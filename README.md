@@ -9,8 +9,9 @@ LambdaLib is the code base for many Lambda Innovation mods. It provides many uti
 LambdaLib currently works on Minecraft 1.7.10, and probably won't update to newer MC versions recently (until mojang make their codes better, which is unlikely to happen).
 
 LambdaLib is merged from two previous projects:
-[LIUtils](https://github.com/LambdaInnovation/LIUtils) provides various functionalities and utilities for common modding.
-[AnnotationRegistry](https://github.com/LambdaInnovation/AnnotationRegistry) focuses on a series of Registration-friendly methods based on Annotations.
+
+* [LIUtils](https://github.com/LambdaInnovation/LIUtils) provides various functionalities and utilities for common modding.
+* [AnnotationRegistry](https://github.com/LambdaInnovation/AnnotationRegistry) focuses on a series of Registration-friendly methods based on Annotations.
 
 Their functionalities are pretty distinct, so the package names of the project will stay the same: ```cn.liutils``` and ```cn.annoreg```.
 
@@ -20,13 +21,13 @@ Workspace setup
 ---
 
 1. Link the ```src/main/java``` and  ```src/main/resources``` into your workspace.
-2. Put the (coremod loading hook)[jars/LambdaLib.jar] into your ``eclipse/mods`` folder.
+2. Put the [coremod loading hook](jars/LambdaLib.jar) into your ``eclipse/mods`` folder.
 3. Make sure you have installed JDK8 and uses 1.8 compilation level in your IDE. ForgeGradle default uses 1.6. 
 
 Compilation
 ---
 
-The project uses Java8 in developement and we officially uses (RetroLambda)[https://github.com/evant/gradle-retrolambda] to compile. Therefore, any use of stream API is forbiddened.
+The project uses Java8 in developement and we officially uses [RetroLambda](https://github.com/evant/gradle-retrolambda) to compile. Therefore, any use of stream API is forbiddened.
 
 You can use the following command to build locally:
 ```
