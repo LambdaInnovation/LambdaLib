@@ -1,0 +1,29 @@
+###############
+# LIUtils Language File
+###############
+
+#CGUI
+cgui.command.usage=/cgui <filepath> or /cgui
+cgui.command.filenotfound=File doesnt exist.
+cgui.command.savefailed=Failed saving the xml file 
+cgui.command.saved=Successfully saved 
+
+cgui.text.selection=Current selection: 
+cgui.text.background=Background
+
+cgui.gui.toolbar=Toolbar
+cgui.button.save=Save
+cgui.button.saveAs=Save As
+cgui.button.addWidget=Add Widget
+cgui.button.hierarchy=Hierarchy
+
+cgui.gui.hierarchy=Hierarchy
+cgui.button.child=Become Child
+cgui.button.dechild=De-child
+cgui.button.moveUp=Move Up
+cgui.button.moveDown=Move Down
+cgui.button.remove=Remove
+cgui.button.duplicate=Duplicate
+cgui.button.rename=Rename
+
+cgui.gui.componentEditor=Component: 

@@ -1,0 +1,15 @@
+[
+{
+  "modid": "AnnoReg",
+  "name": "Annotation Registry",
+  "description": "A coremod API to open up annotation drived registration mechanism and other useful utilities in Minecraft.",
+  "version": "${version}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["acaly", "WeAthFolD", "KSkun"],
+  "credits": "Lambda Innovation",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -1,0 +1,15 @@
+{
+	"default": {
+		"creativeTab": "cn.academy.core.AcademyCraft.cct"
+	},
+	
+	"itemA": {
+		"unlName": "itemA",
+		"textureName": "academy:logo",
+		"maxDamage": 20
+	},
+	"itemB": {
+		"unlName": "itemB",
+		"textureName": "academy:coin"
+	}
+}
