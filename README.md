@@ -6,7 +6,7 @@ Introduction
 
 LambdaLib is the code base for many Lambda Innovation mods. It provides many utilities for Minecraft modding and can boost modder's developement speed dramatically.
 
-LambdaLib currently works on Minecraft 1.7.10, and probably won't update to newer MC versions recently (until mojang make their codes better, which is unlikely to happen).
+LambdaLib is licensed under [GPLv3](http://www.gnu.org/licenses/gpl.html), and currently works on Minecraft 1.7.10. We probably won't update to newer MC versions recently (until mojang make their codes better, which is unlikely to happen).
 
 LambdaLib is merged from two previous projects:
 
@@ -37,12 +37,12 @@ gradle clean install
 Contents
 ---
 
-CGUI - GUI Library with Event Factory, Component Pattern, Visualized Edit
-Vis - Animation and model utilities
-RecipeRegistry - Write recipes in a script and stay away from the trouble of ```GameRegistry.addRecipe```
-AnnotationRegistry - Use annotation to decouple modules and game elements
-NetworkCall - Send packets by directly calling methods
-Raytrace - Better wrapup for ray-tracing, allows Entity and Block Type filtering.
+* CGUI - GUI Library with Event Factory, Component Pattern, Visualized Edit
+* Vis - Animation and model utilities
+* RecipeRegistry - Write recipes in a script and stay away from the trouble of ```GameRegistry.addRecipe```
+* AnnotationRegistry - Use annotation to decouple modules and game elements
+* NetworkCall - Send packets by directly calling methods
+* Raytrace - Better wrapup for ray-tracing, allows Entity and Block Type filtering.
 
 More to discover...
 
