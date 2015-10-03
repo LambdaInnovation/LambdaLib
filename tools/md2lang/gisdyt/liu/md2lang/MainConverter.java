@@ -62,11 +62,12 @@ public class MainConverter {
 		StringBuffer buffer=new StringBuffer();
 		String temp;
 		while((temp=br.readLine())!=null){
-			buffer.append(temp);
+			buffer.append(temp+"\n");
 		}
 		br.close();
 		System.out.println("Reading input file finished...");
 		String md=buffer.toString();
+		Log.println("File Content:\n"+md);
 		String result=convertMD2Lang(md);
 		System.out.println("Converting finished...");
 		PrintWriter pw=new PrintWriter(output);
@@ -93,6 +94,7 @@ public class MainConverter {
 			file_converting(args[0], args[1]);
 		}else if(args.length==3 && args[2].equals("--stacktrace")){
 			Log.log=true;
+			System.out.println("Stacktrace Debug Mode Enabled.");
 			file_converting(args[0], args[1]);
 		}else if(args[0].equals("-h") || args[0].equals("/?") || args[0].equals("--help") || args[0].equals("-?") || args[0].equals("/h")){
 			please_ask_WeAthFolD();
@@ -100,5 +102,7 @@ public class MainConverter {
 			System.out.println("You use a wrong grammar.");
 			please_ask_WeAthFolD();
 		}
+//		String string="This is a test\n-----\n\n__This is another test__\nline\n\n![academy:textures/tutorial/xxx.png](123, 456)\b\bI tell you this is good!";
+//		System.out.println(convertMD2Lang(string));
 	}
 }

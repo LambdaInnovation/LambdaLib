@@ -10,13 +10,13 @@ public class EscapedCharsConverter {
 
 	private static final String replacable[][]=new String[][]{
 			{"&nbsp;", " "},
-			{"=", ""},
 			{"-", ""},
 			{"&equa;", "="},
 			{"&hyph;", "-"},
-			{"\n*\n", "[npar]"},
+			{"\n\\*\n", "[npar]"},
 			{"\t", "&tab;"},
 			{"  \n", "[ln]"},
+			{"\n\n", "[ln]"}
 	}; 
 	
 	public static String convert(String s){
