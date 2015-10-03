@@ -10,6 +10,12 @@ import gisdyt.liu.md2lang.util.Converter;
 public class HeadingConverter {
 
 	public static String convert(String s){
+		s=sharp(s);
+		s=lnsh(s);
+		return s;
+	}
+	
+	public static String sharp(String s){
 		int first_sharp_index;
 		while((first_sharp_index=s.indexOf('#'))!=-1){
 			int begin_index=first_sharp_index;
@@ -30,6 +36,17 @@ public class HeadingConverter {
 			String tab_bottom="[/h"+heading_level+"]";
 			String tab_content=tab_head+source.substring(content_begin_index)+tab_bottom;
 			s=s.replaceAll(source, tab_content);
+		}
+		return s;
+	}
+	
+	public static String lnsh(String s){
+		int first_sh_index;
+		while((first_sh_index=s.indexOf("\n-"))!=-1){
+			s=s.substring(0, first_sh_index)+"[/h1]"+s.substring(first_sh_index);
+			int last_ln_index=s.lastIndexOf('\n', first_sh_index-1);
+			s=s.substring(0, last_ln_index+1)+"[h1]"+s.substring(last_ln_index+1);
+			s=s.replaceFirst("\n-", "");
 		}
 		return s;
 	}
