@@ -1,4 +1,4 @@
-# Project MD2Lang帮助文档
+﻿# Project MD2Lang帮助文档
 
 欢迎访问Project MD2Lang。本项目旨在帮助您更快速地完成Markdown到语言文件的转换。
 
@@ -42,3 +42,93 @@ __特别注意：这张截图是在OS X环境下进行的，如果您使用的�
 ### 可转换的内容
 
 使用MD2Lang时，您能够在Markdown中书写的内容是有限制的。一般来说，MD2Lang Version 1能够转换以下Markdown语法：
+<table>
+    <th>
+        <td>名称</td>
+        <td>markdown格式</td>
+        <td>lang格式</td>
+    </th>
+    <tr>
+        <td>1</td>
+        <td>标题1级</td>
+        <td>
+            <code># example</code> 或 <code>example</code>
+            <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>-------</code>
+        </td>
+        <td><code>[h1]example[/h1]</code></td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>标题2级</td>
+        <td><code>## example<code></td>
+        <td><code>[h2]example[/h2]</code></td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td><code>标题3级</code></td>
+        <td><code>### example</code></td>
+        <td><code>[h3]example[/h3]</code></td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td><code>标题4级</code></td>
+        <td><code>#### example</code></td>
+        <td><code>[h4]example[/h4]</code></td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td>标题5级</td>
+        <td><code>##### example</code></td>
+        <td><code>[h5]example[/h5]</code></td>
+    </tr>
+    <tr>
+        <td>6</td>
+        <td>标题6级</td>
+        <td><code>###### example</code></td>
+        <td><code>[h6]example[/h6]</code></td>
+    </tr>
+    <tr>
+        <td>7</td>
+        <td>删除线</td>
+        <td><code>~~example~~</code></td>
+        <td><code>[stth]exampl[/stth]</code></td>
+    </tr>
+    <tr>
+        <td>8</td>
+        <td>代码引用</td>
+        <td><code>`example`</code> 或 <code>``example``</code><br/>或 <code>```example```</code></td>
+        <td><code>[code]example[/code]</code></td>
+    </tr>
+    <tr>
+        <td>8.5</td>
+        <td colspan="3"><font color="red">
+            语法注意：为了简单起见，对于[code]，我们只编写了一个、两个或三个<code>`</code>符号的情况。如果确实需要能够适应多个 <code>`</code>的情况，请发布一条Issue来通知我们，您的要求将被排入日程。
+        </font></td>
+    </tr>
+    <tr>
+        <td>9</td>
+        <td>加粗字体</td>
+        <td><code>__example__</code></td>
+        <td><code>[bold]example[/bold]</code></td>
+    </tr>
+    <tr>
+        <td>10</td>
+        <td>高亮字体</td>
+        <td><code>==example==</code></td>
+        <td><code>[hili]example[/hili]</code></td>
+    </tr>
+    {"&nbsp;", " "},
+			{"-", ""},
+			{"=", ""},
+			{"&equa;", "="},
+			{"&hyph;", "-"},
+			{"\n\\*\n", "[npar]"},
+			{"\t", "&tab;"},
+			{"  \n", "[ln]"},
+			{"\n\n", "[ln]"},
+			{"\n", ""}
+    <tr>
+        <td>11</td>
+        <td></td>
+    </tr>
+</table>
