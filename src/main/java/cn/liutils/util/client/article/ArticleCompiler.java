@@ -1,50 +1,29 @@
-package cn.liutils.util.client;
+package cn.liutils.util.client.article;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PushbackReader;
 import java.io.Reader;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Stack;
 
 import cn.annoreg.core.Registrant;
 import cn.annoreg.mc.RegInit;
 import cn.liutils.core.LIUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 
 @Registrant
 @RegInit
-public class FormattedLangCompiler {
-	
-	// Test
-	public static void init() {
-		try {
-			new FormattedLangCompiler("test", 
-				new ByteArrayInputStream(
-						"[h1]This is a test[/h1][ln][bold]This is another test[/bold]line[ln][img src=\"academy:textures/tutorial/xxx.png\" width=123 height=456][ln]I tell you this is good!"
-						.getBytes())).compile();
-		} catch (LangCompileException|IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	// Rendering Options
-	public double fontSize = 10;
-	public double fontSize_h1 = 20;
-	public double fontSize_h2 = 18;
-	public double fontSize_h3 = 16;
-	public double fontSize_h4 = 14;
-	
-	public double rowSpacing = 2;
+class ArticleCompiler {
 	
 	// Metainfo
 	final String path;
 	
-	// 
+	// current parsing char
 	boolean isEOF = false;
 	char current;
 	
@@ -54,24 +33,21 @@ public class FormattedLangCompiler {
 	
 	Stack<Tag> parameterTags = new Stack<Tag>();
 	
-	double curx, cury;
+	ArticlePlotter plotter;
 	
-	public FormattedLangCompiler(String _path, InputStream stream) {
+	public ArticleCompiler(String _path, InputStream stream) {
 		path = _path;
 		streamReader = new InputStreamReader(stream);
 		reader = new PushbackReader(streamReader);
 	}
 	
 	/**
-	 * Compile the desired content into a GL draw list and then return the list id.
+	 * Compile the desired content into the ArticlePlotter.
 	 */
-	public int compile() throws IOException, LangCompileException {
-		
-		initDrawContext();
+	ArticlePlotter compile() throws IOException, LangCompileException {
+		plotter = new ArticlePlotter();
 		parse();
-		endDrawContext();
-		
-		return 0;
+		return plotter;
 	}
 	
 	// Parsing
@@ -159,28 +135,19 @@ public class FormattedLangCompiler {
 	}
 	
 	// Rendering
-	private void initDrawContext() {
-		log("init draw context");
-	}
 	
 	/**
 	 * Use the current content parameter and current tag context to draw a line of string.
 	 */
 	private void drawContent(String content) {
-		StringBuilder sb = new StringBuilder("draw \"");
-		sb.append(content).append("\" ");
-		for(Tag tag : parameterTags) {
-			sb.append('[').append(tag.id).append(']');
+		NBTTagCompound tag = new NBTTagCompound();
+		tag.setString("content", content);
+		NBTTagList tags = new NBTTagList();
+		for(Tag t : parameterTags) {
+			tags.appendTag(new NBTTagString(t.id));
 		}
-		log(sb.toString());
-	}
-	
-	private void drawImage(ResourceLocation texture, int width, int height) {
-		log("draw image " + texture + " (" + width + "," + height + ")");
-	}
-	
-	private void endDrawContext() {
-		log("end draw context");
+		tag.setTag("tags", tags);
+		plotter.insr(Opcodes.TEXT, tag);
 	}
 	
 	private void log(String message) {
@@ -189,19 +156,19 @@ public class FormattedLangCompiler {
 	
 	public static class LangCompileException extends RuntimeException {
 		
-		public LangCompileException(FormattedLangCompiler compiler, String what, Exception e) {
+		public LangCompileException(ArticleCompiler compiler, String what, Exception e) {
 			super(errstr(compiler, what), e);
 		}
 		
-		public LangCompileException(FormattedLangCompiler compiler, String what) {
+		public LangCompileException(ArticleCompiler compiler, String what) {
 			super(errstr(compiler, what));
 		}
 		
-		private static String errstr(FormattedLangCompiler compiler, String msg) {
+		private static String errstr(ArticleCompiler compiler, String msg) {
         	return errstr(compiler) + ": " + msg;
         }
         
-        private static String errstr(FormattedLangCompiler compiler) {
+        private static String errstr(ArticleCompiler compiler) {
         	return "at " + compiler.path + ", char " + compiler.readed;
         }
 		
@@ -244,7 +211,7 @@ public class FormattedLangCompiler {
 	
 	private class TagImg extends Tag {
 		
-		ResourceLocation src;
+		String src;
 		int width, height;
 		
 		TagImg() {
@@ -255,7 +222,7 @@ public class FormattedLangCompiler {
 		public void updateInfo(String propName, String content) {
 			switch(propName) {
 			case "src":
-				src = new ResourceLocation(content);
+				src = content;
 				break;
 			case "width":
 				width = Integer.valueOf(content);
@@ -268,7 +235,11 @@ public class FormattedLangCompiler {
 		
 		@Override
 		void inlineParsed() {
-			drawImage(src, width, height);
+			NBTTagCompound tag = new NBTTagCompound();
+			tag.setString("src", src);
+			tag.setInteger("width", width);
+			tag.setInteger("height", height);
+			plotter.insr(Opcodes.IMAGE, tag);
 		}
 		
 		@Override
@@ -285,7 +256,7 @@ public class FormattedLangCompiler {
 		
 		@Override
 		void inlineParsed() {
-			log("draw [newline]");
+			plotter.insr(Opcodes.NEWLINE, null);
 		}
 		
 		@Override
