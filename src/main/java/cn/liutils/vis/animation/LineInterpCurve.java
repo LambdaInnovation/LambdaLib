@@ -13,6 +13,7 @@
 package cn.liutils.vis.animation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cn.liutils.util.generic.MathUtils;
@@ -28,7 +29,7 @@ public class LineInterpCurve implements ICurve {
 	
 	public void addPoint(double x, double y) {
 		points.add(new Point(x, y));
-		points.sort((Point a, Point b) -> {
+		Collections.sort(points, (Point a, Point b) -> {
 			return ((Double) a.x).compareTo(b.x);
 		});
 	}
