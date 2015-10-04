@@ -11,8 +11,9 @@ public class WrapingConverter implements Converter{
 	private static final String[][] wrapedLables=new String[][]{
 		{"~~", "~~", "[stth]", "[/stth]"},
 		{"```", "```", "[code]", "[/code]"},
-		{"__", "__", "[bold]", "[/bold]"},
+		{"``", "``", "[code]", "[/code]"},
 		{"`", "`", "[code]", "[/code]"},
+		{"__", "__", "[bold]", "[/bold]"},
 		{"==", "==", "[hili]", "[/hili]"}
 	};
 	
