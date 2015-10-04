@@ -10,14 +10,35 @@
  * 在遵照该协议的情况下，您可以自由传播和修改。
  * http://www.gnu.org/licenses/gpl.html
  */
-package cn.liutils.vis.animation;
+package cn.liutils.vis.model;
+
+import net.minecraftforge.client.model.IModelCustom;
 
 /**
- * This interface represents a 2D curve, where you input X coord to get Y coord.
  * @author WeAthFolD
  */
-public interface ICurve {
+public class CustomPartedModel extends PartedModel {
+
+	public final IModelCustom model;
+	public final String name;
 	
-	double valueAt(double x);
+	public CustomPartedModel(IModelCustom _model) {
+		this(_model, null);
+	}
 	
+	public CustomPartedModel(IModelCustom _model, String _part) {
+		model = _model;
+		name = _part;
+	}
+	
+	@Override
+	protected void handleDraw() {
+		if(name == null) {
+			model.renderAll();
+		} else {
+			model.renderPart(name);
+		}
+	}
+	
+
 }

@@ -17,10 +17,30 @@ public class CompTransform {
 	
 	public double scale = 1.0;
 	
-	public void setPivotPt(double x, double y, double z) {
-		pivotPt.xCoord = x;
-		pivotPt.yCoord = y;
-		pivotPt.zCoord = z;
+	public CompTransform setPivot(double x, double y, double z) {
+		svec(pivotPt, x, y, z);
+		return this;
+	}
+	
+	public CompTransform setTransform(double x, double y, double z) {
+		svec(transform, x, y, z);
+		return this;
+	}
+	
+	public CompTransform setRotation(double x, double y, double z) {
+		svec(rotation, x, y, z);
+		return this;
+	}
+	
+	public CompTransform setScale(double val) {
+		scale = val;
+		return this;
+	}
+	
+	private void svec(Vec3 vec3, double x, double y, double z) {
+		vec3.xCoord = x;
+		vec3.yCoord = y;
+		vec3.zCoord = z;
 	}
 	
 	public void doTransform() {

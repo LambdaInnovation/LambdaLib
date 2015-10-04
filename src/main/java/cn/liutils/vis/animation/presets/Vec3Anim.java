@@ -10,32 +10,38 @@
  * 在遵照该协议的情况下，您可以自由传播和修改。
  * http://www.gnu.org/licenses/gpl.html
  */
-package cn.liutils.vis.animation;
+package cn.liutils.vis.animation.presets;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import cn.liutils.vis.animation.Animation;
+import cn.liutils.vis.curve.IFittedCurve;
+import net.minecraft.util.Vec3;
 
 /**
  * @author WeAthFolD
  */
-public class AnimationList extends Animation {
+public class Vec3Anim extends Animation {
 	
-	private List<Animation> anims = new ArrayList();	
+	public Vec3 target;
 	
-	public AnimationList(Animation ..._anims) {
-		for(Animation a : _anims)
-			anims.add(a);
-	}
+	public IFittedCurve
+		curveX,
+		curveY,
+		curveZ;
 	
-	public AnimationList(Collection<Animation> _anims) {
-		anims.addAll(_anims);
+	public Vec3Anim() {}
+	
+	public Vec3Anim(Vec3 _target) {
+		target = _target;
 	}
 
 	@Override
 	public void perform(double timePoint) {
-		for(Animation a : anims)
-			a.perform(timePoint);
+		if(curveX != null)
+			target.xCoord = curveX.valueAt(timePoint);
+		if(curveY != null)
+			target.yCoord = curveY.valueAt(timePoint);
+		if(curveZ != null)
+			target.zCoord = curveZ.valueAt(timePoint);
 	}
-	
+
 }

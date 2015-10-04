@@ -10,32 +10,24 @@
  * 在遵照该协议的情况下，您可以自由传播和修改。
  * http://www.gnu.org/licenses/gpl.html
  */
-package cn.liutils.vis.animation;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+package cn.liutils.vis.curve;
 
 /**
+ * This interface represents a Fitted Curve (拟合曲线).
+ * Add control points into the curve and the interface generates a reasonable curve for it.
  * @author WeAthFolD
  */
-public class AnimationList extends Animation {
+public interface IFittedCurve {
 	
-	private List<Animation> anims = new ArrayList();	
+	/**
+	 * Add a point to fit for the curve.
+	 * Note that normally you shouldn't add the same point twice. Bad things like zero division might occur.
+	 */
+	void addPoint(double x, double y);
 	
-	public AnimationList(Animation ..._anims) {
-		for(Animation a : _anims)
-			anims.add(a);
-	}
-	
-	public AnimationList(Collection<Animation> _anims) {
-		anims.addAll(_anims);
-	}
-
-	@Override
-	public void perform(double timePoint) {
-		for(Animation a : anims)
-			a.perform(timePoint);
-	}
+	/**
+	 * Get the yval of the curve at given x coordinate.
+	 */
+	double valueAt(double x);
 	
 }
