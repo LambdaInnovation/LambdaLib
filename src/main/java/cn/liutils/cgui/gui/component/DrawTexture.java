@@ -53,6 +53,7 @@ public class DrawTexture extends Component {
 				color.bind();
 				double preLevel = HudUtils.zLevel;
 				HudUtils.zLevel = zLevel;
+				
 				if(texture != null && !texture.getResourcePath().equals("<null>")) {
 					RenderUtils.loadTexture(texture);
 					HudUtils.rect(0, 0, w.transform.width, w.transform.height);

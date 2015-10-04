@@ -17,7 +17,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 
 @Registrant
-@RegInit
 class ArticleCompiler {
 	
 	// Metainfo

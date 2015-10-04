@@ -12,11 +12,13 @@
  */
 package cn.liutils.util.client.article;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import cn.liutils.core.LIUtils;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.client.RenderUtils;
 import cn.liutils.util.helper.Color;
@@ -29,6 +31,17 @@ import net.minecraft.util.ResourceLocation;
  * @author WeAthFolD
  */
 public class ArticlePlotter {
+	
+	public static ArticlePlotter fromLang(String lang) {
+		try {
+			return new ArticleCompiler("unknown", new ByteArrayInputStream(lang.getBytes())).compile();
+		} catch (Exception e) {
+			LIUtils.log.error("Exception compiling lang, string: " + lang, e);
+			return null;
+		}
+	}
+	
+	static final ResourceLocation missing = new ResourceLocation("minecraft:missing");
 	
 	// Render parameters
 	public double fontSize = 10;
@@ -59,14 +72,13 @@ public class ArticlePlotter {
 		redraw = true;
 	}
 	
-	double x, y;
-	
 	private void rebuildList() {
 		if(listId == -1)
 			listId = GL11.glGenLists(1);
+		else
+			GL11.glDeleteLists(listId, 1);
 		
-		x = 0;
-		y = 0;
+		double x = 0, y = 0, lastLineHeight = fontSize;
 		
 		GL11.glNewList(listId, GL11.GL_COMPILE);
 		
@@ -108,12 +120,14 @@ public class ArticlePlotter {
 				
 				Font.font.draw(content, x, y, size, color.asHexColor());
 				x += Font.font.strLen(content, size);
+				lastLineHeight = size;
 				
 				break;
 				
 			case Opcodes.NEWLINE:
 				x = 0;
-				y += (fontSize + lineSpacing);
+				y += (lastLineHeight + lineSpacing);
+				lastLineHeight = fontSize;
 				break;
 				
 			case Opcodes.IMAGE:
@@ -141,6 +155,7 @@ public class ArticlePlotter {
 		}
 		
 		GL11.glEndList();
+		RenderUtils.loadTexture(missing);
 	}
 	
 	public ArticlePlotter insr(String insr, NBTTagCompound tag) {
