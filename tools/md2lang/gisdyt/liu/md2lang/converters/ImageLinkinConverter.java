@@ -1,12 +1,15 @@
 package gisdyt.liu.md2lang.converters;
 
-import gisdyt.liu.md2lang.util.Converter;
+//组长要求：图片把![url](width, height)改成[img src="xxxx" width=123 height=456][/img]
+public class ImageLinkinConverter implements Converter{
 
-//图片把![url](width, height)改成[img src="xxxx" width=123 height=456][/img]
-@Converter(priority=0)
-public class ImageLinkinConverter {
+	@Override
+	public int getPriority() {
+		// TODO Auto-generated method stub
+		return 3;
+	}
 
-	public static String convert(String s){
+	public String convert(String s){
 		int begin_index;
 		while((begin_index=s.indexOf("!["))!=-1){
 			int url_end_index=s.indexOf(']', begin_index);
