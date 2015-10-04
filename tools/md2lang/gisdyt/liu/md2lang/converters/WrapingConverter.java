@@ -13,7 +13,7 @@ public class WrapingConverter implements Converter{
 		{"```", "```", "[bold]", "[/bold]"},
 		{"__", "__", "[bold]", "[/bold]"},
 		{"`", "`", "[code]", "[/code]"},
-		{"==", "==", "[hili]", "[/hili]"},
+		{"==", "==", "[hili]", "[/hili]"}
 	};
 	
 	public String convert(String s){
