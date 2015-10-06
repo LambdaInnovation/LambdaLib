@@ -1,15 +1,14 @@
 package gisdyt.liu.md2lang.converters;
 
-import gisdyt.liu.md2lang.util.Converter;
+public class HeadingConverter implements Converter{
 
-/*
- * There isn't any tab like heading, so I make it as special.
- * I know that's foolish. We need to decoupling.
- */
-@Converter(priority=1)
-public class HeadingConverter {
+	@Override
+	public int getPriority() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
-	public static String convert(String s){
+	public String convert(String s){
 		s=sharp(s);
 		s=lnsh(s);
 		return s;
