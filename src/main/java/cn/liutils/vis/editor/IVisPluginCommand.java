@@ -12,38 +12,17 @@
  */
 package cn.liutils.vis.editor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import cn.liutils.cgui.gui.Widget;
-import net.minecraft.util.ResourceLocation;
+import cn.liutils.vis.editor.gui.VisPlugin;
+import net.minecraft.command.ICommandSender;
 
 /**
  * @author WeAthFolD
  */
-public final class PropFolder implements IEditorProp {
+public interface IVisPluginCommand {
 	
-	private List<IEditorProp> childs;
-
-	@Override
-	public Widget createPropEditor(Object object) {
-		return null;
-	}
-
-	public void addChild(IEditorProp object) {
-		if(childs == null)
-			childs = new ArrayList();
-		childs.add(object);
-	}
+	/**
+	 * @return A correctly set-up VisPlugin object, or null if no valid VisPlugin can be created.
+	 */
+	VisPlugin createPlugin(ICommandSender ics, String[] args);
 	
-	@Override
-	public List<IEditorProp> getChilds() {
-		return childs;
-	}
-
-	@Override
-	public ResourceLocation getIcon() {
-		return null;
-	}
-
 }

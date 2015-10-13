@@ -3,17 +3,26 @@
  */
 package cn.liutils.cgui.gui.event;
 
-
 /**
  * Solely a notification event, fired when a widget was dragged.
+ * 
  * @author WeAthFolD
  */
-public class DragEvent implements GuiEvent { 
-	 public DragEvent() {}
-	 
-	 public static abstract class DragEventHandler extends GuiEventHandler<DragEvent> {
+public class DragEvent implements GuiEvent {
+	
+	/**
+	 * Offset coordinates from dragging widget origin to current mouse position, in GLOBAL scale level.
+	 */
+	public final double offsetX, offsetY;
+
+	public DragEvent(double _offsetX, double _offsetY) {
+		offsetX = _offsetX;
+		offsetY = _offsetY;
+	}
+
+	public static abstract class DragEventHandler extends GuiEventHandler<DragEvent> {
 		public DragEventHandler() {
 			super(DragEvent.class);
 		}
-	 }
+	}
 }

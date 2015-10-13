@@ -19,6 +19,7 @@ import java.util.List;
 import cn.liutils.util.generic.MathUtils;
 
 /**
+ * TODO: Better over-the-end handling
  * @author WeAthFolD
  */
 public class BezierCurve implements IFittedCurve {

@@ -132,7 +132,7 @@ public class LIGui extends WidgetContainer {
         	}
         	if(draggingNode != null) {
         	    lastDragTime = time;
-        		draggingNode.postEvent(new DragEvent());
+        		draggingNode.postEvent(new DragEvent(xOffset, yOffset));
         		return true;
         	}
     	}

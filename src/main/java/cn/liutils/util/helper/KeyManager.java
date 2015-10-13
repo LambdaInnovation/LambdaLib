@@ -133,6 +133,8 @@ public class KeyManager {
 	private void tick() {
 		Iterator< Entry<String, KeyBinding> > iter = nameMap.entrySet().iterator();
 		boolean inGame = ClientUtils.isPlayerInGame();
+		if(!inGame)
+			return;
 		
 		while(iter.hasNext()) {
 			Entry<String, KeyBinding> entry = iter.next();
