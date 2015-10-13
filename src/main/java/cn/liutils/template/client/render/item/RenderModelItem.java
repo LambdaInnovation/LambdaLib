@@ -116,6 +116,8 @@ public class RenderModelItem implements IItemRenderer {
 	 */
 	public Vec3 entityItemRotation = initVec();
 	
+	public Vec3 entityItemOffset = initVec();
+	
 	/**
 	 * Handle render Inventory or not
 	 */
@@ -282,10 +284,10 @@ public class RenderModelItem implements IItemRenderer {
 	}
 	
 	public void renderEntityItem(RenderBlocks render, EntityItem ent) {
-		
 		GL11.glPushMatrix(); {
 			RenderUtils.loadTexture(texturePath);
 			this.doRotation(entityItemRotation);
+			this.doTransformation(entityItemOffset);
 			GL11.glScaled(entityItemScale, entityItemScale, entityItemScale);
 			renderAtStdPosition();
 		} GL11.glPopMatrix();

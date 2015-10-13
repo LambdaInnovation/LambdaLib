@@ -81,6 +81,11 @@ public class Color {
 		return new Color(r, g, b, a);
 	}
 	
+	public Color monoize() {
+		double x = (r + g + b) / 3;
+		return new Color(x, x, x, a);
+	}
+	
 	public String toString() {
 		return String.valueOf(asHexColor());
 	}
