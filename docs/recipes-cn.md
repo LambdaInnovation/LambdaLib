@@ -64,6 +64,8 @@ recipe_type(<recipe_output>)[experience] {
 * 如果Item中有严格以该name为名称的（包括命名空间，如果是minecraft命名空间可省略）方块，返回该物品所对应的ItemStack
 * 如果Block中有严格以该name为名称的（包括命名空间，如果是minecraft命名空间可省略）方块，返回该方块所对应的ItemStack
 
+以上搜索规则在没有指定data的情况下不成立。如果没有指定data，那么则认为该声明对应于该物品（方块）的所有子物品（方块），因此会直接返回该字段所对应的物品（方块）对象。
+
 如果返回的结果是一个oredict名称，data和amount会被忽略。
 
 在合成表的输出处不能够指定一个oredict名称。如果你这么做，将会得到一个错误。

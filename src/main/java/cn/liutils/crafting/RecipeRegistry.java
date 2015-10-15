@@ -56,6 +56,8 @@ public class RecipeRegistry {
 			return key;
 		if(Item.itemRegistry.containsKey(key))
 			return Item.itemRegistry.getObject(key);
+		if(Block.blockRegistry.containsKey(key))
+			return Block.blockRegistry.getObject(key);
 		
 		throw new RuntimeException("Registry object " + key + " doesn't exist");
 	}
@@ -63,6 +65,10 @@ public class RecipeRegistry {
 	private Object getRegistryObject(ParsedRecipeElement element) {
 		Object o = getNamedObject(element.name);
 		if(o == null)
+			return null;
+		// if we didn't get the data value, we suggest the user is trying to specify a recipe for all subtypes, therefore return the direct object,
+		// 	rather than creating an ItemStack
+		if(!element.dataParsed)
 			return o;
 		if(o instanceof Item) {
 			return new ItemStack((Item) o, element.amount, element.data);
@@ -73,7 +79,7 @@ public class RecipeRegistry {
 		}
 	}
 	
-	private ItemStack getOutput(ParsedRecipeElement element) {
+	private ItemStack getOutputObject(ParsedRecipeElement element) {
 		Object o = getNamedObject(element.name);
 		if(o == null)
 			throw new RuntimeException("Registry object " + element.name + " can't be nil");
@@ -162,7 +168,7 @@ public class RecipeRegistry {
 				}
 				//System.out.println(DebugUtils.formatArray(input));
 				
-				registry.register(type, getOutput(parser.getOutput()), input,
+				registry.register(type, getOutputObject(parser.getOutput()), input,
 					parser.getWidth(), parser.getHeight(), parser.getExperience());
 			}
 			else

@@ -188,6 +188,7 @@ public class RecipeParser {
 		if (read == '#') {
 			getchar();
 			res.data = parseInteger();
+			res.dataParsed = true;
 			parseNull();
 		}
 		if (read == '*') {
