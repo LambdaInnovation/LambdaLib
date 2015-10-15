@@ -13,6 +13,8 @@
 package cn.liutils.crafting;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -35,14 +37,20 @@ public class SmeltingRegistry implements IRecipeRegistry {
 			throw new IllegalArgumentException("You can only specify 1 input for smelting!");
 		}
 		
-		ItemStack in;
+		Object in;
 		if(input[0] instanceof String) {
 			in = OreDictionary.getOres((String) input[0]).get(0);
 		} else {
-			in = (ItemStack) input[0];
+			in = input[0];
 		}
 		
-		GameRegistry.addSmelting(in, output, experience);
+		// 辣鸡java
+		if(in instanceof ItemStack)
+			GameRegistry.addSmelting((ItemStack) in, output, experience);
+		else if(in instanceof Block)
+			GameRegistry.addSmelting((Block) in, output, experience);
+		else if(in instanceof Item)
+			GameRegistry.addSmelting((Item) in, output, experience);
 	}
 
 }
