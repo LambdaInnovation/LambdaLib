@@ -12,7 +12,6 @@
  */
 package cn.liutils.vis.editor;
 
-import cn.liutils.vis.editor.gui.VisPlugin;
 import net.minecraft.command.ICommandSender;
 
 /**
@@ -20,9 +19,6 @@ import net.minecraft.command.ICommandSender;
  */
 public interface IVisPluginCommand {
 	
-	/**
-	 * @return A correctly set-up VisPlugin object, or null if no valid VisPlugin can be created.
-	 */
-	VisPlugin createPlugin(ICommandSender ics, String[] args);
+	void onCommand(ICommandSender ics, String[] args);
 	
 }

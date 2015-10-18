@@ -19,9 +19,6 @@ import java.util.Map;
 import cn.annoreg.core.Registrant;
 import cn.annoreg.mc.RegCommand;
 import cn.liutils.template.command.LICommandBase;
-import cn.liutils.vis.editor.gui.VisEditor;
-import cn.liutils.vis.editor.gui.VisPlugin;
-import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 
 /**
@@ -69,12 +66,7 @@ public class CommandVis extends LICommandBase {
 		
 		if(cmds.containsKey(pars[0])) {
 			String[] args = Arrays.copyOfRange(pars, 1, pars.length);
-			VisPlugin plugin = cmds.get(pars[0]).createPlugin(ics, args);
-			if(plugin != null) {
-				Minecraft.getMinecraft().displayGuiScreen(new VisEditor(plugin));
-			} else {
-				sendChat(ics, "The plugin can't be corectlly located.");
-			}
+			cmds.get(pars[0]).onCommand(ics, args);
 		} else {
 			sendChat(ics, "There is no plugin with name '" + pars[0] + "'.");
 			sendAvailable(ics);

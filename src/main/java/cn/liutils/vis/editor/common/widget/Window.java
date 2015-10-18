@@ -10,7 +10,7 @@
  * 在遵照该协议的情况下，您可以自由传播和修改。
  * http://www.gnu.org/licenses/gpl.html
  */
-package cn.liutils.vis.editor.gui.widget;
+package cn.liutils.vis.editor.common.widget;
 
 import cn.liutils.cgui.gui.LIGui;
 import cn.liutils.cgui.gui.Widget;
@@ -22,10 +22,10 @@ import cn.liutils.cgui.gui.component.Transform.WidthAlign;
 import cn.liutils.cgui.gui.event.DragEvent;
 import cn.liutils.cgui.gui.event.DragEvent.DragEventHandler;
 import cn.liutils.cgui.loader.EventLoader;
+import cn.liutils.vis.editor.common.VEVars;
 import cn.liutils.cgui.gui.event.GuiEvent;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
 import cn.liutils.cgui.gui.event.RefreshEvent;
-import cn.liutils.vis.editor.gui.VEVars;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -154,8 +154,9 @@ public class Window extends Widget {
 		return w;
 	}
 	
-	public void initScrollBar() {
-		// TODO
+	public Widget initScrollBar() {
+		// TODO Implement
+		return null;
 	}
 	
 	public BodyState getBodyState() {

@@ -57,7 +57,7 @@ public class TextBox extends Component {
 	 */
 	public boolean localized = false;
 	
-	public boolean allowEdit = true;
+	public boolean allowEdit = false;
 	
 	public boolean doesEcho = false;
 	public char echoChar = '*';

@@ -57,7 +57,6 @@ public class WidgetContainer implements Iterable<Widget> {
 			Widget w = iter.next();
 			if(w.disposed) {
 				iter.remove();
-				//TODO: Test efficiency.
 				widgets.inverse().remove(w);
 			}
 		}
@@ -142,6 +141,7 @@ public class WidgetContainer implements Iterable<Widget> {
 			}
 		}
 		
+		add.disposed = false; // Reset the dispose flag in case set
 		widgets.put(name, add);
 		return true;
 	}

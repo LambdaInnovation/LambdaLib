@@ -103,8 +103,6 @@ public class ElementList extends Component {
 		}
 	}
 	
-	public void disposeAll() {}
-	
 	@Override
 	public void onRemoved() {
 		for(Widget w : subWidgets) {
