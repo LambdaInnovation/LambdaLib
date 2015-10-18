@@ -203,7 +203,10 @@ public class DelegateGenerator {
                         @Override
                         public void visitEnum(String name, String desc, String value) {
                             super.visitEnum(name, desc, value);
-                            range = StorageOption.Target.RangeOption.valueOf(value);
+                            if(name.equals("range")) // range() default SINGLE;
+                            	range = StorageOption.Target.RangeOption.valueOf(value);
+                            else if(name.equals("option")) // option() default INSTANCE;
+                            	options[parameter] = StorageOption.Option.valueOf(value);
                         }
                     };
                 } else if(type.equals(Type.getType(StorageOption.RangedTarget.class))) {
@@ -218,6 +221,13 @@ public class DelegateGenerator {
                 			super.visit(name, value);
                 			sendRange = (double) value;
                 	    }
+                		
+                		@Override
+                        public void visitEnum(String name, String desc, String value) {
+                			super.visitEnum(name, desc, value);
+                			// option() default INSTANCE;
+                			options[parameter] = StorageOption.Option.valueOf(value);
+                		}
                 	};
                 }
                 return super.visitParameterAnnotation(parameter, desc, visible);

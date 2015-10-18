@@ -54,6 +54,7 @@ public class RecipeRegistry {
 		
 		if(OreDictionary.doesOreNameExist(key))
 			return key;
+		
 		if(Item.itemRegistry.containsKey(key))
 			return Item.itemRegistry.getObject(key);
 		if(Block.blockRegistry.containsKey(key))
@@ -147,8 +148,7 @@ public class RecipeRegistry {
 		try {
 			parser = new RecipeParser(recipes);
 			addRecipe(parser);
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			LIUtils.log.error("Failed to load recipes from String: " + recipes, e);
 		}
 		finally {
@@ -158,21 +158,25 @@ public class RecipeRegistry {
 	
 	private void addRecipe(RecipeParser parser) {
 		while (parser.parseNext()) {
-			String type = parser.getType();
-			IRecipeRegistry registry = map.get(type);
-			if (registry != null) {
-				ParsedRecipeElement[] parsed = parser.getInput();
-				Object[] input = new Object[parsed.length];
-				for(int i = 0; i < input.length; ++i) {
-					input[i] = getRegistryObject(parsed[i]);
+			try {
+				String type = parser.getType();
+				IRecipeRegistry registry = map.get(type);
+				if (registry != null) {
+					ParsedRecipeElement[] parsed = parser.getInput();
+					Object[] input = new Object[parsed.length];
+					for(int i = 0; i < input.length; ++i) {
+						input[i] = getRegistryObject(parsed[i]);
+					}
+					//System.out.println(DebugUtils.formatArray(input));
+					
+					registry.register(type, getOutputObject(parser.getOutput()), input,
+						parser.getWidth(), parser.getHeight(), parser.getExperience());
 				}
-				//System.out.println(DebugUtils.formatArray(input));
-				
-				registry.register(type, getOutputObject(parser.getOutput()), input,
-					parser.getWidth(), parser.getHeight(), parser.getExperience());
+				else
+					LIUtils.log.error("Failed to register a recipe because the type \"" + type + "\" doesn't have its registry");
+			} catch(Exception e) {
+				LIUtils.log.error("Failed processing one recipe element", e);
 			}
-			else
-				LIUtils.log.error("Failed to register a recipe because the type \"" + type + "\" doesn't have its registry");
 		}
 	}
 	
