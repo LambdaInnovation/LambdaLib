@@ -42,6 +42,8 @@ public class PlayerDataTag extends DataPart {
 	}
 	
 	public NBTTagCompound getTag() {
+		if(theTag == null)
+			theTag = new NBTTagCompound();
 		return theTag;
 	}
 

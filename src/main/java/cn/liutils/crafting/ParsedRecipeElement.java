@@ -9,6 +9,8 @@ public class ParsedRecipeElement {
 	public String name = null;
 	public int data = 0;
 	public int amount = 1;
+	
+	public boolean dataParsed = false;
 
 	@Override
 	public String toString() {
