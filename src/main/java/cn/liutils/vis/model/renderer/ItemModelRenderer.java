@@ -19,6 +19,7 @@ import static org.lwjgl.opengl.GL11.glPushMatrix;
 import org.lwjgl.opengl.GL11;
 
 import cn.liutils.util.client.RenderUtils;
+import cn.liutils.vis.editor.util.EditorHelper.VisEditable;
 import cn.liutils.vis.model.CompTransform;
 import cn.liutils.vis.model.PartedModel;
 import net.minecraft.entity.EntityLivingBase;
@@ -34,9 +35,13 @@ import net.minecraftforge.client.IItemRenderer;
  */
 public class ItemModelRenderer implements IItemRenderer {
 
+	@VisEditable("Standard")
 	public CompTransform stdTransform = new CompTransform();
+	@VisEditable("FirstPerson")
 	public CompTransform fpTransform = new CompTransform();
+	@VisEditable("ThirdPerson")
 	public CompTransform tpTransform = new CompTransform();
+	@VisEditable("EntityItem")
 	public CompTransform entityItemTransform = new CompTransform();
 	
 	public PartedModel model;

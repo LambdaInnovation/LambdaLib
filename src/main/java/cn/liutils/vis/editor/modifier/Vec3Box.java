@@ -37,7 +37,7 @@ public class Vec3Box extends BoxBase {
 	public Vec3Box(Field _field, Object _instance) {
 		field = _field;
 		instance = _instance;
-		transform.setSize(50, 48);
+		transform.setSize(50, 45);
 		
 		try {
 			target = (Vec3) field.get(instance);
@@ -45,14 +45,14 @@ public class Vec3Box extends BoxBase {
 			throw new RuntimeException("Can't get vec3", e);
 		}
 		
-		text("X", 2, 5);
+		text("X", 2, 3);
 		modifier(_fx, 10, 2);
 		
-		text("Y", 2, 20);
-		modifier(_fy, 10, 20);
+		text("Y", 2, 18);
+		modifier(_fy, 10, 17);
 		
-		text("Z", 2, 35);
-		modifier(_fz, 10, 35);
+		text("Z", 2, 33);
+		modifier(_fz, 10, 32);
 	}
 	
 	private void modifier(Field _field, double x, double y) {

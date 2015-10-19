@@ -8,9 +8,11 @@ import cn.liutils.util.generic.VecUtils;
 import cn.liutils.vis.editor.IVisPluginCommand;
 import cn.liutils.vis.editor.common.widget.WindowHierarchy;
 import cn.liutils.vis.editor.common.widget.WindowHierarchy.Folder;
+import cn.liutils.vis.editor.property.CompTransformProperty;
 import cn.liutils.vis.editor.property.IntegerProperty;
 import cn.liutils.vis.editor.property.Vec3Property;
 import cn.liutils.vis.editor.registry.RegVisPluginCommand;
+import cn.liutils.vis.model.CompTransform;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
@@ -35,6 +37,8 @@ public class HierWindowTest implements IVisPluginCommand {
 		
 		public Vec3 position = VecUtils.vec(1, 2, 3);
 		
+		public CompTransform cp = new CompTransform();
+		
 		public Gui() {
 			window = new WindowHierarchy();
 			Folder A = new Folder("A");
@@ -55,6 +59,11 @@ public class HierWindowTest implements IVisPluginCommand {
 				field.setAccessible(true);
 				Vec3Property propv = new Vec3Property("Position", field, this);
 				A.addElement(propv);
+				
+				field = Gui.class.getField("cp");
+				field.setAccessible(true);
+				CompTransformProperty ctp = new CompTransformProperty("Composite", field, this);
+				A.addElement(ctp);
 			} catch(Exception e) {
 				e.printStackTrace();
 			}

@@ -174,8 +174,12 @@ public class WindowHierarchy extends Window {
 			OPEN = VEVars.tex("hierarchy/folder_open"),
 			CLOSE = VEVars.tex("hierarchy/folder_close");
 		
+		public Folder(String _name, ResourceLocation _icon) {
+			super(_name, _icon);
+		}
+		
 		public Folder(String _name) {
-			super(_name, CLOSE);
+			this(_name, CLOSE);
 		}
 
 		private List<Element> elements = new ArrayList();
