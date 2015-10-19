@@ -165,8 +165,12 @@ public class LIGui extends WidgetContainer {
 	}
 	
 	public void removeFocus() {
+		removeFocus(null);
+	}
+	
+	public void removeFocus(Widget newFocus) {
 		if(focus != null) {
-			focus.postEvent(new LostFocusEvent());
+			focus.postEvent(new LostFocusEvent(newFocus));
 			focus = null;
 		}
 	}
@@ -179,7 +183,7 @@ public class LIGui extends WidgetContainer {
 			return;
 		}
 		if(focus != null) {
-			removeFocus();
+			removeFocus(node);
 		}
 		focus = node;
 		focus.postEvent(new GainFocusEvent());

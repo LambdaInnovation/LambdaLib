@@ -4,15 +4,18 @@ import java.lang.reflect.Field;
 
 import cn.annoreg.core.Registrant;
 import cn.liutils.cgui.gui.LIGuiScreen;
+import cn.liutils.util.generic.VecUtils;
 import cn.liutils.vis.editor.IVisPluginCommand;
 import cn.liutils.vis.editor.common.widget.WindowHierarchy;
 import cn.liutils.vis.editor.common.widget.WindowHierarchy.Folder;
 import cn.liutils.vis.editor.property.IntegerProperty;
+import cn.liutils.vis.editor.property.Vec3Property;
 import cn.liutils.vis.editor.registry.RegVisPluginCommand;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.util.Vec3;
 
 @SideOnly(Side.CLIENT)
 @Registrant
@@ -30,6 +33,8 @@ public class HierWindowTest implements IVisPluginCommand {
 		
 		public int theval;
 		
+		public Vec3 position = VecUtils.vec(1, 2, 3);
+		
 		public Gui() {
 			window = new WindowHierarchy();
 			Folder A = new Folder("A");
@@ -45,6 +50,11 @@ public class HierWindowTest implements IVisPluginCommand {
 				field.setAccessible(true);
 				IntegerProperty prop = new IntegerProperty("TheVal", field, this);
 				A.addElement(prop);
+				
+				field = Gui.class.getField("position");
+				field.setAccessible(true);
+				Vec3Property propv = new Vec3Property("Position", field, this);
+				A.addElement(propv);
 			} catch(Exception e) {
 				e.printStackTrace();
 			}

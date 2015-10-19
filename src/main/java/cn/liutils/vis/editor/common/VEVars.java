@@ -11,6 +11,7 @@ public class VEVars {
 	public static final Color
 		C_WINDOW_TOP = new Color(0xff1e1e1e),
 		C_WINDOW_BODY = new Color(0xff292929),
+		C_WINDOW_BODY2 = new Color(0xff444444),
 		C_WINDOW_FOREGROUND = new Color(0xff474747),
 		C_WINDOW_HIGHLIGHT = new Color(0xff454545),
 		C_WINDOW_HIGHLIGHT2 = new Color(0xffb1b1b1),

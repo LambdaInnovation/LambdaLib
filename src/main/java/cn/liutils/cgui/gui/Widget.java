@@ -293,6 +293,16 @@ public class Widget extends WidgetContainer {
 		return true;
 	}
 	
+	public boolean isChildOf(Widget another) {
+		Widget cur = this.getWidgetParent();
+		while(cur != null) {
+			if(cur == another)
+				return true;
+			cur = cur.getWidgetParent();
+		}
+		return false;
+	}
+	
 	public void gainFocus() {
 		getGui().gainFocus(this);
 	}

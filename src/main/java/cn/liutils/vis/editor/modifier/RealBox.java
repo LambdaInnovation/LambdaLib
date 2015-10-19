@@ -14,25 +14,21 @@ package cn.liutils.vis.editor.modifier;
 
 import java.lang.reflect.Field;
 
+import cn.liutils.cgui.gui.component.Transform.HeightAlign;
+import cn.liutils.cgui.gui.component.Transform.WidthAlign;
+
 /**
  * @author WeAthFolD
  */
-public class RealModifier extends ModifierBase {
-	
-	boolean isDouble;
+public class RealBox extends BoxBase {
 
-	public RealModifier(Field _field, Object _instance) {
-		super(_field, _instance);
-		Class type = field.getType();
-		isDouble = type == Double.class || type == Double.TYPE;
-	}
-
-	@Override
-	protected void setValue(String content) throws Exception {
-		if(isDouble)
-			field.set(instance, Double.valueOf(content));
-		else
-			field.set(instance, Float.valueOf(content));
+	public RealBox(Field _field, Object _instance) {
+		transform.setSize(50, 18);
+		
+		RealModifier modifier = new RealModifier(_field, _instance);
+		modifier.transform.alignWidth = WidthAlign.CENTER;
+		modifier.transform.alignHeight = HeightAlign.CENTER;
+		addWidget(modifier);
 	}
 
 }

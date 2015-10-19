@@ -34,8 +34,8 @@ public class WindowHierarchy extends Window {
 	public static final double
 		WIDTH = 100,
 		HEIGHT = 230,
-		ELEMENT_HT = 15,
-		ELEMENT_ICON_SZ = 12;
+		ELEMENT_HT = 12,
+		ELEMENT_ICON_SZ = 10;
 	
 	private ElementList list;
 	
@@ -43,6 +43,7 @@ public class WindowHierarchy extends Window {
 
 	public WindowHierarchy() {
 		super("Hierarchy");
+		initTopButton(TopButtonType.MINIMIZE);
 		transform.setSize(WIDTH, HEIGHT);
 	}
 	
@@ -89,12 +90,15 @@ public class WindowHierarchy extends Window {
 			transform.setSize(WIDTH, ELEMENT_HT);
 		}
 		
-		/**
-		 * Currently don't handle widgets that scale isnt 1.
-		 */
+		public void addAdditional(Widget w) {
+			hierarchy().body.addWidget(w);
+			this.placeAround(w);
+		}
+		
 		public void placeAround(Widget widget) {
-			widget.transform.x = this.x + this.scale * this.transform.width;
-			widget.transform.y = this.y;
+			getGui().moveWidgetToAbsPos(widget,
+					this.x + this.scale * this.transform.width,
+					this.y);
 		}
 		
 		@Override
@@ -119,8 +123,8 @@ public class WindowHierarchy extends Window {
 					
 					TextBox box = new TextBox();
 					box.content = name;
-					box.heightAlign = HeightAlign.CENTER;
-					box.size = 13;
+					box.heightAlign = HeightAlign.BOTTOM;
+					box.size = 9;
 					textArea.addComponent(box);
 					
 					addWidget(textArea);

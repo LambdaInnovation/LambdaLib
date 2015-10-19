@@ -17,28 +17,33 @@ import java.lang.reflect.Field;
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.vis.editor.common.VEVars;
 import cn.liutils.vis.editor.common.widget.WindowHierarchy.Element;
-import cn.liutils.vis.editor.modifier.IntegerBox;
+import cn.liutils.vis.editor.modifier.RealBox;
 import net.minecraft.util.ResourceLocation;
 
 /**
  * @author WeAthFolD
  */
-public class IntegerProperty extends Element {
+public class RealProperty extends Element {
 	
-	static final ResourceLocation ICON = VEVars.tex("hierarchy/integer");
+	static final ResourceLocation 
+		ICON_FLOAT = VEVars.tex("hierarchy/float"),
+		ICON_DOUBLE = VEVars.tex("hierarchy/double");
 	
 	private final Field field;
 	private final Object instance;
 	
-	public IntegerProperty(String _name, Field _field, Object _instance) {
-		super(_name, ICON);
+	public RealProperty(String _name, Field _field, Object _instance) {
+		super(_name, 
+			_field.getType() == Double.class || 
+			_field.getType() == Double.TYPE ? ICON_DOUBLE : ICON_FLOAT);
 		field = _field;
 		instance = _instance;
 	}
 
 	@Override
 	public void onClick() {
-		addAdditional(new IntegerBox(field, instance));
+		addAdditional(new RealBox(field, instance));
 	}
 
 }
+
