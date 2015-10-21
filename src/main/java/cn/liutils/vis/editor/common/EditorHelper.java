@@ -1,4 +1,4 @@
-package cn.liutils.vis.editor.util;
+package cn.liutils.vis.editor.common;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.liutils.core.LIUtils;
-import cn.liutils.vis.editor.common.widget.WindowHierarchy;
 import cn.liutils.vis.editor.common.widget.WindowHierarchy.Element;
 import cn.liutils.vis.editor.property.CompTransformProperty;
 import cn.liutils.vis.editor.property.IntegerProperty;
@@ -50,7 +49,7 @@ public class EditorHelper {
 		String value() default "";
 	}
 
-	public static void initHierarchy(WindowHierarchy hier, Object editable) {
+	public static void initHierarchy(IHierarchy hier, Object editable) {
 		Class type = editable.getClass();
 		for(Field f : type.getFields()) {
 			if(f.isAnnotationPresent(VisEditable.class)) {

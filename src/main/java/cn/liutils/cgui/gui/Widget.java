@@ -136,6 +136,13 @@ public class Widget extends WidgetContainer {
 		return null;
 	}
 	
+	public Widget addComponents(Component ...c) {
+		for(Component x : c) {
+			addComponent(x);
+		}
+		return this;
+	}
+	
 	public Widget addComponent(Component c) {
 		if(c.widget != null)
 			throw new RuntimeException("Can't add one component into multiple widgets!");

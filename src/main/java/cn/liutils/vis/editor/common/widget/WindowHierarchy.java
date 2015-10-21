@@ -23,13 +23,14 @@ import cn.liutils.cgui.gui.component.Tint;
 import cn.liutils.cgui.gui.component.Transform.HeightAlign;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
 import cn.liutils.cgui.gui.event.MouseDownEvent.MouseDownHandler;
+import cn.liutils.vis.editor.common.IHierarchy;
 import cn.liutils.vis.editor.common.VEVars;
 import net.minecraft.util.ResourceLocation;
 
 /**
  * @author WeAthFolD
  */
-public class WindowHierarchy extends Window {
+public class WindowHierarchy extends Window implements IHierarchy {
 	
 	public static final double
 		WIDTH = 100,
@@ -168,14 +169,19 @@ public class WindowHierarchy extends Window {
 		
 	}
 	
-	public static class Folder extends Element {
+	public static class Folder extends Element implements IHierarchy {
 		
 		static final ResourceLocation
 			OPEN = VEVars.tex("hierarchy/folder_open"),
 			CLOSE = VEVars.tex("hierarchy/folder_close");
 		
+		public ResourceLocation
+			iconOpen = OPEN,
+			iconClose = CLOSE;
+		
 		public Folder(String _name, ResourceLocation _icon) {
 			super(_name, _icon);
+			iconOpen = iconClose = _icon;
 		}
 		
 		public Folder(String _name) {
@@ -195,7 +201,7 @@ public class WindowHierarchy extends Window {
 			open = !open;
 			
 			WindowHierarchy hier = hierarchy();
-			DrawTexture.get(iconArea).texture = open ? OPEN : CLOSE;
+			DrawTexture.get(iconArea).texture = open ? iconOpen : iconClose;
 			hier.rebuild();
 		}
 		

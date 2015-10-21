@@ -16,10 +16,18 @@ package cn.liutils.vis.model.renderer;
 import static org.lwjgl.opengl.GL11.glPopMatrix;
 import static org.lwjgl.opengl.GL11.glPushMatrix;
 
+import java.io.IOException;
+
 import org.lwjgl.opengl.GL11;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
+
 import cn.liutils.util.client.RenderUtils;
-import cn.liutils.vis.editor.util.EditorHelper.VisEditable;
+import cn.liutils.vis.editor.common.EditorHelper.VisEditable;
+import cn.liutils.vis.gson.GsonAdapters;
 import cn.liutils.vis.model.CompTransform;
 import cn.liutils.vis.model.PartedModel;
 import net.minecraft.entity.EntityLivingBase;
@@ -135,5 +143,64 @@ public class ItemModelRenderer implements IItemRenderer {
 		GL11.glRotated(35, 0, 0, 1);
 		GL11.glTranslated(0.8, -.12, 0);
 	}
+	
+	protected void readFromJson(String name, JsonReader in) throws IOException {
+		TypeAdapter<CompTransform> cta = GsonAdapters.compTransformAdapter;
+		switch(name) {
+		case "t_std":
+			stdTransform = cta.read(in);
+			break;
+		case "t_fp":
+			fpTransform = cta.read(in);
+			break;
+		case "t_tp":
+			tpTransform = cta.read(in);
+			break;
+		case "texture":
+			texture = GsonAdapters.resourceLocationAdapter.read(in);
+			break;
+		}
+	}
+	
+	protected void writeToJson(JsonWriter out) throws IOException {
+		TypeAdapter cta = GsonAdapters.compTransformAdapter;
+		out.name("t_std");
+		cta.write(out, stdTransform);
+		out.name("t_fp");
+		cta.write(out, fpTransform);
+		out.name("t_tp");
+		cta.write(out, tpTransform);
+//		if(value.texture != null) {
+//			out.name("texture");
+//			cta.write(out, value.texture.toString());
+//		}
+	}
+	
+	public static class Adapter<T extends ItemModelRenderer> extends TypeAdapter<T> {
+
+		@Override
+		public final void write(JsonWriter out, T value) throws IOException {
+			out.beginObject();
+			value.writeToJson(out);
+			out.endObject();
+		}
+
+		@Override
+		public final T read(JsonReader in) throws IOException {
+			T ret = create();
+			in.beginObject();
+			JsonToken token;
+			while((token = in.peek()) != JsonToken.END_ARRAY) {
+				ret.readFromJson(in.nextString(), in);
+			}
+			in.endObject();
+			return ret;
+		}
+		
+		protected T create() { return (T) new ItemModelRenderer(); }
+		
+	}
+	
+	public static final Adapter baseAdapter = new Adapter();
 	
 }
