@@ -87,10 +87,6 @@ public class GsonAdapters {
 		
 	};
 	
-	/**
-	 * NOTE: This implementation CANNOT load the model for you. 
-	 * You have to do it by yourself depending on how you want to construct that model.
-	 */
 	public static TypeAdapter<ResourceLocation> resourceLocationAdapter =
 		new TypeAdapter<ResourceLocation>() {
 
