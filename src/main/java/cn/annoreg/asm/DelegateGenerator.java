@@ -200,13 +200,23 @@ public class DelegateGenerator {
                     options[parameter] = StorageOption.Option.INSTANCE;
                     targetIndex = parameter;
                     return new AnnotationVisitor(this.api, super.visitParameterAnnotation(parameter, desc, visible)) {
+                    	boolean optionsVisited;
+                    	
                         @Override
                         public void visitEnum(String name, String desc, String value) {
                             super.visitEnum(name, desc, value);
                             if(name.equals("range")) // range() default SINGLE;
                             	range = StorageOption.Target.RangeOption.valueOf(value);
-                            else if(name.equals("option")) // option() default INSTANCE;
+                            else if(name.equals("option")) {// option() default INSTANCE;
                             	options[parameter] = StorageOption.Option.valueOf(value);
+                            	optionsVisited = true;
+                            }
+                        }
+                        
+                        @Override
+                        public void visitEnd() {
+                        	if(!optionsVisited)
+                        		options[parameter] = StorageOption.Option.INSTANCE;
                         }
                     };
                 } else if(type.equals(Type.getType(StorageOption.RangedTarget.class))) {
@@ -216,6 +226,8 @@ public class DelegateGenerator {
                 	range = null;
                 	targetIndex = parameter;
                 	return new AnnotationVisitor(this.api, super.visitParameterAnnotation(parameter, desc, visible)) {
+                		boolean optionsVisited;
+                		
                 		@Override
                 	    public void visit(String name, Object value) {
                 			super.visit(name, value);
@@ -227,6 +239,13 @@ public class DelegateGenerator {
                 			super.visitEnum(name, desc, value);
                 			// option() default INSTANCE;
                 			options[parameter] = StorageOption.Option.valueOf(value);
+                			optionsVisited = true;
+                		}
+                		
+                		@Override
+                		public void visitEnd() {
+                			if(!optionsVisited)
+                				options[parameter] = StorageOption.Option.INSTANCE;
                 		}
                 	};
                 }
@@ -419,13 +438,23 @@ public class DelegateGenerator {
                     }
                     targetIndex = parameter;
                     return new AnnotationVisitor(this.api, super.visitParameterAnnotation(parameter, desc, visible)) {
+                    	boolean optionsVisited;
+                    	
                         @Override
                         public void visitEnum(String name, String desc, String value) {
                             super.visitEnum(name, desc, value);
                             if(name.equals("range")) // range() default SINGLE;
                             	range = StorageOption.Target.RangeOption.valueOf(value);
-                            else if(name.equals("option")) // option() default INSTANCE;
+                            else if(name.equals("option")) {// option() default INSTANCE;
                             	options[parameter] = StorageOption.Option.valueOf(value);
+                            	optionsVisited = true;
+                            }
+                        }
+                        
+                        @Override
+                        public void visitEnd() {
+                        	if(!optionsVisited)
+                        		options[parameter] = StorageOption.Option.INSTANCE;
                         }
                     };
                 } else if(type.equals(Type.getType(StorageOption.RangedTarget.class))) {
@@ -435,17 +464,26 @@ public class DelegateGenerator {
                 	targetIndex = parameter;
                 	range = null;
                 	return new AnnotationVisitor(this.api, super.visitParameterAnnotation(parameter, desc, visible)) {
+                		boolean optionsVisited;
+                		
                 		@Override
-                        public void visit(String name, Object value) {
-                            super.visit(name, value);
-                            sendRange = (double) value;
-                        }
+                	    public void visit(String name, Object value) {
+                			super.visit(name, value);
+                			sendRange = (double) value;
+                	    }
                 		
                 		@Override
                         public void visitEnum(String name, String desc, String value) {
                 			super.visitEnum(name, desc, value);
                 			// option() default INSTANCE;
                 			options[parameter] = StorageOption.Option.valueOf(value);
+                			optionsVisited = true;
+                		}
+                		
+                		@Override
+                		public void visitEnd() {
+                			if(!optionsVisited)
+                				options[parameter] = StorageOption.Option.INSTANCE;
                 		}
                 	};
                 }

@@ -89,7 +89,7 @@ public class RecipeRegistry {
 		} else if(o instanceof Block) {
 			return new ItemStack((Block) o, element.amount, element.data);
 		} else {
-			ItemStack outputstack=OreDictionary.getOres(element.name).get(0);
+			ItemStack outputstack=OreDictionary.getOres(element.name).get(0).copy();
 			outputstack.stackSize=element.amount;
 			return outputstack;
 		}
