@@ -17,20 +17,18 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cn.annoreg.core.RegistrationManager;
-import cn.annoreg.mc.network.Future;
-
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import cn.annoreg.core.RegistrationManager;
+import cn.annoreg.mc.network.Future;
+import cn.liutils.core.LIUtils;
 import cpw.mods.fml.common.DummyModContainer;
 import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.discovery.ASMDataTable;
 import cpw.mods.fml.common.event.FMLConstructionEvent;
 import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 public class ARModContainer extends DummyModContainer {
 	
@@ -40,7 +38,8 @@ public class ARModContainer extends DummyModContainer {
 	private static ModMetadata getModMetadata() {
         HashMap def = new HashMap();
         def.put("name", MODID);
-        def.put("version", "2.0a");
+        // FIXME Unify the location of version string
+        def.put("version", LIUtils.VERSION);
         return AnnoRegCorePlugin.mc.getMetadataForId(MODID, def);
 	}
 	

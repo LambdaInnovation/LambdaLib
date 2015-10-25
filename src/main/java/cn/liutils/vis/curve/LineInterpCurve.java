@@ -10,9 +10,10 @@
  * 在遵照该协议的情况下，您可以自由传播和修改。
  * http://www.gnu.org/licenses/gpl.html
  */
-package cn.liutils.vis.animation;
+package cn.liutils.vis.curve;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cn.liutils.util.generic.MathUtils;
@@ -20,7 +21,7 @@ import cn.liutils.util.generic.MathUtils;
 /**
  * @author WeAthFolD
  */
-public class LineInterpCurve implements ICurve {
+public class LineInterpCurve implements IFittedCurve {
 	
 	private List<Point> points = new ArrayList();
 	
@@ -28,7 +29,7 @@ public class LineInterpCurve implements ICurve {
 	
 	public void addPoint(double x, double y) {
 		points.add(new Point(x, y));
-		points.sort((Point a, Point b) -> {
+		Collections.sort(points, (Point a, Point b) -> {
 			return ((Double) a.x).compareTo(b.x);
 		});
 	}

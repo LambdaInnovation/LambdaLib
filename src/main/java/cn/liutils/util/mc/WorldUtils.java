@@ -181,4 +181,13 @@ public class WorldUtils {
 		return world.getEntitiesWithinAABBExcludingEntity(null, box, filter);
 	}
 	
+	/**
+	 * Get the tile entity at the given position and check if it is the specified type. 
+	 * Return the tile entity if is of the type, null otherwise.
+	 */
+	public static <T extends TileEntity> T getTileEntity(World world, int x, int y, int z, Class<T> type) {
+		TileEntity te = world.getTileEntity(x, y, z);
+		return type.isInstance(te) ? (T) te : null;
+	}
+	
 }

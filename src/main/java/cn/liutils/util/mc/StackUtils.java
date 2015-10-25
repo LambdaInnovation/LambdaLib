@@ -40,10 +40,10 @@ public class StackUtils {
 	}
 
 	/**
-	 * Return whether two stack's item instance and data are equal.
+	 * Return whether two stack's item instance, item damage and data are equal.
 	 */
 	public static boolean isStackDataEqual(ItemStack s1, ItemStack s2) {
-		if(s1.getItem() != s1.getItem())
+		if(s1.getItem() != s2.getItem() || s1.getItemDamage() != s2.getItemDamage())
 			return false;
 		NBTTagCompound tag1 = s1.getTagCompound(), tag2 = s2.getTagCompound();
 		if(tag1 == null || tag2 == null) {

@@ -1,13 +1,24 @@
 [
 {
   "modid": "AnnoReg",
-  "name": "Annotation Registry",
+  "name": "LambdaLib|Annotation Registry",
   "description": "A coremod API to open up annotation drived registration mechanism and other useful utilities in Minecraft.",
   "version": "${version}",
   "url": "",
   "updateUrl": "",
   "authorList": ["acaly", "WeAthFolD", "KSkun"],
-  "credits": "Lambda Innovation",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+},
+{
+  "modid": "LIUtils",
+  "name": "LambdaLib|LIUtils",
+  "description": "A library providing many useful utilities to Minecraft modders.",
+  "version": "${version}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Lambda Innovation"],
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

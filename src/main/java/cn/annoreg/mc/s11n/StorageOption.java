@@ -15,6 +15,8 @@ package cn.annoreg.mc.s11n;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
+
 public class StorageOption {
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -48,11 +50,32 @@ public class StorageOption {
         }
         
         RangeOption range() default RangeOption.SINGLE;
+        /**
+         * The storage potion of this parameter. INSTANCE by default.
+         */
+        Option option() default Option.INSTANCE;
     }
     
+    /**
+     * Used only in server-to-client network call.
+	 * Used on argument with the type that can be convert to a {@link cpw.mods.fml.common.network.NetworkRegistry.TargetPoint}
+	 *  using {@link cn.annoreg.mc.network.TargetPointHelper}.
+	 * The message is then send around the given target point with given range parameter.
+     * @author WeAthFolD
+     */
     @Retention(RetentionPolicy.RUNTIME)
     public @interface RangedTarget {
-    	double range() default -1; //The hardcoded range option. The TargetPoint converter can choose to ignore this parameter.
+    	//The hardcoded range option. The TargetPoint converter can choose to ignore this parameter.
+    	double range() default -1; 
+    	
+    	/**
+         * The storage potion of this parameter. INSTANCE by default.
+         */
+        Option option() default Option.INSTANCE;
+    }
+    
+    {
+    	TargetPoint tp;
     }
 	
 	public enum Option {

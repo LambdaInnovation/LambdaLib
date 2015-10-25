@@ -1,0 +1,102 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		maven {
+			name = "forge"
+			url = "http://files.minecraftforge.net/maven"
+		}
+		maven {
+			name = "sonatype"
+			url = "https://oss.sonatype.org/content/repositories/snapshots/"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+	}
+}
+
+ext.configFile = file "build.properties"
+
+configFile.withReader {
+	def prop = new Properties()
+	prop.load(it)
+	project.ext.config = new ConfigSlurper().parse prop
+}
+
+configurations {
+	deployerJars
+}
+
+apply plugin: 'forge'
+
+version				= config.mod_ver
+group				= config.mod_group
+archivesBaseName	= config.mod_name
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+minecraft {
+	version = "${config.mc_ver}-${config.forge_ver}"
+	runDir = "eclipse"
+}
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+}
+
+dependencies {
+	deployerJars "org.apache.maven.wagon:wagon-ftp:2.2"
+}
+
+processResources
+{
+	from(sourceSets.main.resources.srcDirs) {
+		include 'mcmod.info'
+		expand 'version':project.version, 'mcversion':project.minecraft.version
+	}
+
+	from(sourceSets.main.resources.srcDirs) {
+		exclude 'mcmod.info'
+	}
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+}
+
+jar {
+	manifest {
+		attributes 'FMLCorePluginContainsFMLMod' : 'true'
+		attributes 'FMLCorePlugin' : 'cn.annoreg.AnnoRegCorePlugin'
+	}
+}
+
+task deobfJar(type: Jar, dependsOn: 'jar') {
+	classifier 'dev'
+	from sourceSets.main.output
+	manifest {
+		attributes 'FMLCorePluginContainsFMLMod' : 'true'
+		attributes 'FMLCorePlugin' : 'cn.annoreg.AnnoRegCorePlugin'
+	}
+}
+
+task uploadJars(type: Upload, dependsOn: 'install') {
+	configuration = configurations.archives
+	repositories {
+		mavenDeployer {
+			configuration = configurations.deployerJars
+			repository(url: config.upload_url) {
+				authentication(userName: config.upload_user, password: config.upload_pass)
+			}
+		}
+	}
+}
+
+artifacts {
+	archives deobfJar
+}
+
+install.dependsOn build
+

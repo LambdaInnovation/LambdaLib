@@ -10,10 +10,10 @@
  * 在遵照该协议的情况下，您可以自由传播和修改。
  * http://www.gnu.org/licenses/gpl.html
  */
-package cn.liutils.vis.animation;
+package cn.liutils.vis.curve;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,13 +21,13 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * @author WeAthFolD
  */
-public class CubicSplineCurve implements ICurve {
+public class CubicSplineCurve implements IFittedCurve {
 
 	private List<Pair<Double, Double>> pts = new ArrayList();
 	
 	public void addPoint(double x, double y) {
 		pts.add(Pair.of(x, y));
-		pts.sort((Pair<Double, Double> a, Pair<Double, Double> b) -> {
+		Collections.sort(pts, (Pair<Double, Double> a, Pair<Double, Double> b) -> {
 			return a.getLeft().compareTo(b.getLeft());
 		});
 	}

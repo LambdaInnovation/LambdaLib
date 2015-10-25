@@ -1,22 +1,23 @@
 package gisdyt.liu.md2lang.converters;
 
-import gisdyt.liu.md2lang.util.Converter;
+public class WrapingConverter implements Converter{
 
-/*
- * Like Bold, Emphasize and Strike-through.
- * I think my solution is very foolish. The Escape.. and Wraping...
- */
-@Converter(priority=1)
-public class WrapingConverter {
+	@Override
+	public int getPriority() {
+		// TODO Auto-generated method stub
+		return 1;
+	}
 
 	private static final String[][] wrapedLables=new String[][]{
 		{"~~", "~~", "[stth]", "[/stth]"},
-		{"```", "```", "[blod]", "[/blod]"},
+		{"```", "```", "[code]", "[/code]"},
+		{"``", "``", "[code]", "[/code]"},
 		{"`", "`", "[code]", "[/code]"},
-		{"==", "==", "[hili]", "[/hili]"},
+		{"__", "__", "[bold]", "[/bold]"},
+		{"==", "==", "[hili]", "[/hili]"}
 	};
 	
-	public static String convert(String s){
+	public String convert(String s){
 		for(int i=0;i<wrapedLables.length;++i){
 			int begin_index;
 			while(s.indexOf(wrapedLables[i][0])!=-1 && s.indexOf(wrapedLables[i][1])!=-1){
