@@ -80,7 +80,7 @@ recipe_type(<recipe_output>)[experience] {
 
 你可以通过
 ```java
-RecipeRegistry.map(String key, String obj);
+RecipeRegistry.map(String key, Object obj);
 ```
 方法来指定一个自定义名称映射。
 该自定义名称映射必须是以下三种对象中的一个：
