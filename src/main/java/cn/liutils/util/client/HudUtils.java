@@ -15,12 +15,12 @@ package cn.liutils.util.client;
 import java.util.Iterator;
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 /**
  * @author WeAthFolD
@@ -81,6 +81,7 @@ public class HudUtils {
 	}
 	
 	public static void colorRect(double x, double y, double width, double height) {
+		boolean prev = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		Tessellator t = Tessellator.instance;
         t.startDrawingQuads();
@@ -89,7 +90,8 @@ public class HudUtils {
         t.addVertex(x + width, y + 0,	   zLevel);
         t.addVertex(x + 0, 	   y + 0, 	   zLevel);
         t.draw();
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+        
+		if(prev) GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	
     public static void drawRectOutline(double x, double y, double w, double h, float lineWidth) {

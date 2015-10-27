@@ -50,13 +50,15 @@ public class LineInterpCurve implements IFittedCurve {
 		double lambda = (x - p0.x) / (p1.x - p0.x);
 		return MathUtils.lerp(p0.y, p1.y, lambda);
 	}
-	
-	private class Point {
-		double x, y;
-		Point(double _x, double _y) {
-			x = _x;
-			y = _y;
-		}
+
+	@Override
+	public int pointCount() {
+		return points.size();
+	}
+
+	@Override
+	public Point getPoint(int i) {
+		return points.get(i);
 	}
 
 }

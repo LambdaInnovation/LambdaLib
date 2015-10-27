@@ -48,6 +48,7 @@ public class DrawTexture extends Component {
 			public void handleEvent(Widget w, FrameEvent event) {
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glDisable(GL_ALPHA_TEST);
+				glDepthFunc(GL_LEQUAL);
 				glDepthMask(writeDepth);
 				glUseProgram(shaderId);
 				color.bind();

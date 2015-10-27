@@ -19,6 +19,15 @@ package cn.liutils.vis.curve;
  */
 public interface IFittedCurve {
 	
+	public static class Point {
+		public double x, y;
+		public Point() {}
+		public Point(double _x, double _y) {
+			x = _x;
+			y = _y;
+		}
+	}
+	
 	/**
 	 * Add a point to fit for the curve.
 	 * Note that normally you shouldn't add the same point twice. Bad things like zero division might occur.
@@ -29,5 +38,16 @@ public interface IFittedCurve {
 	 * Get the yval of the curve at given x coordinate.
 	 */
 	double valueAt(double x);
+	
+	/**
+	 * @return The count of control points
+	 */
+	int pointCount();
+	
+	/**
+	 * @return The control point with index i
+	 * @throws IndexOutofBoundsException
+	 */
+	Point getPoint(int i);
 	
 }

@@ -12,14 +12,21 @@
  */
 package cn.liutils.vis.curve;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
+
 import cn.liutils.util.generic.MathUtils;
 
 /**
- * TODO: Better over-the-end handling
+ * Adapt bezier curve into the IFittedCurve pattern. 
+ * Use <code>setControlPoint</code> to set the control point for each index.
  * @author WeAthFolD
  */
 public class BezierCurve implements IFittedCurve {
@@ -92,10 +99,16 @@ public class BezierCurve implements IFittedCurve {
 		if(!baked)
 			bake();
 		if(x <= drawpts.get(0).x) {
-			return drawpts.get(0).y;
+			Point p0 = drawpts.get(0), c0 = pts.get(0).ctrl;
+			double dx = c0 == null ? 0 : p0.x - c0.x;
+			double k = dx == 0 ? 0 : (p0.y - c0.y) / dx;
+			return p0.y + k * (x - p0.x);
 		}
 		if(x >= drawpts.get(drawpts.size() - 1).x) {
-			return drawpts.get(drawpts.size() - 1).y;
+			Point pn = drawpts.get(drawpts.size() - 1), cn = pts.get(pts.size() - 1).ctrl;
+			double dx = cn == null ? 0 : cn.x - pn.x;
+			double k = dx == 0 ? 0 : (cn.y - pn.y) / dx;
+			return pn.y + k * (x - pn.x);
 		}
 		int i = 0;
 		for(; drawpts.get(i).x < x; ++i);
@@ -116,16 +129,91 @@ public class BezierCurve implements IFittedCurve {
 		}
 	}
 	
-	private static class Point {
-		double x, y;
+	public static TypeAdapter<BezierCurve> adapter = new TypeAdapter<BezierCurve>() {
+
+		@Override
+		public void write(JsonWriter out, BezierCurve value) throws IOException {
+			out.beginObject();
+			
+			//out.name("type");
+			//out.value("bezier");
+			
+			out.name("points");
+			out.beginArray();
+			for(Pt pt : value.pts) {
+				out.beginArray();
+				out.value(pt.pos.x);
+				out.value(pt.pos.y);
+				out.endArray();
+			}
+			out.endArray();
+			
+			out.name("ctrl");
+			out.beginArray();
+			for(Pt pt : value.pts) {
+				if(pt.ctrl != null) {
+					out.beginArray();
+					out.value(pt.ctrl.x);
+					out.value(pt.ctrl.y);
+					out.endArray();
+				} else {
+					out.nullValue();
+				}
+			}
+			out.endArray();
+			out.endObject();
+		}
+
+		@Override
+		public BezierCurve read(JsonReader in) throws IOException {
+			BezierCurve ret = new BezierCurve();
+			in.beginObject();
+			JsonToken token0 = null;
+			while((token0 = in.peek()) != JsonToken.END_OBJECT) {
+				JsonToken token1 = null;
+				switch(in.nextName()) {
+				case "points":
+					in.beginArray();
+					while((token1 = in.peek()) != JsonToken.END_ARRAY) {
+						in.beginArray();
+						ret.addPoint(in.nextDouble(), in.nextDouble());
+						in.endArray();
+					}
+					in.endArray();
+					break;
+				case "ctrl":
+					in.beginArray();
+					int i = 0;
+					while((token1 = in.peek()) != JsonToken.END_ARRAY) {
+						if(in.peek() == JsonToken.NULL) {
+							in.nextNull();
+						} else {
+							in.beginArray();
+							ret.setCtrlPoint(i, in.nextDouble(), in.nextDouble());
+							in.endArray();
+						}
+						++i;
+					}
+					in.endArray();
+					break;
+				default:
+					in.nextString();
+				}
+			}
+			in.endObject();
+			return ret;
+		}
 		
-		Point(double _x, double _y) {
-			x = _x;
-			y = _y;
-		}
-		Point() {
-			this(0, 0);
-		}
+	};
+
+	@Override
+	public int pointCount() {
+		return pts.size();
+	}
+
+	@Override
+	public Point getPoint(int i) {
+		return pts.get(i).pos;
 	}
 
 }

@@ -385,7 +385,7 @@ public class LIGui extends WidgetContainer {
 				
 				double px = cur.transform.pivotX * cur.scale, py = cur.transform.pivotY * cur.scale;
 				
-
+				GL11.glDepthFunc(GL11.GL_LEQUAL);
 				GL11.glScaled(cur.scale, cur.scale, 1);
 				GL11.glTranslated(-cur.transform.pivotX, -cur.transform.pivotY, 0);
 				
