@@ -159,7 +159,10 @@ public class KeyManager {
 					}
 				} else {
 					if(kb.keyDown) {
-						kb.handler.onKeyUp();
+						if(inGame) 
+							kb.handler.onKeyUp();
+						else 
+							kb.handler.onKeyAbort();
 					}
 					kb.keyAborted = false;
 				}

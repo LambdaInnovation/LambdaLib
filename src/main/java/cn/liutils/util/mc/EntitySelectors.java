@@ -20,6 +20,7 @@ import java.util.Set;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**
@@ -28,7 +29,10 @@ import net.minecraft.entity.player.EntityPlayer;
  */
 public class EntitySelectors {
 
-	public static IEntitySelector living = new SelectorOfType(EntityLivingBase.class);
+	public static IEntitySelector living = or(
+		new SelectorOfType(EntityLivingBase.class),
+		new SelectorOfType(EntityDragonPart.class) // Workaround to let it be applicable for dragon
+	);
 	
 	public static IEntitySelector player = new SelectorOfType(EntityPlayer.class);
 	
@@ -166,6 +170,21 @@ public class EntitySelectors {
 	 */
 	public static IEntitySelector combine(IEntitySelector ...sels) {
 		return new SelectorList(sels);
+	}
+	
+	public static IEntitySelector or(IEntitySelector ...sels) {
+		return new IEntitySelector() {
+			@Override
+			public boolean isEntityApplicable(Entity entity) {
+				if(sels.length == 0)
+					return true;
+				for(IEntitySelector s : sels)
+					if(s.isEntityApplicable(entity))
+						return true;
+				return false;
+			}
+			
+		};
 	}
 	
 	/**

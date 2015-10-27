@@ -29,6 +29,7 @@ configurations {
 
 apply plugin: 'forge'
 
+
 version				= config.mod_ver
 group				= config.mod_group
 archivesBaseName	= config.mod_name
