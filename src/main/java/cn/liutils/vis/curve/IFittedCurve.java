@@ -19,12 +19,17 @@ package cn.liutils.vis.curve;
  */
 public interface IFittedCurve {
 	
-	public static class Point {
+	public static class Point implements Comparable<Point> {
 		public double x, y;
 		public Point() {}
 		public Point(double _x, double _y) {
 			x = _x;
 			y = _y;
+		}
+		
+		@Override
+		public int compareTo(Point arg0) {
+			return ((Double) x).compareTo(arg0.x);
 		}
 	}
 	

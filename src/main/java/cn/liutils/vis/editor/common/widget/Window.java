@@ -62,6 +62,7 @@ public class Window extends Widget {
 		
 		transform.width = DEF_WINDOW_WIDTH;
 		transform.height = DEF_WINDOW_HT;
+		transform.doesListenKey = false;
 		
 		/* Top Area */ {
 			topArea = new Widget();

@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 import cn.annoreg.core.Registrant;
 import cn.liutils.cgui.gui.LIGuiScreen;
 import cn.liutils.util.generic.VecUtils;
-import cn.liutils.vis.curve.BezierCurve;
+import cn.liutils.vis.curve.CubicCurve;
 import cn.liutils.vis.editor.IVisPluginCommand;
 import cn.liutils.vis.editor.animation.CurveView;
 import cn.liutils.vis.editor.common.widget.WindowHierarchy;
@@ -79,12 +79,10 @@ public class HierWindowTest implements IVisPluginCommand {
 			
 			gui.addWidget(window);
 			
-			BezierCurve curve = new BezierCurve();
+			CubicCurve curve = new CubicCurve();
 			curve.addPoint(0, 10);
-			curve.addPoint(5, 0);
 			curve.addPoint(10, 5);
-			curve.setCtrlPoint(0, -5, 15);
-			curve.setCtrlPoint(1, 10, 0);
+			curve.addPoint(5, 0);
 			
 			CurveView view = new CurveView(curve);
 			gui.addWidget(view);
