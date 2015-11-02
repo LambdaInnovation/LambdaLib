@@ -23,7 +23,6 @@ import cn.liutils.cgui.gui.event.FrameEvent;
 import cn.liutils.cgui.gui.event.GainFocusEvent;
 import cn.liutils.cgui.gui.event.GuiEvent;
 import cn.liutils.cgui.gui.event.GuiEventBus;
-import cn.liutils.cgui.gui.event.GuiEventHandler;
 import cn.liutils.cgui.gui.event.KeyEvent;
 import cn.liutils.cgui.gui.event.LostFocusEvent;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
@@ -46,7 +45,7 @@ public class LIGui extends WidgetContainer {
 	
 	Widget focus; //last input focus
 	
-	GuiEventBus eventBus = new GuiEventBus();
+	public final GuiEventBus eventBus = new GuiEventBus();
 
 	public LIGui() {}
 	
@@ -466,14 +465,6 @@ public class LIGui extends WidgetContainer {
 		for(Widget w : getDrawList()) {
 			hierPostEvent(w, event);
 		}
-	}
-	
-	public void regEventHandler(GuiEventHandler geh) {
-		eventBus.regEventHandler(geh);
-	}
-	
-	public void removeEventHandler(GuiEventHandler geh) {
-		eventBus.remove(geh);
 	}
 	
 	private void hierPostEvent(Widget w, GuiEvent event) {

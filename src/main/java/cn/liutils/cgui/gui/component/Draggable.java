@@ -12,12 +12,7 @@
  */
 package cn.liutils.cgui.gui.component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.event.DragEvent;
-import cn.liutils.cgui.gui.event.DragEvent.DragEventHandler;
 
 /**
  * @author WeAthFolD
@@ -27,12 +22,9 @@ public class Draggable extends Component {
 	public Draggable() {
 		super("Draggable");
 		
-		addEventHandler(new DragEventHandler() {
-			@Override
-			public void handleEvent(Widget w, DragEvent event) {
-				w.getGui().updateDragWidget();
-				w.dirty = true;
-			}
+		addEventHandler(DragEvent.class, (w, e) -> {
+			w.getGui().updateDragWidget();
+			w.dirty = true;
 		});
 	}
 

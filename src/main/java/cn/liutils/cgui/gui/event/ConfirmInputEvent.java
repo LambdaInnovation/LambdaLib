@@ -19,9 +19,4 @@ package cn.liutils.cgui.gui.event;
  * @author WeAthFolD
  */
 public class ConfirmInputEvent implements GuiEvent {
-	public static abstract class ConfirmInputHandler extends GuiEventHandler<ConfirmInputEvent> {
-		public ConfirmInputHandler() {
-			super(ConfirmInputEvent.class);
-		}
-	}
 }

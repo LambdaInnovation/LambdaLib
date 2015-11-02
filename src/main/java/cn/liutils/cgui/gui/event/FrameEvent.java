@@ -16,10 +16,4 @@ public class FrameEvent implements GuiEvent {
 		my = _my;
 		hovering = hov;
 	}
-	
-	public abstract static class FrameEventHandler extends GuiEventHandler<FrameEvent> {
-		public FrameEventHandler() {
-			super(FrameEvent.class);
-		}
-	}
 }

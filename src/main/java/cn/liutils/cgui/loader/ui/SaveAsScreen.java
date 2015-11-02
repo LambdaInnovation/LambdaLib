@@ -14,8 +14,6 @@ package cn.liutils.cgui.loader.ui;
 
 import java.io.File;
 
-import net.minecraft.client.Minecraft;
-
 import org.lwjgl.opengl.GL11;
 
 import cn.liutils.cgui.client.CGUILang;
@@ -24,15 +22,14 @@ import cn.liutils.cgui.gui.component.DrawTexture;
 import cn.liutils.cgui.gui.component.TextBox;
 import cn.liutils.cgui.gui.component.Tint;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
-import cn.liutils.cgui.gui.event.MouseDownEvent.MouseDownHandler;
 import cn.liutils.cgui.loader.xml.CGUIDocWriter;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.helper.Color;
 import cn.liutils.util.helper.Font;
 import cn.liutils.util.helper.Font.Align;
 import cn.liutils.util.helper.GameTimer;
+import net.minecraft.client.Minecraft;
 
 /**
  * @author WeAthFolD
@@ -73,32 +70,26 @@ public class SaveAsScreen extends Window {
 		tint.idleColor = new Color(1, 1, 1, 0.3);
 		button.addComponent(tint);
 		
-		button.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				File file = new File(textBox.content);
-				if(file.exists()) {
-					lastWarningTime = GameTimer.getAbsTime();
-				} else {
-					if(!CGUIDocWriter.save(guiEdit.toEdit, file))
-						Minecraft.getMinecraft().thePlayer.sendChatMessage(CGUILang.commSaveFailed() + textBox.content);
-					else
-						Minecraft.getMinecraft().thePlayer.sendChatMessage(CGUILang.commSaved() + textBox.content);
-					guiEdit.path = textBox.content;
-					SaveAsScreen.this.dispose();
-				}
+		button.regEventHandler(MouseDownEvent.class, (w, e) -> {
+			File file = new File(textBox.content);
+			if(file.exists()) {
+				lastWarningTime = GameTimer.getAbsTime();
+			} else {
+				if(!CGUIDocWriter.save(guiEdit.toEdit, file))
+					Minecraft.getMinecraft().thePlayer.sendChatMessage(CGUILang.commSaveFailed() + textBox.content);
+				else
+					Minecraft.getMinecraft().thePlayer.sendChatMessage(CGUILang.commSaved() + textBox.content);
+				guiEdit.path = textBox.content;
+				SaveAsScreen.this.dispose();
 			}
 		});
 		
-		button.regEventHandler(new FrameEventHandler() {
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				Font.font.draw(CGUILang.butSave(), 9, 1, 6, 0xffffff, Align.CENTER);
-				if(GameTimer.getAbsTime() - lastWarningTime < 1000L) {
-					GL11.glColor4d(1, .3, .3, .3);
-					HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
-					GL11.glColor4d(1, 1, 1, 1);
-				}
+		button.regEventHandler(FrameEvent.class, (w, e) -> {
+			Font.font.draw(CGUILang.butSave(), 9, 1, 6, 0xffffff, Align.CENTER);
+			if(GameTimer.getAbsTime() - lastWarningTime < 1000L) {
+				GL11.glColor4d(1, .3, .3, .3);
+				HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
+				GL11.glColor4d(1, 1, 1, 1);
 			}
 		});
 		

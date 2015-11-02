@@ -14,9 +14,7 @@ package cn.liutils.cgui.gui.component;
 
 import org.lwjgl.opengl.GL11;
 
-import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.helper.Color;
 
@@ -31,15 +29,10 @@ public class Outline extends Component {
 	public Outline() {
 		super("Outline");
 		
-		addEventHandler(new FrameEventHandler() {
-
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				color.bind();
-				HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, lineWidth);
-				GL11.glColor4f(1, 1, 1, 1);
-			}
-			
+		addEventHandler(FrameEvent.class, (w, e) -> {
+			color.bind();
+			HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, lineWidth);
+			GL11.glColor4f(1, 1, 1, 1);
 		});
 	}
 

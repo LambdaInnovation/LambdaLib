@@ -17,10 +17,4 @@ package cn.liutils.cgui.gui.event;
  * Fired when a widget is marked 'dirty' and is about to be updated by the LIGui.
  * @author WeAthFolD
  */
-public class RefreshEvent implements GuiEvent {
-	public static abstract class RefreshFunc extends GuiEventHandler<RefreshEvent> {
-		public RefreshFunc() {
-			super(RefreshEvent.class);
-		}
-	}
-}
+public class RefreshEvent implements GuiEvent {}

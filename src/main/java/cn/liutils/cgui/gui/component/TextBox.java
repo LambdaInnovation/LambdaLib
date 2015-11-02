@@ -21,9 +21,6 @@ import java.io.IOException;
 
 import javax.vecmath.Vector2d;
 
-import net.minecraft.util.ChatAllowedCharacters;
-import net.minecraft.util.StatCollector;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -34,15 +31,14 @@ import cn.liutils.cgui.gui.component.Transform.WidthAlign;
 import cn.liutils.cgui.gui.event.ChangeContentEvent;
 import cn.liutils.cgui.gui.event.ConfirmInputEvent;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.cgui.gui.event.KeyEvent;
-import cn.liutils.cgui.gui.event.KeyEvent.KeyEventHandler;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
-import cn.liutils.cgui.gui.event.MouseDownEvent.MouseDownHandler;
 import cn.liutils.util.helper.Color;
 import cn.liutils.util.helper.Font;
 import cn.liutils.util.helper.Font.Align;
 import cn.liutils.util.helper.GameTimer;
+import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraft.util.StatCollector;
 
 /**
  * 事实证明UI底层是十分蛋疼的……
@@ -169,109 +165,95 @@ public class TextBox extends Component {
 	
 	public TextBox() {
 		super("TextBox");
-		addEventHandler(new KeyEventHandler() {
+		addEventHandler(KeyEvent.class, (w, event) -> {
+			if(!allowEdit)
+				return;
+			checkCaret();
 			
-			@Override
-			public void handleEvent(Widget w, KeyEvent event) {
-				if(!allowEdit)
-					return;
-				checkCaret();
-				
-				int par2 = event.keyCode;
-				
-				if(par2 == Keyboard.KEY_RIGHT) {
-					caretPos++;
-				} else if(par2 == Keyboard.KEY_LEFT) {
-					caretPos--;
-				}
-				
-				if(caretPos < 0) caretPos = 0;
-				if(caretPos > content.length()) caretPos = content.length();
-				
-				if(event.keyCode == Keyboard.KEY_V && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-					String str1 = content.substring(0, caretPos), str2 = getClipboardContent(), str3 = content.substring(caretPos);
-					content = str1 + str2 + str3;
-					w.postEvent(new ChangeContentEvent());
-					return;
-				}
-				
-				if(event.keyCode == Keyboard.KEY_C && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-					saveClipboardContent();
-					return;
-				}
-				
-				if (par2 == Keyboard.KEY_BACK && content.length() > 0) {
-					if(caretPos > 0) {
-						content = content.substring(0, caretPos - 1) + 
-							(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
-						--caretPos;
-					}
-					w.postEvent(new ChangeContentEvent());
-				} else if(par2 == Keyboard.KEY_RETURN || par2 == Keyboard.KEY_NUMPADENTER) {
-					w.postEvent(new ConfirmInputEvent());
-				} else if(par2 == Keyboard.KEY_DELETE) {
-					content = "";
-					w.postEvent(new ChangeContentEvent());
-				}
-				if (ChatAllowedCharacters.isAllowedCharacter(event.inputChar)) {
-					content = content.substring(0, caretPos) + event.inputChar +
-							(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
-					caretPos += 1;
-					w.postEvent(new ChangeContentEvent());
-				}
-				
-				checkCaret();
+			int par2 = event.keyCode;
+			
+			if(par2 == Keyboard.KEY_RIGHT) {
+				caretPos++;
+			} else if(par2 == Keyboard.KEY_LEFT) {
+				caretPos--;
 			}
 			
+			if(caretPos < 0) caretPos = 0;
+			if(caretPos > content.length()) caretPos = content.length();
+			
+			if(event.keyCode == Keyboard.KEY_V && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+				String str1 = content.substring(0, caretPos), str2 = getClipboardContent(), str3 = content.substring(caretPos);
+				content = str1 + str2 + str3;
+				w.postEvent(new ChangeContentEvent());
+				return;
+			}
+			
+			if(event.keyCode == Keyboard.KEY_C && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+				saveClipboardContent();
+				return;
+			}
+			
+			if (par2 == Keyboard.KEY_BACK && content.length() > 0) {
+				if(caretPos > 0) {
+					content = content.substring(0, caretPos - 1) + 
+						(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
+					--caretPos;
+				}
+				w.postEvent(new ChangeContentEvent());
+			} else if(par2 == Keyboard.KEY_RETURN || par2 == Keyboard.KEY_NUMPADENTER) {
+				w.postEvent(new ConfirmInputEvent());
+			} else if(par2 == Keyboard.KEY_DELETE) {
+				content = "";
+				w.postEvent(new ChangeContentEvent());
+			}
+			if (ChatAllowedCharacters.isAllowedCharacter(event.inputChar)) {
+				content = content.substring(0, caretPos) + event.inputChar +
+						(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
+				caretPos += 1;
+				w.postEvent(new ChangeContentEvent());
+			}
+			
+			checkCaret();
 		});
 		
-		addEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				double len = 3;
-				double[] offset = getOffset(w);
-				double eventX = -offset[0] + event.x;
+		addEventHandler(MouseDownEvent.class, (w, e) -> {
+			double len = 3;
+			double[] offset = getOffset(w);
+			double eventX = -offset[0] + e.x;
+			
+			for(int i = 0; i < content.length(); ++i) {
+				double cw = Font.font.strLen(String.valueOf(content.charAt(i)), size);
+				len += cw;
 				
-				for(int i = 0; i < content.length(); ++i) {
-					double cw = Font.font.strLen(String.valueOf(content.charAt(i)), size);
-					len += cw;
-					
-					if(len > eventX) {
-						caretPos = (eventX - len + cw > cw / 2) ? i + 1 : i;
-						return;
-					}
+				if(len > eventX) {
+					caretPos = (eventX - len + cw > cw / 2) ? i + 1 : i;
+					return;
 				}
-				caretPos = content.length();
 			}
+			caretPos = content.length();
 		});
 		
-		addEventHandler(new FrameEventHandler() {
-
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				
-				double[] offset = getOffset(w);
-				
-				checkCaret();
-				
-				String str = getProcessedContent();
-				
-				GL11.glPushMatrix();
-				GL11.glTranslated(0, 0, zLevel);
-				
-				if(emit)
-					Font.font.drawTrimmed(str, offset[0], offset[1], size, color.asHexColor(), Align.LEFT, w.transform.width - 2, "...");
-				else
-					Font.font.draw(str, offset[0], offset[1], size, color.asHexColor(), Align.LEFT);
-				
-				GL11.glPopMatrix();
-				
-				if(allowEdit && w.isFocused() && GameTimer.getAbsTime() % 1000 < 500) {
-					double len = Font.font.strLen(str.substring(0, caretPos), size);
-					Font.font.draw("|", len + offset[0], offset[1], size, color.asHexColor());
-				}
-			}
+		addEventHandler(FrameEvent.class, (w, event) -> {
+			double[] offset = getOffset(w);
 			
+			checkCaret();
+			
+			String str = getProcessedContent();
+			
+			GL11.glPushMatrix();
+			GL11.glTranslated(0, 0, zLevel);
+			
+			if(emit)
+				Font.font.drawTrimmed(str, offset[0], offset[1], size, color.asHexColor(), Align.LEFT, w.transform.width - 2, "...");
+			else
+				Font.font.draw(str, offset[0], offset[1], size, color.asHexColor(), Align.LEFT);
+			
+			GL11.glPopMatrix();
+			
+			if(allowEdit && w.isFocused() && GameTimer.getAbsTime() % 1000 < 500) {
+				double len = Font.font.strLen(str.substring(0, caretPos), size);
+				Font.font.draw("|", len + offset[0], offset[1], size, color.asHexColor());
+			}
 		});
 	}
 	

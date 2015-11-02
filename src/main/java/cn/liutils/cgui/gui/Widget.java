@@ -15,15 +15,11 @@ package cn.liutils.cgui.gui;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import com.google.common.collect.ImmutableList;
 
 import cn.liutils.cgui.gui.component.Component;
 import cn.liutils.cgui.gui.component.Transform;
 import cn.liutils.cgui.gui.event.GuiEvent;
 import cn.liutils.cgui.gui.event.GuiEventBus;
-import cn.liutils.cgui.gui.event.GuiEventHandler;
 import cn.liutils.cgui.gui.event.IGuiEventHandler;
 
 
@@ -177,32 +173,21 @@ public class Widget extends WidgetContainer {
 	}
 	
 	//Event dispatch
-	public final Widget regEventHandler(GuiEventHandler h) {
-		eventBus.regEventHandler(h);
-		return this;
+	
+	public <T extends GuiEvent> void regEventHandler(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
+		regEventHandler(clazz, handler, 0);
 	}
 	
-	public final Widget regEventHandlerAtBegin(GuiEventHandler h) {
-		eventBus.regAtBeginning(h);
-		return this;
-	}
-	
-	public final <T extends GuiEvent> Widget regEventHandler(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
+	public <T extends GuiEvent> void regEventHandler(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority) {
 		eventBus.reg(clazz, handler);
-		return this;
-	}
-
-	public final <T extends GuiEvent> Widget regEventHandlerAtBegin(Class<? extends GuiEvent> clazz, IGuiEventHandler<T> handler) {
-		eventBus.regAtBeginning(clazz, handler);
-		return this;
 	}
 	
-	public final void postEvent(GuiEvent event) {
+	public <T extends GuiEvent> void removeEventHandler(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
+		eventBus.remove(clazz, handler);
+	}
+	
+	public void postEvent(GuiEvent event) {
 		eventBus.postEvent(this, event);
-		for(Component c : components) {
-			if(c.enabled)
-				c.postEvent(this, event);
-		}
 	}
 	
 	//Utils

@@ -25,7 +25,7 @@ import cn.liutils.cgui.gui.annotations.CopyIgnore;
 import cn.liutils.cgui.gui.annotations.EditIgnore;
 import cn.liutils.cgui.gui.event.GuiEvent;
 import cn.liutils.cgui.gui.event.GuiEventBus;
-import cn.liutils.cgui.gui.event.GuiEventHandler;
+import cn.liutils.cgui.gui.event.IGuiEventHandler;
 import cn.liutils.core.LIUtils;
 import cn.liutils.util.helper.TypeHelper;
 
@@ -37,8 +37,6 @@ import cn.liutils.util.helper.TypeHelper;
 public class Component {
 	
 	static Map<Class, List<Field>> copiedFields = new HashMap();
-
-	private GuiEventBus eventBus;
 	
 	public final String name;
 	
@@ -54,10 +52,17 @@ public class Component {
 	@CopyIgnore
 	public Widget widget;
 	
+	private class Node {
+		Class<? extends GuiEvent> type;
+		IGuiEventHandler handler;
+		int prio;
+	}
+	
+	private List<Node> addedHandlers = new ArrayList();
+	
 	public Component(String _name) {
 		name = _name;
 		checkCopyFields();
-		eventBus = new GuiEventBus();
 	}
 
 	private List<Field> checkCopyFields() {
@@ -74,23 +79,33 @@ public class Component {
 		return ret;
 	}
 	
-	protected void addEventHandler(GuiEventHandler handler) {
-		eventBus.regEventHandler(handler);
+	protected <T extends GuiEvent> void addEventHandler(Class<? extends T> type, IGuiEventHandler<T> handler) {
+		addEventHandler(type, handler, 0);
+	}
+	
+	protected <T extends GuiEvent> void addEventHandler(Class<? extends T> type, IGuiEventHandler<T> handler, int prio) {
+		if(widget != null)
+			throw new RuntimeException("Can only add event handlers before componenet is added into widget");
+		Node n = new Node();
+		n.type = type;
+		n.handler = handler;
+		n.prio = prio;
+		addedHandlers.add(n);
 	}
 	
 	/**
 	 * Called when the component is added into a widget, and the widget field is correctly set.
 	 */
 	public void onAdded() {
-		
+		for(Node n : addedHandlers) {
+			widget.regEventHandler(n.type, n.handler, n.prio);
+		}
 	}
 	
 	public void onRemoved() {
-		
-	}
-	
-	public void postEvent(Widget w, GuiEvent event) {
-		eventBus.postEvent(w, event);
+		for(Node n : addedHandlers) {
+			widget.removeEventHandler(n.type, n.handler);
+		}
 	}
 	
 	public Component copy() {

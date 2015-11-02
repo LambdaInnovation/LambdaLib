@@ -12,24 +12,18 @@
  */
 package cn.liutils.cgui.loader.ui;
 
-import javax.vecmath.Vector2d;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
-
 import org.lwjgl.opengl.GL11;
 
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.component.DrawTexture;
 import cn.liutils.cgui.gui.component.Transform;
 import cn.liutils.cgui.gui.event.DragEvent;
-import cn.liutils.cgui.gui.event.DragEvent.DragEventHandler;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
-import cn.liutils.cgui.gui.event.MouseDownEvent.MouseDownHandler;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.helper.Font;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Tessellator;
 
 /**
  * @author WeAthFolD
@@ -60,39 +54,30 @@ public class Window extends Widget {
 			 Widget close = new Widget();
 			 close.transform.setSize(10, 10).setPos(transform.width - 12, 1);
 			 close.addComponent(new DrawTexture().setTex(GuiEdit.tex("toolbar/close")));
-			 close.regEventHandler(new MouseDownHandler() {
-				@Override
-				public void handleEvent(Widget w, MouseDownEvent event) {
-					Window.this.dispose();
-				}
+			 close.regEventHandler(MouseDownEvent.class, (w, e) -> {
+				 Window.this.dispose();
 			 });
 			 addWidget(close);
 		}
 		
 		if(!this.isWidgetParent()) {
-			this.regEventHandler(new DragEventHandler() {
-				@Override
-				public void handleEvent(Widget w, DragEvent event) {
-					w.getGui().updateDragWidget();
-					guiEdit.updateDefaultPosition(name, w.transform.x, w.transform.y);
-				}
+			this.regEventHandler(DragEvent.class, (w, e) -> {
+				w.getGui().updateDragWidget();
+				guiEdit.updateDefaultPosition(name, w.transform.x, w.transform.y);
 			});
 		}
 		
-		this.regEventHandler(new FrameEventHandler() {
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				Transform t = w.transform;
-				final double bar_ht = 10;
-				
-				GuiEdit.bindColor(2);
-				HudUtils.colorRect(0, 0, t.width, bar_ht);
-				
-				GuiEdit.bindColor(1);
-				HudUtils.colorRect(0, bar_ht, t.width, t.height - bar_ht);
-				
-				Font.font.draw(name, 10, 0, 10, 0x7fbeff);
-			}
+		regEventHandler(FrameEvent.class, (w, e) -> {
+			Transform t = w.transform;
+			final double bar_ht = 10;
+			
+			GuiEdit.bindColor(2);
+			HudUtils.colorRect(0, 0, t.width, bar_ht);
+			
+			GuiEdit.bindColor(1);
+			HudUtils.colorRect(0, bar_ht, t.width, t.height - bar_ht);
+			
+			Font.font.draw(name, 10, 0, 10, 0x7fbeff);
 		});
 	}
 	
