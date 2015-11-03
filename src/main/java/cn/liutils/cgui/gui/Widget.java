@@ -79,12 +79,18 @@ public class Widget extends WidgetContainer {
 	}
 	
 	protected void copyInfoTo(Widget n) {
+		n.removeComponent(n.transform);
+		n.transform = (Transform) transform.copy();
+		n.addComponent(n.transform);
+		
+		n.eventBus = eventBus.copy();
+		
 		n.components.clear();
 		for(Component c : components) {
-			n.addComponent(c.copy());
+			if(c.getClass() != Transform.class)
+				n.addComponent(c.copy());
 		}
-		n.transform = n.getComponent("Transform");
-		n.eventBus = eventBus.copy();
+		
 		//Also copy the widget's sub widgets recursively.
 		for(Widget asub : getDrawList()) {
 			if(asub.needCopy) n.addWidget(asub.getName(), asub.copy());
@@ -179,7 +185,11 @@ public class Widget extends WidgetContainer {
 	}
 	
 	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority) {
-		eventBus.listen(clazz, handler);
+		eventBus.listen(clazz, handler, priority);
+	}
+	
+	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority, boolean copyable) {
+		eventBus.listen(clazz, handler, priority, copyable);
 	}
 	
 	public <T extends GuiEvent> void unlisten(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
@@ -280,6 +290,11 @@ public class Widget extends WidgetContainer {
 	
 	public void gainFocus() {
 		getGui().gainFocus(this);
+	}
+	
+	@Override
+	public String toString() {
+		return this.getName() + "@" + this.getClass();
 	}
 
 }

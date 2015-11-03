@@ -70,17 +70,21 @@ public final class GuiEventBus {
 	}
 	
 	public <T extends GuiEvent> void listen(Class<? extends GuiEvent> clazz, IGuiEventHandler handler, int priority) {
+		listen(clazz, handler, priority, true);
+	}
+	
+	public <T extends GuiEvent> void listen(Class<? extends GuiEvent> clazz, IGuiEventHandler handler, int priority, boolean copyable) {
 		NodeCollection list = getRawList(clazz);
 		// Perform gracefully if handler is duplicated. This allows safe copy.
 		for(GuiHandlerNode n : list) {
 			if(n.handler == handler)
 				return;
 		}
-		list.add(new GuiHandlerNode(handler, priority));
+		list.add(new GuiHandlerNode(handler, priority, copyable));
 	}
 	
 	public <T extends GuiEvent> void unlisten(Class<? extends GuiEvent> clazz, IGuiEventHandler<T> handler) {
-		getRawList(clazz).remove(new GuiHandlerNode(handler, 0));
+		getRawList(clazz).remove(new GuiHandlerNode(handler, 0, false));
 	}
 	
 	private NodeCollection getRawList(Class<? extends GuiEvent> clazz) {
@@ -92,11 +96,20 @@ public final class GuiEventBus {
 		return ret;
 	}
 	
+	/**
+	 * Copies (or clones) the event bus. 
+	 * The cloned event bus will retain all copyable event handlers of the previous bus, as reference.
+	 */
 	public GuiEventBus copy() {
 		GuiEventBus ret = new GuiEventBus();
 		
 		for(Entry< Class<? extends GuiEvent>, NodeCollection> ent : eventHandlers.entrySet()) {
-			ret.getRawList(ent.getKey()).addAll(ent.getValue());
+			NodeCollection list = ret.getRawList(ent.getKey());
+			for(GuiHandlerNode n : ent.getValue()) {
+				if(n.copySensitive) {
+					list.add(n);
+				}
+			}
 		}
 		return ret;
 	}
@@ -104,10 +117,12 @@ public final class GuiEventBus {
 	private class GuiHandlerNode implements Comparable<GuiHandlerNode> {
 		final IGuiEventHandler handler;
 		final int priority;
+		final boolean copySensitive;
 		
-		public GuiHandlerNode(IGuiEventHandler _handler, int _priority) {
+		public GuiHandlerNode(IGuiEventHandler _handler, int _priority, boolean _copySensitive) {
 			handler = _handler;
 			priority = _priority;
+			copySensitive = _copySensitive;
 		}
 		
 		@Override

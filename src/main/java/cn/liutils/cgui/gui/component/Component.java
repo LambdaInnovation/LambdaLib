@@ -24,7 +24,6 @@ import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.annotations.CopyIgnore;
 import cn.liutils.cgui.gui.annotations.EditIgnore;
 import cn.liutils.cgui.gui.event.GuiEvent;
-import cn.liutils.cgui.gui.event.GuiEventBus;
 import cn.liutils.cgui.gui.event.IGuiEventHandler;
 import cn.liutils.core.LIUtils;
 import cn.liutils.util.helper.TypeHelper;
@@ -52,13 +51,13 @@ public class Component {
 	@CopyIgnore
 	public Widget widget;
 	
-	private class Node {
+	private static class Node {
 		Class<? extends GuiEvent> type;
 		IGuiEventHandler handler;
 		int prio;
 	}
 	
-	private List<Node> addedHandlers = new ArrayList();
+	List<Node> addedHandlers = new ArrayList();
 	
 	public Component(String _name) {
 		name = _name;
@@ -88,7 +87,7 @@ public class Component {
 			throw new RuntimeException("Can only add event handlers before componenet is added into widget");
 		Node n = new Node();
 		n.type = type;
-		n.handler = handler;
+		n.handler = new EHWrapper(handler);
 		n.prio = prio;
 		addedHandlers.add(n);
 	}
@@ -98,7 +97,7 @@ public class Component {
 	 */
 	public void onAdded() {
 		for(Node n : addedHandlers) {
-			widget.listen(n.type, n.handler, n.prio);
+			widget.listen(n.type, n.handler, n.prio, false);
 		}
 	}
 	
@@ -153,6 +152,23 @@ public class Component {
 	
 	public Collection<Field> getPropertyList() {
 		return copiedFields.get(getClass());
+	}
+	
+	private final class EHWrapper<T extends GuiEvent> implements IGuiEventHandler<T> {
+		
+		final IGuiEventHandler<T> wrapped;
+
+		public EHWrapper(IGuiEventHandler<T> _wrapped) {
+			wrapped = _wrapped;
+		}
+		
+		@Override
+		public void handleEvent(Widget w, T event) {
+			if(enabled)
+				wrapped.handleEvent(w, event);
+		}
+		
+		
 	}
 	
 }
