@@ -49,7 +49,7 @@ public class EventLoader {
 				} else {
 					MethodWrapper wrapper =new MethodWrapper(m, callbackProvider);
 					Class c = pars[1];
-					target.<GuiEvent>regEventHandler((Class<? extends GuiEvent>) c, new MethodWrapper(m, callbackProvider));
+					target.<GuiEvent>listen((Class<? extends GuiEvent>) c, new MethodWrapper(m, callbackProvider));
 				}
 			}
 		}

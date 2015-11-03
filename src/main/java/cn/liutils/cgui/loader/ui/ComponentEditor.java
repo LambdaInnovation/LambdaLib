@@ -78,7 +78,7 @@ public class ComponentEditor extends Window {
 				Widget drawer = new Widget();
 				drawer.transform.x = 2;
 				drawer.transform.y = y;
-				regEventHandler(FrameEvent.class, (w, e) -> {
+				drawer.listen(FrameEvent.class, (w, e) -> {
 					Font.font.draw(f.getName(), 0, 0, 9, 0xffffff);
 				});
 				addWidget(drawer);

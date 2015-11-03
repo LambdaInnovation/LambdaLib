@@ -98,13 +98,13 @@ public class Component {
 	 */
 	public void onAdded() {
 		for(Node n : addedHandlers) {
-			widget.regEventHandler(n.type, n.handler, n.prio);
+			widget.listen(n.type, n.handler, n.prio);
 		}
 	}
 	
 	public void onRemoved() {
 		for(Node n : addedHandlers) {
-			widget.removeEventHandler(n.type, n.handler);
+			widget.unlisten(n.type, n.handler);
 		}
 	}
 	

@@ -38,7 +38,7 @@ public class VerticalDragBar extends Component {
 			} else if(w.transform.y < y0) {
 				w.transform.y = y0;
 			}
-			w.postEvent(new DraggedEvent());
+			w.post(new DraggedEvent());
 			w.dirty = true;
 		});
 	}

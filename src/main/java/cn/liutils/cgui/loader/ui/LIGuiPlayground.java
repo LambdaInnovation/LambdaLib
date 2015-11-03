@@ -36,7 +36,7 @@ public class LIGuiPlayground extends LIGui {
 	public LIGuiPlayground(GuiEdit _guiEdit) {
 		guiEdit = _guiEdit;
 		
-		eventBus.reg(AddWidgetEvent.class, (w, e) -> {
+		eventBus.listen(AddWidgetEvent.class, (w, e) -> {
 			guiEdit.getGui().postEvent(new AddTargetEvent(w));
 		});
 	}
@@ -59,7 +59,7 @@ public class LIGuiPlayground extends LIGui {
 	private void injectEvents(Widget w) {
 		//Add selection indicator
 		final Color c = new Color(112, 223, 122, 200);
-		w.regEventHandler(FrameEvent.class, (ww, e) -> {
+		w.listen(FrameEvent.class, (ww, e) -> {
 			if(getFocus() == w) {
 				c.bind();
 				HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, 1);
@@ -67,12 +67,12 @@ public class LIGuiPlayground extends LIGui {
 				//HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, 1);
 			}
 		});
-		w.regEventHandler(DragEvent.class, (ww, e) -> {
+		w.listen(DragEvent.class, (ww, e) -> {
 			if(w.isFocused()) {
 				w.getGui().updateDragWidget();
 			}
 		});
-		w.regEventHandler(GainFocusEvent.class, (ww, e) -> {
+		w.listen(GainFocusEvent.class, (ww, e) -> {
 			new SelectedWidgetBar(guiEdit, w);
 		});
 		

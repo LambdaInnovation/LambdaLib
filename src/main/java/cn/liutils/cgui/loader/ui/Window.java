@@ -54,20 +54,20 @@ public class Window extends Widget {
 			 Widget close = new Widget();
 			 close.transform.setSize(10, 10).setPos(transform.width - 12, 1);
 			 close.addComponent(new DrawTexture().setTex(GuiEdit.tex("toolbar/close")));
-			 close.regEventHandler(MouseDownEvent.class, (w, e) -> {
+			 close.listen(MouseDownEvent.class, (w, e) -> {
 				 Window.this.dispose();
 			 });
 			 addWidget(close);
 		}
 		
 		if(!this.isWidgetParent()) {
-			this.regEventHandler(DragEvent.class, (w, e) -> {
+			this.listen(DragEvent.class, (w, e) -> {
 				w.getGui().updateDragWidget();
 				guiEdit.updateDefaultPosition(name, w.transform.x, w.transform.y);
 			});
 		}
 		
-		regEventHandler(FrameEvent.class, (w, e) -> {
+		listen(FrameEvent.class, (w, e) -> {
 			Transform t = w.transform;
 			final double bar_ht = 10;
 			

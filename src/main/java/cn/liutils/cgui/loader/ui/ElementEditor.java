@@ -71,7 +71,7 @@ public abstract class ElementEditor extends Widget {
 	public void onAdded() {
 		updateValue();
 		
-		regEventHandler(FrameEvent.class, new IGuiEventHandler<FrameEvent>() {
+		listen(FrameEvent.class, new IGuiEventHandler<FrameEvent>() {
 			int slowdown = 0;
 			
 			@Override
@@ -131,12 +131,12 @@ public abstract class ElementEditor extends Widget {
 		public void onAdded() {
 			super.onAdded();
 			
-			regEventHandler(MouseDownEvent.class, (w, e) -> {
+			listen(MouseDownEvent.class, (w, e) -> {
 				state = !state;
 				TypeHelper.set(targetField, getEditInstance(), state);
 			});
 			
-			regEventHandler(FrameEvent.class, (w, e) -> {
+			listen(FrameEvent.class, (w, e) -> {
 				if(firstLoad) {
 					firstLoad = false;
 					transform.setSize(10, 10);
@@ -188,7 +188,7 @@ public abstract class ElementEditor extends Widget {
 			double x = 5;
 			for(final String s : arr) {
 				Widget drawer = new Widget();
-				drawer.regEventHandler(FrameEvent.class, (w, e) -> {
+				drawer.listen(FrameEvent.class, (w, e) -> {
 					Font.font.draw(s, 0, 2, 8, 0xffffff);
 				});
 				drawer.transform.x = x;
@@ -276,7 +276,7 @@ public abstract class ElementEditor extends Widget {
 			transform.height = 10;
 			
 			addComponent(new TextBox().setSize(9));
-			regEventHandler(FrameEvent.class, (w, e) -> {
+			listen(FrameEvent.class, (w, e) -> {
 				if(lastErrorTime != -1 && GameTimer.getAbsTime() - lastErrorTime < 1000) {
 					GL11.glColor4d(1, 0, 0, GameTimer.getAbsTime() % 500 < 250 ? 0.6 : 0.3);
 				} else if(inputDirty) {
@@ -288,10 +288,10 @@ public abstract class ElementEditor extends Widget {
 					w.transform.width, w.transform.height);
 				GL11.glColor4d(1, 1, 1, 1);
 			});
-			regEventHandler(ChangeContentEvent.class, (w, e) -> {
+			listen(ChangeContentEvent.class, (w, e) -> {
 				inputDirty = true;
 			});
-			regEventHandler(ConfirmInputEvent.class, (w, e) -> {
+			listen(ConfirmInputEvent.class, (w, e) -> {
 				if(inputDirty) {
 					//Try to edit the edit target. if not successful, show error.
 					if(!setValue()) {
@@ -345,7 +345,7 @@ public abstract class ElementEditor extends Widget {
 			tint.idleColor = new Color(1, 1, 1, 0.3);
 			addComponent(tint);
 			
-			regEventHandler(MouseDownEvent.class, (w, event) -> {
+			listen(MouseDownEvent.class, (w, event) -> {
 				if(list != null)
 					list.dispose();
 				list = new Widget();
@@ -355,7 +355,7 @@ public abstract class ElementEditor extends Widget {
 				}
 				w.addWidget(list);
 				list.gainFocus();
-				list.regEventHandler(LostFocusEvent.class, (widget, e) -> {
+				list.listen(LostFocusEvent.class, (widget, e) -> {
 					list.dispose();
 					list = null;
 				});
@@ -387,7 +387,7 @@ public abstract class ElementEditor extends Widget {
 				tint.idleColor = new Color(1, 1, 1, 0.3);
 				addComponent(tint);
 				
-				regEventHandler(MouseDownEvent.class, (w, e) -> {
+				listen(MouseDownEvent.class, (w, e) -> {
 					TypeHelper.edit(targetField, getEditInstance(), name);
 					editor.widget.dirty = true;
 				});

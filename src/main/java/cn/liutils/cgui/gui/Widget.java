@@ -174,19 +174,19 @@ public class Widget extends WidgetContainer {
 	
 	//Event dispatch
 	
-	public <T extends GuiEvent> void regEventHandler(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
-		regEventHandler(clazz, handler, 0);
+	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
+		listen(clazz, handler, 0);
 	}
 	
-	public <T extends GuiEvent> void regEventHandler(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority) {
-		eventBus.reg(clazz, handler);
+	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority) {
+		eventBus.listen(clazz, handler);
 	}
 	
-	public <T extends GuiEvent> void removeEventHandler(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
-		eventBus.remove(clazz, handler);
+	public <T extends GuiEvent> void unlisten(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
+		eventBus.unlisten(clazz, handler);
 	}
 	
-	public void postEvent(GuiEvent event) {
+	public void post(GuiEvent event) {
 		eventBus.postEvent(this, event);
 	}
 	

@@ -131,7 +131,7 @@ public class LIGui extends WidgetContainer {
         	}
         	if(draggingNode != null) {
         	    lastDragTime = time;
-        		draggingNode.postEvent(new DragEvent());
+        		draggingNode.post(new DragEvent());
         		return true;
         	}
     	}
@@ -153,7 +153,7 @@ public class LIGui extends WidgetContainer {
 			Widget node = getTopWidget(mx, my);
 			if(node != null) {
 				gainFocus(node);
-				node.postEvent(new MouseDownEvent((mx - node.x) / node.scale, (my - node.y) / node.scale));
+				node.post(new MouseDownEvent((mx - node.x) / node.scale, (my - node.y) / node.scale));
 				return true;
 			} else {
 				removeFocus();
@@ -165,7 +165,7 @@ public class LIGui extends WidgetContainer {
 	
 	public void removeFocus() {
 		if(focus != null) {
-			focus.postEvent(new LostFocusEvent());
+			focus.post(new LostFocusEvent());
 			focus = null;
 		}
 	}
@@ -181,12 +181,12 @@ public class LIGui extends WidgetContainer {
 			removeFocus();
 		}
 		focus = node;
-		focus.postEvent(new GainFocusEvent());
+		focus.post(new GainFocusEvent());
 	}
 	
 	public void keyTyped(char ch, int key) {
 		if(focus != null) {
-			focus.postEvent(new KeyEvent(ch, key));
+			focus.post(new KeyEvent(ch, key));
 		}
 	}
     
@@ -352,7 +352,7 @@ public class LIGui extends WidgetContainer {
 	private void updateTraverse(Widget cur, WidgetContainer set) {
 		if(cur != null) {
 			if(cur.dirty) {
-				cur.postEvent(new RefreshEvent());
+				cur.post(new RefreshEvent());
 				this.updateWidget(cur);
 			}
 		}
@@ -385,7 +385,7 @@ public class LIGui extends WidgetContainer {
 				GL11.glTranslated(-cur.transform.pivotX, -cur.transform.pivotY, 0);
 				
 				GL11.glColor4d(1, 1, 1, 1); //Force restore color for any widget
-				cur.postEvent(new FrameEvent((mx - cur.x) / cur.scale, (my - cur.y) / cur.scale, cur == top));
+				cur.post(new FrameEvent((mx - cur.x) / cur.scale, (my - cur.y) / cur.scale, cur == top));
 				GL11.glPopMatrix();
 			}
 		} catch(Exception e) {
@@ -468,7 +468,7 @@ public class LIGui extends WidgetContainer {
 	}
 	
 	private void hierPostEvent(Widget w, GuiEvent event) {
-		w.postEvent(event);
+		w.post(event);
 		for(Widget ww : w.widgetList) {
 			hierPostEvent(ww, event);
 		}

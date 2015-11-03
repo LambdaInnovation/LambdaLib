@@ -77,7 +77,7 @@ public class SelectedWidgetBar extends Window {
 	}
 	
 	private void initEvents() {
-		regEventHandler(FrameEvent.class, (w, e) -> {
+		listen(FrameEvent.class, (w, e) -> {
 			if(target.disposed || target != guiEdit.toEdit.getFocus()) {
 				w.dispose();
 			}
@@ -108,14 +108,14 @@ public class SelectedWidgetBar extends Window {
 				add.transform.setSize(100, 10);
 				add.addComponent(new Tint());
 				ResourceLocation tex = GuiEdit.tex("toolbar/add");
-				add.regEventHandler(FrameEvent.class, (w, e) -> {
+				add.listen(FrameEvent.class, (w, e) -> {
 					RenderUtils.loadTexture(tex);
 					GL11.glColor4d(1, 1, 1, 1);
 					HudUtils.rect(45, 0, 10, 10);
 				});
 				
 				final int y = 11 * (i + 2);
-				add.regEventHandler(MouseDownEvent.class, (w, e) -> {
+				add.listen(MouseDownEvent.class, (w, e) -> {
 
 					if(listSpawned)
 						return;
@@ -123,7 +123,7 @@ public class SelectedWidgetBar extends Window {
 					
 					//Setup background list
 					Widget list = new Widget();
-					list.regEventHandler(LostFocusEvent.class, (ww, event) -> {
+					list.listen(LostFocusEvent.class, (ww, event) -> {
 						ww.dispose();
 					});
 					list.addComponent(new DrawTexture().setTex(null).setColor4d(.8, .8, 1, 0.3));
@@ -138,11 +138,11 @@ public class SelectedWidgetBar extends Window {
 						one.transform.y = (j++) * 10;
 						one.transform.setSize(80, 10);
 						one.addComponent(new Tint());
-						one.regEventHandler(FrameEvent.class, (ww, event) -> {
+						one.listen(FrameEvent.class, (ww, event) -> {
 							String text = c.name;
 							Font.font.draw(text, 40, 1, 8, 0xffffff, Align.CENTER);
 						});
-						one.regEventHandler(MouseDownEvent.class, (ww, ee) -> {
+						one.listen(MouseDownEvent.class, (ww, ee) -> {
 							target.addComponent(c.copy());
 							//Rebuild the component selection GUI
 							ComponentSelection.this.dispose();
@@ -181,11 +181,11 @@ public class SelectedWidgetBar extends Window {
 				
 				addComponent(new Tint());
 				
-				regEventHandler(MouseDownEvent.class, (w, e) -> {
+				listen(MouseDownEvent.class, (w, e) -> {
 					setPropertyEditor(new ComponentEditor(guiEdit, target, c));
 				});
 				
-				regEventHandler(FrameEvent.class, (w, e) -> {
+				listen(FrameEvent.class, (w, e) -> {
 					Font.font.draw(c.name, 50, 2, 7, 0xffffff, Align.CENTER);
 				});
 				
@@ -200,7 +200,7 @@ public class SelectedWidgetBar extends Window {
 				w.transform.setSize(10, 10).setPos(85, 0);
 				w.addComponent(new DrawTexture().setTex(TEX_REMOVE));
 				w.addComponent(new Tint());
-				w.regEventHandler(MouseDownEvent.class, (ww, e) -> {
+				w.listen(MouseDownEvent.class, (ww, e) -> {
 					target.removeComponent(c);
 					ComponentSelection.this.dispose();
 					SelectedWidgetBar.this.addWidget(new ComponentSelection());

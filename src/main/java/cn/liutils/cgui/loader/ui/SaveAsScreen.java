@@ -70,7 +70,7 @@ public class SaveAsScreen extends Window {
 		tint.idleColor = new Color(1, 1, 1, 0.3);
 		button.addComponent(tint);
 		
-		button.regEventHandler(MouseDownEvent.class, (w, e) -> {
+		button.listen(MouseDownEvent.class, (w, e) -> {
 			File file = new File(textBox.content);
 			if(file.exists()) {
 				lastWarningTime = GameTimer.getAbsTime();
@@ -84,7 +84,7 @@ public class SaveAsScreen extends Window {
 			}
 		});
 		
-		button.regEventHandler(FrameEvent.class, (w, e) -> {
+		button.listen(FrameEvent.class, (w, e) -> {
 			Font.font.draw(CGUILang.butSave(), 9, 1, 6, 0xffffff, Align.CENTER);
 			if(GameTimer.getAbsTime() - lastWarningTime < 1000L) {
 				GL11.glColor4d(1, .3, .3, .3);

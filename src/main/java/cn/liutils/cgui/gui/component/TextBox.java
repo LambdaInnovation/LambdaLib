@@ -184,7 +184,7 @@ public class TextBox extends Component {
 			if(event.keyCode == Keyboard.KEY_V && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
 				String str1 = content.substring(0, caretPos), str2 = getClipboardContent(), str3 = content.substring(caretPos);
 				content = str1 + str2 + str3;
-				w.postEvent(new ChangeContentEvent());
+				w.post(new ChangeContentEvent());
 				return;
 			}
 			
@@ -199,18 +199,18 @@ public class TextBox extends Component {
 						(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
 					--caretPos;
 				}
-				w.postEvent(new ChangeContentEvent());
+				w.post(new ChangeContentEvent());
 			} else if(par2 == Keyboard.KEY_RETURN || par2 == Keyboard.KEY_NUMPADENTER) {
-				w.postEvent(new ConfirmInputEvent());
+				w.post(new ConfirmInputEvent());
 			} else if(par2 == Keyboard.KEY_DELETE) {
 				content = "";
-				w.postEvent(new ChangeContentEvent());
+				w.post(new ChangeContentEvent());
 			}
 			if (ChatAllowedCharacters.isAllowedCharacter(event.inputChar)) {
 				content = content.substring(0, caretPos) + event.inputChar +
 						(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
 				caretPos += 1;
-				w.postEvent(new ChangeContentEvent());
+				w.post(new ChangeContentEvent());
 			}
 			
 			checkCaret();
