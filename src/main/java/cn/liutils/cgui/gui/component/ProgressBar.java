@@ -48,7 +48,7 @@ public class ProgressBar extends Component {
 
 	public ProgressBar() {
 		super("ProgressBar");
-		addEventHandler(FrameEvent.class, (wi, e) -> {
+		listen(FrameEvent.class, (wi, e) -> {
 			if(illustrating) {
 				progress = 0.5 * (1 + Math.sin(GameTimer.getAbsTime() / 1000.0));
 			}

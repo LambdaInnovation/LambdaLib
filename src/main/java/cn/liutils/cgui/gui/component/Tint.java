@@ -37,7 +37,7 @@ public class Tint extends Component {
 	public Tint() {
 		super("Tint");
 		
-		addEventHandler(FrameEvent.class, (w, event) -> {
+		listen(FrameEvent.class, (w, event) -> {
 			if(affectTexture) {
 				DrawTexture dt = DrawTexture.get(w);
 				if(dt != null) {

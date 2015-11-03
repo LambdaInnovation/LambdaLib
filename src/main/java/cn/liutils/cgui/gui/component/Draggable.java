@@ -22,7 +22,7 @@ public class Draggable extends Component {
 	public Draggable() {
 		super("Draggable");
 		
-		addEventHandler(DragEvent.class, (w, e) -> {
+		listen(DragEvent.class, (w, e) -> {
 			w.getGui().updateDragWidget();
 			w.dirty = true;
 		});

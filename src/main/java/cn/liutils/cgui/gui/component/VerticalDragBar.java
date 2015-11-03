@@ -27,7 +27,7 @@ public class VerticalDragBar extends Component {
 	public VerticalDragBar() {
 		super("VerticalDragBar");
 		
-		addEventHandler(DragEvent.class, (w, event) -> {
+		listen(DragEvent.class, (w, event) -> {
 			double originalX = w.transform.x;
 			w.getGui().updateDragWidget();
 			w.transform.x = originalX;

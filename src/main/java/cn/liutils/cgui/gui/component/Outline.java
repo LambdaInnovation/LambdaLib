@@ -29,7 +29,7 @@ public class Outline extends Component {
 	public Outline() {
 		super("Outline");
 		
-		addEventHandler(FrameEvent.class, (w, e) -> {
+		listen(FrameEvent.class, (w, e) -> {
 			color.bind();
 			HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, lineWidth);
 			GL11.glColor4f(1, 1, 1, 1);

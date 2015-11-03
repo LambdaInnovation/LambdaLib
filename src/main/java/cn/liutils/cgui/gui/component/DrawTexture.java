@@ -46,7 +46,7 @@ public class DrawTexture extends Component {
 
 	public DrawTexture() {
 		super("DrawTexture");
-		addEventHandler(FrameEvent.class, (w, e) -> {
+		listen(FrameEvent.class, (w, e) -> {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDisable(GL_ALPHA_TEST);
 			glDepthMask(writeDepth);

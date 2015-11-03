@@ -41,7 +41,7 @@ public class ElementList extends Component {
 	public ElementList() {
 		super("ElementList");
 		
-		addEventHandler(FrameEvent.class, (w, e) -> {
+		listen(FrameEvent.class, (w, e) -> {
 			if(!loaded) {
 				loaded = true;
 				for(Widget ww : subWidgets) {

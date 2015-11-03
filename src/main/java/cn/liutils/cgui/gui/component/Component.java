@@ -78,11 +78,11 @@ public class Component {
 		return ret;
 	}
 	
-	protected <T extends GuiEvent> void addEventHandler(Class<? extends T> type, IGuiEventHandler<T> handler) {
-		addEventHandler(type, handler, 0);
+	protected <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler) {
+		listen(type, handler, 0);
 	}
 	
-	protected <T extends GuiEvent> void addEventHandler(Class<? extends T> type, IGuiEventHandler<T> handler, int prio) {
+	protected <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler, int prio) {
 		if(widget != null)
 			throw new RuntimeException("Can only add event handlers before componenet is added into widget");
 		Node n = new Node();

@@ -165,7 +165,7 @@ public class TextBox extends Component {
 	
 	public TextBox() {
 		super("TextBox");
-		addEventHandler(KeyEvent.class, (w, event) -> {
+		listen(KeyEvent.class, (w, event) -> {
 			if(!allowEdit)
 				return;
 			checkCaret();
@@ -216,7 +216,7 @@ public class TextBox extends Component {
 			checkCaret();
 		});
 		
-		addEventHandler(MouseDownEvent.class, (w, e) -> {
+		listen(MouseDownEvent.class, (w, e) -> {
 			double len = 3;
 			double[] offset = getOffset(w);
 			double eventX = -offset[0] + e.x;
@@ -233,7 +233,7 @@ public class TextBox extends Component {
 			caretPos = content.length();
 		});
 		
-		addEventHandler(FrameEvent.class, (w, event) -> {
+		listen(FrameEvent.class, (w, event) -> {
 			double[] offset = getOffset(w);
 			
 			checkCaret();
