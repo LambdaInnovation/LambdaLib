@@ -1,6 +1,6 @@
 package cn.lambdalib.vis.editor.common;
 
-import cn.liutils.util.helper.Color;
+import cn.lambdalib.util.helper.Color;
 import net.minecraft.util.ResourceLocation;
 
 /**

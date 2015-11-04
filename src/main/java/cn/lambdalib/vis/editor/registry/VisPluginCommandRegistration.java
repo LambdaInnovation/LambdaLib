@@ -16,10 +16,10 @@ import cn.lambdalib.annoreg.base.RegistrationInstance;
 import cn.lambdalib.annoreg.core.AnnotationData;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
+import cn.lambdalib.util.client.auxgui.AuxGui;
+import cn.lambdalib.util.client.auxgui.AuxGuiRegistry.RegAuxGui;
 import cn.lambdalib.vis.editor.CommandVis;
 import cn.lambdalib.vis.editor.IVisPluginCommand;
-import cn.liutils.api.gui.AuxGui;
-import cn.liutils.registry.AuxGuiRegistry.RegAuxGui;
 
 /**
  * @author WeAthFolD

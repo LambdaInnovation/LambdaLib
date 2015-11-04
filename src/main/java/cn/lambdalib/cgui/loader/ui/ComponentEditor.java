@@ -22,8 +22,8 @@ import cn.lambdalib.cgui.gui.annotations.EditIgnore;
 import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.core.LambdaLib;
-import cn.liutils.util.helper.Color;
-import cn.liutils.util.helper.Font;
+import cn.lambdalib.util.helper.Color;
+import cn.lambdalib.util.helper.Font;
 import net.minecraft.util.ResourceLocation;
 
 /**

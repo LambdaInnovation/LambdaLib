@@ -21,9 +21,9 @@ import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GainFocusEvent;
 import cn.lambdalib.cgui.gui.event.global.AddWidgetEvent;
 import cn.lambdalib.cgui.loader.ui.event.AddTargetEvent;
-import cn.liutils.util.client.HudUtils;
-import cn.liutils.util.helper.Color;
-import cn.liutils.util.helper.Font;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.helper.Color;
+import cn.lambdalib.util.helper.Font;
 
 /**
  * Handler of edit content also provides environment information for GuiEdit and other toolbars.

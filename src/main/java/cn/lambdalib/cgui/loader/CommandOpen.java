@@ -27,7 +27,7 @@ import cn.lambdalib.cgui.client.CGUILang;
 import cn.lambdalib.cgui.gui.LIGui;
 import cn.lambdalib.cgui.loader.ui.GuiEdit;
 import cn.lambdalib.cgui.loader.xml.CGUIDocLoader;
-import cn.liutils.template.command.LICommandBase;
+import cn.lambdalib.template.command.LICommandBase;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

@@ -15,8 +15,8 @@ package cn.lambdalib.cgui.gui.component;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.cgui.gui.event.FrameEvent;
-import cn.liutils.util.client.HudUtils;
-import cn.liutils.util.helper.Color;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.helper.Color;
 
 /**
  * @author WeAthFolD

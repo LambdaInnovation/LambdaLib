@@ -15,7 +15,7 @@ package cn.lambdalib.vis.editor.common.widget;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.Tint;
-import cn.liutils.util.helper.Color;
+import cn.lambdalib.util.helper.Color;
 import net.minecraft.util.ResourceLocation;
 
 /**

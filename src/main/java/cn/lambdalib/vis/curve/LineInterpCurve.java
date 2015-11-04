@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import cn.liutils.util.generic.MathUtils;
+import cn.lambdalib.util.generic.MathUtils;
 
 /**
  * @author WeAthFolD

@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.cgui.gui.LIGuiScreen;
+import cn.lambdalib.util.generic.VecUtils;
 import cn.lambdalib.vis.curve.CubicCurve;
 import cn.lambdalib.vis.editor.IVisPluginCommand;
 import cn.lambdalib.vis.editor.animation.CurveView;
@@ -14,7 +15,6 @@ import cn.lambdalib.vis.editor.property.IntegerProperty;
 import cn.lambdalib.vis.editor.property.Vec3Property;
 import cn.lambdalib.vis.editor.registry.RegVisPluginCommand;
 import cn.lambdalib.vis.model.CompTransform;
-import cn.liutils.util.generic.VecUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;

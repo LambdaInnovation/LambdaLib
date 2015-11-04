@@ -18,7 +18,7 @@ import java.util.Map;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegCommand;
-import cn.liutils.template.command.LICommandBase;
+import cn.lambdalib.template.command.LICommandBase;
 import net.minecraft.command.ICommandSender;
 
 /**

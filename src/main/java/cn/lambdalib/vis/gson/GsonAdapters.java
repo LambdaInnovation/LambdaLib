@@ -7,9 +7,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
+import cn.lambdalib.util.generic.VecUtils;
 import cn.lambdalib.vis.model.CompTransform;
 import cn.lambdalib.vis.model.renderer.ItemModelRenderer;
-import cn.liutils.util.generic.VecUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 

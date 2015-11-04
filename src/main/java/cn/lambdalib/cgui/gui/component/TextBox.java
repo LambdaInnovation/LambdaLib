@@ -33,10 +33,10 @@ import cn.lambdalib.cgui.gui.event.ConfirmInputEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.KeyEvent;
 import cn.lambdalib.cgui.gui.event.MouseDownEvent;
-import cn.liutils.util.helper.Color;
-import cn.liutils.util.helper.Font;
-import cn.liutils.util.helper.Font.Align;
-import cn.liutils.util.helper.GameTimer;
+import cn.lambdalib.util.helper.Color;
+import cn.lambdalib.util.helper.Font;
+import cn.lambdalib.util.helper.GameTimer;
+import cn.lambdalib.util.helper.Font.Align;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.StatCollector;
 

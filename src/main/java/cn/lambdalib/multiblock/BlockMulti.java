@@ -32,9 +32,9 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import cn.lambdalib.core.LambdaLib;
-import cn.liutils.template.client.render.block.RenderEmptyBlock;
-import cn.liutils.util.generic.VecUtils;
-import cn.liutils.util.mc.WorldUtils;
+import cn.lambdalib.template.client.render.block.RenderEmptyBlock;
+import cn.lambdalib.util.generic.VecUtils;
+import cn.lambdalib.util.mc.WorldUtils;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -101,7 +101,7 @@ public abstract class BlockMulti extends BlockContainer {
 				vecs[i * 2 + 1] = VecUtils.vec(rot.dx + 1, rot.dy + 1, rot.dz + 1);
 			}
 			
-			renderBB[dir.ordinal()] = WorldUtils.ofPoints(vecs);
+			renderBB[dir.ordinal()] = WorldUtils.minimumBounds(vecs);
 		}
 		
 		AxisAlignedBB box = renderBB[dir.ordinal()];

@@ -14,10 +14,10 @@ package cn.lambdalib.vis.editor.property;
 
 import java.lang.reflect.Field;
 
+import cn.lambdalib.util.generic.RegistryUtils;
 import cn.lambdalib.vis.editor.common.VEVars;
 import cn.lambdalib.vis.editor.common.widget.WindowHierarchy.Folder;
 import cn.lambdalib.vis.model.CompTransform;
-import cn.liutils.util.generic.RegistryUtils;
 import net.minecraft.util.ResourceLocation;
 
 /**

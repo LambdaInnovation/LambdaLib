@@ -32,9 +32,9 @@ import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GainFocusEvent;
 import cn.lambdalib.cgui.gui.event.MouseDownEvent;
 import cn.lambdalib.cgui.loader.ui.event.AddTargetEvent;
-import cn.liutils.util.client.HudUtils;
-import cn.liutils.util.helper.Font;
-import cn.liutils.util.helper.Font.Align;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.helper.Font;
+import cn.lambdalib.util.helper.Font.Align;
 import net.minecraft.util.ResourceLocation;
 
 

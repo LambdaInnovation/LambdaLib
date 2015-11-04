@@ -1,7 +1,7 @@
 package cn.lambdalib.ripple;
 
-import cn.liutils.util.generic.MathUtils;
-import cn.liutils.util.generic.RandUtils;
+import cn.lambdalib.util.generic.MathUtils;
+import cn.lambdalib.util.generic.RandUtils;
 
 
 /**

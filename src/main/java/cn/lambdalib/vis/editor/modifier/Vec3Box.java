@@ -14,7 +14,7 @@ package cn.lambdalib.vis.editor.modifier;
 
 import java.lang.reflect.Field;
 
-import cn.liutils.util.generic.RegistryUtils;
+import cn.lambdalib.util.generic.RegistryUtils;
 import net.minecraft.util.Vec3;
 
 /**

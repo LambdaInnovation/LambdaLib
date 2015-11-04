@@ -10,7 +10,7 @@ import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.ripple.RippleException.RippleRuntimeException;
 import cn.lambdalib.ripple.impl.compiler.Parser;
 import cn.lambdalib.ripple.impl.compiler.Parser.ScriptObject;
-import cn.liutils.util.generic.RegistryUtils;
+import cn.lambdalib.util.generic.RegistryUtils;
 
 /**
  * The global object of a ripple program.

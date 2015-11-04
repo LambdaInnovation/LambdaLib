@@ -17,9 +17,9 @@ import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.Tint;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.util.helper.Font;
+import cn.lambdalib.util.helper.Font.Align;
 import cn.lambdalib.vis.editor.common.VEVars;
-import cn.liutils.util.helper.Font;
-import cn.liutils.util.helper.Font.Align;
 import net.minecraft.util.ResourceLocation;
 
 /**

@@ -17,6 +17,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotate this on mod's main class to enable the AnnoReg and provide necessary information.
+ * @author acaly
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RegistrationMod {

@@ -30,8 +30,8 @@ import cn.lambdalib.cgui.gui.event.RefreshEvent;
 import cn.lambdalib.cgui.gui.event.global.AddWidgetEvent;
 import cn.lambdalib.cgui.gui.event.global.GlobalMouseEvent;
 import cn.lambdalib.core.LambdaLib;
-import cn.liutils.util.client.HudUtils;
-import cn.liutils.util.helper.GameTimer;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.helper.GameTimer;
 
 /**
  * @author WeathFolD

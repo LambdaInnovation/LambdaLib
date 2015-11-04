@@ -8,8 +8,8 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import cn.liutils.util.client.RenderUtils;
-import cn.liutils.util.generic.VecUtils;
+import cn.lambdalib.util.client.RenderUtils;
+import cn.lambdalib.util.generic.VecUtils;
 import net.minecraft.util.Vec3;
 
 public class CompTransform {

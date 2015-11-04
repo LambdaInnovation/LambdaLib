@@ -26,12 +26,12 @@ import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
 import cn.lambdalib.cgui.gui.event.LostFocusEvent;
 import cn.lambdalib.cgui.gui.event.MouseDownEvent;
-import cn.liutils.util.client.HudUtils;
-import cn.liutils.util.client.RenderUtils;
-import cn.liutils.util.helper.Color;
-import cn.liutils.util.helper.Font;
-import cn.liutils.util.helper.GameTimer;
-import cn.liutils.util.helper.TypeHelper;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.client.RenderUtils;
+import cn.lambdalib.util.deprecated.TypeHelper;
+import cn.lambdalib.util.helper.Color;
+import cn.lambdalib.util.helper.Font;
+import cn.lambdalib.util.helper.GameTimer;
 import net.minecraft.util.ResourceLocation;
 
 /**

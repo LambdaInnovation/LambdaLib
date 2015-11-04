@@ -22,9 +22,9 @@ import static org.lwjgl.opengl.GL20.glUseProgram;
 
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
-import cn.liutils.util.client.HudUtils;
-import cn.liutils.util.client.RenderUtils;
-import cn.liutils.util.helper.Color;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.client.RenderUtils;
+import cn.lambdalib.util.helper.Color;
 import net.minecraft.util.ResourceLocation;
 
 /**

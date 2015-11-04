@@ -22,14 +22,14 @@ import cn.lambdalib.cgui.gui.component.Transform.HeightAlign;
 import cn.lambdalib.cgui.gui.component.Transform.WidthAlign;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.core.LambdaLib;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.helper.Font;
+import cn.lambdalib.util.helper.Font.Align;
 import cn.lambdalib.vis.curve.IFittedCurve;
 import cn.lambdalib.vis.curve.IFittedCurve.Point;
 import cn.lambdalib.vis.editor.common.VEVars;
 import cn.lambdalib.vis.editor.common.widget.Window;
 import cn.lambdalib.vis.editor.modifier.RealModifier;
-import cn.liutils.util.client.HudUtils;
-import cn.liutils.util.helper.Font;
-import cn.liutils.util.helper.Font.Align;
 
 /**
  * @author WeAthFolD

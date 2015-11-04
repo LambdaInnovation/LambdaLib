@@ -24,6 +24,7 @@ import com.google.gson.GsonBuilder;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.cgui.gui.LIGuiScreen;
+import cn.lambdalib.util.mc.PlayerUtils;
 import cn.lambdalib.vis.editor.IVisPluginCommand;
 import cn.lambdalib.vis.editor.common.EditorHelper;
 import cn.lambdalib.vis.editor.common.widget.Toolbar;
@@ -32,7 +33,6 @@ import cn.lambdalib.vis.editor.registry.RegVisPluginCommand;
 import cn.lambdalib.vis.gson.GsonAdapters;
 import cn.lambdalib.vis.model.CompTransform;
 import cn.lambdalib.vis.model.renderer.ItemModelRenderer;
-import cn.liutils.util.mc.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.item.Item;

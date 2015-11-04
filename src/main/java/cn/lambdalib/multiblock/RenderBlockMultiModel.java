@@ -17,8 +17,8 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
-import cn.liutils.api.render.model.ITileEntityModel;
-import cn.liutils.util.client.RenderUtils;
+import cn.lambdalib.util.client.RenderUtils;
+import cn.lambdalib.util.deprecated.ITileEntityModel;
 
 /**
  * Simple model renderer template.

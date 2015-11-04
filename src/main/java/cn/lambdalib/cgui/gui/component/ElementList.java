@@ -18,7 +18,7 @@ import java.util.List;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
-import cn.liutils.util.generic.MathUtils;
+import cn.lambdalib.util.generic.MathUtils;
 
 /**
  * Component that can hold widgets itself and display them as a list. Only Widgets fully in the area will be shown.

@@ -38,7 +38,7 @@ import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.component.Transform;
 import cn.lambdalib.cgui.loader.EventLoader;
 import cn.lambdalib.core.LambdaLib;
-import cn.liutils.util.generic.RegistryUtils;
+import cn.lambdalib.util.generic.RegistryUtils;
 
 /**
  * @author WeAthFolD

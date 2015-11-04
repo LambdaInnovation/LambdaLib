@@ -26,7 +26,7 @@ import cn.lambdalib.cgui.gui.annotations.EditIgnore;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
 import cn.lambdalib.core.LambdaLib;
-import cn.liutils.util.helper.TypeHelper;
+import cn.lambdalib.util.deprecated.TypeHelper;
 
 /**
  * Component is the basic content of Widget. It can define a set of EventHandlers and store information itself.

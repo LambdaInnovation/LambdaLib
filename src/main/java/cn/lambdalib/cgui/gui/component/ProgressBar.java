@@ -18,10 +18,10 @@ import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
-import cn.liutils.util.client.HudUtils;
-import cn.liutils.util.client.RenderUtils;
-import cn.liutils.util.helper.Color;
-import cn.liutils.util.helper.GameTimer;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.client.RenderUtils;
+import cn.lambdalib.util.helper.Color;
+import cn.lambdalib.util.helper.GameTimer;
 import net.minecraft.util.ResourceLocation;
 
 /**

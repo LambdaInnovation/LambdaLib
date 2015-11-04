@@ -25,11 +25,11 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
+import cn.lambdalib.util.client.RenderUtils;
 import cn.lambdalib.vis.editor.common.EditorHelper.VisEditable;
 import cn.lambdalib.vis.gson.GsonAdapters;
 import cn.lambdalib.vis.model.CompTransform;
 import cn.lambdalib.vis.model.PartedModel;
-import cn.liutils.util.client.RenderUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
