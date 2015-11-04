@@ -12,6 +12,8 @@ public abstract class ModifierBase extends EditBox {
 	public ModifierBase(Field _field, Object _instance) {
 		field = _field;
 		instance = _instance;
+		
+		field.setAccessible(true);
 	}
 	
 	protected String repr() throws Exception {

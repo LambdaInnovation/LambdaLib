@@ -8,6 +8,7 @@ import cn.lambdalib.util.generic.VecUtils;
 import cn.lambdalib.vis.curve.CubicCurve;
 import cn.lambdalib.vis.editor.IVisPluginCommand;
 import cn.lambdalib.vis.editor.animation.CurveView;
+import cn.lambdalib.vis.editor.animation.DopeSheet;
 import cn.lambdalib.vis.editor.common.widget.WindowHierarchy;
 import cn.lambdalib.vis.editor.common.widget.WindowHierarchy.Folder;
 import cn.lambdalib.vis.editor.property.CompTransformProperty;
@@ -86,6 +87,9 @@ public class HierWindowTest implements IVisPluginCommand {
 			
 			CurveView view = new CurveView(curve);
 			gui.addWidget(view);
+			
+			DopeSheet sheet = new DopeSheet();
+			gui.addWidget(sheet);
 		}
 		
 	}

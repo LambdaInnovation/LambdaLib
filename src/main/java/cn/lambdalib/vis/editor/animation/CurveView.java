@@ -78,12 +78,13 @@ public class CurveView extends Window {
 		GL11.glPushMatrix();
 		// Map to widget size
 		
-		GL11.glTranslated(0, 0, 20);
+		GL11.glTranslated(0, 0, -10);
 		
 		GL11.glScaled(w.transform.width, w.transform.height, 1);
 		
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
+		GL11.glDepthFunc(GL11.GL_ALWAYS);
 		// Background
 		GL11.glColor4d(.3, .3, .3, 1);
 		HudUtils.colorRect(0, 0, 1, 1);
@@ -133,7 +134,7 @@ public class CurveView extends Window {
 		// refline
 		//GL11.glDepthFunc(GL11.GL_ALWAYS);
 		GL11.glPushMatrix();
-		GL11.glTranslated(0, 0, 21);
+		GL11.glTranslated(0, 0, 0);
 		GL11.glColor4d(.1, .1, .1, .3);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glBegin(GL11.GL_LINES);

@@ -24,6 +24,8 @@ import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.MouseDownEvent;
 import cn.lambdalib.cgui.gui.event.RefreshEvent;
 import cn.lambdalib.cgui.loader.EventLoader;
+import cn.lambdalib.util.helper.Font;
+import cn.lambdalib.vis.editor.common.EditBox;
 import cn.lambdalib.vis.editor.common.VEVars;
 import net.minecraft.util.ResourceLocation;
 
@@ -42,7 +44,7 @@ public class Window extends Widget {
 	
 	public enum BodyState { MINIMIZED, FULL };
 	
-	public enum TopButtonType { MINIMIZE, MAXIMIZE }
+	public enum TopButtonType { MINIMIZE, MAXIMIZE };
 	
 	public static final double
 		WINDOW_TOP_HT = 12,
@@ -92,6 +94,26 @@ public class Window extends Widget {
 				
 				container.addComponent(tb);
 				topArea.addWidget(container);
+			}
+			
+			/* Rescaling */ {
+				EditBox box = new EditBox() {
+
+					@Override
+					protected String repr() throws Exception {
+						return String.valueOf(Window.this.transform.scale);
+					}
+
+					@Override
+					protected void setValue(String content) throws Exception {
+						Window.this.transform.scale = Double.valueOf(content);
+						Window.this.dirty = true;
+					}
+				
+				};
+				box.transform.x = Font.font.strLen(name, TOP_FT_SIZE) + 10;
+				box.transform.y = 1;
+				topArea.addWidget(box);
 			}
 			
 			addWidget("top", topArea);

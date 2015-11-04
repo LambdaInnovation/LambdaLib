@@ -55,7 +55,6 @@ public class BoxBase extends Widget {
 		
 		listen(LostFocusEvent.class, (w, event) -> 
 		{
-			System.out.println("NF " + event.newFocus);
 			if(event.newFocus == null || !event.newFocus.isChildOf(BoxBase.this))
 				dispose();
 		});
