@@ -16,16 +16,15 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.util.ResourceLocation;
 import cn.liutils.cgui.client.CGUILang;
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.annotations.EditIgnore;
 import cn.liutils.cgui.gui.component.Component;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.core.LIUtils;
 import cn.liutils.util.helper.Color;
 import cn.liutils.util.helper.Font;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * Editor for a single property type. Currently is generated each time it is queried.
@@ -79,12 +78,8 @@ public class ComponentEditor extends Window {
 				Widget drawer = new Widget();
 				drawer.transform.x = 2;
 				drawer.transform.y = y;
-				drawer.regEventHandler(new FrameEventHandler() {
-					final String name = f.getName();
-					@Override
-					public void handleEvent(Widget w, FrameEvent event) {
-						Font.font.draw(name, 0, 0, 9, 0xffffff);
-					}
+				drawer.listen(FrameEvent.class, (w, e) -> {
+					Font.font.draw(f.getName(), 0, 0, 9, 0xffffff);
 				});
 				addWidget(drawer);
 				

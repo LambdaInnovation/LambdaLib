@@ -16,7 +16,6 @@ import org.lwjgl.opengl.GL11;
 
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.helper.Color;
 
@@ -38,22 +37,19 @@ public class Tint extends Component {
 	public Tint() {
 		super("Tint");
 		
-		addEventHandler(new FrameEventHandler() {
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				if(affectTexture) {
-					DrawTexture dt = DrawTexture.get(w);
-					if(dt != null) {
-						dt.color = event.hovering ? hoverColor : idleColor;
-					}
-				} else {
-					if(event.hovering) hoverColor.bind();
-					else idleColor.bind();
-					
-					GL11.glDisable(GL11.GL_ALPHA_TEST);
-					HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
-					//GL11.glEnable(GL11.GL_ALPHA_TEST);
+		listen(FrameEvent.class, (w, event) -> {
+			if(affectTexture) {
+				DrawTexture dt = DrawTexture.get(w);
+				if(dt != null) {
+					dt.color = event.hovering ? hoverColor : idleColor;
 				}
+			} else {
+				if(event.hovering) hoverColor.bind();
+				else idleColor.bind();
+				
+				GL11.glDisable(GL11.GL_ALPHA_TEST);
+				HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
+				//GL11.glEnable(GL11.GL_ALPHA_TEST);
 			}
 		});
 	}

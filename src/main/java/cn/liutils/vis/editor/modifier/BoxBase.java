@@ -18,7 +18,6 @@ import cn.liutils.cgui.gui.component.DrawTexture;
 import cn.liutils.cgui.gui.component.TextBox;
 import cn.liutils.cgui.gui.component.Transform.HeightAlign;
 import cn.liutils.cgui.gui.event.LostFocusEvent;
-import cn.liutils.cgui.gui.event.LostFocusEvent.LostFocusHandler;
 import cn.liutils.vis.editor.common.VEVars;
 
 /**
@@ -54,13 +53,11 @@ public class BoxBase extends Widget {
 		LIGui gui = getGui();
 		gui.gainFocus(this);
 		
-		this.regEventHandler(new LostFocusHandler() {
-			@Override
-			public void handleEvent(Widget w, LostFocusEvent event) {
-				System.out.println("NF " + event.newFocus);
-				if(event.newFocus == null || !event.newFocus.isChildOf(BoxBase.this))
-					dispose();
-			}
+		listen(LostFocusEvent.class, (w, event) -> 
+		{
+			System.out.println("NF " + event.newFocus);
+			if(event.newFocus == null || !event.newFocus.isChildOf(BoxBase.this))
+				dispose();
 		});
 	}
 	

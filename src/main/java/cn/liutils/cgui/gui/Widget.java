@@ -15,15 +15,11 @@ package cn.liutils.cgui.gui;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import com.google.common.collect.ImmutableList;
 
 import cn.liutils.cgui.gui.component.Component;
 import cn.liutils.cgui.gui.component.Transform;
 import cn.liutils.cgui.gui.event.GuiEvent;
 import cn.liutils.cgui.gui.event.GuiEventBus;
-import cn.liutils.cgui.gui.event.GuiEventHandler;
 import cn.liutils.cgui.gui.event.IGuiEventHandler;
 
 
@@ -83,12 +79,18 @@ public class Widget extends WidgetContainer {
 	}
 	
 	protected void copyInfoTo(Widget n) {
+		n.removeComponent(n.transform);
+		n.transform = (Transform) transform.copy();
+		n.addComponent(n.transform);
+		
+		n.eventBus = eventBus.copy();
+		
 		n.components.clear();
 		for(Component c : components) {
-			n.addComponent(c.copy());
+			if(c.getClass() != Transform.class)
+				n.addComponent(c.copy());
 		}
-		n.transform = n.getComponent("Transform");
-		n.eventBus = eventBus.copy();
+		
 		//Also copy the widget's sub widgets recursively.
 		for(Widget asub : getDrawList()) {
 			if(asub.needCopy) n.addWidget(asub.getName(), asub.copy());
@@ -184,32 +186,25 @@ public class Widget extends WidgetContainer {
 	}
 	
 	//Event dispatch
-	public final Widget regEventHandler(GuiEventHandler h) {
-		eventBus.regEventHandler(h);
-		return this;
+	
+	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
+		listen(clazz, handler, 0);
 	}
 	
-	public final Widget regEventHandlerAtBegin(GuiEventHandler h) {
-		eventBus.regAtBeginning(h);
-		return this;
+	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority) {
+		eventBus.listen(clazz, handler, priority);
 	}
 	
-	public final <T extends GuiEvent> Widget regEventHandler(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
-		eventBus.reg(clazz, handler);
-		return this;
-	}
-
-	public final <T extends GuiEvent> Widget regEventHandlerAtBegin(Class<? extends GuiEvent> clazz, IGuiEventHandler<T> handler) {
-		eventBus.regAtBeginning(clazz, handler);
-		return this;
+	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority, boolean copyable) {
+		eventBus.listen(clazz, handler, priority, copyable);
 	}
 	
-	public final void postEvent(GuiEvent event) {
+	public <T extends GuiEvent> void unlisten(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
+		eventBus.unlisten(clazz, handler);
+	}
+	
+	public void post(GuiEvent event) {
 		eventBus.postEvent(this, event);
-		for(Component c : components) {
-			if(c.enabled)
-				c.postEvent(this, event);
-		}
 	}
 	
 	//Utils
@@ -312,6 +307,11 @@ public class Widget extends WidgetContainer {
 	
 	public void gainFocus() {
 		getGui().gainFocus(this);
+	}
+	
+	@Override
+	public String toString() {
+		return this.getName() + "@" + this.getClass();
 	}
 
 }

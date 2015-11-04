@@ -20,12 +20,11 @@ import cn.liutils.cgui.gui.component.TextBox;
 import cn.liutils.cgui.gui.component.Transform.HeightAlign;
 import cn.liutils.cgui.gui.component.Transform.WidthAlign;
 import cn.liutils.cgui.gui.event.DragEvent;
-import cn.liutils.cgui.gui.event.DragEvent.DragEventHandler;
-import cn.liutils.cgui.loader.EventLoader;
-import cn.liutils.vis.editor.common.VEVars;
 import cn.liutils.cgui.gui.event.GuiEvent;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
 import cn.liutils.cgui.gui.event.RefreshEvent;
+import cn.liutils.cgui.loader.EventLoader;
+import cn.liutils.vis.editor.common.VEVars;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -67,13 +66,11 @@ public class Window extends Widget {
 		/* Top Area */ {
 			topArea = new Widget();
 			topArea.transform.height = WINDOW_TOP_HT;
-			topArea.regEventHandler(new DragEventHandler() {
-				@Override
-				public void handleEvent(Widget w, DragEvent event) {
-					LIGui gui = w.getGui();
-					double ax = gui.mouseX - event.offsetX, ay = gui.mouseY - event.offsetY;
-					gui.moveWidgetToAbsPos(Window.this, ax, ay);
-				}
+			topArea.listen(DragEvent.class, (w, event) ->
+			{
+				LIGui gui = w.getGui();
+				double ax = gui.mouseX - event.offsetX, ay = gui.mouseY - event.offsetY;
+				gui.moveWidgetToAbsPos(Window.this, ax, ay);
 			});
 			
 			DrawTexture dt = new DrawTexture();
@@ -130,7 +127,7 @@ public class Window extends Widget {
 			break;
 		case MINIMIZE:
 			w = new Button(bodyState == BodyState.FULL ? TEX_BTN_MINIMIZE : TEX_BTN_RESTORE, sz, sz);
-			w.regEventHandler(MouseDownEvent.class, (widget, event) -> {
+			w.listen(MouseDownEvent.class, (widget, event) -> {
 				DrawTexture dt = DrawTexture.get(widget);
 				switch(bodyState) {
 				case FULL:
@@ -168,7 +165,7 @@ public class Window extends Widget {
 		if(newState != bodyState) {
 			BodyState lastState = bodyState;
 			bodyState = newState;
-			postEvent(new BodyStateChangeEvent(lastState));
+			post(new BodyStateChangeEvent(lastState));
 		}
 	}
 	

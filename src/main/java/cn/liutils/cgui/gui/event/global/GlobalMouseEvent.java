@@ -13,7 +13,6 @@
 package cn.liutils.cgui.gui.event.global;
 
 import cn.liutils.cgui.gui.event.GuiEvent;
-import cn.liutils.cgui.gui.event.GuiEventHandler;
 
 /**
  * @author WeAthFolD
@@ -27,14 +26,6 @@ public class GlobalMouseEvent implements GuiEvent {
 		x = _x;
 		y = _y;
 		key = _key;
-	}
-	
-	public static abstract class GlobalMouseHandler extends GuiEventHandler<GlobalMouseEvent> {
-
-		public GlobalMouseHandler() {
-			super(GlobalMouseEvent.class);
-		}
-		
 	}
 	
 }

@@ -17,9 +17,7 @@ import java.util.List;
 
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.cgui.gui.event.GuiEvent;
-import cn.liutils.cgui.gui.event.GuiEventHandler;
 import cn.liutils.util.generic.MathUtils;
 
 /**
@@ -43,16 +41,13 @@ public class ElementList extends Component {
 	public ElementList() {
 		super("ElementList");
 		
-		this.addEventHandler(new FrameEventHandler() {
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				if(!loaded) {
-					loaded = true;
-					for(Widget ww : subWidgets) {
-						w.addWidget(ww);
-					}
-					updateList();
+		listen(FrameEvent.class, (w, e) -> {
+			if(!loaded) {
+				loaded = true;
+				for(Widget ww : subWidgets) {
+					w.addWidget(ww);
 				}
+				updateList();
 			}
 		});
 	}
@@ -111,15 +106,6 @@ public class ElementList extends Component {
 	}
 	
 	public static class ProgressChangedEvent implements GuiEvent  {}
-	
-	public abstract static class ProgressChangeHandler 
-		extends GuiEventHandler<ProgressChangedEvent> {
-
-		public ProgressChangeHandler() {
-			super(ProgressChangedEvent.class);
-		}
-		
-	}
 	
 	public void addWidget(Widget w) {
 		if(loaded) return;

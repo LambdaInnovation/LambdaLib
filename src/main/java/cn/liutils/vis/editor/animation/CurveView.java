@@ -63,7 +63,7 @@ public class CurveView extends Window {
 		area.transform.alignWidth = WidthAlign.CENTER;
 		area.transform.setPos(6, 10).setSize(270, 110);
 		
-		area.regEventHandler(FrameEvent.class, this::onAreaDraw);
+		area.listen(FrameEvent.class, this::onAreaDraw);
 		
 		body.addWidget(area);
 	}
@@ -183,7 +183,7 @@ public class CurveView extends Window {
 			mod.transform.setPos(x, y);
 			mod.transform.alignHeight = HeightAlign.BOTTOM;
 			body.addWidget(mod);
-			mod.regEventHandler(FrameEvent.class, (w, e) -> {
+			mod.listen(FrameEvent.class, (w, e) -> {
 				Font.font.draw(desc, -3, 0, 10, 0xffffff, Align.RIGHT);
 			});
 		} catch(Exception e) {

@@ -19,7 +19,7 @@ import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.WidgetContainer;
 import cn.liutils.cgui.gui.annotations.GuiCallback;
 import cn.liutils.cgui.gui.event.GuiEvent;
-import cn.liutils.cgui.gui.event.GuiEventHandler;
+import cn.liutils.cgui.gui.event.IGuiEventHandler;
 import cn.liutils.core.LIUtils;
 
 /**
@@ -47,19 +47,20 @@ public class EventLoader {
 				if(target == null) {
 					LIUtils.log.error("Didn't find widget named " + path + ".");
 				} else {
-					target.regEventHandler(new MethodWrapper(m, callbackProvider, pars[1]));
+					MethodWrapper wrapper =new MethodWrapper(m, callbackProvider);
+					Class c = pars[1];
+					target.<GuiEvent>listen((Class<? extends GuiEvent>) c, new MethodWrapper(m, callbackProvider));
 				}
 			}
 		}
 	}
 	
-	private static class MethodWrapper extends GuiEventHandler {
+	private static class MethodWrapper implements IGuiEventHandler {
 		
 		final Method method;
 		final Object instance;
 
-		public MethodWrapper(Method m, Object i, Class ec) {
-			super(ec);
+		public MethodWrapper(Method m, Object i) {
 			method = m;
 			instance = i;
 		}

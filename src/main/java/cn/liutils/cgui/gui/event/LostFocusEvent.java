@@ -26,9 +26,4 @@ public class LostFocusEvent implements GuiEvent {
 		newFocus = _newFocus;
 	}
 	
-	public static abstract class LostFocusHandler extends GuiEventHandler<LostFocusEvent> {
-		public LostFocusHandler() {
-			super(LostFocusEvent.class);
-		}
-	}
 }

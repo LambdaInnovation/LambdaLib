@@ -18,12 +18,4 @@ package cn.liutils.cgui.gui.event;
  * @author WeAthFolD
  */
 public class ChangeContentEvent implements GuiEvent {
-	
-	public abstract static class ChangeContentHandler extends GuiEventHandler<ChangeContentEvent> {
-
-		public ChangeContentHandler() {
-			super(ChangeContentEvent.class);
-		}
-		
-	}
 }

@@ -14,8 +14,6 @@ package cn.liutils.cgui.loader.ui;
 
 import java.lang.reflect.Field;
 
-import net.minecraft.util.ResourceLocation;
-
 import org.lwjgl.opengl.GL11;
 
 import cn.liutils.cgui.gui.Widget;
@@ -23,21 +21,18 @@ import cn.liutils.cgui.gui.component.Component;
 import cn.liutils.cgui.gui.component.TextBox;
 import cn.liutils.cgui.gui.component.Tint;
 import cn.liutils.cgui.gui.event.ChangeContentEvent;
-import cn.liutils.cgui.gui.event.ChangeContentEvent.ChangeContentHandler;
 import cn.liutils.cgui.gui.event.ConfirmInputEvent;
-import cn.liutils.cgui.gui.event.ConfirmInputEvent.ConfirmInputHandler;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
+import cn.liutils.cgui.gui.event.IGuiEventHandler;
 import cn.liutils.cgui.gui.event.LostFocusEvent;
-import cn.liutils.cgui.gui.event.LostFocusEvent.LostFocusHandler;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
-import cn.liutils.cgui.gui.event.MouseDownEvent.MouseDownHandler;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.client.RenderUtils;
 import cn.liutils.util.helper.Color;
 import cn.liutils.util.helper.Font;
 import cn.liutils.util.helper.GameTimer;
 import cn.liutils.util.helper.TypeHelper;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * @author WeAthFolD
@@ -76,7 +71,7 @@ public abstract class ElementEditor extends Widget {
 	public void onAdded() {
 		updateValue();
 		
-		regEventHandler(new FrameEventHandler() {
+		listen(FrameEvent.class, new IGuiEventHandler<FrameEvent>() {
 			int slowdown = 0;
 			
 			@Override
@@ -122,6 +117,8 @@ public abstract class ElementEditor extends Widget {
 		
 		boolean state;
 		
+		boolean firstLoad = true;
+		
 		public CheckBox(Field f) {
 			super(f);
 			
@@ -134,33 +131,24 @@ public abstract class ElementEditor extends Widget {
 		public void onAdded() {
 			super.onAdded();
 			
-			regEventHandler(new MouseDownHandler() {
-				@Override
-				public void handleEvent(Widget w, MouseDownEvent event) {
-					state = !state;
-					
-					TypeHelper.set(targetField, getEditInstance(), state);
-				}
+			listen(MouseDownEvent.class, (w, e) -> {
+				state = !state;
+				TypeHelper.set(targetField, getEditInstance(), state);
 			});
 			
-			regEventHandler(new FrameEventHandler() {
-				boolean firstLoad = true;
+			listen(FrameEvent.class, (w, e) -> {
+				if(firstLoad) {
+					firstLoad = false;
+					transform.setSize(10, 10);
+					w.dirty = true;
+				}
+				GL11.glColor4d(1, 1, 1, .8);
+				RenderUtils.loadTexture(OUTLINE);
+				HudUtils.rect(0, 0, 10, 10);
 				
-				@Override
-				public void handleEvent(Widget w, FrameEvent event) {
-					if(firstLoad) {
-						firstLoad = false;
-						transform.setSize(10, 10);
-						w.dirty = true;
-					}
-					GL11.glColor4d(1, 1, 1, .8);
-					RenderUtils.loadTexture(OUTLINE);
-					HudUtils.rect(0, 0, 10, 10);
-					
-					if(state) {
-						RenderUtils.loadTexture(CHECK);
-						HudUtils.rect(0, 0, w.transform.width, w.transform.height);
-					}
+				if(state) {
+					RenderUtils.loadTexture(CHECK);
+					HudUtils.rect(0, 0, w.transform.width, w.transform.height);
 				}
 			});
 		}
@@ -200,11 +188,8 @@ public abstract class ElementEditor extends Widget {
 			double x = 5;
 			for(final String s : arr) {
 				Widget drawer = new Widget();
-				drawer.regEventHandler(new FrameEventHandler() {
-					@Override
-					public void handleEvent(Widget w, FrameEvent event) {
-						Font.font.draw(s, 0, 2, 8, 0xffffff);
-					}
+				drawer.listen(FrameEvent.class, (w, e) -> {
+					Font.font.draw(s, 0, 2, 8, 0xffffff);
 				});
 				drawer.transform.x = x;
 				addWidget(drawer);
@@ -291,38 +276,29 @@ public abstract class ElementEditor extends Widget {
 			transform.height = 10;
 			
 			addComponent(new TextBox().setSize(9));
-			regEventHandler(new FrameEventHandler() {
-				@Override
-				public void handleEvent(Widget w, FrameEvent event) {
-					if(lastErrorTime != -1 && GameTimer.getAbsTime() - lastErrorTime < 1000) {
-						GL11.glColor4d(1, 0, 0, GameTimer.getAbsTime() % 500 < 250 ? 0.6 : 0.3);
-					} else if(inputDirty) {
-						GL11.glColor4d(1, 0.6, 0, 0.3);
+			listen(FrameEvent.class, (w, e) -> {
+				if(lastErrorTime != -1 && GameTimer.getAbsTime() - lastErrorTime < 1000) {
+					GL11.glColor4d(1, 0, 0, GameTimer.getAbsTime() % 500 < 250 ? 0.6 : 0.3);
+				} else if(inputDirty) {
+					GL11.glColor4d(1, 0.6, 0, 0.3);
+				} else {
+					GL11.glColor4d(1, 1, 1, 0.3);
+				}
+				HudUtils.colorRect(0, 0, 
+					w.transform.width, w.transform.height);
+				GL11.glColor4d(1, 1, 1, 1);
+			});
+			listen(ChangeContentEvent.class, (w, e) -> {
+				inputDirty = true;
+			});
+			listen(ConfirmInputEvent.class, (w, e) -> {
+				if(inputDirty) {
+					//Try to edit the edit target. if not successful, show error.
+					if(!setValue()) {
+						lastErrorTime = GameTimer.getAbsTime();
 					} else {
-						GL11.glColor4d(1, 1, 1, 0.3);
-					}
-					HudUtils.colorRect(0, 0, 
-						w.transform.width, w.transform.height);
-					GL11.glColor4d(1, 1, 1, 1);
-				}
-			});
-			regEventHandler(new ChangeContentHandler() {
-				@Override
-				public void handleEvent(Widget w, ChangeContentEvent event) {
-					inputDirty = true;
-				}
-			});
-			regEventHandler(new ConfirmInputHandler() {
-				@Override
-				public void handleEvent(Widget w, ConfirmInputEvent event) {
-					if(inputDirty) {
-						//Try to edit the edit target. if not successful, show error.
-						if(!setValue()) {
-							lastErrorTime = GameTimer.getAbsTime();
-						} else {
-							updateTargetWidget();
-							inputDirty = false;
-						}
+						updateTargetWidget();
+						inputDirty = false;
 					}
 				}
 			});
@@ -369,28 +345,20 @@ public abstract class ElementEditor extends Widget {
 			tint.idleColor = new Color(1, 1, 1, 0.3);
 			addComponent(tint);
 			
-			regEventHandler(new MouseDownHandler() {
-
-				@Override
-				public void handleEvent(Widget w, MouseDownEvent event) {
-					if(list != null)
-						list.dispose();
-					list = new Widget();
-					list.transform.setPos(0, 0).setSize(40, 10 * enumConstants.length);
-					for(int i = 0; i < enumConstants.length; ++i) {
-						list.addWidget(new Value(i));
-					}
-					w.addWidget(list);
-					list.gainFocus();
-					list.regEventHandler(new LostFocusHandler() {
-						@Override
-						public void handleEvent(Widget w, LostFocusEvent event) {
-							list.dispose();
-							list = null;
-						}
-					});
+			listen(MouseDownEvent.class, (w, event) -> {
+				if(list != null)
+					list.dispose();
+				list = new Widget();
+				list.transform.setPos(0, 0).setSize(40, 10 * enumConstants.length);
+				for(int i = 0; i < enumConstants.length; ++i) {
+					list.addWidget(new Value(i));
 				}
-				
+				w.addWidget(list);
+				list.gainFocus();
+				list.listen(LostFocusEvent.class, (widget, e) -> {
+					list.dispose();
+					list = null;
+				});
 			});
 			
 			super.onAdded();
@@ -419,12 +387,9 @@ public abstract class ElementEditor extends Widget {
 				tint.idleColor = new Color(1, 1, 1, 0.3);
 				addComponent(tint);
 				
-				regEventHandler(new MouseDownHandler() {
-					@Override
-					public void handleEvent(Widget w, MouseDownEvent event) {
-						TypeHelper.edit(targetField, getEditInstance(), name);
-						editor.widget.dirty = true;
-					}
+				listen(MouseDownEvent.class, (w, e) -> {
+					TypeHelper.edit(targetField, getEditInstance(), name);
+					editor.widget.dirty = true;
 				});
 			}
 		}

@@ -12,17 +12,20 @@
  */
 package cn.liutils.cgui.gui.component;
 
-import net.minecraft.util.ResourceLocation;
-
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL11.GL_ALPHA_TEST;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glDepthMask;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL20.glUseProgram;
 
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.client.RenderUtils;
 import cn.liutils.util.helper.Color;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * @author WeAthFolD
@@ -43,28 +46,25 @@ public class DrawTexture extends Component {
 
 	public DrawTexture() {
 		super("DrawTexture");
-		this.addEventHandler(new FrameEventHandler() {
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glDisable(GL_ALPHA_TEST);
-				glDepthFunc(GL_LEQUAL);
-				glDepthMask(writeDepth);
-				glUseProgram(shaderId);
-				color.bind();
-				double preLevel = HudUtils.zLevel;
-				HudUtils.zLevel = zLevel;
-				
-				if(texture != null && !texture.getResourcePath().equals("<null>")) {
-					RenderUtils.loadTexture(texture);
-					HudUtils.rect(0, 0, w.transform.width, w.transform.height);
-				} else {
-					HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
-				}
-				HudUtils.zLevel = preLevel;
-				glUseProgram(0);
-				glDepthMask(true);
+		listen(FrameEvent.class, (w, e) -> 
+		{
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDisable(GL_ALPHA_TEST);
+			glDepthMask(writeDepth);
+			glUseProgram(shaderId);
+			color.bind();
+			double preLevel = HudUtils.zLevel;
+			HudUtils.zLevel = zLevel;
+			
+			if(texture != null && !texture.getResourcePath().equals("<null>")) {
+				RenderUtils.loadTexture(texture);
+				HudUtils.rect(0, 0, w.transform.width, w.transform.height);
+			} else {
+				HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
 			}
+			HudUtils.zLevel = preLevel;
+			glUseProgram(0);
+			glDepthMask(true);
 		});
 	}
 	

@@ -14,7 +14,6 @@ package cn.liutils.cgui.gui.event.global;
 
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.event.GuiEvent;
-import cn.liutils.cgui.gui.event.GuiEventHandler;
 
 /**
  * Indicate that a widget has been added into LIGui.
@@ -29,11 +28,4 @@ public class AddWidgetEvent implements GuiEvent {
 		widget = w;
 	}
 	
-	public static abstract class AddWidgetHandler extends GuiEventHandler<AddWidgetEvent> {
-
-		public AddWidgetHandler() {
-			super(AddWidgetEvent.class);
-		}
-		
-	}
 }

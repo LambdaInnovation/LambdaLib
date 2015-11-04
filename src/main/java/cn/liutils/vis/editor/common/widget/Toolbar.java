@@ -59,13 +59,13 @@ public class Toolbar extends Window {
 		
 		b.addComponents(dt, tint);
 		
-		b.regEventHandler(FrameEvent.class, (widget, e) -> {
+		b.listen(FrameEvent.class, (widget, e) -> {
 			if(e.hovering) {
 				Font.font.draw(name, 0, 15, 10, 0xffffff, Align.CENTER);
 			}
 		});
 		
-		b.regEventHandler(MouseDownEvent.class, (widget, e) -> {
+		b.listen(MouseDownEvent.class, (widget, e) -> {
 			action.invoke();
 		});
 		

@@ -22,7 +22,6 @@ import cn.liutils.cgui.gui.component.TextBox;
 import cn.liutils.cgui.gui.component.Tint;
 import cn.liutils.cgui.gui.component.Transform.HeightAlign;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
-import cn.liutils.cgui.gui.event.MouseDownEvent.MouseDownHandler;
 import cn.liutils.vis.editor.common.IHierarchy;
 import cn.liutils.vis.editor.common.VEVars;
 import net.minecraft.util.ResourceLocation;
@@ -133,11 +132,7 @@ public class WindowHierarchy extends Window implements IHierarchy {
 				
 				addComponent(new Tint());
 				
-				regEventHandler(new MouseDownHandler() {
-					@Override public void handleEvent(Widget w, MouseDownEvent event) {
-						onClick();
-					}
-				});
+				listen(MouseDownEvent.class, (w, e) -> { onClick(); });
 			}
 		}
 		

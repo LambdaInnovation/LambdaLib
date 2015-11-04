@@ -14,13 +14,5 @@ public class MouseDownEvent implements GuiEvent {
 		x = _x;
 		y = _y;
 	}
-	
-	public static abstract class MouseDownHandler extends GuiEventHandler<MouseDownEvent> {
-
-		public MouseDownHandler() {
-			super(MouseDownEvent.class);
-		}
-
-	}
 
 }

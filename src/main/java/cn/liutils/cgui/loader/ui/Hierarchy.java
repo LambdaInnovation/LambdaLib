@@ -15,36 +15,27 @@ package cn.liutils.cgui.loader.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.util.ResourceLocation;
-
 import org.lwjgl.opengl.GL11;
 
 import cn.liutils.cgui.client.CGUILang;
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.component.DrawTexture;
 import cn.liutils.cgui.gui.component.ElementList;
-import cn.liutils.cgui.gui.component.ElementList.ProgressChangeHandler;
 import cn.liutils.cgui.gui.component.ElementList.ProgressChangedEvent;
 import cn.liutils.cgui.gui.component.TextBox;
 import cn.liutils.cgui.gui.component.Tint;
 import cn.liutils.cgui.gui.component.VerticalDragBar;
 import cn.liutils.cgui.gui.component.VerticalDragBar.DraggedEvent;
-import cn.liutils.cgui.gui.component.VerticalDragBar.DraggedHandler;
 import cn.liutils.cgui.gui.event.ChangeContentEvent;
-import cn.liutils.cgui.gui.event.ChangeContentEvent.ChangeContentHandler;
 import cn.liutils.cgui.gui.event.ConfirmInputEvent;
-import cn.liutils.cgui.gui.event.ConfirmInputEvent.ConfirmInputHandler;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.cgui.gui.event.GainFocusEvent;
-import cn.liutils.cgui.gui.event.GainFocusEvent.GainFocusHandler;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
-import cn.liutils.cgui.gui.event.MouseDownEvent.MouseDownHandler;
 import cn.liutils.cgui.loader.ui.event.AddTargetEvent;
-import cn.liutils.cgui.loader.ui.event.AddTargetEvent.AddTargetHandler;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.helper.Font;
 import cn.liutils.util.helper.Font.Align;
+import net.minecraft.util.ResourceLocation;
 
 
 /**
@@ -64,20 +55,14 @@ public class Hierarchy extends Window {
 	@Override
 	public void onAdded() {
 		super.onAdded();
-		regEventHandler(new FrameEventHandler() {
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				drawSplitLine(30);
-			}
+		listen(FrameEvent.class, (w, e) -> {
+			drawSplitLine(30);
 		});
 		
 		buildHierarchy();
 		addButtons();
-		getGui().regEventHandler(new AddTargetHandler() {
-			@Override
-			public void handleEvent(Widget w, AddTargetEvent event) {
-				buildHierarchy();
-			}
+		getGui().eventBus.listen(AddTargetEvent.class, (w, e) -> {
+			buildHierarchy();
 		});
 	}
 	
@@ -89,46 +74,34 @@ public class Hierarchy extends Window {
 		Widget tmp;
 		
 		tmp = setupButton(0, "arrow_left", CGUILang.butDechild());
-		tmp.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				if(getAccessTarget() != null) {
-					getAccessTarget().moveLeft();
-					buildHierarchy();
-				}
+		tmp.listen(MouseDownEvent.class, (w, e) -> {
+			if(getAccessTarget() != null) {
+				getAccessTarget().moveLeft();
+				buildHierarchy();
 			}
 		});
 		
 		tmp = setupButton(1, "arrow_right", CGUILang.butChild());
-		tmp.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				if(getAccessTarget() != null) {
-					getAccessTarget().moveRight();
-					buildHierarchy();
-				}
+		tmp.listen(MouseDownEvent.class, (w, e) -> {
+			if(getAccessTarget() != null) {
+				getAccessTarget().moveRight();
+				buildHierarchy();
 			}
 		});
 		
 		tmp = setupButton(2, "arrow_up", CGUILang.butMoveUp());
-		tmp.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				if(getAccessTarget() != null) {
-					getAccessTarget().moveUp();
-					buildHierarchy();
-				}
+		tmp.listen(MouseDownEvent.class, (w, e) -> {
+			if(getAccessTarget() != null) {
+				getAccessTarget().moveUp();
+				buildHierarchy();
 			}
 		});
 		
 		tmp = setupButton(3, "arrow_down", CGUILang.butMoveDown());
-		tmp.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				if(getAccessTarget() != null) {
-					getAccessTarget().moveDown();
-					buildHierarchy();
-				}
+		tmp.listen(MouseDownEvent.class, (w, e) -> {
+			if(getAccessTarget() != null) {
+				getAccessTarget().moveDown();
+				buildHierarchy();
 			}
 		});
 		
@@ -146,48 +119,36 @@ public class Hierarchy extends Window {
 //		});
 
 		tmp = setupButton(4, "remove", CGUILang.butRemove());
-		tmp.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				if(getAccessTarget() != null) {
-					getAccessTarget().dispose();
-					buildHierarchy();
-				}
+		tmp.listen(MouseDownEvent.class, (w, e) -> {
+			if(getAccessTarget() != null) {
+				getAccessTarget().dispose();
+				buildHierarchy();
 			}
 		});
 		
 		tmp = setupButton(5, "duplicate", CGUILang.butDuplicate());
-		tmp.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				if(getAccessTarget() != null) {
-					getAccessTarget().getAbstractParent().addWidget(getAccessTarget().copy());
-					buildHierarchy();
-				}
+		tmp.listen(MouseDownEvent.class, (w, e) -> {
+			if(getAccessTarget() != null) {
+				getAccessTarget().getAbstractParent().addWidget(getAccessTarget().copy());
+				buildHierarchy();
 			}
 		});
 		
 		tmp = setupButton(6, "up", "Move Up");
 		tmp.transform.setPos(90, 30);
-		tmp.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				if(hList != null) {
-					ElementList list = ElementList.get(hList);
-					list.progressLast();
-				}
+		tmp.listen(MouseDownEvent.class, (w, e) -> {
+			if(hList != null) {
+				ElementList list = ElementList.get(hList);
+				list.progressLast();
 			}
 		});
 		
 		tmp = setupButton(7, "down", "Move Down");
 		tmp.transform.setPos(90, 110);
-		tmp.regEventHandler(new MouseDownHandler() {
-			@Override
-			public void handleEvent(Widget w, MouseDownEvent event) {
-				if(hList != null) {
-					ElementList list = ElementList.get(hList);
-					list.progressNext();
-				}
+		tmp.listen(MouseDownEvent.class, (w, e) -> {
+			if(hList != null) {
+				ElementList list = ElementList.get(hList);
+				list.progressNext();
 			}
 		});
 		
@@ -203,14 +164,11 @@ public class Hierarchy extends Window {
 			DrawTexture dt = new DrawTexture().setTex(null).setColor4i(200, 200, 255, 200);
 			tmp.addComponent(dt);
 			
-			tmp.regEventHandler(new DraggedHandler() {
-				@Override
-				public void handleEvent(Widget w, DraggedEvent event) {
-					double p = bar.getProgress();
-					if(hList != null) {
-						ElementList list = ElementList.get(hList);
-						list.setProgress((int) Math.round(p * list.getMaxProgress()));
-					}
+			tmp.listen(DraggedEvent.class, (w, e) -> {
+				double p = bar.getProgress();
+				if(hList != null) {
+					ElementList list = ElementList.get(hList);
+					list.setProgress((int) Math.round(p * list.getMaxProgress()));
 				}
 			});
 			
@@ -238,14 +196,9 @@ public class Hierarchy extends Window {
 				hierarchyAdd(el, w);
 		}
 		hList.addComponent(el);
-		hList.regEventHandler(new ProgressChangeHandler() {
-
-			@Override
-			public void handleEvent(Widget w, ProgressChangedEvent event) {
-				double p = (double)el.getProgress() / el.getMaxProgress();
-				VerticalDragBar.get(dragbar).setProgress(dragbar, p);
-			}
-			
+		hList.listen(ProgressChangedEvent.class, (w, e) -> {
+			double p = (double)el.getProgress() / el.getMaxProgress();
+			VerticalDragBar.get(dragbar).setProgress(dragbar, p);
 		});
 		
 		
@@ -266,18 +219,16 @@ public class Hierarchy extends Window {
 		final double size = 10;
 		Widget w = new Widget();
 		final Tint tint = new Tint();
-		w.addComponent(tint);
 		w.addComponent(new DrawTexture().setTex(GuiEdit.tex(name)));
+		w.addComponent(tint);
+		
 		w.transform.setSize(size, size).setPos(2 + count * 12, 11);
-		w.regEventHandler(new FrameEventHandler() {
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				Widget target = getAccessTarget();
-				tint.enabled = target != null && target.visible;
-				
-				if(event.hovering) {
-					Font.font.draw(desc, size / 2, size, 10, 0xffffff, Align.CENTER);
-				}
+		w.listen(FrameEvent.class, (we, event) -> {
+			Widget target = getAccessTarget();
+			tint.enabled = target != null && target.visible;
+			
+			if(event.hovering) {
+				Font.font.draw(desc, size / 2, size, 10, 0xffffff, Align.CENTER);
 			}
 		});
 		
@@ -304,43 +255,33 @@ public class Hierarchy extends Window {
 			
 			hierLevel = w.getHierarchyLevel();
 			target = w;
-			regEventHandler(new FrameEventHandler() {
-				@Override
-				public void handleEvent(Widget w, FrameEvent event) {
-					double r = 1, g = 1, b = 1;
-					double brightness = event.hovering ? .5 : .3;
-					if(target.isFocused()) {
-						brightness *= 1.6;
-						r = b = .6;
-					}
-					if(modified) {
-						r = g = 1;
-						b = 0;
-					}
-					GL11.glColor4d(r, g, b, brightness);
-					HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
+			
+			listen(FrameEvent.class, (ww, event) -> {
+				double r = 1, g = 1, b = 1;
+				double brightness = event.hovering ? .5 : .3;
+				if(target.isFocused()) {
+					brightness *= 1.6;
+					r = b = .6;
 				}
+				if(modified) {
+					r = g = 1;
+					b = 0;
+				}
+				GL11.glColor4d(r, g, b, brightness);
+				HudUtils.colorRect(0, 0, ww.transform.width, ww.transform.height);
 			});
 			
-			regEventHandler(new MouseDownHandler() {
-				@Override
-				public void handleEvent(Widget w, MouseDownEvent event) {
-					guiEdit.toEdit.gainFocus(target);
-				}
-			});
+			listen(MouseDownEvent.class, (ww, ee) -> { guiEdit.toEdit.gainFocus(target); });
 			
 			{
 				Widget eye = new Widget();
 				eye.transform.setSize(10, 10).setPos(1, 1);
 				eye.addComponent(new Tint());
 				eye.addComponent(new DrawTexture().setTex(vis_on));
-				eye.regEventHandler(new MouseDownHandler() {
-					@Override
-					public void handleEvent(Widget w, MouseDownEvent event) {
-						on = !on;
-						target.visible = on;
-						DrawTexture.get(w).setTex(on ? vis_on : vis_off);
-					}
+				eye.listen(MouseDownEvent.class, (ww, e) -> {
+					on = !on;
+					target.visible = on;
+					DrawTexture.get(ww).setTex(on ? vis_on : vis_off);
 				});
 				addWidget(eye);
 			}
@@ -349,6 +290,9 @@ public class Hierarchy extends Window {
 		}
 		
 		private class Name extends Widget {
+			
+			int slowdown;
+			
 			public Name() {
 				box = new TextBox().setSize(10);
 				box.content = target.getName();
@@ -358,36 +302,23 @@ public class Hierarchy extends Window {
 			
 			@Override
 			public void onAdded() {
-				regEventHandler(new FrameEventHandler() {
-					int slowdown = 0;
-					@Override
-					public void handleEvent(Widget w, FrameEvent event) {
-						if(++slowdown == 100) {
-							slowdown = 0;
-							transform.x = 14 + hierLevel * 6;
-							w.dirty = true;
-						}
+				listen(FrameEvent.class, (w, e) -> {
+					if(++slowdown == 100) {
+						slowdown = 0;
+						transform.x = 14 + hierLevel * 6;
+						w.dirty = true;
 					}
 				});
-				regEventHandler(new ConfirmInputHandler() {
-					@Override
-					public void handleEvent(Widget w, ConfirmInputEvent event) {
-						if(target.rename(box.content)) {
-							modified = false;
-						}
+				listen(ConfirmInputEvent.class, (w, e) -> {
+					if(target.rename(box.content)) {
+						modified = false;
 					}
 				});
-				regEventHandler(new ChangeContentHandler() {
-					@Override
-					public void handleEvent(Widget w, ChangeContentEvent event) {
-						modified = true;
-					}
+				listen(ChangeContentEvent.class, (w, e) -> {
+					modified = true;
 				});
-				regEventHandler(new GainFocusHandler() {
-					@Override
-					public void handleEvent(Widget w, GainFocusEvent event) {
-						SingleWidget.this.postEvent(new MouseDownEvent(0, 0));
-					}
+				listen(GainFocusEvent.class, (w, e) -> {
+					SingleWidget.this.post(new MouseDownEvent(0, 0));
 				});
 				addComponent(box);
 			}

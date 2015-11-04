@@ -16,12 +16,4 @@ public class KeyEvent implements GuiEvent {
 		inputChar = _ch;
 		keyCode = _key;
 	}
-	
-	public abstract static class KeyEventHandler extends GuiEventHandler<KeyEvent> {
-
-		public KeyEventHandler() {
-			super(KeyEvent.class);
-		}
-		
-	}
 }

@@ -12,17 +12,12 @@
  */
 package cn.liutils.vis.editor.common;
 
-import java.lang.reflect.Field;
-
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.component.DrawTexture;
 import cn.liutils.cgui.gui.component.TextBox;
 import cn.liutils.cgui.gui.event.ChangeContentEvent;
 import cn.liutils.cgui.gui.event.ConfirmInputEvent;
 import cn.liutils.cgui.gui.event.LostFocusEvent;
-import cn.liutils.cgui.gui.event.ChangeContentEvent.ChangeContentHandler;
-import cn.liutils.cgui.gui.event.ConfirmInputEvent.ConfirmInputHandler;
-import cn.liutils.cgui.gui.event.LostFocusEvent.LostFocusHandler;
 import cn.liutils.core.LIUtils;
 
 /**
@@ -46,37 +41,29 @@ public abstract class EditBox extends Widget {
 		text.setSize(9);
 		addComponent(text);
 		
-		regEventHandler(new LostFocusHandler() {
-
-			@Override
-			public void handleEvent(Widget w, LostFocusEvent event) {
-				Widget parent = w.getWidgetParent();
-				if(parent != null)
-					parent.postEvent(event);
-			}
-			
+		listen(LostFocusEvent.class, (w, event) -> 
+		{
+			Widget parent = w.getWidgetParent();
+			if(parent != null)
+				parent.post(event);
 		});
 		
-		regEventHandler(new ChangeContentHandler() {
-			@Override
-			public void handleEvent(Widget w, ChangeContentEvent event) {
-				drawer.color = VEVars.C_MODIFIED;
-			}
+		listen(ChangeContentEvent.class, (w, e) -> 
+		{
+			drawer.color = VEVars.C_MODIFIED;
 		});
 		
-		regEventHandler(new ConfirmInputHandler() {
-			@Override
-			public void handleEvent(Widget w, ConfirmInputEvent event) {
-				try {
-					setValue(text.content);
-					drawer.color = VEVars.C_WINDOW_BODY2;
-					updateRepr();
-				} catch(NumberFormatException e) {
-					drawer.color = VEVars.C_ERRORED;
-				} catch(Exception e) {
-					drawer.color = VEVars.C_ERRORED;
-					LIUtils.log.error("ModifierBase.confirmInput()", e);
-				}
+		listen(ConfirmInputEvent.class, (w, e) -> 
+		{
+			try {
+				setValue(text.content);
+				drawer.color = VEVars.C_WINDOW_BODY2;
+				updateRepr();
+			} catch(NumberFormatException exc) {
+				drawer.color = VEVars.C_ERRORED;
+			} catch(Exception exc) {
+				drawer.color = VEVars.C_ERRORED;
+				LIUtils.log.error("ModifierBase.confirmInput()", exc);
 			}
 		});
 	}

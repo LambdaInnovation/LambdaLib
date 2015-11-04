@@ -17,8 +17,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.util.ResourceLocation;
-
 import org.lwjgl.opengl.GL11;
 
 import cn.liutils.cgui.gui.Widget;
@@ -26,16 +24,14 @@ import cn.liutils.cgui.gui.component.Component;
 import cn.liutils.cgui.gui.component.DrawTexture;
 import cn.liutils.cgui.gui.component.Tint;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.cgui.gui.event.LostFocusEvent;
-import cn.liutils.cgui.gui.event.LostFocusEvent.LostFocusHandler;
 import cn.liutils.cgui.gui.event.MouseDownEvent;
-import cn.liutils.cgui.gui.event.MouseDownEvent.MouseDownHandler;
 import cn.liutils.cgui.loader.CGUIEditor;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.client.RenderUtils;
 import cn.liutils.util.helper.Font;
 import cn.liutils.util.helper.Font.Align;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * @author WeAthFolD
@@ -81,12 +77,9 @@ public class SelectedWidgetBar extends Window {
 	}
 	
 	private void initEvents() {
-		regEventHandler(new FrameEventHandler() {
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				if(target.disposed || target != guiEdit.toEdit.getFocus()) {
-					w.dispose();
-				}
+		listen(FrameEvent.class, (w, e) -> {
+			if(target.disposed || target != guiEdit.toEdit.getFocus()) {
+				w.dispose();
 			}
 		});
 	}
@@ -114,69 +107,52 @@ public class SelectedWidgetBar extends Window {
 				add.transform.setPos(0, 11 + i * 11);
 				add.transform.setSize(100, 10);
 				add.addComponent(new Tint());
-				add.regEventHandler(new FrameEventHandler() {
-					ResourceLocation tex = GuiEdit.tex("toolbar/add");
-					@Override
-					public void handleEvent(Widget w, FrameEvent event) {
-						RenderUtils.loadTexture(tex);
-						GL11.glColor4d(1, 1, 1, 1);
-						HudUtils.rect(45, 0, 10, 10);
-					}
+				ResourceLocation tex = GuiEdit.tex("toolbar/add");
+				add.listen(FrameEvent.class, (w, e) -> {
+					RenderUtils.loadTexture(tex);
+					GL11.glColor4d(1, 1, 1, 1);
+					HudUtils.rect(45, 0, 10, 10);
 				});
 				
 				final int y = 11 * (i + 2);
-				add.regEventHandler(new MouseDownHandler() {
+				add.listen(MouseDownEvent.class, (w, e) -> {
 
-					@Override
-					public void handleEvent(Widget w, MouseDownEvent event) {
-						if(listSpawned)
-							return;
-						listSpawned = true;
-						
-						//Setup background list
-						Widget list = new Widget();
-						list.regEventHandler(new LostFocusHandler() {
-							@Override
-							public void handleEvent(Widget w, LostFocusEvent event) {
-								w.dispose();
-							}
+					if(listSpawned)
+						return;
+					listSpawned = true;
+					
+					//Setup background list
+					Widget list = new Widget();
+					list.listen(LostFocusEvent.class, (ww, event) -> {
+						ww.dispose();
+					});
+					list.addComponent(new DrawTexture().setTex(null).setColor4d(.8, .8, 1, 0.3));
+					Collection<Component> components = CGUIEditor.getComponents();
+					list.transform.setSize(80, 10 * components.size());
+					list.transform.setPos(10, y);
+					
+					//Use a loop to setup all the sub-components.
+					int j = 0;
+					for(final Component c : getCanAddList()) {
+						Widget one = new Widget();
+						one.transform.y = (j++) * 10;
+						one.transform.setSize(80, 10);
+						one.addComponent(new Tint());
+						one.listen(FrameEvent.class, (ww, event) -> {
+							String text = c.name;
+							Font.font.draw(text, 40, 1, 8, 0xffffff, Align.CENTER);
 						});
-						list.addComponent(new DrawTexture().setTex(null).setColor4d(.8, .8, 1, 0.3));
-						Collection<Component> components = CGUIEditor.getComponents();
-						list.transform.setSize(80, 10 * components.size());
-						list.transform.setPos(10, y);
-						
-						//Use a loop to setup all the sub-components.
-						int i = 0;
-						for(final Component c : getCanAddList()) {
-							Widget one = new Widget();
-							one.transform.y = (i++) * 10;
-							one.transform.setSize(80, 10);
-							one.addComponent(new Tint());
-							one.regEventHandler(new FrameEventHandler() {
-								@Override
-								public void handleEvent(Widget w, FrameEvent event) {
-									String text = c.name;
-									Font.font.draw(text, 40, 1, 8, 0xffffff, Align.CENTER);
-								}
-							});
-							one.regEventHandler(new MouseDownHandler() {
-								@Override
-								public void handleEvent(Widget w,
-										MouseDownEvent event) {
-									target.addComponent(c.copy());
-									//Rebuild the component selection GUI
-									ComponentSelection.this.dispose();
-									SelectedWidgetBar.this.addWidget(new ComponentSelection());
-								}
-							});
-							list.addWidget(one);
-						}
-						
-						ComponentSelection.this.addWidget(list);
-						//getGui().gainFocus(list);
+						one.listen(MouseDownEvent.class, (ww, ee) -> {
+							target.addComponent(c.copy());
+							//Rebuild the component selection GUI
+							ComponentSelection.this.dispose();
+							SelectedWidgetBar.this.addWidget(new ComponentSelection());
+						});
+						list.addWidget(one);
 					}
 					
+					ComponentSelection.this.addWidget(list);
+					//getGui().gainFocus(list);
 				});
 				addWidget(add);
 			}
@@ -205,18 +181,12 @@ public class SelectedWidgetBar extends Window {
 				
 				addComponent(new Tint());
 				
-				regEventHandler(new MouseDownHandler() {
-					@Override
-					public void handleEvent(Widget w, MouseDownEvent event) {
-						setPropertyEditor(new ComponentEditor(guiEdit, target, c));
-					}
+				listen(MouseDownEvent.class, (w, e) -> {
+					setPropertyEditor(new ComponentEditor(guiEdit, target, c));
 				});
 				
-				regEventHandler(new FrameEventHandler() {
-					@Override
-					public void handleEvent(Widget w, FrameEvent event) {
-						Font.font.draw(c.name, 50, 2, 7, 0xffffff, Align.CENTER);
-					}
+				listen(FrameEvent.class, (w, e) -> {
+					Font.font.draw(c.name, 50, 2, 7, 0xffffff, Align.CENTER);
 				});
 				
 				addSubWidgets();
@@ -230,13 +200,10 @@ public class SelectedWidgetBar extends Window {
 				w.transform.setSize(10, 10).setPos(85, 0);
 				w.addComponent(new DrawTexture().setTex(TEX_REMOVE));
 				w.addComponent(new Tint());
-				w.regEventHandler(new MouseDownHandler() {
-					@Override
-					public void handleEvent(Widget w, MouseDownEvent event) {
-						target.removeComponent(c);
-						ComponentSelection.this.dispose();
-						SelectedWidgetBar.this.addWidget(new ComponentSelection());
-					}
+				w.listen(MouseDownEvent.class, (ww, e) -> {
+					target.removeComponent(c);
+					ComponentSelection.this.dispose();
+					SelectedWidgetBar.this.addWidget(new ComponentSelection());
 				});
 				addWidget(w);
 			}

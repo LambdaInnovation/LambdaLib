@@ -20,9 +20,4 @@ public class DragEvent implements GuiEvent {
 		offsetY = _offsetY;
 	}
 
-	public static abstract class DragEventHandler extends GuiEventHandler<DragEvent> {
-		public DragEventHandler() {
-			super(DragEvent.class);
-		}
-	}
 }

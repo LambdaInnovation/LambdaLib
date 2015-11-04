@@ -17,13 +17,9 @@ import cn.liutils.cgui.gui.LIGui;
 import cn.liutils.cgui.gui.Widget;
 import cn.liutils.cgui.gui.WidgetContainer;
 import cn.liutils.cgui.gui.event.DragEvent;
-import cn.liutils.cgui.gui.event.DragEvent.DragEventHandler;
 import cn.liutils.cgui.gui.event.FrameEvent;
-import cn.liutils.cgui.gui.event.FrameEvent.FrameEventHandler;
 import cn.liutils.cgui.gui.event.GainFocusEvent;
-import cn.liutils.cgui.gui.event.GainFocusEvent.GainFocusHandler;
 import cn.liutils.cgui.gui.event.global.AddWidgetEvent;
-import cn.liutils.cgui.gui.event.global.AddWidgetEvent.AddWidgetHandler;
 import cn.liutils.cgui.loader.ui.event.AddTargetEvent;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.helper.Color;
@@ -40,11 +36,8 @@ public class LIGuiPlayground extends LIGui {
 	public LIGuiPlayground(GuiEdit _guiEdit) {
 		guiEdit = _guiEdit;
 		
-		this.regEventHandler(new AddWidgetHandler() {
-			@Override
-			public void handleEvent(Widget w, AddWidgetEvent event) {
-				guiEdit.getGui().postEvent(new AddTargetEvent(w));
-			}
+		eventBus.listen(AddWidgetEvent.class, (w, e) -> {
+			guiEdit.getGui().postEvent(new AddTargetEvent(w));
 		});
 	}
 	
@@ -65,32 +58,22 @@ public class LIGuiPlayground extends LIGui {
 	
 	private void injectEvents(Widget w) {
 		//Add selection indicator
-		w.regEventHandler(new FrameEventHandler() {
-			Color c = new Color(112, 223, 122, 200);
-			
-			@Override
-			public void handleEvent(Widget w, FrameEvent event) {
-				if(getFocus() == w) {
-					c.bind();
-					HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, 1);
-				} else {
-					//HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, 1);
-				}
+		final Color c = new Color(112, 223, 122, 200);
+		w.listen(FrameEvent.class, (ww, e) -> {
+			if(getFocus() == w) {
+				c.bind();
+				HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, 1);
+			} else {
+				//HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, 1);
 			}
 		});
-		w.regEventHandler(new DragEventHandler() {
-			@Override
-			public void handleEvent(Widget w, DragEvent event) {
-				if(w.isFocused()) {
-					w.getGui().updateDragWidget();
-				}
+		w.listen(DragEvent.class, (ww, e) -> {
+			if(w.isFocused()) {
+				w.getGui().updateDragWidget();
 			}
 		});
-		w.regEventHandler(new GainFocusHandler() {
-			@Override
-			public void handleEvent(Widget w, GainFocusEvent event) {
-				new SelectedWidgetBar(guiEdit, w);
-			}
+		w.listen(GainFocusEvent.class, (ww, e) -> {
+			new SelectedWidgetBar(guiEdit, w);
 		});
 		
 		for(Widget w2 : w.getDrawList()) {
