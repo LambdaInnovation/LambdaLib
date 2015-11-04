@@ -17,7 +17,7 @@ import java.util.List;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.loading.Loader;
 
 import com.google.gson.JsonObject;
@@ -73,7 +73,7 @@ public class ItemLoader<T extends Item> extends Loader<T> {
 			GameRegistry.registerItem(item, name);
 			return (T) item;
 		} catch(Exception e) {
-			LIUtils.log.error("An error occured loading Item " + name);
+			LambdaLib.log.error("An error occured loading Item " + name);
 			e.printStackTrace();
 			return null;
 		}
@@ -107,7 +107,7 @@ public class ItemLoader<T extends Item> extends Loader<T> {
 		try {
 			doInit(object, name);
 		} catch (Exception e) {
-			LIUtils.log.error("error occured doing item post-init, name:" + name + ", object: " + object);
+			LambdaLib.log.error("error occured doing item post-init, name:" + name + ", object: " + object);
 			e.printStackTrace();
 		}
 	}

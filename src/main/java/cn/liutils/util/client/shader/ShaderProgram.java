@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.util.generic.RegistryUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -64,7 +64,7 @@ public class ShaderProgram {
 				int successful = glGetShaderi(shaderID, GL_COMPILE_STATUS);
 				if(successful == GL_FALSE) {
 					String log = glGetShaderInfoLog(shaderID, glGetShaderi(shaderID, GL_INFO_LOG_LENGTH));
-					LIUtils.log.error("Error when linking shader '" + location + "'. code: " + successful + ", Error string: \n" + log);
+					LambdaLib.log.error("Error when linking shader '" + location + "'. code: " + successful + ", Error string: \n" + log);
 					throw new RuntimeException();
 				}
 			}
@@ -72,7 +72,7 @@ public class ShaderProgram {
 			attachedShaders.add(shaderID);
 			glAttachShader(programID, shaderID);
 		} catch (IOException e) {
-			LIUtils.log.error("Error when linking shader " + location, e);
+			LambdaLib.log.error("Error when linking shader " + location, e);
 			throw new RuntimeException();
 		}
 	}
@@ -85,7 +85,7 @@ public class ShaderProgram {
 		if(compiled) {
 			glUseProgram(programID);
 		} else {
-			LIUtils.log.error("Trying to use a uncompiled program");
+			LambdaLib.log.error("Trying to use a uncompiled program");
 			throw new RuntimeException();
 		}
 	}
@@ -96,7 +96,7 @@ public class ShaderProgram {
 	
 	public void compile() {
 		if(compiled) {
-			LIUtils.log.error("Trying to compile shader " + this + " twice.");
+			LambdaLib.log.error("Trying to compile shader " + this + " twice.");
 			throw new RuntimeException();
 		}
 		
@@ -109,8 +109,8 @@ public class ShaderProgram {
 		int status = glGetProgrami(programID, GL_LINK_STATUS);
 		if(status == GL_FALSE) {
 			String log = glGetProgramInfoLog(programID, glGetProgrami(programID, GL_INFO_LOG_LENGTH));
-			LIUtils.log.error("Error when linking program #" + programID + ". Error code: " + status + ", Error string: ");
-			LIUtils.log.error(log);
+			LambdaLib.log.error("Error when linking program #" + programID + ". Error code: " + status + ", Error string: ");
+			LambdaLib.log.error(log);
 			throw new RuntimeException();
 		}
 		

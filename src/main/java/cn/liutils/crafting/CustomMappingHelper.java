@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 
 public class CustomMappingHelper {
 	
@@ -25,7 +25,7 @@ public class CustomMappingHelper {
 				}
 			}
 		} catch(Exception e) {
-			LIUtils.log.error("An error occured analyzing recipe custom mapping");
+			LambdaLib.log.error("An error occured analyzing recipe custom mapping");
 			e.printStackTrace();
 		}
 	}

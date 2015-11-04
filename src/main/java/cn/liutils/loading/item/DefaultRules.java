@@ -16,7 +16,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.MinecraftForgeClient;
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.loading.Loader.ObjectNamespace;
 
 /**
@@ -61,7 +61,7 @@ class DefaultRules {
 						throw new RuntimeException();
 					}
 				} catch(Exception e) {
-					LIUtils.log.error("Didn't find CreativeTab " + cctName);
+					LambdaLib.log.error("Didn't find CreativeTab " + cctName);
 				}
 			}
 		}
@@ -120,7 +120,7 @@ class DefaultRules {
 						throw new RuntimeException();
 					}
 				} catch(Exception e) {
-					LIUtils.log.error("Didn't find item renderer " + rendererName);
+					LambdaLib.log.error("Didn't find item renderer " + rendererName);
 				}
 			}
 		}

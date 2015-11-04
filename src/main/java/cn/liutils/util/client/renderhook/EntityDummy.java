@@ -12,8 +12,8 @@
  */
 package cn.liutils.util.client.renderhook;
 
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.RegEntity;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegEntity;
 import cn.liutils.util.client.ViewOptimize.IAssociatePlayer;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

@@ -12,7 +12,7 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.io.IOUtils;
 
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.util.generic.DebugUtils;
 import cn.liutils.util.generic.RegistryUtils;
 
@@ -125,7 +125,7 @@ public class RecipeRegistry {
 			addRecipe(parser);
 		}
 		catch (Throwable e) {
-			LIUtils.log.error("Failed to load recipes from file: " + file, e);
+			LambdaLib.log.error("Failed to load recipes from file: " + file, e);
 		}
 		finally {
 			parser.close();
@@ -136,7 +136,7 @@ public class RecipeRegistry {
 		try {
 			addRecipeFromString(IOUtils.toString(RegistryUtils.getResourceStream(src)));
 		} catch(Throwable e) {
-			LIUtils.log.error("Failed to load recipes from file: " + src, e);
+			LambdaLib.log.error("Failed to load recipes from file: " + src, e);
 			e.printStackTrace();
 		}
 	}
@@ -151,7 +151,7 @@ public class RecipeRegistry {
 			parser = new RecipeParser(recipes);
 			addRecipe(parser);
 		} catch (Throwable e) {
-			LIUtils.log.error("Failed to load recipes from String: " + recipes, e);
+			LambdaLib.log.error("Failed to load recipes from String: " + recipes, e);
 		}
 		finally {
 			parser.close();
@@ -175,9 +175,9 @@ public class RecipeRegistry {
 						parser.getWidth(), parser.getHeight(), parser.getExperience());
 				}
 				else
-					LIUtils.log.error("Failed to register a recipe because the type \"" + type + "\" doesn't have its registry");
+					LambdaLib.log.error("Failed to register a recipe because the type \"" + type + "\" doesn't have its registry");
 			} catch(Exception e) {
-				LIUtils.log.error("Failed processing one recipe element", e);
+				LambdaLib.log.error("Failed processing one recipe element", e);
 			}
 		}
 	}

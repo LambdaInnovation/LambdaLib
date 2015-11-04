@@ -12,7 +12,7 @@
  */
 package cn.liutils.util.helper;
 
-import cn.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.core.Registrant;
 import cn.liutils.registry.RegDataPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;

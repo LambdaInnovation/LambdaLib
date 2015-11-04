@@ -17,11 +17,11 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.RegEventHandler;
-import cn.annoreg.mc.RegEventHandler.Bus;
-import cn.annoreg.mc.RegInit;
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegEventHandler;
+import cn.lambdalib.annoreg.mc.RegInit;
+import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.util.generic.RegistryUtils;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -115,7 +115,7 @@ public class ControlOverrider {
 		if(activeOverrides.containsKey(keyID)) {
 			activeOverrides.get(keyID).count++;
 			if(activeOverrides.get(keyID).count > 100)
-				LIUtils.log.warn("Over 100 override locks for " + 
+				LambdaLib.log.warn("Over 100 override locks for " + 
 						keyID + ". Might be a programming error?");
 			log("Override increment " + "[" + keyID + "]" + activeOverrides.get(keyID).count);
 			return;
@@ -186,12 +186,12 @@ public class ControlOverrider {
 	}
 	
 	private static void log(String s) {
-		if(LIUtils.DEBUG)
-			LIUtils.log.info(s);
+		if(LambdaLib.DEBUG)
+			LambdaLib.log.info(s);
 	}
 	
 	private static void error(String s, Exception e) {
-		LIUtils.log.error("ControlOverrider error: " + s, e);
+		LambdaLib.log.error("ControlOverrider error: " + s, e);
 	}
 	
 	private static class Override {

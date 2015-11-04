@@ -16,13 +16,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.network.RegNetworkCall;
-import cn.annoreg.mc.s11n.InstanceSerializer;
-import cn.annoreg.mc.s11n.RegSerializable;
-import cn.annoreg.mc.s11n.SerializationManager;
-import cn.annoreg.mc.s11n.StorageOption.Data;
-import cn.annoreg.mc.s11n.StorageOption.Target;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.networkcall.RegNetworkCall;
+import cn.lambdalib.networkcall.s11n.InstanceSerializer;
+import cn.lambdalib.networkcall.s11n.RegSerializable;
+import cn.lambdalib.networkcall.s11n.SerializationManager;
+import cn.lambdalib.networkcall.s11n.StorageOption.Data;
+import cn.lambdalib.networkcall.s11n.StorageOption.Target;
 import cpw.mods.fml.relauncher.Side;
 
 /**

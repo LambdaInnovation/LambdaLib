@@ -15,8 +15,8 @@ package cn.liutils.template.client.render.block;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.world.IBlockAccess;
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.RegBlockRenderer;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegBlockRenderer;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 

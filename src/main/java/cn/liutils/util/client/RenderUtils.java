@@ -18,7 +18,7 @@ import java.lang.reflect.Field;
 
 import org.lwjgl.opengl.GL11;
 
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.util.helper.GameTimer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
@@ -313,7 +313,7 @@ public class RenderUtils {
 			try {
 				return fIsShadowPass.getBoolean(null);
 			} catch(Exception e) {
-				LIUtils.log.error("Exception in isInShadowPass", e);
+				LambdaLib.log.error("Exception in isInShadowPass", e);
 			}
 		}
 		return false;
@@ -324,9 +324,9 @@ public class RenderUtils {
 			Class shadersClass = Class.forName(_shadersClassName);
 			fIsShadowPass = shadersClass.getField("isShadowPass");
 			smcPresent = true;
-			LIUtils.log.info("LIUtils SMC support successfully initialized.");
+			LambdaLib.log.info("LambdaLib SMC support successfully initialized.");
 		} catch(Exception e) {
-			LIUtils.log.info("LIUtils SMC support isn't initialized.");
+			LambdaLib.log.info("LambdaLib SMC support isn't initialized.");
 			smcPresent = false;
 		}
 		

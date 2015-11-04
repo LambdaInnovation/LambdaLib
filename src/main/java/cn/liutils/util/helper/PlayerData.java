@@ -17,17 +17,17 @@ import java.util.Map.Entry;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.RegEventHandler;
-import cn.annoreg.mc.SideHelper;
-import cn.annoreg.mc.network.RegNetworkCall;
-import cn.annoreg.mc.s11n.InstanceSerializer;
-import cn.annoreg.mc.s11n.RegSerializable;
-import cn.annoreg.mc.s11n.StorageOption;
-import cn.annoreg.mc.s11n.StorageOption.Data;
-import cn.annoreg.mc.s11n.StorageOption.Instance;
-import cn.annoreg.mc.s11n.StorageOption.RangedTarget;
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegEventHandler;
+import cn.lambdalib.annoreg.mc.SideHelper;
+import cn.lambdalib.core.LambdaLib;
+import cn.lambdalib.networkcall.RegNetworkCall;
+import cn.lambdalib.networkcall.s11n.InstanceSerializer;
+import cn.lambdalib.networkcall.s11n.RegSerializable;
+import cn.lambdalib.networkcall.s11n.StorageOption;
+import cn.lambdalib.networkcall.s11n.StorageOption.Data;
+import cn.lambdalib.networkcall.s11n.StorageOption.Instance;
+import cn.lambdalib.networkcall.s11n.StorageOption.RangedTarget;
 import cn.liutils.util.client.ClientUtils;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -78,7 +78,7 @@ public abstract class PlayerData implements IExtendedEntityProperties {
 		try {
 			constructData();
 		} catch(Exception e) {
-			LIUtils.log.error("Error constructing DataPart");
+			LambdaLib.log.error("Error constructing DataPart");
 			e.printStackTrace();
 		}
 	}
@@ -207,7 +207,7 @@ public abstract class PlayerData implements IExtendedEntityProperties {
 					if(ret != null)
 						tag.setTag(getName(p), ret);
 				} else {
-					LIUtils.log.warn("Ignored saving of " + p.getName());
+					LambdaLib.log.warn("Ignored saving of " + p.getName());
 				}
 			}
 		}

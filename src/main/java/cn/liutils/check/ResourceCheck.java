@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.annoreg.mc.SideHelper;
-import cn.annoreg.mc.network.RegNetworkCall;
-import cn.annoreg.mc.s11n.StorageOption.Data;
-import cn.annoreg.mc.s11n.StorageOption.Instance;
-import cn.annoreg.mc.s11n.StorageOption.Target;
+import cn.lambdalib.annoreg.mc.SideHelper;
+import cn.lambdalib.networkcall.RegNetworkCall;
+import cn.lambdalib.networkcall.s11n.StorageOption.Data;
+import cn.lambdalib.networkcall.s11n.StorageOption.Instance;
+import cn.lambdalib.networkcall.s11n.StorageOption.Target;
 import cn.liutils.util.generic.HashUtils;
 import cn.liutils.util.generic.RegistryUtils;
 import cpw.mods.fml.common.FMLCommonHandler;

@@ -9,7 +9,7 @@ import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.io.IOUtils;
 
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.util.generic.RegistryUtils;
 
 import com.google.common.collect.HashBiMap;
@@ -91,12 +91,12 @@ public abstract class Loader<T> {
 		try {
 			T obj = load(name, new ObjectNamespace(name));
 			if(obj == null) {
-				LIUtils.log.error("Didn't load the element " + name + " correctly.");
+				LambdaLib.log.error("Didn't load the element " + name + " correctly.");
 				return;
 			}
 			loadedObjects.put(name, obj);
 		} catch(Exception e) {
-			LIUtils.log.error("An error occured when loading element " + name + ".");
+			LambdaLib.log.error("An error occured when loading element " + name + ".");
 			e.printStackTrace();
 		}
 	}

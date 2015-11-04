@@ -16,11 +16,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import cn.annoreg.base.RegistrationInstance;
-import cn.annoreg.core.LoadStage;
-import cn.annoreg.core.RegistryTypeDecl;
+
+import cn.lambdalib.annoreg.base.RegistrationInstance;
+import cn.lambdalib.annoreg.core.LoadStage;
+import cn.lambdalib.annoreg.core.RegistryTypeDecl;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.api.gui.AuxGui;
-import cn.liutils.core.LIUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -38,7 +39,7 @@ public class AuxGuiRegistry extends RegistrationInstance<AuxGuiRegistry.RegAuxGu
 	public @interface RegAuxGui {}
 
 	public AuxGuiRegistry() {
-		super(RegAuxGui.class, LIUtils.REGISTER_TYPE_AUXGUI);
+		super(RegAuxGui.class, "AuxGui");
 		this.setLoadStage(LoadStage.INIT);
 	}
 

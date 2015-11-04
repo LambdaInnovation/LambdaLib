@@ -17,9 +17,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import cn.annoreg.base.RegistrationFieldSimple;
-import cn.annoreg.core.LoadStage;
-import cn.annoreg.core.RegistryTypeDecl;
+import cn.lambdalib.annoreg.base.RegistrationFieldSimple;
+import cn.lambdalib.annoreg.core.LoadStage;
+import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 import cn.liutils.registry.KeyHandlerRegistration.RegKeyHandler;
 import cn.liutils.util.helper.KeyHandler;
 import cn.liutils.util.helper.KeyManager;

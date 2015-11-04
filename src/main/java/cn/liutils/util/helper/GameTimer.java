@@ -14,7 +14,7 @@ package cn.liutils.util.helper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import cn.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.core.Registrant;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

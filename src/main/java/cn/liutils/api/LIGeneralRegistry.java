@@ -19,7 +19,7 @@ import net.minecraftforge.common.config.Property;
 import cn.liutils.api.register.Configurable;
 
 /**
- * A public interface for all LIUtils Non-Client API functions.
+ * A public interface for all LambdaLib Non-Client API functions.
  * @author WeAthFolD
  */
 public class LIGeneralRegistry {

@@ -18,8 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import cn.lambdalib.core.LambdaLib;
 import net.minecraft.entity.Entity;
-import cn.liutils.core.LIUtils;
 
 /**
  * Compared to the old API, this class is designed to be delegated. Entities should create EntityX by themselves and delegate event&calls.
@@ -68,7 +68,7 @@ public class EntityX<T extends Entity> {
 	
 	public void addMotionHandler(MotionHandler mh) {
 		if(motionHandlers.containsKey(mh.getID())) {
-			LIUtils.log.error("Duplicate MotionHandler ID");
+			LambdaLib.log.error("Duplicate MotionHandler ID");
 			return;
 		}
 		

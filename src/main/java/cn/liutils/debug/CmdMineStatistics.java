@@ -26,8 +26,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.RegCommand;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegCommand;
 import cn.liutils.template.command.LICommandBase;
 
 /**

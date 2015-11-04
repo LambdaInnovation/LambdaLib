@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegEventHandler;
+import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
 import net.minecraft.world.World;
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.RegEventHandler;
-import cn.annoreg.mc.RegEventHandler.Bus;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;

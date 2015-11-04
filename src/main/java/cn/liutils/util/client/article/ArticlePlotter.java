@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.util.client.HudUtils;
 import cn.liutils.util.client.RenderUtils;
 import cn.liutils.util.helper.Color;
@@ -36,7 +36,7 @@ public class ArticlePlotter {
 		try {
 			return new ArticleCompiler("unknown", new ByteArrayInputStream(lang.getBytes())).compile();
 		} catch (Exception e) {
-			LIUtils.log.error("Exception compiling lang, string: " + lang, e);
+			LambdaLib.log.error("Exception compiling lang, string: " + lang, e);
 			return null;
 		}
 	}

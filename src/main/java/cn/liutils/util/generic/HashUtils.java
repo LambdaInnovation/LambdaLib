@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 
 /**
  * Provides some hash functions
@@ -22,7 +22,7 @@ public enum HashUtils {
 			md = MessageDigest.getInstance(alg);
 		}
 		catch (NoSuchAlgorithmException e) {
-			LIUtils.log.error("Failed to initialize HashUtils." + alg, e);
+			LambdaLib.log.error("Failed to initialize HashUtils." + alg, e);
 		}
 		MD = md;
 	}

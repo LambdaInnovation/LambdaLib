@@ -19,8 +19,8 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.RegEventHandler;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegEventHandler;
 import cn.liutils.api.event.OpenAuxGuiEvent;
 import cn.liutils.util.client.RenderUtils;
 import cn.liutils.util.helper.GameTimer;

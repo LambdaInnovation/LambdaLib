@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import cn.annoreg.core.Registrant;
-import cn.annoreg.mc.RegInit;
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegInit;
+import cn.lambdalib.core.LambdaLib;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -150,7 +150,7 @@ class ArticleCompiler {
 	}
 	
 	private void log(String message) {
-		LIUtils.log.info("LCP: " + message);
+		LambdaLib.log.info("LCP: " + message);
 	}
 	
 	public static class LangCompileException extends RuntimeException {

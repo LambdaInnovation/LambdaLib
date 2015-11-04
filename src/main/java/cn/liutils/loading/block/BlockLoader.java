@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import cn.liutils.core.LIUtils;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.loading.Loader;
 import cn.liutils.render.material.Material;
 
@@ -63,7 +63,7 @@ public class BlockLoader extends Loader<Block> {
 			
 			return block;
 		} catch(Exception e) {
-			LIUtils.log.fatal("An error occured doing block construction.");
+			LambdaLib.log.fatal("An error occured doing block construction.");
 			e.printStackTrace();
 			return null;
 		}
@@ -82,7 +82,7 @@ public class BlockLoader extends Loader<Block> {
 				checkRuleset(block, ns, ((BlockLoadRuleProvider)block).getLoadRules(), name);
 			}
 		} catch(Exception e) {
-			LIUtils.log.fatal("An error occured applying loader rules.");
+			LambdaLib.log.fatal("An error occured applying loader rules.");
 			e.printStackTrace();
 		}
 	}

@@ -22,13 +22,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraftforge.common.config.Configuration;
-import cn.annoreg.core.AnnotationData;
-import cn.annoreg.core.LoadStage;
-import cn.annoreg.core.RegModInformation;
-import cn.annoreg.core.RegistryType;
-import cn.annoreg.core.RegistryTypeDecl;
+import cn.lambdalib.annoreg.core.AnnotationData;
+import cn.lambdalib.annoreg.core.LoadStage;
+import cn.lambdalib.annoreg.core.RegModInformation;
+import cn.lambdalib.annoreg.core.RegistryType;
+import cn.lambdalib.annoreg.core.RegistryTypeDecl;
+import cn.lambdalib.core.LambdaLib;
 import cn.liutils.api.LIGeneralRegistry;
-import cn.liutils.core.LIUtils;
 
 @RegistryTypeDecl
 public class ConfigurableRegistry extends RegistryType {
@@ -39,7 +39,7 @@ public class ConfigurableRegistry extends RegistryType {
 	}
 
 	public ConfigurableRegistry() {
-		super(RegConfigurable.class, LIUtils.REGISTER_TYPE_CONFIGURABLE);
+		super(RegConfigurable.class, "Configurable");
 		this.setLoadStage(LoadStage.PRE_INIT);
 	}
 
