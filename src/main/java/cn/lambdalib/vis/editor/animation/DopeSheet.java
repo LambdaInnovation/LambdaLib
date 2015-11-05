@@ -20,9 +20,16 @@ import java.util.TreeMap;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.cgui.gui.Widget;
+import cn.lambdalib.cgui.gui.component.DrawTexture;
+import cn.lambdalib.cgui.gui.component.ElementList;
 import cn.lambdalib.cgui.gui.component.TextBox;
+import cn.lambdalib.cgui.gui.component.Transform.HeightAlign;
 import cn.lambdalib.cgui.gui.event.DragEvent;
+import cn.lambdalib.cgui.gui.event.DragStopEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
+import cn.lambdalib.cgui.gui.event.GainFocusEvent;
+import cn.lambdalib.cgui.gui.event.GuiEvent;
+import cn.lambdalib.cgui.gui.event.MouseDownEvent;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.client.RenderUtils;
@@ -40,6 +47,17 @@ import net.minecraft.util.ResourceLocation;
  */
 public class DopeSheet extends Window {
 	
+	// EVENTS
+	public static class TimelineChangeEvent implements GuiEvent {
+		
+		public final Timeline target;
+		
+		public TimelineChangeEvent(Timeline _target) {
+			target = _target;
+		}
+		
+	}
+	
 	private static ResourceLocation tex(String loc) {
 		return VEVars.tex("anim/" + loc);
 	}
@@ -52,9 +70,13 @@ public class DopeSheet extends Window {
 	private int fps = 40;
 	private double length = 3;
 	
-	private static final double TIMEAREA_L = 60, TIMEAREA_R = 280, TIMEAREA_S = TIMEAREA_R - TIMEAREA_L;
+	private double time_l = 0, time_r = 3;
 	
-	private class Frame {
+	private TLWidget focusTL;
+	
+	private static final double TIMEAREA_L = 70, TIMEAREA_R = 295, TIMEAREA_S = TIMEAREA_R - TIMEAREA_L;
+	
+	public static class Frame {
 		int frame;
 		double value;
 		
@@ -64,8 +86,9 @@ public class DopeSheet extends Window {
 		}
 	}
 	
-	// Preserved for future use. (More types of curves?)
-	private abstract class BaseTimeline {
+	public static abstract class Timeline {
+		private DopeSheet dopesheet;
+		
 		private List<Frame> list_ = new ArrayList();
 		private IFittedCurve curve_ = createCurve();
 		
@@ -86,17 +109,21 @@ public class DopeSheet extends Window {
 			return list_.size(); 
 		}
 		
+		public IFittedCurve getCurve() {
+			return curve_;
+		}
+		
 		public void rebuildCurve() {
-			curve_ = createCurve();
+			curve_.reset();
 			for(Frame f : list_) {
-				curve_.addPoint((double) f.frame / fps, f.value);
+				curve_.addPoint((double) f.frame / dopesheet.fps, f.value);
 			}
 		}
 		
 		protected abstract IFittedCurve createCurve();
 	}
 	
-	private class Timeline extends BaseTimeline {
+	private class CubicTimeline extends Timeline {
 
 		@Override
 		protected IFittedCurve createCurve() {
@@ -107,7 +134,7 @@ public class DopeSheet extends Window {
 	
 	private class TimePtr extends Widget {
 		
-		int frame;
+		private int frame;
 		
 		public TimePtr() {
 			listen(DragEvent.class, (w, event) -> 
@@ -116,15 +143,19 @@ public class DopeSheet extends Window {
 				double ax = getGui().mouseX - event.offsetX;
 				double lx = (ax - parent.x) / parent.scale + 5;
 				lx = MathUtils.wrapd(TIMEAREA_L, TIMEAREA_R, lx);
-				lx = (lx - TIMEAREA_L) / TIMEAREA_S;
 				
-				frame = (int) (fps * length * lx);
-				transform.x = TIMEAREA_L + TIMEAREA_S * frame / (fps * length) - 5;
-				dirty = true;
+				setFrame(x2f(lx));
 			});
 			
 			listen(FrameEvent.class, (w, event) ->
 			{
+				GL11.glColor4d(1, 1, 1, 1);
+				GL11.glLineWidth(3f);
+				GL11.glBegin(GL11.GL_LINES);
+				GL11.glVertex2f(5, 5);
+				GL11.glVertex2f(5, 68);
+				GL11.glEnd();
+				
 				RenderUtils.loadTexture(TEX_TIMEPTR);
 				if(event.hovering)
 					GL11.glColor4f(1, 1, 1, 1);
@@ -138,11 +169,138 @@ public class DopeSheet extends Window {
 			transform.y = 27;
 		}
 		
+		public void setFrame(int f) {
+			frame = f;
+			transform.x = f2x(frame) - 5;
+			dirty = true;
+		}
+		
+	}
+	
+	private class TLWidget extends Widget {
+		
+		final String path;
+		final Timeline timeline;
+		final List<FrameWidget> widgets = new ArrayList();
+		
+		TLWidget(String _path, Timeline _timeline) {
+			path = _path;
+			timeline = _timeline;
+			
+			listen(FrameEvent.class, (w, event) -> 
+			{
+				float amul = this == focusTL ? 0.9f : 1f;
+				float c1 = .15f * amul, c2 = .12f * amul;
+				
+				GL11.glColor4d(c1, c1, c1, 1);
+				HudUtils.colorRect(3, 0, 67, 10);
+				
+				GL11.glColor4d(c2, c2, c2, 1);
+				HudUtils.colorRect(70, 0, TIMEAREA_S, 10);
+				
+				Font.font.draw(path, 4, 0, 9, 0xffffff);
+			});
+			
+			listen(GainFocusEvent.class, (w, event) -> 
+			{
+				if(focusTL != this) {
+					focusTL = this;
+					DopeSheet.this.post(new TimelineChangeEvent(focusTL.timeline));
+				}
+			});
+			
+			transform.setPos(0, 0).setSize(300, 10);
+		}
+		
+		@Override
+		public void onAdded() {
+			rebuild();
+		}
+		
+		public void rebuild() {
+			for(Widget w : widgets)
+				this.removeWidget(w);
+			widgets.clear();
+			
+			for(int i = 0; i < timeline.size() - 1; ++i) {
+				if(timeline.frame(i).frame == timeline.frame(i+1).frame) {
+					timeline.remove(i);
+					--i;
+				}
+			}
+			
+			timeline.rebuildCurve();
+			
+			for(int i = 0; i < timeline.size(); ++i) {
+				Frame f = timeline.frame(i);
+				double x = f2t(f.frame);
+				if(x >= time_l && x <= time_r) {
+					FrameWidget fw = new FrameWidget(f);
+					addWidget(fw);
+					widgets.add(fw);
+				}
+			}
+		}
+		
+		private class FrameWidget extends Widget {
+			
+			final Frame frame;
+			final DrawTexture texture;
+			
+			public FrameWidget(Frame _frame) {
+				frame = _frame;
+				repose();
+				transform.alignHeight = HeightAlign.CENTER;
+				
+				texture = new DrawTexture();
+				texture.setTex(TEX_KEYFRAME_OFF);
+				addComponent(texture);
+				
+				transform.setSize(10, 10);
+				
+				listen(DragEvent.class, (w, e) -> 
+				{
+					if(focusTL != TLWidget.this) {
+						focusTL = TLWidget.this;
+						DopeSheet.this.post(new TimelineChangeEvent(focusTL.timeline));
+					}
+					
+					double ax = getGui().mouseX - e.offsetX;
+					double lx = (ax - TLWidget.this.x) / TLWidget.this.scale + 5;
+					lx = MathUtils.wrapd(TIMEAREA_L, TIMEAREA_R, lx);
+					log(lx);
+					
+					int f = x2f(lx);
+					frame.frame = f;
+					w.transform.x = f2x(f) - 5;
+					w.dirty = true;
+					
+					texture.setTex(TEX_KEYFRAME_ON);
+				});
+				
+				listen(DragStopEvent.class, (w, e) ->
+				{
+					texture.setTex(TEX_KEYFRAME_OFF);
+					rebuild();
+				});
+			}
+			
+			public void repose() {
+				transform.x = f2x(frame.frame) - 5;
+				dirty = true;
+			}
+			
+		}
+		
 	}
 	
 	private TimePtr pointer;
 	
 	private Map<String, Timeline> table = new TreeMap();
+	
+	private ElementList elements;
+	
+	private Widget timeArea;
 
 	public DopeSheet() {
 		super("Dope Sheet");
@@ -193,12 +351,54 @@ public class DopeSheet extends Window {
 			LambdaLib.log.error(e);
 		}
 		
+		{
+			Widget w = new Widget();
+			w.transform.setSize(TIMEAREA_S, 7).setPos(TIMEAREA_L, 16);
+			w.addComponent(new DrawTexture().setTex(null).setColor4i(50, 50, 50, 255));
+			w.listen(MouseDownEvent.class, (__, event) -> {
+				pointer.setFrame(x2f(TIMEAREA_L + event.x));
+			});
+			body.addWidget(w);
+		}
+		
+		
+		timeArea = new Widget();
+		timeArea.transform.setSize(300, 60).setPos(0, 23);
+		timeArea.listen(FrameEvent.class, (w, event) -> 
+		{
+			GL11.glColor4d(.2, .2, .2, 1);
+			HudUtils.colorRect(3, 0, 67, 60);
+			GL11.glColor4d(.15, .15, .15, 1);
+			HudUtils.colorRect(70, 0, 225, 60);
+		});
+		body.addWidget(timeArea);
+		
 	}
 	
-	public void addTarget(String path) {
+	public void addTarget(String path, Timeline timeline) {
 		if(table.containsKey(path))
 			throw new RuntimeException();
-		table.put(path, new Timeline());
+		table.put(path, timeline);
+		timeline.dopesheet = this;
+		if(this.getGui() != null) {
+			rebuild();
+		}
+	}
+	
+	@Override
+	public void onAdded() {
+		rebuild();
+	}
+	
+	private void rebuild() {
+		if(elements != null)
+			timeArea.removeComponent(elements);
+		
+		elements = new ElementList();
+		for(Map.Entry<String, Timeline> entry : table.entrySet()) {
+			elements.addWidget(new TLWidget(entry.getKey(), entry.getValue()));
+		}
+		timeArea.addComponent(elements);
 	}
 	
 	private void boxWithName(double x, double y, String name, Widget box) {
@@ -216,5 +416,35 @@ public class DopeSheet extends Window {
 		body.addWidget(box);
 	}
 	
-
+	// Convert macros
+	// f: frame, t: time, x: x_position
+	
+	private double f2t(int frame) {
+		return (double) frame / fps;
+	}
+	
+	private int t2f(double time) {
+		return (int) (time * fps);
+	}
+	
+	private double x2t(double x) {
+		return time_l + (x - TIMEAREA_L) / TIMEAREA_S * (time_r - time_l);
+	}
+	
+	private double t2x(double time) {
+		return TIMEAREA_L + (time - time_l) / (time_r - time_l) * TIMEAREA_S;
+	}
+	
+	private double f2x(int frame) {
+		return t2x(f2t(frame));
+	}
+	
+	private int x2f(double x) {
+		return t2f(x2t(x));
+	}
+	
+	private void log(Object obj) {
+		LambdaLib.log.info("[DopeSheet]" + obj);
+	}
+	
 }

@@ -19,6 +19,7 @@ import org.lwjgl.util.glu.GLU;
 
 import cn.lambdalib.cgui.gui.component.Transform;
 import cn.lambdalib.cgui.gui.event.DragEvent;
+import cn.lambdalib.cgui.gui.event.DragStopEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GainFocusEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
@@ -46,6 +47,11 @@ public class LIGui extends WidgetContainer {
 	Widget focus; //last input focus
 	
 	public final GuiEventBus eventBus = new GuiEventBus();
+	
+	static final long DRAG_TIME_TOLE = 100;
+	long lastStartTime, lastDragTime;
+	Widget draggingNode;
+	double xOffset, yOffset;
 
 	public LIGui() {}
 	
@@ -106,10 +112,6 @@ public class LIGui extends WidgetContainer {
 		return true;
 	}
 	
-	static final long DRAG_TIME_TOLE = 100;
-	long lastStartTime, lastDragTime;
-	Widget draggingNode;
-	double xOffset, yOffset;
 	/**
 	 * Standard GUI class callback.
 	 * @param mx
@@ -121,7 +123,7 @@ public class LIGui extends WidgetContainer {
     	updateMouse(mx, my);
     	if(btn == 0) {
     		long time = GameTimer.getAbsTime();
-        	if(Math.abs(time - dt - lastStartTime) > DRAG_TIME_TOLE) {
+        	if(draggingNode == null) {
         		lastStartTime = time;
         		draggingNode = getTopWidget(mx, my);
         		if(draggingNode == null)
@@ -349,6 +351,17 @@ public class LIGui extends WidgetContainer {
 	 * Generic checking.
 	 */
 	private void frameUpdate() {
+		long time = GameTimer.getAbsTime();
+		
+		// Update drag
+		if(draggingNode != null) {
+			if(time - lastDragTime > DRAG_TIME_TOLE) {
+				draggingNode.post(new DragStopEvent());
+				draggingNode = null;
+			}
+		}
+		//
+		
 		updateTraverse(null, this);
 		this.update();
 	}

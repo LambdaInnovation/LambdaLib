@@ -61,4 +61,9 @@ public class LineInterpCurve implements IFittedCurve {
 		return points.get(i);
 	}
 
+	@Override
+	public void reset() {
+		points.clear();
+	}
+
 }

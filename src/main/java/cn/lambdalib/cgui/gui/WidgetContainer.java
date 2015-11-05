@@ -165,7 +165,7 @@ public class WidgetContainer implements Iterable<Widget> {
 	}
 	
 	/**
-	 * Callback when a widget was loaded. Allows lower class to do
+	 * Callback when a widget was loaded. Allows sub class to do
 	 * some specific data setup.
 	 */
 	protected void onWidgetAdded(String name, Widget w) {}

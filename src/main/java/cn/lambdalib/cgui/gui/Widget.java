@@ -37,7 +37,8 @@ public class Widget extends WidgetContainer {
 	LIGui gui;
 	Widget parent;
 	
-	//*INTERNAL* Real-time calculated data not directly relevant to widget properties
+	// Calculated absolute widget position and scale
+	// Will only be updated if widget.dirty = true each frame
 	public double x, y;
 	public double scale;
 	/**
@@ -203,8 +204,26 @@ public class Widget extends WidgetContainer {
 		eventBus.unlisten(clazz, handler);
 	}
 	
+	/**
+	 * Post a event to this widget's event bus.
+	 * @param event
+	 */
 	public void post(GuiEvent event) {
+		post(event, false);
+	}
+	
+	/**
+	 * Post a event to this widget's event bus (and all it's childs hierarchically, if tochild=true)
+	 * @param event
+	 * @param tochild If we should post event to all childs hierarchically
+	 */
+	public void post(GuiEvent event, boolean tochild) {
 		eventBus.postEvent(this, event);
+		if(tochild) {
+			for(Widget w : widgets.values())
+				if(!w.disposed)
+					w.post(event, true);
+		}
 	}
 	
 	//Utils

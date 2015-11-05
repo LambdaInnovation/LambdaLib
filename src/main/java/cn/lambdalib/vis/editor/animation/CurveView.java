@@ -41,7 +41,7 @@ public class CurveView extends Window {
 	
 	private double l = DEF_L, r = DEF_R, u = DEF_U, d = DEF_D;
 
-	public final IFittedCurve curve;
+	private IFittedCurve curve;
 	public double precision = 0.01;
 	
 	public int xdiv = 10, ydiv = 10;
@@ -55,6 +55,10 @@ public class CurveView extends Window {
 		
 		initViewArea();
 		initWidgets();
+	}
+	
+	public void setCurve(IFittedCurve _curve) {
+		curve = _curve;
 	}
 	
 	private void initViewArea() {

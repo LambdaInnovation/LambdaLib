@@ -43,9 +43,6 @@ public class LambdaLib {
 	 */
 	public static final boolean DEBUG = false;
 	
-	@Instance("LIutils")
-	public static LambdaLib instance;
-	
 	public static Logger log = FMLLog.getLogger();
 
 	@RegMessageHandler.WrapperInstance

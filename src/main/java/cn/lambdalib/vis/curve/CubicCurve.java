@@ -127,4 +127,9 @@ public class CubicCurve implements IFittedCurve {
 		
 	};
 
+	@Override
+	public void reset() {
+		pts.clear();
+	}
+
 }

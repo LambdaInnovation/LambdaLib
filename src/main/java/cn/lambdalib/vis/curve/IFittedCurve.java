@@ -55,4 +55,9 @@ public interface IFittedCurve {
 	 */
 	Point getPoint(int i);
 	
+	/**
+	 * Remove all the control points and reset the curve.
+	 */
+	void reset();
+	
 }

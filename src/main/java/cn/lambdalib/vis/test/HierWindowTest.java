@@ -6,9 +6,12 @@ import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.cgui.gui.LIGuiScreen;
 import cn.lambdalib.util.generic.VecUtils;
 import cn.lambdalib.vis.curve.CubicCurve;
+import cn.lambdalib.vis.curve.IFittedCurve;
 import cn.lambdalib.vis.editor.IVisPluginCommand;
 import cn.lambdalib.vis.editor.animation.CurveView;
 import cn.lambdalib.vis.editor.animation.DopeSheet;
+import cn.lambdalib.vis.editor.animation.DopeSheet.Timeline;
+import cn.lambdalib.vis.editor.animation.DopeSheet.TimelineChangeEvent;
 import cn.lambdalib.vis.editor.common.widget.WindowHierarchy;
 import cn.lambdalib.vis.editor.common.widget.WindowHierarchy.Folder;
 import cn.lambdalib.vis.editor.property.CompTransformProperty;
@@ -89,6 +92,38 @@ public class HierWindowTest implements IVisPluginCommand {
 			gui.addWidget(view);
 			
 			DopeSheet sheet = new DopeSheet();
+			sheet.addTarget("233", new Timeline() {
+				
+				{
+					this.add(0, 10);
+					this.add(100, 1);
+					this.add(200, 3);
+				}
+
+				@Override
+				protected IFittedCurve createCurve() {
+					return new CubicCurve();
+				}
+				
+			});
+			sheet.addTarget("lol", new Timeline() {
+				
+				{
+					this.add(0, 10);
+					this.add(50, 1);
+					this.add(115, 3);
+				}
+
+				@Override
+				protected IFittedCurve createCurve() {
+					return new CubicCurve();
+				}
+				
+			});
+			sheet.listen(TimelineChangeEvent.class, (w, event) -> 
+			{
+				view.setCurve(event.target.getCurve());
+			});
 			gui.addWidget(sheet);
 		}
 		
