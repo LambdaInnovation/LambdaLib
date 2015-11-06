@@ -20,12 +20,13 @@ import cn.lambdalib.cgui.gui.component.TextBox;
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign;
 import cn.lambdalib.cgui.gui.component.Transform.WidthAlign;
 import cn.lambdalib.cgui.gui.event.DragEvent;
+import cn.lambdalib.cgui.gui.event.DragStopEvent;
+import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.MouseDownEvent;
 import cn.lambdalib.cgui.gui.event.RefreshEvent;
 import cn.lambdalib.cgui.loader.EventLoader;
-import cn.lambdalib.util.helper.Font;
-import cn.lambdalib.vis.editor.common.EditBox;
+import cn.lambdalib.util.generic.MathUtils;
 import cn.lambdalib.vis.editor.common.VEVars;
 import net.minecraft.util.ResourceLocation;
 
@@ -96,26 +97,6 @@ public class Window extends Widget {
 				topArea.addWidget(container);
 			}
 			
-			/* Rescaling */ {
-				EditBox box = new EditBox() {
-
-					@Override
-					protected String repr() throws Exception {
-						return String.valueOf(Window.this.transform.scale);
-					}
-
-					@Override
-					protected void setValue(String content) throws Exception {
-						Window.this.transform.scale = Double.valueOf(content);
-						Window.this.dirty = true;
-					}
-				
-				};
-				box.transform.x = Font.font.strLen(name, TOP_FT_SIZE) + 10;
-				box.transform.y = 1;
-				topArea.addWidget(box);
-			}
-			
 			addWidget("top", topArea);
 		}
 		
@@ -135,9 +116,62 @@ public class Window extends Widget {
 		//refreshArea();
 	}
 	
+	Widget resizeArea;
+	
+	@Override
+	public void onAdded() {
+		resizeArea = new Widget() {
+			boolean dragging = false;
+			
+			{
+				Window window = Window.this;
+				DrawTexture dt = new DrawTexture().setTex(TEX_BTN_RESIZE);
+				
+				double sz = 6, hsz = sz / 2;
+				
+				transform.setSize(sz, sz);
+				listen(DragEvent.class, (__, event) -> 
+				{
+					double ax = getGui().mouseX - event.offsetX + hsz;
+					double lx = (ax - Window.this.x) / Window.this.scale;
+					lx = MathUtils.wrapd(20, window.transform.width * 1.5, lx);
+					transform.x = window.transform.x + lx * window.transform.scale - hsz;
+					transform.y = window.transform.y + lx * window.transform.scale * (window.transform.height / window.transform.width) - hsz;
+					dirty = true;
+					dragging = true;
+				});
+				
+				listen(DragStopEvent.class, (__, event) -> 
+				{
+					double lx = (x - window.x) / window.scale;
+					double nscale = window.transform.scale * lx / window.transform.width;
+					window.transform.scale = MathUtils.wrapd(0.2, 1.5, nscale);
+					window.dirty = true;
+					dragging = false;
+				});
+				listen(FrameEvent.class, (__, event) ->
+				{
+					dt.color.a = event.hovering || dragging ? 1 : 0;
+					
+					if(!dragging) {
+						transform.setPos(
+							window.transform.x + window.transform.width * window.transform.scale - hsz, 
+							window.transform.y + window.transform.height * window.transform.scale - hsz);
+						dirty = true;
+						if(window.disposed)
+							dispose();
+					}
+				});
+				addComponent(dt);
+			}
+		};
+		this.getAbstractParent().addWidget(resizeArea);
+	}
+	
 	static final ResourceLocation 
 		TEX_BTN_MINIMIZE = VEVars.tex("buttons/minimize"),
-		TEX_BTN_RESTORE = VEVars.tex("buttons/restore");
+		TEX_BTN_RESTORE = VEVars.tex("buttons/restore"),
+		TEX_BTN_RESIZE = VEVars.tex("buttons/resize");
 	
 	public Widget initTopButton(TopButtonType type) {
 		final double sz = 8, step = sz + 5;

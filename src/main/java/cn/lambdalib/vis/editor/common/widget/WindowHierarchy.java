@@ -49,6 +49,7 @@ public class WindowHierarchy extends Window implements IHierarchy {
 	
 	@Override
 	public void onAdded() {
+		super.onAdded();
 		rebuild();
 	}
 	

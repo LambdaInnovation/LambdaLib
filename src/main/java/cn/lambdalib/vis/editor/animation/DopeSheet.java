@@ -12,12 +12,18 @@
  */
 package cn.lambdalib.vis.editor.animation;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.lwjgl.opengl.GL11;
+
+import com.google.gson.JsonObject;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.component.DrawTexture;
@@ -57,6 +63,8 @@ public class DopeSheet extends Window {
 		}
 		
 	}
+	
+	private static class TimePtrChangeEvent implements GuiEvent {}
 	
 	private static ResourceLocation tex(String loc) {
 		return VEVars.tex("anim/" + loc);
@@ -101,8 +109,22 @@ public class DopeSheet extends Window {
 			list_.remove(index);
 		}
 		
+		public void remove(Frame obj) {
+			list_.remove(obj);
+		}
+		
 		public Frame frame(int index) { 
 			return list_.get(index); 
+		}
+		
+		public Frame frameByF(int frame) {
+			for(Frame f : list_) {
+				if(f.frame == frame)
+					return f;
+				if(f.frame > frame)
+					return null;
+			}
+			return null;
 		}
 		
 		public int size() { 
@@ -173,6 +195,7 @@ public class DopeSheet extends Window {
 			frame = f;
 			transform.x = f2x(frame) - 5;
 			dirty = true;
+			DopeSheet.this.post(new TimePtrChangeEvent(), true);
 		}
 		
 	}
@@ -183,9 +206,80 @@ public class DopeSheet extends Window {
 		final Timeline timeline;
 		final List<FrameWidget> widgets = new ArrayList();
 		
+		Widget addFrame;
+		
 		TLWidget(String _path, Timeline _timeline) {
 			path = _path;
 			timeline = _timeline;
+			
+			addFrame = new Widget() {
+				{
+					DrawTexture dt = new DrawTexture();
+					dt.texture = TEX_KEYFRAME_OFF;
+					addComponent(dt);
+					
+					transform.alignHeight = HeightAlign.CENTER;
+					transform.setSize(6, 6).setPos(30, 0);
+					
+					listen(TimePtrChangeEvent.class, (__, event) -> 
+					{
+						for(int i = 0; i < timeline.size(); ++i) {
+							Frame f = timeline.frame(i);
+							if(f.frame > pointer.frame) break;
+							if(f.frame == pointer.frame) {
+								dt.setTex(TEX_KEYFRAME_ON);
+								return;
+							}
+						}
+						dt.setTex(TEX_KEYFRAME_OFF);
+					});
+					
+					listen(MouseDownEvent.class, (__, event) -> 
+					{
+						Frame f = timeline.frameByF(pointer.frame);
+						if(f == null) {
+							timeline.add(pointer.frame, timeline.getCurve().valueAt(f2t(pointer.frame)));
+						} else {
+							timeline.remove(f);
+						}
+						rebuild();
+						DopeSheet.this.post(new TimePtrChangeEvent(), true);
+					});
+				}
+			};
+			addWidget(addFrame);
+			
+			addWidget(new EditBox() {
+				
+				{
+					transform.setPos(37, 1).setSize(29, 8);
+					
+					listen(TimePtrChangeEvent.class, (__, event) -> 
+					{
+						text.setContent(r());
+					});
+				}
+
+				@Override
+				protected String repr() throws Exception {
+					return r();
+				}
+				
+				private String r() {
+					return String.format("%.3f", timeline.curve_.valueAt(f2t(pointer.frame)));
+				}
+
+				@Override
+				protected void setValue(String content) throws Exception {
+					double val = Double.valueOf(content);
+					Frame f = timeline.frameByF(pointer.frame);
+					if(f != null) {
+						 f.value = val;
+						 rebuild();
+					} else throw new RuntimeException();
+				}
+				
+			});
 			
 			listen(FrameEvent.class, (w, event) -> 
 			{
@@ -214,6 +308,7 @@ public class DopeSheet extends Window {
 		
 		@Override
 		public void onAdded() {
+			super.onAdded();
 			rebuild();
 		}
 		
@@ -268,7 +363,6 @@ public class DopeSheet extends Window {
 					double ax = getGui().mouseX - e.offsetX;
 					double lx = (ax - TLWidget.this.x) / TLWidget.this.scale + 5;
 					lx = MathUtils.wrapd(TIMEAREA_L, TIMEAREA_R, lx);
-					log(lx);
 					
 					int f = x2f(lx);
 					frame.frame = f;
@@ -385,9 +479,24 @@ public class DopeSheet extends Window {
 		}
 	}
 	
+	/**
+	 * Convert current timeline data (all timeline) into a json object containing {path:curve} mapping.
+	 */
+	public JsonObject toJson() {
+		return null;
+	}
+	
+	/**
+	 * Construct the timeines from the given json object
+	 */
+	public void fromJson(JsonObject obj) {
+		
+	}
+	
 	@Override
 	public void onAdded() {
 		rebuild();
+		super.onAdded();
 	}
 	
 	private void rebuild() {
@@ -445,6 +554,21 @@ public class DopeSheet extends Window {
 	
 	private void log(Object obj) {
 		LambdaLib.log.info("[DopeSheet]" + obj);
+	}
+	
+	private static class TimelineAdapter extends TypeAdapter<Timeline> {
+
+		@Override
+		public void write(JsonWriter out, Timeline value) throws IOException {
+			
+		}
+
+		@Override
+		public Timeline read(JsonReader in) throws IOException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
 	}
 	
 }
