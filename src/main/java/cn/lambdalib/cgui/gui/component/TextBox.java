@@ -81,8 +81,8 @@ public class TextBox extends Component {
 		return this;
 	}
 	
-	public TextBox disallowEdit() {
-		allowEdit = false;
+	public TextBox allowEdit() {
+		allowEdit = true;
 		return this;
 	}
 	

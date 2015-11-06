@@ -275,7 +275,7 @@ public abstract class ElementEditor extends Widget {
 			transform.width = 120;
 			transform.height = 10;
 			
-			addComponent(new TextBox().setSize(9));
+			addComponent(new TextBox().allowEdit().setSize(9));
 			listen(FrameEvent.class, (w, e) -> {
 				if(lastErrorTime != -1 && GameTimer.getAbsTime() - lastErrorTime < 1000) {
 					GL11.glColor4d(1, 0, 0, GameTimer.getAbsTime() % 500 < 250 ? 0.6 : 0.3);
@@ -339,7 +339,7 @@ public abstract class ElementEditor extends Widget {
 		@Override
 		public void onAdded() {
 			transform.setSize(65, 10);
-			box = new TextBox().disallowEdit().setSize(10);
+			box = new TextBox().setSize(10);
 			addComponent(box);
 			Tint tint = new Tint();
 			tint.idleColor = new Color(1, 1, 1, 0.3);
@@ -382,7 +382,7 @@ public abstract class ElementEditor extends Widget {
 				transform.setSize(40, 10);
 				transform.setPos(65, 10 * i);
 				name = enumConstants[i].toString();
-				addComponent(new TextBox().setSize(10).disallowEdit().setContent(name));
+				addComponent(new TextBox().setSize(10).setContent(name));
 				Tint tint = new Tint();
 				tint.idleColor = new Color(1, 1, 1, 0.3);
 				addComponent(tint);

@@ -1,6 +1,7 @@
 package cn.lambdalib.cgui.gui.event;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +25,11 @@ public final class GuiEventBus {
 				toadd.add(node);
 				return true;
 			} else {
-				return super.add(node);
+				boolean res = super.add(node);
+				if(res) {
+					Collections.sort(this);
+				}
+				return res;
 			}
 		}
 		
@@ -44,6 +49,9 @@ public final class GuiEventBus {
 			iterating = false;
 			addAll(toadd);
 			removeAll(toremove);
+			if(!toadd.isEmpty()) {
+				Collections.sort(this);
+			}
 			toadd.clear();
 			toremove.clear();
 		}
@@ -137,7 +145,7 @@ public final class GuiEventBus {
 
 		@Override
 		public int compareTo(GuiHandlerNode handler) {
-			return ((Integer) priority).compareTo(handler.priority);
+			return -((Integer) priority).compareTo(handler.priority);
 		}
 	}
 	

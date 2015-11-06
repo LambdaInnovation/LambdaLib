@@ -155,6 +155,7 @@ public class LIGui extends WidgetContainer {
 			Widget node = getTopWidget(mx, my);
 			if(node != null) {
 				gainFocus(node);
+				System.out.println("GainFocus " + node);
 				node.post(new MouseDownEvent((mx - node.x) / node.scale, (my - node.y) / node.scale));
 				return true;
 			} else {

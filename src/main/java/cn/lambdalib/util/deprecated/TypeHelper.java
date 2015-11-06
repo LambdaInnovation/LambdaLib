@@ -209,6 +209,11 @@ public class TypeHelper {
 			}
 
 			@Override
+			public String repr(Field f, Object instance) throws Exception {
+				return String.valueOf(((Color) f.get(instance)).asHexColor());
+			}
+			
+			@Override
 			public Object copy(Field f, Object instance) throws Exception {
 				return ((Color)f.get(instance)).copy();
 			}

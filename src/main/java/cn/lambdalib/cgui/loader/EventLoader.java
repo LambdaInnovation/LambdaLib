@@ -42,14 +42,15 @@ public class EventLoader {
 					throw new IllegalArgumentException("par2 not a GuiEvent for " + m.getName());
 				}
 				
-				String path = m.getAnnotation(GuiCallback.class).value();
+				GuiCallback anno = m.getAnnotation(GuiCallback.class);
+				String path = anno.value();
 				Widget target = (Widget) (path.equals("") ? (widget instanceof Widget ? widget : null) : widget.getWidget(path));
 				if(target == null) {
 					LambdaLib.log.error("Didn't find widget named " + path + ".");
 				} else {
 					MethodWrapper wrapper =new MethodWrapper(m, callbackProvider);
 					Class c = pars[1];
-					target.<GuiEvent>listen((Class<? extends GuiEvent>) c, new MethodWrapper(m, callbackProvider));
+					target.<GuiEvent>listen((Class<? extends GuiEvent>) c, new MethodWrapper(m, callbackProvider), anno.priority());
 				}
 			}
 		}
