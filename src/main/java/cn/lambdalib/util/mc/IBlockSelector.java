@@ -19,7 +19,7 @@ import net.minecraft.world.World;
  * @author WeAthFolD
  *
  */
-public interface IBlockFilter {
+public interface IBlockSelector {
 	
 	boolean accepts(World world, int x, int y, int z, Block block);
 	

@@ -4,9 +4,9 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
-public class BlockFilters {
+public class BlockSelectors {
 	
-	public static final IBlockFilter filNothing = new IBlockFilter() {
+	public static final IBlockSelector filNothing = new IBlockSelector() {
 
 		@Override
 		public boolean accepts(World world, int x, int y, int z, Block block) {
@@ -15,7 +15,7 @@ public class BlockFilters {
 		
 	},
 	
-	filNormal = new IBlockFilter() {
+	filNormal = new IBlockSelector() {
 
 		@Override
 		public boolean accepts(World world, int x, int y, int z, Block block) {
@@ -26,7 +26,7 @@ public class BlockFilters {
 		
 	},
 	
-	filEverything = new IBlockFilter() {
+	filEverything = new IBlockSelector() {
 		
 		@Override
 		public boolean accepts(World world, int x, int y, int z, Block block) {

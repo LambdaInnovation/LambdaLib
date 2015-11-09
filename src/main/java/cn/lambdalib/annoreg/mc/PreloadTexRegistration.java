@@ -75,4 +75,9 @@ public class PreloadTexRegistration extends RegistryType {
 		return false;
 	}
 
+	@Override
+	public boolean registerMethod(AnnotationData data) throws Exception {
+		return false;
+	}
+
 }

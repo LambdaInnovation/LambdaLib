@@ -33,10 +33,16 @@ public class RegistrationEmpty extends RegistryType {
 	public boolean registerField(AnnotationData data) throws Exception {
 		return false;
 	}
+	
+	@Override
+	public boolean registerMethod(AnnotationData data) throws Exception {
+		return false;
+	}
 
 	@Override
 	public void visitClass(Class<?> clazz) {}
 	
 	@Override
 	public void visitField(Field field) {}
+	
 }

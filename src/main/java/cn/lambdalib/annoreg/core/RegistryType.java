@@ -14,7 +14,7 @@ package cn.lambdalib.annoreg.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -82,7 +82,16 @@ public abstract class RegistryType {
 		}
 	}
 	
+	public void visitMethod(Method method) {
+		Annotation anno = method.getAnnotation(annoClass);
+		if(anno != null) {
+			newData(new AnnotationData(anno, method));
+		}
+	}
+	
 	public void registerAll(RegModInformation mod) {
+		LLModContainer.log.info("Reg " + this.name);
+		
 		//Dependencies.
 		for (String dep : dependencies) {
 			RegistrationManager.INSTANCE.registerAll(mod.getModInstance(), dep);
@@ -159,6 +168,18 @@ public abstract class RegistryType {
 					itor.remove();
 				}
 				break;
+			case METHOD:
+				Method theMethod = ad.getTheMethod();
+				// METHOD doesn't need SuggestedName feature.
+				try {
+					if (registerMethod(ad))
+						itor.remove();
+				} catch (Exception e) {
+					LLModContainer.log.error("Error when registering {}.", ad.toString());
+					LLModContainer.log.error(e);
+					itor.remove();
+				}
+				break;
 			default:
 				LLModContainer.log.error("Unknown registry data type.");
 				break;
@@ -169,14 +190,27 @@ public abstract class RegistryType {
 		this.currentMod = null;
 	}
 	
+	// CALLBACKS
+	
 	/**
 	 * Return true to remove the data from list. 
 	 * (For Command, reg is done each time the server is started, so can not always remove.)
 	 * @param data
 	 * @return
 	 */
-	public abstract boolean registerClass(AnnotationData data) throws Exception;
-	public abstract boolean registerField(AnnotationData data) throws Exception;
+	public boolean registerClass(AnnotationData data) throws Exception {
+		return true;
+	}
+	
+	public boolean registerField(AnnotationData data) throws Exception {
+		return true;
+	}
+	
+	public boolean registerMethod(AnnotationData data) throws Exception {
+		return true;
+	}
+	
+	// CALLBACKS END
 	
 	public void checkLoadState() {
 		for (RegModInformation mod : RegistrationManager.INSTANCE.getMods()) {
@@ -197,6 +231,9 @@ public abstract class RegistryType {
 	
 	private String currentSuggestedName;
 	
+	/**
+	 * @return A readable suggested name for this item of registration. NULL for method registration process.
+	 */
 	protected String getSuggestedName() {
 		return currentSuggestedName;
 	}

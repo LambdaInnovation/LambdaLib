@@ -33,6 +33,11 @@ public abstract class RegistrationFieldSimple<ANNO extends Annotation, BASE> ext
 	public boolean registerClass(AnnotationData data) throws Exception {
 		throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on class.");
 	}
+	
+	@Override
+	public boolean registerMethod(AnnotationData data) throws Exception {
+		throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on method.");
+	}
 
 	@Override
 	public boolean registerField(AnnotationData data) throws Exception {

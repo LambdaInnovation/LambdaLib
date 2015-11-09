@@ -19,8 +19,8 @@ import net.minecraft.util.Vec3;
 import cn.lambdalib.util.entityx.MotionHandler;
 import cn.lambdalib.util.entityx.event.CollideEvent;
 import cn.lambdalib.util.generic.VecUtils;
-import cn.lambdalib.util.mc.BlockFilters;
-import cn.lambdalib.util.mc.IBlockFilter;
+import cn.lambdalib.util.mc.BlockSelectors;
+import cn.lambdalib.util.mc.IBlockSelector;
 import cn.lambdalib.util.mc.Raytrace;
 
 /**
@@ -33,7 +33,7 @@ public class Rigidbody extends MotionHandler {
 	public double linearDrag = 1.0;
 	
 	public IEntitySelector entitySel;
-	public IBlockFilter blockFil = BlockFilters.filNormal;
+	public IBlockSelector blockFil = BlockSelectors.filNormal;
 	
 	public boolean accurateCollision = false;
 

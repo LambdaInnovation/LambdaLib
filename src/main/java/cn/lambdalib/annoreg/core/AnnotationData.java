@@ -14,10 +14,11 @@ package cn.lambdalib.annoreg.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class AnnotationData {
 	public enum Type {
-		CLASS, FIELD,
+		CLASS, FIELD, METHOD
 	}
 	
 	public final Type type;
@@ -36,6 +37,12 @@ public class AnnotationData {
 		this.reflect = field;
 		this.type = Type.FIELD;
 	}
+	
+	public AnnotationData(Annotation anno, Method method) {
+		this.anno = anno;
+		this.reflect = method;
+		this.type = Type.METHOD;
+	}
 
 	public <T extends Annotation> T getAnnotation() {
 		return (T) anno;
@@ -49,12 +56,20 @@ public class AnnotationData {
 		return type == Type.FIELD;
 	}
 	
+	public boolean isMethod() {
+		return type == Type.METHOD;
+	}
+	
 	public Class<?> getTheClass() {
 		return isClass() ? (Class<?>) reflect : null;
 	}
 	
 	public Field getTheField() {
 		return isField() ? (Field) reflect : null;
+	}
+	
+	public Method getTheMethod() {
+		return isMethod() ? (Method) reflect : null;
 	}
 	
 	@Override

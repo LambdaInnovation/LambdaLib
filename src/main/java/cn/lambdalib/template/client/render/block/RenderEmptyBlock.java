@@ -30,8 +30,7 @@ public class RenderEmptyBlock implements ISimpleBlockRenderingHandler {
 	
 	public static int id = RenderingRegistry.getNextAvailableRenderId();
 
-	public RenderEmptyBlock() {
-	}
+	public RenderEmptyBlock() {}
 
 	@Override
 	public void renderInventoryBlock(Block block, int metadata, int modelID,

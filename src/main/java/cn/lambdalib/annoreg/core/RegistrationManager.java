@@ -14,6 +14,7 @@ package cn.lambdalib.annoreg.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,8 +22,8 @@ import java.util.Map;
 import java.util.Set;
 
 import cn.lambdalib.annoreg.base.RegistrationEmpty;
-import cn.lambdalib.annoreg.mc.BlockRegistration;
 import cn.lambdalib.core.LLModContainer;
+import cn.lambdalib.core.LambdaLib;
 import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
 
 public class RegistrationManager {
@@ -54,6 +55,7 @@ public class RegistrationManager {
 				prepareClass(Class.forName(name));
 			} catch (Exception e) {
 				LLModContainer.log.warn("Can not load class {}, maybe a SideOnly class.", name);
+				e.printStackTrace();
 				//TODO check whether it's really caused by sideonly
 			} catch (Throwable e) {
 				LLModContainer.log.fatal("Error on loading class {}. Please check the implementation.", name);
@@ -88,6 +90,17 @@ public class RegistrationManager {
 			}
 		}
 		
+		//Method annotations
+		for (Method method : clazz.getDeclaredMethods()) {
+			for (Annotation anno : method.getAnnotations()) {
+				Class<? extends Annotation> annoclazz = anno.annotationType();
+				if(regByClass.containsKey(annoclazz)) {
+					regByClass.get(annoclazz).visitMethod(method);
+				}
+			}
+		}
+		
+		
 		//Inner classes
 		if (innerClassList.containsKey(clazz.getName())) {
 		    for (String inner : innerClassList.get(clazz.getName())) {
@@ -97,7 +110,7 @@ public class RegistrationManager {
 	                LLModContainer.log.warn("Can not load class {}, maybe a SideOnly class.", inner);
                 } catch (Throwable e) {
                     LLModContainer.log.fatal("Error on loading class {}. Please check the implementation.", inner);
-                    e.printStackTrace();
+                    LLModContainer.log.fatal(e);
                 }
 		    }
 		}
@@ -107,7 +120,9 @@ public class RegistrationManager {
 	RegModInformation findMod(AnnotationData data) {
 		for (RegModInformation mod : mods) {
 			Class<?> clazz = data.type == AnnotationData.Type.CLASS ?
-					data.getTheClass() : data.getTheField().getDeclaringClass();
+					data.getTheClass() : 
+					(data.type == AnnotationData.Type.FIELD ? data.getTheField().getDeclaringClass() :
+						data.getTheMethod().getDeclaringClass());
 			if (clazz.getCanonicalName().startsWith(mod.getPackage())) {
 				data.mod = mod;
 				return mod;
@@ -178,8 +193,9 @@ public class RegistrationManager {
                 RegistryType rt = (RegistryType) clazz.newInstance();
                 addRegType(rt);
             } catch (Exception e) {
-                LLModContainer.log.warn("No registry type {}. Might be a SideOnly regtype.", asm.getClassName()); //TODO side only type will go here
-                //e.printStackTrace();
+            	if(LambdaLib.DEBUG) {
+            		LLModContainer.log.warn("No registry type {}. Might be a SideOnly regtype.", asm.getClassName()); //TODO side only type will go here
+            	}
             }
         }
         unloadedRegType.clear();

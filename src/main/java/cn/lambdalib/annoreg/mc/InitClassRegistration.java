@@ -23,10 +23,11 @@ import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 
+@Deprecated
 @RegistryTypeDecl
-public class InitRegistration extends RegistrationClassOrField<RegInit> {
+public class InitClassRegistration extends RegistrationClassOrField<RegInit> {
 
-	public InitRegistration() {
+	public InitClassRegistration() {
 		super(RegInit.class, "SubmoduleInit");
 		this.setLoadStage(LoadStage.INIT);
 	}

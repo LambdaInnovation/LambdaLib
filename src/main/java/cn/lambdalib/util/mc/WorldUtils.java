@@ -92,11 +92,11 @@ public class WorldUtils {
 		return ret;
 	}
 	
-	public static List<BlockPos> getBlocksWithin(Entity entity, double range, int max, IBlockFilter ...filters) {
+	public static List<BlockPos> getBlocksWithin(Entity entity, double range, int max, IBlockSelector ...filters) {
 		return getBlocksWithin(entity.worldObj, entity.posX, entity.posY, entity.posZ, range, max, filters);
 	}
 	
-	public static List<BlockPos> getBlocksWithin(TileEntity te, double range, int max, IBlockFilter ...filters) {
+	public static List<BlockPos> getBlocksWithin(TileEntity te, double range, int max, IBlockSelector ...filters) {
 		return getBlocksWithin(te.getWorldObj(), te.xCoord + 0.5, te.yCoord + 0.5, te.zCoord + 0.5, range, max, filters);
 	}
 	
@@ -104,14 +104,14 @@ public class WorldUtils {
 			World world,
 			final double x, final double y, final double z,
 			double range, int max,
-			IBlockFilter ...filter) {
-		IBlockFilter [] fs = new IBlockFilter[filter.length + 1];
+			IBlockSelector ...filter) {
+		IBlockSelector [] fs = new IBlockSelector[filter.length + 1];
 		for(int i = 0; i < filter.length; ++i)
 			fs[i] = filter[i];
 		
 		final double rangeSq = range * range;
 		
-		fs[filter.length] = new IBlockFilter() {
+		fs[filter.length] = new IBlockSelector() {
 
 			@Override
 			public boolean accepts(World world, int xx, int yy, int zz, Block block) {
@@ -136,14 +136,14 @@ public class WorldUtils {
 		int minX, int minY, int minZ, 
 		int maxX, int maxY, int maxZ, 
 		int max, 
-		IBlockFilter ...filter) {
+		IBlockSelector ...filter) {
 		
 		List<BlockPos> ret = new ArrayList();
 		for(int x = minX; x <= maxX; ++x) {
 			for(int y = minY; y <= maxY; ++y) {
 				for(int z = minZ; z <= maxZ; ++z) {
 					boolean match = true;
-					for(IBlockFilter f : filter) {
+					for(IBlockSelector f : filter) {
 						if(!f.accepts(world, x, y, z, world.getBlock(x, y, z))) {
 							match = false;
 							break;

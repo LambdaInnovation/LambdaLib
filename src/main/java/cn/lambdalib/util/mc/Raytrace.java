@@ -32,7 +32,7 @@ public class Raytrace {
 	 * @param blockSel The block filter
 	 * @return The trace result, might be null
 	 */
-	public static MovingObjectPosition perform(World world, Vec3 vec1, Vec3 vec2, IEntitySelector entitySel, IBlockFilter blockSel) {
+	public static MovingObjectPosition perform(World world, Vec3 vec1, Vec3 vec2, IEntitySelector entitySel, IBlockSelector blockSel) {
 		MovingObjectPosition 
 			mop1 = rayTraceEntities(world, vec1, vec2, entitySel),
 			mop2 = rayTraceBlocks(world, vec1, vec2, blockSel);
@@ -64,7 +64,7 @@ public class Raytrace {
 		return getLookingPos(living, dist, esel, null);
 	}
 	
-	public static Pair<Vec3, MovingObjectPosition> getLookingPos(EntityLivingBase living, double dist, IEntitySelector esel, IBlockFilter bsel) {
+	public static Pair<Vec3, MovingObjectPosition> getLookingPos(EntityLivingBase living, double dist, IEntitySelector esel, IBlockSelector bsel) {
 		MovingObjectPosition pos = traceLiving(living, dist, esel, bsel);
 		Vec3 end = null;
 		if(pos != null) {
@@ -120,7 +120,7 @@ public class Raytrace {
 	 * @return MovingObjectPosition
 	 */
     @SuppressWarnings("unused")
-	public static MovingObjectPosition rayTraceBlocks(World world, Vec3 vec1, Vec3 vec2, IBlockFilter filter) {
+	public static MovingObjectPosition rayTraceBlocks(World world, Vec3 vec1, Vec3 vec2, IBlockSelector filter) {
         if(Double.isNaN(vec1.xCoord) || Double.isNaN(vec1.yCoord) || Double.isNaN(vec1.zCoord) ||
         		Double.isNaN(vec2.xCoord) || Double.isNaN(vec2.yCoord) || Double.isNaN(vec2.zCoord)) {
         	return null;
@@ -129,7 +129,7 @@ public class Raytrace {
     	//HACKHACK: copy the vec to prevent modifying the parameter
     	vec1 = VecUtils.copy(vec1);
     	if(filter == null)
-    		filter = BlockFilters.filNormal;
+    		filter = BlockSelectors.filNormal;
         
         int x2 = MathHelper.floor_double(vec2.xCoord);
         int y2 = MathHelper.floor_double(vec2.yCoord);
@@ -344,7 +344,7 @@ public class Raytrace {
 	 * Performs a RayTrace starting from the target entity's eye towards its looking direction.
 	 * The trace will automatically ignore the target entity.
 	 */
-	public static MovingObjectPosition traceLiving(EntityLivingBase entity, double dist, IEntitySelector entitySel, IBlockFilter blockSel) {
+	public static MovingObjectPosition traceLiving(EntityLivingBase entity, double dist, IEntitySelector entitySel, IBlockSelector blockSel) {
 		Motion3D mo = new Motion3D(entity, true);
 		Vec3 v1 = mo.getPosVec(), v2 = mo.move(dist).getPosVec();
 		

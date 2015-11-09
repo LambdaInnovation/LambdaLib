@@ -32,7 +32,7 @@ public abstract class RegistrationInstance<ANNO extends Annotation, BASE> extend
 	@Override
 	public boolean registerClass(AnnotationData data) throws Exception {
 		BASE obj = (BASE) data.getTheClass().newInstance();
-		register(obj, (ANNO) data.getAnnotation());
+		register(obj, data.getAnnotation());
 		return true;
 	}
 
@@ -57,7 +57,13 @@ public abstract class RegistrationInstance<ANNO extends Annotation, BASE> extend
 		} catch (Exception e) {
 			throw new RuntimeException("Can not create new instance for the field.", e);
 		}
-		register(value, (ANNO) data.getAnnotation());
+		register(value, data.getAnnotation());
+		return true;
+	}
+	
+	@Override
+	public boolean registerMethod(AnnotationData data) throws Exception {
+		register(null, data.getAnnotation());
 		return true;
 	}
 
