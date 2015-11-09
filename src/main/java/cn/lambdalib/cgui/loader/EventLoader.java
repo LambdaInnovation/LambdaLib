@@ -26,7 +26,10 @@ import cn.lambdalib.core.LambdaLib;
  * @author WeAthFolD
  */
 public class EventLoader {
-
+	
+	/**
+	 * Registers all event handlers annotated with {@link GuiCallback} as event handler methods into the given widget container.
+	 */
 	public static void load(WidgetContainer widget, Object callbackProvider) {
 		for(Method m : callbackProvider.getClass().getMethods()) {
 			if(m.isAnnotationPresent(GuiCallback.class)) {

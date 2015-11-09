@@ -15,8 +15,7 @@ package cn.lambdalib.cgui.gui.event;
 import cn.lambdalib.cgui.gui.Widget;
 
 /**
- * Indicate that a widget has lost input focus.
- * @author WeAthFolD
+ * Fired on target widget when it has lost input focus.
  */
 public class LostFocusEvent implements GuiEvent {
 	

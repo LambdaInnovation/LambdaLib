@@ -12,11 +12,17 @@
  */
 package cn.lambdalib.cgui.gui.event;
 
+import cn.lambdalib.cgui.gui.Widget;
 
 /**
- * Fired when ANY input-releated function has confirmed its input.
- * (e.g.Pressed enter)
- * @author WeAthFolD
+ * Fired on LIGui when a new widget is added into it.
  */
-public class ConfirmInputEvent implements GuiEvent {
+public class AddWidgetEvent implements GuiEvent {
+	
+	public final Widget widget;
+	
+	public AddWidgetEvent(Widget w) {
+		widget = w;
+	}
+	
 }

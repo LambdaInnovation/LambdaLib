@@ -17,6 +17,7 @@ import static cn.lambdalib.util.generic.VecUtils.vec;
 import java.lang.reflect.Field;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.helper.GameTimer;
@@ -331,6 +332,35 @@ public class RenderUtils {
 		}
 		
 		smcSupportInit = true;
+	}
+
+	public static void drawBlackout() {
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glDisable(GL11.GL_CULL_FACE);
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glPushMatrix();
+		GL11.glLoadIdentity();
+		GLU.gluOrtho2D(1, 0, 1, 0);
+		
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glPushMatrix();
+		GL11.glLoadIdentity();
+		
+		GL11.glColor4d(0, 0, 0, 0.7);
+		GL11.glTranslated(0, 0, 0);
+		HudUtils.colorRect(0, 0, 1, 1);
+		
+		GL11.glPopMatrix();
+		
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glPopMatrix();
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glColor4d(1, 1, 1, 1);
+		
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glEnable(GL11.GL_CULL_FACE);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 	}
 	
 }

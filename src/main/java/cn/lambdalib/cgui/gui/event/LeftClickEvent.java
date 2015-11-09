@@ -10,22 +10,19 @@
  * 在遵照该协议的情况下，您可以自由传播和修改。
  * http://www.gnu.org/licenses/gpl.html
  */
-package cn.lambdalib.cgui.gui.event.global;
+package cn.lambdalib.cgui.gui.event;
 
-import cn.lambdalib.cgui.gui.Widget;
-import cn.lambdalib.cgui.gui.event.GuiEvent;
 
 /**
- * Indicate that a widget has been added into LIGui.
- * Only fires to GUIs that are already loaded before the Widget is added.
- * @author WeAthFolD
+ * Fired on LIGui and current focus when user presses left mouse button.
  */
-public class AddWidgetEvent implements GuiEvent {
+public class LeftClickEvent implements GuiEvent {
 	
-	public final Widget widget;
+	public final double x, y;
 	
-	public AddWidgetEvent(Widget w) {
-		widget = w;
+	public LeftClickEvent(double _x, double _y) {
+		x = _x;
+		y = _y;
 	}
-	
+
 }

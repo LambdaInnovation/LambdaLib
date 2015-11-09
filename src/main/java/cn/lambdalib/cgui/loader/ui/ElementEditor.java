@@ -19,13 +19,13 @@ import org.lwjgl.opengl.GL11;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.component.TextBox;
+import cn.lambdalib.cgui.gui.component.TextBox.ChangeContentEvent;
+import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent;
 import cn.lambdalib.cgui.gui.component.Tint;
-import cn.lambdalib.cgui.gui.event.ChangeContentEvent;
-import cn.lambdalib.cgui.gui.event.ConfirmInputEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.cgui.gui.event.LostFocusEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.client.RenderUtils;
 import cn.lambdalib.util.deprecated.TypeHelper;
@@ -131,7 +131,7 @@ public abstract class ElementEditor extends Widget {
 		public void onAdded() {
 			super.onAdded();
 			
-			listen(MouseDownEvent.class, (w, e) -> {
+			listen(LeftClickEvent.class, (w, e) -> {
 				state = !state;
 				TypeHelper.set(targetField, getEditInstance(), state);
 			});
@@ -345,7 +345,7 @@ public abstract class ElementEditor extends Widget {
 			tint.idleColor = new Color(1, 1, 1, 0.3);
 			addComponent(tint);
 			
-			listen(MouseDownEvent.class, (w, event) -> {
+			listen(LeftClickEvent.class, (w, event) -> {
 				if(list != null)
 					list.dispose();
 				list = new Widget();
@@ -387,7 +387,7 @@ public abstract class ElementEditor extends Widget {
 				tint.idleColor = new Color(1, 1, 1, 0.3);
 				addComponent(tint);
 				
-				listen(MouseDownEvent.class, (w, e) -> {
+				listen(LeftClickEvent.class, (w, e) -> {
 					TypeHelper.edit(targetField, getEditInstance(), name);
 					editor.widget.dirty = true;
 				});

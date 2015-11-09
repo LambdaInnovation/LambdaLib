@@ -25,7 +25,7 @@ import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.Tint;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.LostFocusEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.cgui.loader.CGUIEditor;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.client.RenderUtils;
@@ -115,7 +115,7 @@ public class SelectedWidgetBar extends Window {
 				});
 				
 				final int y = 11 * (i + 2);
-				add.listen(MouseDownEvent.class, (w, e) -> {
+				add.listen(LeftClickEvent.class, (w, e) -> {
 
 					if(listSpawned)
 						return;
@@ -142,7 +142,7 @@ public class SelectedWidgetBar extends Window {
 							String text = c.name;
 							Font.font.draw(text, 40, 1, 8, 0xffffff, Align.CENTER);
 						});
-						one.listen(MouseDownEvent.class, (ww, ee) -> {
+						one.listen(LeftClickEvent.class, (ww, ee) -> {
 							target.addComponent(c.copy());
 							//Rebuild the component selection GUI
 							ComponentSelection.this.dispose();
@@ -181,7 +181,7 @@ public class SelectedWidgetBar extends Window {
 				
 				addComponent(new Tint());
 				
-				listen(MouseDownEvent.class, (w, e) -> {
+				listen(LeftClickEvent.class, (w, e) -> {
 					setPropertyEditor(new ComponentEditor(guiEdit, target, c));
 				});
 				
@@ -200,7 +200,7 @@ public class SelectedWidgetBar extends Window {
 				w.transform.setSize(10, 10).setPos(85, 0);
 				w.addComponent(new DrawTexture().setTex(TEX_REMOVE));
 				w.addComponent(new Tint());
-				w.listen(MouseDownEvent.class, (ww, e) -> {
+				w.listen(LeftClickEvent.class, (ww, e) -> {
 					target.removeComponent(c);
 					ComponentSelection.this.dispose();
 					SelectedWidgetBar.this.addWidget(new ComponentSelection());

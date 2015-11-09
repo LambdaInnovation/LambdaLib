@@ -15,9 +15,9 @@ package cn.lambdalib.cgui.gui;
 import java.util.Iterator;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
 
 import cn.lambdalib.cgui.gui.component.Transform;
+import cn.lambdalib.cgui.gui.event.AddWidgetEvent;
 import cn.lambdalib.cgui.gui.event.DragEvent;
 import cn.lambdalib.cgui.gui.event.DragStopEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
@@ -25,13 +25,12 @@ import cn.lambdalib.cgui.gui.event.GainFocusEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.GuiEventBus;
 import cn.lambdalib.cgui.gui.event.KeyEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.cgui.gui.event.LostFocusEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.MouseClickEvent;
 import cn.lambdalib.cgui.gui.event.RefreshEvent;
-import cn.lambdalib.cgui.gui.event.global.AddWidgetEvent;
-import cn.lambdalib.cgui.gui.event.global.GlobalMouseEvent;
+import cn.lambdalib.cgui.gui.event.RightClickEvent;
 import cn.lambdalib.core.LambdaLib;
-import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.helper.GameTimer;
 
 /**
@@ -83,12 +82,15 @@ public class LIGui extends WidgetContainer {
 	
 	//---Event callback---
 	
+	/**
+	 * Simplified version of {@link #draw(double mx, double my)} callback.
+	 */
 	public void draw() {
 		draw(-1, -1);
 	}
 	
 	/**
-	 * Go down the hierarchy tree and draw each widget node.
+	 * Go down the hierarchy tree and draw each widget node. Should be called each rendering frame.
 	 */
 	public void draw(double mx, double my) {
 		frameUpdate();
@@ -108,12 +110,12 @@ public class LIGui extends WidgetContainer {
 		if(this.hasWidget(name))
 			return false;
 		super.addWidget(name, w);
-		this.postEvent(new AddWidgetEvent(w));
+		eventBus.postEvent(null, new AddWidgetEvent(w));
 		return true;
 	}
 	
 	/**
-	 * Standard GUI class callback.
+	 * Standard GuiScreen class callback.
 	 * @param mx
 	 * @param my
 	 * @param btn the mouse button ID.
@@ -141,7 +143,7 @@ public class LIGui extends WidgetContainer {
     }
     
     /**
-	 * Standard GUI mouseClicked callback.
+	 * Standard GuiScreen mouseClicked callback.
 	 * @param mx
 	 * @param my
 	 * @param btn the mouse button ID.
@@ -149,20 +151,38 @@ public class LIGui extends WidgetContainer {
 	 */
 	public boolean mouseClicked(int mx, int my, int bid) {
 		updateMouse(mx, my);
-		eventBus.postEvent(null, new GlobalMouseEvent(mx, my, bid));
 		
+		Widget top = getTopWidget(mx, my);
+		
+		GuiEvent event = null, guievent;
 		if(bid == 0) {
-			Widget node = getTopWidget(mx, my);
-			if(node != null) {
-				gainFocus(node);
-				System.out.println("GainFocus " + node);
-				node.post(new MouseDownEvent((mx - node.x) / node.scale, (my - node.y) / node.scale));
+			guievent = new LeftClickEvent(mx, my);
+			if(top != null) {
+				event = new LeftClickEvent((mx - top.x) / top.scale, (my - top.y) / top.scale);
+			}
+		} else if(bid == 1) {
+			guievent = new RightClickEvent(mx, my);
+			if(top != null) {
+				event = new RightClickEvent((mx - top.x) / top.scale, (my - top.y) / top.scale);
+			}
+		} else {
+			guievent = new MouseClickEvent(mx, my, bid);
+			if(top != null) {
+				event = new MouseClickEvent((mx - top.x) / top.scale, (my - top.y) / top.scale, bid);
+			}
+		}
+		
+		eventBus.postEvent(null, guievent);
+		
+		if(top != null) {
+			top.post(event);
+			if(bid == 0) {
+				gainFocus(top);
 				return true;
 			} else {
 				removeFocus();
 			}
 		}
-		
 		return false;
 	}
 	
@@ -446,39 +466,11 @@ public class LIGui extends WidgetContainer {
 		updateWidget(w);
 	}
 	
-	public static void drawBlackout() {
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glDisable(GL11.GL_CULL_FACE);
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glPushMatrix();
-		GL11.glLoadIdentity();
-		GLU.gluOrtho2D(1, 0, 1, 0);
-		
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glPushMatrix();
-		GL11.glLoadIdentity();
-		
-		GL11.glColor4d(0, 0, 0, 0.7);
-		GL11.glTranslated(0, 0, 0);
-		HudUtils.colorRect(0, 0, 1, 1);
-		
-		GL11.glPopMatrix();
-		
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glPopMatrix();
-		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glColor4d(1, 1, 1, 1);
-		
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glEnable(GL11.GL_CULL_FACE);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-	}
-	
 	/**
-	 * Event bus delegator, will post every widget inside this LIGui.
+	 * Event bus delegator, will post every widget inside this LIGui. <br>
+	 * Note that this might impact peformance when used incorectlly.
 	 */
-	public void postEvent(GuiEvent event) {
+	public void postEventHierarchically(GuiEvent event) {
 		eventBus.postEvent(null, event);
 		for(Widget w : getDrawList()) {
 			hierPostEvent(w, event);

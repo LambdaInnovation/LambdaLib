@@ -18,6 +18,10 @@ import net.minecraft.inventory.Container;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+/**
+ * A simple wrapper for fast {@link LIGui} deploy as GuiContainer.
+ * @author WeAthFolD
+ */
 public class LIGuiContainer extends GuiContainer {
 	
 	protected LIGui gui;
@@ -87,10 +91,16 @@ public class LIGuiContainer extends GuiContainer {
     		super.keyTyped(ch, key);
     }
     
+    /**
+     * @return Whether the inventory itself receives key input. (This should be disabled when you are handling some user input)
+     */
     protected boolean containerAcceptsKey(int key) {
     	return true;
     }
     
+    /**
+     * @return Whether inventory slots should be renderered this frame.
+     */
     public boolean isSlotActive() {
     	return true;
     }

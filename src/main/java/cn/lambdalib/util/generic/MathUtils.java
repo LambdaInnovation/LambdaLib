@@ -79,11 +79,11 @@ public class MathUtils {
 		return a * (1 - lambda) + b * lambda;
 	}
 	
-	public static int wrapi(int min, int max, int val) {
+	public static int clampi(int min, int max, int val) {
 		return Math.max(min, Math.min(max, val));
 	}
 	
-	public static double wrapd(double min, double max, double val) {
+	public static double clampd(double min, double max, double val) {
 		if(val > max)
 			return max;
 		if(val < min)
@@ -91,7 +91,7 @@ public class MathUtils {
 		return val;
 	}
 	
-	public static float wrapf(float min, float max, float val) {
+	public static float clampf(float min, float max, float val) {
 		if(val > max)
 			return max;
 		if(val < min)

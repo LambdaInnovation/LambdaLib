@@ -10,11 +10,15 @@ import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.opengl.GL11;
 
 /**
+ * A simple wrapper for fast {@link LIGui} deploy as GuiScreen.
  * @author WeAthFolD
- *
  */
 public class LIGuiScreen extends GuiScreen {
 	protected LIGui gui;
+	
+	/**
+	 * Whether the black background should be drawed.
+	 */
 	protected boolean drawBack = true;
 	
 	public LIGuiScreen(LIGui _gui) {
@@ -25,8 +29,11 @@ public class LIGuiScreen extends GuiScreen {
 		this(new LIGui());
 	}
 	
-	public LIGuiScreen setDrawBack(boolean b) {
-		drawBack = b;
+	/**
+	 * Set whether the black background should be drawed.
+	 */
+	public LIGuiScreen setDrawBack(boolean flag) {
+		drawBack = flag;
 		return this;
 	}
 	

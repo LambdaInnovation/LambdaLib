@@ -14,7 +14,6 @@ package cn.lambdalib.cgui.gui.event;
 
 
 /**
- * Fired when a widget is marked 'dirty' and is about to be updated by the LIGui.
- * @author WeAthFolD
+ * Fired when target widget is marked 'dirty' and is about to be updated by the LIGui.
  */
 public class RefreshEvent implements GuiEvent {}

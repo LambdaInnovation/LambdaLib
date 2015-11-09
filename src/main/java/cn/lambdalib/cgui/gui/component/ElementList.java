@@ -73,11 +73,12 @@ public class ElementList extends Component {
 	}
 	
 	public void setProgress(int p) {
-		p = MathUtils.wrapi(0, getMaxProgress(), p);
+		p = MathUtils.clampi(0, getMaxProgress(), p);
 		boolean u = progress != p;
 		progress = p;
-		if(u)
+		if(u) {
 			updateList();
+		}
 	}
 	
 	private void updateList() {

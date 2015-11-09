@@ -15,6 +15,7 @@ package cn.lambdalib.cgui.gui.component;
 import cn.lambdalib.cgui.gui.event.DragEvent;
 
 /**
+ * This component simply updates the widget's position when it was dragged.
  * @author WeAthFolD
  */
 public class Draggable extends Component {

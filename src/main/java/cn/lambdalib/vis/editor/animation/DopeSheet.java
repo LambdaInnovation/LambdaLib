@@ -35,7 +35,7 @@ import cn.lambdalib.cgui.gui.event.DragStopEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GainFocusEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.client.RenderUtils;
@@ -164,7 +164,7 @@ public class DopeSheet extends Window {
 				Widget parent = DopeSheet.this;
 				double ax = getGui().mouseX - event.offsetX;
 				double lx = (ax - parent.x) / parent.scale + 5;
-				lx = MathUtils.wrapd(TIMEAREA_L, TIMEAREA_R, lx);
+				lx = MathUtils.clampd(TIMEAREA_L, TIMEAREA_R, lx);
 				
 				setFrame(x2f(lx));
 			});
@@ -234,7 +234,7 @@ public class DopeSheet extends Window {
 						dt.setTex(TEX_KEYFRAME_OFF);
 					});
 					
-					listen(MouseDownEvent.class, (__, event) -> 
+					listen(LeftClickEvent.class, (__, event) -> 
 					{
 						Frame f = timeline.frameByF(pointer.frame);
 						if(f == null) {
@@ -362,7 +362,7 @@ public class DopeSheet extends Window {
 					
 					double ax = getGui().mouseX - e.offsetX;
 					double lx = (ax - TLWidget.this.x) / TLWidget.this.scale + 5;
-					lx = MathUtils.wrapd(TIMEAREA_L, TIMEAREA_R, lx);
+					lx = MathUtils.clampd(TIMEAREA_L, TIMEAREA_R, lx);
 					
 					int f = x2f(lx);
 					frame.frame = f;
@@ -449,7 +449,7 @@ public class DopeSheet extends Window {
 			Widget w = new Widget();
 			w.transform.setSize(TIMEAREA_S, 7).setPos(TIMEAREA_L, 16);
 			w.addComponent(new DrawTexture().setTex(null).setColor4i(50, 50, 50, 255));
-			w.listen(MouseDownEvent.class, (__, event) -> {
+			w.listen(LeftClickEvent.class, (__, event) -> {
 				pointer.setFrame(x2f(TIMEAREA_L + event.x));
 			});
 			body.addWidget(w);

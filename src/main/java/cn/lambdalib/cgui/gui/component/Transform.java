@@ -2,13 +2,17 @@ package cn.lambdalib.cgui.gui.component;
 
 import cn.lambdalib.cgui.gui.Widget;
 
+/**
+ * Transform is the base component of a widget. It cannot be removed. It provides some meta-information such as widget align and placement.
+ * @author WeAthFolD
+ */
 public class Transform extends Component {
 	
 	public enum WidthAlign { LEFT, CENTER, RIGHT };
 	
 	public enum HeightAlign { TOP, CENTER, BOTTOM };
 	
-	public double width = 50.0, height = 50.0;
+	public double width = 0.0, height = 0.0;
 	
 	public double x = 0, y = 0;
 	
@@ -16,7 +20,15 @@ public class Transform extends Component {
 	
 	public double scale = 1.0;
 	
-	public boolean doesDraw = true, doesListenKey = true;
+	/**
+	 * Whether the widget should be drawed.
+	 */
+	public boolean doesDraw = true;
+	
+	/**
+	 * Whether the widget listens to key events. Note you can't listen to key events either when doesDraw=false.
+	 */
+	public boolean doesListenKey = true;
 	
 	public WidthAlign alignWidth = WidthAlign.LEFT;
 	

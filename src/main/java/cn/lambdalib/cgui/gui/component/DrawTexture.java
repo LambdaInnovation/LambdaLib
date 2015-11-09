@@ -28,7 +28,7 @@ import cn.lambdalib.util.helper.Color;
 import net.minecraft.util.ResourceLocation;
 
 /**
- * @author WeAthFolD
+ * Draws a squared texture that fills the area of the given widget.
  */
 public class DrawTexture extends Component {
 	

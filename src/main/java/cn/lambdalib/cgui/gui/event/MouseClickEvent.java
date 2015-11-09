@@ -13,11 +13,25 @@
 package cn.lambdalib.cgui.gui.event;
 
 /**
- * Fired when the current focus widget's dragging was stopped.
- * @author WeAthFolD
+ * Fired on both LIGui and current focus when any mouse button except for LMB and RMB is clicked.
+ * (For convenience reasons, they are handled in {@link LeftClickEvent} and {@link RightClickEvent}.)
  */
-public class DragStopEvent implements GuiEvent {
+public class MouseClickEvent implements GuiEvent {
 
-	public DragStopEvent() {}
+	/**
+	 * Mouse position in local coordinate space.
+	 */
+	public final double mx, my;
+	
+	/**
+	 * Pressed button id.
+	 */
+	public final int button;
+	
+	public MouseClickEvent(double _mx, double _my, int bid) {
+		mx = _mx;
+		my = _my;
+		button = bid;
+	}
 
 }

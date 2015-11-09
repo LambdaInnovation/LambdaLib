@@ -16,10 +16,10 @@ import cn.lambdalib.cgui.client.CGUILang;
 import cn.lambdalib.cgui.gui.LIGui;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.WidgetContainer;
+import cn.lambdalib.cgui.gui.event.AddWidgetEvent;
 import cn.lambdalib.cgui.gui.event.DragEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GainFocusEvent;
-import cn.lambdalib.cgui.gui.event.global.AddWidgetEvent;
 import cn.lambdalib.cgui.loader.ui.event.AddTargetEvent;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.helper.Color;
@@ -37,7 +37,7 @@ public class LIGuiPlayground extends LIGui {
 		guiEdit = _guiEdit;
 		
 		eventBus.listen(AddWidgetEvent.class, (w, e) -> {
-			guiEdit.getGui().postEvent(new AddTargetEvent(w));
+			guiEdit.getGui().postEventHierarchically(new AddTargetEvent(w));
 		});
 	}
 	

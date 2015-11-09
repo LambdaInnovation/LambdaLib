@@ -18,8 +18,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Populate this on your event callback method so it can be recognized by EventLoader.load(Widget, CallbackProvider). <br/>
- * Any method provided must have the signature <code>(Widget, ? extends GuiEvent)V</code>.
+ * <summary>
+ * Populate this on your event callback method so it can be recognized by {@link cn.lambdalib.cgui.loader.EventLoader#load()}.
+ * </summary>
+ * <p>Any method provided must look like: </p>
+ * <code>
+ * 	public void handle(Widget w, EventType event) { ... }
+ * </code>
  * @author WeAthFolD
  */
 @Target(ElementType.METHOD)

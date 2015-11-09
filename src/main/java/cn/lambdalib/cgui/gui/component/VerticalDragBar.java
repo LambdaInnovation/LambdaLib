@@ -18,9 +18,10 @@ import cn.lambdalib.cgui.gui.event.GuiEvent;
 
 /**
  * @author WeAthFolD
- *
  */
 public class VerticalDragBar extends Component {
+	
+	public static class DraggedEvent implements GuiEvent {}
 	
 	public double y0, y1;
 
@@ -62,6 +63,4 @@ public class VerticalDragBar extends Component {
 		
 		return this;
 	}
-	
-	public static class DraggedEvent implements GuiEvent {}
 }

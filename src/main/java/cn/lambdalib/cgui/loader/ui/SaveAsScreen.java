@@ -22,7 +22,7 @@ import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.TextBox;
 import cn.lambdalib.cgui.gui.component.Tint;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.cgui.loader.xml.CGUIDocWriter;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.helper.Color;
@@ -70,7 +70,7 @@ public class SaveAsScreen extends Window {
 		tint.idleColor = new Color(1, 1, 1, 0.3);
 		button.addComponent(tint);
 		
-		button.listen(MouseDownEvent.class, (w, e) -> {
+		button.listen(LeftClickEvent.class, (w, e) -> {
 			File file = new File(textBox.content);
 			if(file.exists()) {
 				lastWarningTime = GameTimer.getAbsTime();

@@ -14,7 +14,6 @@ package cn.lambdalib.cgui.gui.event;
 
 
 /**
- * Indicate that a widget has gained input focus.
- * @author WeAthFolD
+ * Fired on target widget that has gained input focus.
  */
 public class GainFocusEvent implements GuiEvent {}

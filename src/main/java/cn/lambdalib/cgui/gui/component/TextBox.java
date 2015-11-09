@@ -28,23 +28,32 @@ import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.annotations.CopyIgnore;
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign;
 import cn.lambdalib.cgui.gui.component.Transform.WidthAlign;
-import cn.lambdalib.cgui.gui.event.ChangeContentEvent;
-import cn.lambdalib.cgui.gui.event.ConfirmInputEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
+import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.KeyEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.util.helper.Color;
 import cn.lambdalib.util.helper.Font;
-import cn.lambdalib.util.helper.GameTimer;
 import cn.lambdalib.util.helper.Font.Align;
+import cn.lambdalib.util.helper.GameTimer;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.StatCollector;
 
 /**
- * 事实证明UI底层是十分蛋疼的……
+ * Textbox displays text on the widget area, it might also be edited.
  * @author WeAthFolD
  */
 public class TextBox extends Component {
+	
+	/**
+	 * Fired each time the TextBox's content is being edited.
+	 */
+	public static class ChangeContentEvent implements GuiEvent {}
+	
+	/**
+	 * Fired each time the TextBox's input is confirmed. (a.k.a. User presses enter)
+	 */
+	public static class ConfirmInputEvent implements GuiEvent {}
 	
 	public String content = "";
 	
@@ -216,7 +225,7 @@ public class TextBox extends Component {
 			checkCaret();
 		});
 		
-		listen(MouseDownEvent.class, (w, e) -> {
+		listen(LeftClickEvent.class, (w, e) -> {
 			double len = 3;
 			double[] offset = getOffset(w);
 			double eventX = -offset[0] + e.x;

@@ -16,7 +16,7 @@ import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.Tint;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.util.helper.Font;
 import cn.lambdalib.util.helper.Font.Align;
 import cn.lambdalib.vis.editor.common.VEVars;
@@ -65,7 +65,7 @@ public class Toolbar extends Window {
 			}
 		});
 		
-		b.listen(MouseDownEvent.class, (widget, e) -> {
+		b.listen(LeftClickEvent.class, (widget, e) -> {
 			action.invoke();
 		});
 		

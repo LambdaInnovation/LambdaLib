@@ -21,7 +21,7 @@ import cn.lambdalib.cgui.gui.component.ElementList;
 import cn.lambdalib.cgui.gui.component.TextBox;
 import cn.lambdalib.cgui.gui.component.Tint;
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.vis.editor.common.IHierarchy;
 import cn.lambdalib.vis.editor.common.VEVars;
 import net.minecraft.util.ResourceLocation;
@@ -133,7 +133,7 @@ public class WindowHierarchy extends Window implements IHierarchy {
 				
 				addComponent(new Tint());
 				
-				listen(MouseDownEvent.class, (w, e) -> { onClick(); });
+				listen(LeftClickEvent.class, (w, e) -> { onClick(); });
 			}
 		}
 		

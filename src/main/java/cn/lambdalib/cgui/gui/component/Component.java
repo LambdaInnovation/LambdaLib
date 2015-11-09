@@ -29,13 +29,16 @@ import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.deprecated.TypeHelper;
 
 /**
- * Component is the basic content of Widget. It can define a set of EventHandlers and store information itself.
- * The (non-runtime-state) information stored in the component will be copied as a widget is copied.
+ * <summary>
+ * Component is the concrete material of Widget. It can define a set of EventHandlers and store information itself.
+ * </summary>
+ * <p>
+ * Components supports prototype patteren natively. They can be copied to make duplicates, typically when its 
+ * 	container widget is being copied.
+ * </p>
  * @author WeAthFolD
  */
 public class Component {
-	
-	static Map<Class, List<Field>> copiedFields = new HashMap();
 	
 	public final String name;
 	
@@ -51,31 +54,9 @@ public class Component {
 	@CopyIgnore
 	public Widget widget;
 	
-	private static class Node {
-		Class<? extends GuiEvent> type;
-		IGuiEventHandler handler;
-		int prio;
-	}
-	
-	List<Node> addedHandlers = new ArrayList();
-	
 	public Component(String _name) {
 		name = _name;
 		checkCopyFields();
-	}
-
-	private List<Field> checkCopyFields() {
-		if(copiedFields.containsKey(getClass()))
-			return copiedFields.get(getClass());
-		List<Field> ret = new ArrayList<Field>();
-		for(Field f : getClass().getFields()) {
-			if(((f.getModifiers() & Modifier.FINAL) == 0)
-			&& !f.isAnnotationPresent(CopyIgnore.class) && TypeHelper.isTypeSupported(f.getType())) {
-				ret.add(f);
-			}
-		}
-		copiedFields.put(getClass(), ret);
-		return ret;
 	}
 	
 	protected <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler) {
@@ -128,6 +109,7 @@ public class Component {
 	/**
 	 * Recover all the data fields within the component with the data map specified.
 	 */
+	@Deprecated
 	public void fromPropertyMap(Map<String, String> map) {
 		List<Field> fields = checkCopyFields();
 		for(Field f : fields) {
@@ -138,6 +120,7 @@ public class Component {
 		}
 	}
 	
+	@Deprecated
 	public Map<String, String> getPropertyMap() {
 		Map<String, String> ret = new HashMap();
 		for(Field f : checkCopyFields()) {
@@ -154,6 +137,24 @@ public class Component {
 		return copiedFields.get(getClass());
 	}
 	
+	private List<Field> checkCopyFields() {
+		if(copiedFields.containsKey(getClass()))
+			return copiedFields.get(getClass());
+		List<Field> ret = new ArrayList<Field>();
+		for(Field f : getClass().getFields()) {
+			if(((f.getModifiers() & Modifier.FINAL) == 0)
+			&& !f.isAnnotationPresent(CopyIgnore.class) && TypeHelper.isTypeSupported(f.getType())) {
+				ret.add(f);
+			}
+		}
+		copiedFields.put(getClass(), ret);
+		return ret;
+	}
+	
+	private static Map<Class, List<Field>> copiedFields = new HashMap();
+	
+	private List<Node> addedHandlers = new ArrayList();
+	
 	private final class EHWrapper<T extends GuiEvent> implements IGuiEventHandler<T> {
 		
 		final IGuiEventHandler<T> wrapped;
@@ -168,7 +169,12 @@ public class Component {
 				wrapped.handleEvent(w, event);
 		}
 		
-		
+	}
+	
+	private static class Node {
+		Class<? extends GuiEvent> type;
+		IGuiEventHandler handler;
+		int prio;
 	}
 	
 }

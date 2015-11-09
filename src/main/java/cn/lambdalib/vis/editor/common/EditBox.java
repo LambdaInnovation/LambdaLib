@@ -15,8 +15,8 @@ package cn.lambdalib.vis.editor.common;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.TextBox;
-import cn.lambdalib.cgui.gui.event.ChangeContentEvent;
-import cn.lambdalib.cgui.gui.event.ConfirmInputEvent;
+import cn.lambdalib.cgui.gui.component.TextBox.ChangeContentEvent;
+import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent;
 import cn.lambdalib.cgui.gui.event.LostFocusEvent;
 import cn.lambdalib.core.LambdaLib;
 

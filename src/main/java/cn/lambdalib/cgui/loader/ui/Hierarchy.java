@@ -21,16 +21,16 @@ import cn.lambdalib.cgui.client.CGUILang;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.ElementList;
+import cn.lambdalib.cgui.gui.component.ElementList.ProgressChangedEvent;
 import cn.lambdalib.cgui.gui.component.TextBox;
+import cn.lambdalib.cgui.gui.component.TextBox.ChangeContentEvent;
+import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent;
 import cn.lambdalib.cgui.gui.component.Tint;
 import cn.lambdalib.cgui.gui.component.VerticalDragBar;
-import cn.lambdalib.cgui.gui.component.ElementList.ProgressChangedEvent;
 import cn.lambdalib.cgui.gui.component.VerticalDragBar.DraggedEvent;
-import cn.lambdalib.cgui.gui.event.ChangeContentEvent;
-import cn.lambdalib.cgui.gui.event.ConfirmInputEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GainFocusEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.cgui.loader.ui.event.AddTargetEvent;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.helper.Font;
@@ -74,7 +74,7 @@ public class Hierarchy extends Window {
 		Widget tmp;
 		
 		tmp = setupButton(0, "arrow_left", CGUILang.butDechild());
-		tmp.listen(MouseDownEvent.class, (w, e) -> {
+		tmp.listen(LeftClickEvent.class, (w, e) -> {
 			if(getAccessTarget() != null) {
 				getAccessTarget().moveLeft();
 				buildHierarchy();
@@ -82,7 +82,7 @@ public class Hierarchy extends Window {
 		});
 		
 		tmp = setupButton(1, "arrow_right", CGUILang.butChild());
-		tmp.listen(MouseDownEvent.class, (w, e) -> {
+		tmp.listen(LeftClickEvent.class, (w, e) -> {
 			if(getAccessTarget() != null) {
 				getAccessTarget().moveRight();
 				buildHierarchy();
@@ -90,7 +90,7 @@ public class Hierarchy extends Window {
 		});
 		
 		tmp = setupButton(2, "arrow_up", CGUILang.butMoveUp());
-		tmp.listen(MouseDownEvent.class, (w, e) -> {
+		tmp.listen(LeftClickEvent.class, (w, e) -> {
 			if(getAccessTarget() != null) {
 				getAccessTarget().moveUp();
 				buildHierarchy();
@@ -98,7 +98,7 @@ public class Hierarchy extends Window {
 		});
 		
 		tmp = setupButton(3, "arrow_down", CGUILang.butMoveDown());
-		tmp.listen(MouseDownEvent.class, (w, e) -> {
+		tmp.listen(LeftClickEvent.class, (w, e) -> {
 			if(getAccessTarget() != null) {
 				getAccessTarget().moveDown();
 				buildHierarchy();
@@ -119,7 +119,7 @@ public class Hierarchy extends Window {
 //		});
 
 		tmp = setupButton(4, "remove", CGUILang.butRemove());
-		tmp.listen(MouseDownEvent.class, (w, e) -> {
+		tmp.listen(LeftClickEvent.class, (w, e) -> {
 			if(getAccessTarget() != null) {
 				getAccessTarget().dispose();
 				buildHierarchy();
@@ -127,7 +127,7 @@ public class Hierarchy extends Window {
 		});
 		
 		tmp = setupButton(5, "duplicate", CGUILang.butDuplicate());
-		tmp.listen(MouseDownEvent.class, (w, e) -> {
+		tmp.listen(LeftClickEvent.class, (w, e) -> {
 			if(getAccessTarget() != null) {
 				getAccessTarget().getAbstractParent().addWidget(getAccessTarget().copy());
 				buildHierarchy();
@@ -136,7 +136,7 @@ public class Hierarchy extends Window {
 		
 		tmp = setupButton(6, "up", "Move Up");
 		tmp.transform.setPos(90, 30);
-		tmp.listen(MouseDownEvent.class, (w, e) -> {
+		tmp.listen(LeftClickEvent.class, (w, e) -> {
 			if(hList != null) {
 				ElementList list = ElementList.get(hList);
 				list.progressLast();
@@ -145,7 +145,7 @@ public class Hierarchy extends Window {
 		
 		tmp = setupButton(7, "down", "Move Down");
 		tmp.transform.setPos(90, 110);
-		tmp.listen(MouseDownEvent.class, (w, e) -> {
+		tmp.listen(LeftClickEvent.class, (w, e) -> {
 			if(hList != null) {
 				ElementList list = ElementList.get(hList);
 				list.progressNext();
@@ -271,14 +271,14 @@ public class Hierarchy extends Window {
 				HudUtils.colorRect(0, 0, ww.transform.width, ww.transform.height);
 			});
 			
-			listen(MouseDownEvent.class, (ww, ee) -> { guiEdit.toEdit.gainFocus(target); });
+			listen(LeftClickEvent.class, (ww, ee) -> { guiEdit.toEdit.gainFocus(target); });
 			
 			{
 				Widget eye = new Widget();
 				eye.transform.setSize(10, 10).setPos(1, 1);
 				eye.addComponent(new Tint());
 				eye.addComponent(new DrawTexture().setTex(vis_on));
-				eye.listen(MouseDownEvent.class, (ww, e) -> {
+				eye.listen(LeftClickEvent.class, (ww, e) -> {
 					on = !on;
 					target.visible = on;
 					DrawTexture.get(ww).setTex(on ? vis_on : vis_off);
@@ -319,7 +319,7 @@ public class Hierarchy extends Window {
 					modified = true;
 				});
 				listen(GainFocusEvent.class, (w, e) -> {
-					SingleWidget.this.post(new MouseDownEvent(0, 0));
+					SingleWidget.this.post(new LeftClickEvent(0, 0));
 				});
 				addComponent(box);
 			}

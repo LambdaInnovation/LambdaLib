@@ -23,7 +23,7 @@ import cn.lambdalib.cgui.gui.event.DragEvent;
 import cn.lambdalib.cgui.gui.event.DragStopEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.cgui.gui.event.RefreshEvent;
 import cn.lambdalib.cgui.loader.EventLoader;
 import cn.lambdalib.util.generic.MathUtils;
@@ -134,7 +134,7 @@ public class Window extends Widget {
 				{
 					double ax = getGui().mouseX - event.offsetX + hsz;
 					double lx = (ax - Window.this.x) / Window.this.scale;
-					lx = MathUtils.wrapd(20, window.transform.width * 1.5, lx);
+					lx = MathUtils.clampd(20, window.transform.width * 1.5, lx);
 					transform.x = window.transform.x + lx * window.transform.scale - hsz;
 					transform.y = window.transform.y + lx * window.transform.scale * (window.transform.height / window.transform.width) - hsz;
 					dirty = true;
@@ -145,7 +145,7 @@ public class Window extends Widget {
 				{
 					double lx = (x - window.x) / window.scale;
 					double nscale = window.transform.scale * lx / window.transform.width;
-					window.transform.scale = MathUtils.wrapd(0.2, 1.5, nscale);
+					window.transform.scale = MathUtils.clampd(0.2, 1.5, nscale);
 					window.dirty = true;
 					dragging = false;
 				});
@@ -183,7 +183,7 @@ public class Window extends Widget {
 			break;
 		case MINIMIZE:
 			w = new Button(bodyState == BodyState.FULL ? TEX_BTN_MINIMIZE : TEX_BTN_RESTORE, sz, sz);
-			w.listen(MouseDownEvent.class, (widget, event) -> {
+			w.listen(LeftClickEvent.class, (widget, event) -> {
 				DrawTexture dt = DrawTexture.get(widget);
 				switch(bodyState) {
 				case FULL:

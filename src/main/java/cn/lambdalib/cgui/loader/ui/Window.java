@@ -19,7 +19,7 @@ import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.Transform;
 import cn.lambdalib.cgui.gui.event.DragEvent;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.helper.Font;
 import net.minecraft.client.Minecraft;
@@ -54,7 +54,7 @@ public class Window extends Widget {
 			 Widget close = new Widget();
 			 close.transform.setSize(10, 10).setPos(transform.width - 12, 1);
 			 close.addComponent(new DrawTexture().setTex(GuiEdit.tex("toolbar/close")));
-			 close.listen(MouseDownEvent.class, (w, e) -> {
+			 close.listen(LeftClickEvent.class, (w, e) -> {
 				 Window.this.dispose();
 			 });
 			 addWidget(close);

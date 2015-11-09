@@ -17,6 +17,7 @@ import cn.lambdalib.cgui.gui.LIGui;
 import cn.lambdalib.cgui.gui.LIGuiScreen;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.loader.xml.CGUIDocWriter;
+import cn.lambdalib.util.client.RenderUtils;
 
 /**
  * @author WeAthFolD
@@ -96,7 +97,7 @@ public class GuiEdit extends LIGuiScreen {
 	@Override
     public void drawScreen(int mx, int my, float w) {
 		if(toggleBlack)
-			LIGui.drawBlackout();
+			RenderUtils.drawBlackout();
 		
 		toEdit.resize(width, height);
 		toEdit.draw(mx, my);

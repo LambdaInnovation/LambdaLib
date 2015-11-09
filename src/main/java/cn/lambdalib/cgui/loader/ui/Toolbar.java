@@ -22,7 +22,7 @@ import cn.lambdalib.cgui.gui.component.DrawTexture;
 import cn.lambdalib.cgui.gui.component.Transform;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.LostFocusEvent;
-import cn.lambdalib.cgui.gui.event.MouseDownEvent;
+import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.cgui.loader.CGUIEditor;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.helper.Font;
@@ -87,7 +87,7 @@ public class Toolbar extends Window {
 					Font.font.draw(name, 9, 19, 10, 0x9fceff, Align.CENTER);
 				}
 			});
-			listen(MouseDownEvent.class, (w, e) -> {
+			listen(LeftClickEvent.class, (w, e) -> {
 				if(!isLocked)
 					triggerEvent();
 			});
@@ -113,7 +113,7 @@ public class Toolbar extends Window {
 					
 					Font.font.draw(name, 25, 1.5, 10, 0x98b8e2, Align.CENTER);
 				});
-				one.listen(MouseDownEvent.class, (w, event) -> {
+				one.listen(LeftClickEvent.class, (w, event) -> {
 					isLocked = false;
 					TemplateList.this.dispose();
 					gui().toEdit.addWidget(CGUIEditor.createFromTemplate(name));
