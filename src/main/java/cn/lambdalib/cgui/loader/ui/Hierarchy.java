@@ -296,6 +296,7 @@ public class Hierarchy extends Window {
 			public Name() {
 				box = new TextBox().setSize(10);
 				box.content = target.getName();
+				box.allowEdit = true;
 				transform.x = 14 + hierLevel * 6;
 				transform.setSize(70, 10);
 			}

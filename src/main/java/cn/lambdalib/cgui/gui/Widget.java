@@ -80,13 +80,13 @@ public class Widget extends WidgetContainer {
 	}
 	
 	protected void copyInfoTo(Widget n) {
-		n.removeComponent(n.transform);
+		n.components.clear();
+		
 		n.transform = (Transform) transform.copy();
 		n.addComponent(n.transform);
 		
 		n.eventBus = eventBus.copy();
 		
-		n.components.clear();
 		for(Component c : components) {
 			if(c.getClass() != Transform.class)
 				n.addComponent(c.copy());
