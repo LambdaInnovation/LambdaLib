@@ -150,7 +150,7 @@ public class DelegateGenerator {
         
         //The returned MethodVisitor will visit the original version of the method,
         //including its annotation, where we can get StorageOptions.
-        return new MethodVisitor(Opcodes.ASM4, 
+        return new MethodVisitor(Opcodes.ASM5, 
                 parentClass.visitMethod(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, delegateFunctionName, desc, null, null)) {
             
             //Remember storage options for each argument
@@ -387,7 +387,7 @@ public class DelegateGenerator {
         
         //The returned MethodVisitor will visit the original version of the method,
         //including its annotation, where we can get StorageOptions.
-        return new MethodVisitor(Opcodes.ASM4, 
+        return new MethodVisitor(Opcodes.ASM5, 
                 parentClass.visitMethod(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, delegateMethodName, nonstaticDesc, null, null)) {
             
             //Remember storage options for each argument

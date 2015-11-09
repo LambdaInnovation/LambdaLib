@@ -45,7 +45,7 @@ public class RegistryTransformer implements IClassTransformer {
     		
     		//Get inner class list for each class
     		{
-    	        InnerClassVisitor cv = new InnerClassVisitor(Opcodes.ASM4);
+    	        InnerClassVisitor cv = new InnerClassVisitor(Opcodes.ASM5);
     	        cr.accept(cv, 0);
     	        List<String> inner = cv.getInnerClassList();
     	        if (inner != null) {
@@ -54,10 +54,10 @@ public class RegistryTransformer implements IClassTransformer {
     		}
     		//Transform network-calls for each class
     		{
-    		    NetworkCallVisitor cv = new NetworkCallVisitor(Opcodes.ASM4, arg0);
+    		    NetworkCallVisitor cv = new NetworkCallVisitor(Opcodes.ASM5, arg0);
     		    cr.accept(cv, 0);
     	        if (cv.needTransform()) {
-    	            ClassWriter cw = new ClassWriter(Opcodes.ASM4);
+    	            ClassWriter cw = new ClassWriter(Opcodes.ASM5);
     	            cr.accept(cv.getTransformer(cw), 0);
     	            data = cw.toByteArray();
     	        }
