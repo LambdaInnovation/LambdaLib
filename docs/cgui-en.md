@@ -12,8 +12,9 @@ CGUI is already being used extensively in [AcademyCraft](https://github.com/Lamb
 Basic Concepts
 ---
 
-``[Widget](#Widget Hierarchy)`` is the basic building block of CGUI. A widget represents an entity with position and size (width, height) lying in a 'canvas'.  
-``Widget``s are also allowed to be **added into** ``Widget``s. by doing this, the child widget will move and rescale together with its parent widget. This allows a great deal of flexibility for actions like window dragging and resizing.
+[Widget](#widget-hierarchy) is the basic building block of CGUI. A widget represents an entity with position and size (width, height) lying in a 'canvas'.
+
+``Widget``s are also allowed to be added into ``Widget``s. by doing this, the child widget will move and rescale together with its parent widget. This allows a great deal of flexibility for actions like window dragging and resizing.
 
 ``LIGui`` is the basic "canvas" of CGUI. Widgets are added into ``LIGui`` and ``LIGui`` handles everything for them, including drawing, dragging, keyboard clicking and many other stuffs. 
 LIGui does so by taking event delegations from somewhere else. Most typically, ``GuiScreen`` and its subclasses. If you have question about event delegation, see section [Delegation](#Delegation).
