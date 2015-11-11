@@ -41,7 +41,7 @@ public class LambdaLib {
 	/**
 	 * Does open debug mode. turn to false when compiling.
 	 */
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 	
 	public static Logger log = FMLLog.getLogger();
 

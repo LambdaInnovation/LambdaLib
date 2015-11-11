@@ -27,6 +27,7 @@ import java.util.Set;
 
 import cn.lambdalib.annoreg.core.AnnotationData.Type;
 import cn.lambdalib.core.LLModContainer;
+import cn.lambdalib.core.LambdaLib;
 
 public abstract class RegistryType {
 	
@@ -90,7 +91,9 @@ public abstract class RegistryType {
 	}
 	
 	public void registerAll(RegModInformation mod) {
-		LLModContainer.log.info("Reg " + this.name);
+        if(LambdaLib.DEBUG) {
+            LLModContainer.log.info("Reg " + this.name);
+        }
 		
 		//Dependencies.
 		for (String dep : dependencies) {
@@ -115,18 +118,17 @@ public abstract class RegistryType {
 		
 		//Sort
 		List<AnnotationData> regList = data.get(mod);
-		Collections.sort(regList, new Comparator<AnnotationData>() {
-			@Override
-			public int compare(AnnotationData arg0, AnnotationData arg1) {
-				if (arg0.type != arg1.type) {
-					return arg0.type.compareTo(arg1.type);
-				} else if (arg0.type == Type.CLASS) {
-					return arg0.getTheClass().getCanonicalName().compareTo(arg1.getTheClass().getCanonicalName());
-				} else {
-					return arg0.getTheField().toString().compareTo(arg1.getTheField().toString());
-				}
-			}
-		});
+        regList.sort((arg0, arg1) -> {
+            if (arg0.type != arg1.type) {
+                return arg0.type.compareTo(arg1.type);
+            } else if (arg0.type == Type.CLASS) {
+                return arg0.getTheClass().getCanonicalName().compareTo(arg1.getTheClass().getCanonicalName());
+            } else if (arg0.type == Type.FIELD){
+                return arg0.getTheField().toString().compareTo(arg1.getTheField().toString());
+            } else {
+                return arg0.getTheMethod().toString().compareTo(arg1.getTheMethod().toString());
+            }
+        });
 
 		//Do registration
 		String entryPrefix = mod.getPrefix() + this.name + "_";

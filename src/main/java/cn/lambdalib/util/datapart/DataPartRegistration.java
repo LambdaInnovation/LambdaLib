@@ -25,7 +25,7 @@ import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 public class DataPartRegistration extends RegistryType {
 
 	public DataPartRegistration() {
-		super(RegDataPart.class, "ac_DataPart");
+		super(RegDataPart.class, "LL_DataPart");
 		setLoadStage(LoadStage.INIT);
 	}
 
