@@ -12,17 +12,18 @@ CGUI is already being used extensively in [AcademyCraft](https://github.com/Lamb
 Basic Concepts
 ---
 
-``[Widget](#Widget Hierarchy)`` is the basic building block of CGUI. A widget represents an entity with position and size (width, height) lying in a 'canvas'. 
-Widgets are also allowed to be *added into Widgets*, by doing this, the child widget will move and rescale together with its parent widget. This allows a great deal of flexibility for actions like window dragging and resizing.
+[Widget](#widget-hierarchy) is the basic building block of CGUI. A widget represents an entity with position and size (width, height) lying in a 'canvas'.
 
-``LIGui`` is the basic "canvas" of CGUI. Widgets are added into LIGui and LIGui handles everything for them, including drawing, dragging, keyboard clicking and many other stuffs. 
+``Widget``s are also allowed to be added into ``Widget``s. by doing this, the child widget will move and rescale together with its parent widget. This allows a great deal of flexibility for actions like window dragging and resizing.
+
+``LIGui`` is the basic "canvas" of CGUI. Widgets are added into ``LIGui`` and ``LIGui`` handles everything for them, including drawing, dragging, keyboard clicking and many other stuffs. 
 LIGui does so by taking event delegations from somewhere else. Most typically, ``GuiScreen`` and its subclasses. If you have question about event delegation, see section [Delegation](#Delegation).
 
 You can treat ``Widget`` as what ``GameObject`` is in Unity. If you add an empty widget it does nothing. To make it be able to do things such as mouse event handling and picture drawing, you have to use ``GuiEventBus`` and possibly ``Component``.
 
-Every action in CGUI is represented as a ``GuiEvent``. When drawing each frame, widget receives ``FrameEvent``, when mouse is clicked, the clicked widget receives ``MouseDownEvent``, when its dragged it receives ``DragEvent``...
+Every action in CGUI is represented as a ``GuiEvent``. When drawing each frame, widget receives ``FrameEvent``, when mouse is clicked, the clicked widget receives ``MouseDownEvent``, when its dragged it receives ``DragEvent``, ...
 
-To make a widget response for such events, just call ```Widget#listen(...)```. The code is very intuitive and simple, if combined with the use of Java8 lambda expression. For example, the following code snippet will send chat to player when player clicks button:
+To make a widget response to such events, just call ```Widget#listen(eventClass, eventListener)```. The code is very intuitive and simple, if combined with the use of Java8 lambda expression. For example, the following code snippet will send chat to player when player clicks button:
 
 ```java
 EntityPlayer player = ...;
@@ -59,12 +60,13 @@ Components are usually well-defined and contains many custom attributes for you 
 
 - [ ] TODO: Finish animation briefing
 
-That's basically the structure of CGUI. It's flexible and extensible, almost allows any kind of GUI creation. One last thing worth mentioning: The visualized editing system!
+That's basically the structure of CGUI. It's flexible and extensible, and almost allows any kind of GUI creation. One last thing worth mentioning: Its visualized editing system!
 
 - [ ] TODO: Image of the new editor
 
-After editing the GUI, it is stored as XML document, and can be restored any time by reading it back as a ``LIGui`` instance. ``Widget`` supports prototype pattern natively.
-That is, you can copy widgets from the loaded ``LIGui`` arbitarily and forge them into any shape you want!
+After editing the GUI, it is stored as XML document, and can be restored any time by reading it back as a ``LIGui`` instance.
+
+``Widget`` supports prototype pattern natively, that is, you can copy widgets from the loaded ``LIGui`` arbitarily and forge them into any shape you want!
 
 ```java
 LIGui loadedGui = CGUIDocLoader.load(new ResourceLocation("mymod:gui.xml"));
