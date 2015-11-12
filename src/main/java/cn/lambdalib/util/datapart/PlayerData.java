@@ -95,9 +95,7 @@ public abstract class PlayerData implements IExtendedEntityProperties {
 	}
 	
 	protected void tick() {
-		for(DataPart p : constructed.values()) {
-			p.tick();
-		}
+		constructed.values().forEach(x -> x.tick());
 	}
 
 	@Override

@@ -175,13 +175,13 @@ public class LIGui extends WidgetContainer {
 		eventBus.postEvent(null, guievent);
 		
 		if(top != null) {
-			top.post(event);
 			if(bid == 0) {
 				gainFocus(top);
-				return true;
 			} else {
 				removeFocus();
 			}
+			top.post(event);
+			return true;
 		}
 		return false;
 	}

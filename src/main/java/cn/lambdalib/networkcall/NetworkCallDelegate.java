@@ -13,5 +13,5 @@
 package cn.lambdalib.networkcall;
 
 public interface NetworkCallDelegate {
-    void invoke(Object[] params);
+	void invoke(Object[] params);
 }

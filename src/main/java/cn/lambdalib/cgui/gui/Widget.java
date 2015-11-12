@@ -220,9 +220,11 @@ public class Widget extends WidgetContainer {
 	public void post(GuiEvent event, boolean tochild) {
 		eventBus.postEvent(this, event);
 		if(tochild) {
-			for(Widget w : widgets.values())
-				if(!w.disposed)
-					w.post(event, true);
+			widgets
+				.values()
+				.stream()
+				.filter(w -> !w.disposed)
+				.forEach(w -> w.post(event, true));
 		}
 	}
 	

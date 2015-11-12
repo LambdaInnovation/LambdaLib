@@ -29,6 +29,8 @@ public class Tint extends Component {
 		hoverColor = new Color(1, 1, 1, 0.4);
 	
 	public boolean affectTexture = false;
+
+	public double zLevel = 0.0;
 	
 	public static Tint get(Widget w) {
 		return w.getComponent("Tint");
@@ -48,8 +50,10 @@ public class Tint extends Component {
 				else idleColor.bind();
 				
 				GL11.glDisable(GL11.GL_ALPHA_TEST);
+				HudUtils.pushZLevel();
+				HudUtils.zLevel = zLevel;
 				HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
-				//GL11.glEnable(GL11.GL_ALPHA_TEST);
+				HudUtils.popZLevel();
 			}
 		});
 	}

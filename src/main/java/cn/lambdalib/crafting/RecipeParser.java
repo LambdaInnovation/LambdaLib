@@ -15,24 +15,24 @@ public class RecipeParser {
 	private Reader reader = null;
 	private int read = 0;
 	private int cur = 0;
-	
+
 	private String type = null;
 	private ParsedRecipeElement output = null;
 	private ParsedRecipeElement[] input = null;
 	private int width = -1;
 	private int height = -1;
 	private float exp = 0;
-	
+
 	RecipeParser(String str) throws Throwable {
 		reader = new StringReader(str);
 		getchar();
 	}
-	
+
 	RecipeParser(File file) throws Throwable {
 		reader = new FileReader(file);
 		getchar();
 	}
-	
+
 	void close() {
 		try {
 			reader.close();
@@ -44,41 +44,41 @@ public class RecipeParser {
 	public String getType() {
 		return type;
 	}
-	
+
 	public ParsedRecipeElement getOutput() {
 		return output;
 	}
-	
+
 	public ParsedRecipeElement[] getInput() {
 		return input;
 	}
-	
+
 	public int getWidth() {
 		return width;
 	}
-	
+
 	public int getHeight() {
 		return height;
 	}
-	
+
 	public float getExperience() {
 		return exp;
 	}
-	
+
 	private void error(String message) {
 		error(message, null);
 	}
-	
+
 	private void error(String message, Throwable cause) {
 		throw new RuntimeException("Failed at: " + cur, new RecipeParsingException(message, cause));
 	}
-	
+
 	private int getchar() {
 		try {
 			++cur;
 			read = reader.read();
-			if(read == ';') {
-				while(read != '\n' && read != '\r' && read != -1)
+			if (read == ';') {
+				while (read != '\n' && read != '\r' && read != -1)
 					read = reader.read();
 			}
 			return read;
@@ -87,7 +87,7 @@ public class RecipeParser {
 			return -1;
 		}
 	}
-	
+
 	public boolean parseNext() {
 		type = null;
 		output = null;
@@ -106,12 +106,12 @@ public class RecipeParser {
 		}
 		return false;
 	}
-	
+
 	private void parseNull() {
 		while (read != -1 && Character.isWhitespace(read))
 			getchar();
 	}
-	
+
 	private void parseType() {
 		parseNull();
 		StringBuilder sb = new StringBuilder();
@@ -123,20 +123,19 @@ public class RecipeParser {
 		if (type == null || type.isEmpty())
 			error("Empty type is not allowed");
 	}
-	
+
 	private void parseOutput() {
 		parseChar('(');
 		output = parseElement();
 		parseChar(')');
 	}
-	
+
 	private void parseInput() {
 		List<List<ParsedRecipeElement>> rows = new ArrayList<List<ParsedRecipeElement>>();
 		for (;;) {
 			try {
 				rows.add(parseList());
-			}
-			catch (Throwable e) {
+			} catch (Throwable e) {
 				break;
 			}
 		}
@@ -157,7 +156,7 @@ public class RecipeParser {
 			for (ParsedRecipeElement element : row)
 				input[index++] = element;
 	}
-	
+
 	private List<ParsedRecipeElement> parseList() {
 		parseChar('[');
 		ArrayList<ParsedRecipeElement> list = new ArrayList<ParsedRecipeElement>();
@@ -172,7 +171,7 @@ public class RecipeParser {
 		parseChar(']');
 		return list;
 	}
-	
+
 	private ParsedRecipeElement parseElement() {
 		parseNull();
 		ParsedRecipeElement res = new ParsedRecipeElement();
@@ -198,15 +197,15 @@ public class RecipeParser {
 		}
 		return res;
 	}
-	
+
 	private void parseChar(char c) {
-		if(!tryParseChar(c))
+		if (!tryParseChar(c))
 			error("Expecting " + c);
 	}
-	
+
 	private boolean tryParseChar(char c) {
 		parseNull();
-		
+
 		if (read == c) {
 			getchar();
 			return true;
@@ -214,7 +213,7 @@ public class RecipeParser {
 			return false;
 		}
 	}
-	
+
 	private int parseInteger() {
 		parseNull();
 		StringBuilder sb = new StringBuilder();
@@ -224,9 +223,9 @@ public class RecipeParser {
 		}
 		return Integer.valueOf(sb.toString());
 	}
-	
+
 	private void parseExp() {
-		if(tryParseChar('[')) {
+		if (tryParseChar('[')) {
 			float val = parseFloat();
 			parseNull();
 			parseChar(']');
@@ -234,20 +233,20 @@ public class RecipeParser {
 		} else
 			exp = 0;
 	}
-	
+
 	private float parseFloat() {
 		parseNull();
 		StringBuilder sb = new StringBuilder();
-		
+
 		boolean hasDot = false;
-		while(read != -1 && Character.isDigit(read) || (!hasDot && read == '.')) {
+		while (read != -1 && Character.isDigit(read) || (!hasDot && read == '.')) {
 			sb.append(Character.toChars(read));
-			if(read == '.') {
+			if (read == '.') {
 				hasDot = true;
 			}
 			getchar();
 		}
 		return Float.valueOf(sb.toString());
 	}
-	
+
 }

@@ -30,7 +30,7 @@ import cpw.mods.fml.common.event.FMLConstructionEvent;
 import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
 
 public class LLModContainer extends DummyModContainer {
-	
+
 	public static Logger log = LogManager.getLogger("LambdaLib|Core");
 	public static final String MODID = "LambdaLib|Core";
 
@@ -39,39 +39,39 @@ public class LLModContainer extends DummyModContainer {
 		metadata.modId = MODID;
 		metadata.name = "LambdaLib|Core";
 		metadata.version = LambdaLib.VERSION;
-		
-        return metadata;
+
+		return metadata;
 	}
-	
+
 	public LLModContainer() {
-	    super(getModMetadata());
+		super(getModMetadata());
 	}
-	
-    @Override
-    public boolean registerBus(EventBus bus, LoadController controller) {
-    	bus.register(this);
-        return true;
-    }
 
-    @Subscribe
-    public void constructMod(FMLConstructionEvent event) {
-    	log.info("LambdaLib|Core is loading.");
-    	
-    	//Get annotation information from forge asm data table.
-    	//This must be done before PreInit stage.
-    	ASMDataTable dt = event.getASMHarvestedData();
-    	RegistrationManager.INSTANCE.addRegistryTypes(dt.getAll("cn.lambdalib.annoreg.core.RegistryTypeDecl"));
-    	RegistrationManager.INSTANCE.annotationList(dt.getAll("cn.lambdalib.annoreg.core.Registrant"));
-    	RegistrationManager.INSTANCE.addAnnotationMod(dt.getAll("cn.lambdalib.annoreg.core.RegistrationMod"));
-    	
-    	// Misc initialization
-    	Future.init();
-    }
+	@Override
+	public boolean registerBus(EventBus bus, LoadController controller) {
+		bus.register(this);
+		return true;
+	}
 
-    @Subscribe
-    public void loadComplete(FMLLoadCompleteEvent event) {
-    	log.info("AnnotationRegistry is loaded. Checking states.");
-    	RegistrationManager.INSTANCE.checkLoadState();
-    }
-    
+	@Subscribe
+	public void constructMod(FMLConstructionEvent event) {
+		log.info("LambdaLib|Core is loading.");
+
+		// Get annotation information from forge asm data table.
+		// This must be done before PreInit stage.
+		ASMDataTable dt = event.getASMHarvestedData();
+		RegistrationManager.INSTANCE.addRegistryTypes(dt.getAll("cn.lambdalib.annoreg.core.RegistryTypeDecl"));
+		RegistrationManager.INSTANCE.annotationList(dt.getAll("cn.lambdalib.annoreg.core.Registrant"));
+		RegistrationManager.INSTANCE.addAnnotationMod(dt.getAll("cn.lambdalib.annoreg.core.RegistrationMod"));
+
+		// Misc initialization
+		Future.init();
+	}
+
+	@Subscribe
+	public void loadComplete(FMLLoadCompleteEvent event) {
+		log.info("AnnotationRegistry is loaded. Checking states.");
+		RegistrationManager.INSTANCE.checkLoadState();
+	}
+
 }

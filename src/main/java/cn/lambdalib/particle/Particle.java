@@ -32,10 +32,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 @RegEntity(clientOnly = true)
 @RegEntity.HasRender
 public final class Particle extends EntityAdvanced implements ISpriteEntity {
-	
+
 	@RegEntity.Render
 	public static RenderParticle render;
-	
+
 	public ResourceLocation texture = null;
 	public Color color = Color.WHITE();
 	public float size = 1.0f;
@@ -43,48 +43,49 @@ public final class Particle extends EntityAdvanced implements ISpriteEntity {
 	public double gravity = 0.0;
 	public boolean needRigidbody = true;
 	/**
-	 * When set to true this particle is rotated with rotationYaw and rotationPitch, else always faces the player.
+	 * When set to true this particle is rotated with rotationYaw and
+	 * rotationPitch, else always faces the player.
 	 */
 	public boolean customRotation = false;
 
 	long creationTime;
-	
+
 	public int fadeInTime = 5;
 	public int fadeTime;
 	public int life = 10000000;
 	double startAlpha;
-	
+
 	boolean updated;
-	
+
 	public Particle() {
 		super(null);
 	}
-	
+
 	public void fadeAfter(int life, int fadeTime) {
 		this.life = life;
 		this.fadeTime = fadeTime;
 	}
-	
+
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if(ticksExisted > life) {
+		if (ticksExisted > life) {
 			int dt = ticksExisted - life;
 			double alpha = 1 - (double) dt / fadeTime;
-			if(alpha < 0) {
+			if (alpha < 0) {
 				setDead();
 				alpha = 0;
 			}
 			color.a = alpha * startAlpha;
-		} else if(ticksExisted < fadeInTime) {
+		} else if (ticksExisted < fadeInTime) {
 			color.a = startAlpha * ((double) ticksExisted / fadeInTime);
 		} else {
 			color.a = startAlpha;
 		}
-		
+
 		motionY -= gravity;
 	}
-	
+
 	public void fromTemplate(Particle template) {
 		this.texture = template.texture;
 		this.color = template.color.copy();
@@ -98,20 +99,20 @@ public final class Particle extends EntityAdvanced implements ISpriteEntity {
 		this.customRotation = template.customRotation;
 		this.updated = false;
 	}
-	
+
 	@Override
 	protected void onFirstUpdate() {
 		updated = true;
-		if(needRigidbody)
+		if (needRigidbody)
 			this.addMotionHandler(new Rigidbody());
 		creationTime = GameTimer.getTime();
 		startAlpha = color.a;
 	}
-	
+
 	public long getParticleLife() {
 		return GameTimer.getTime() - creationTime;
 	}
-	
+
 	public long getMaxLife() {
 		return life;
 	}
@@ -122,7 +123,8 @@ public final class Particle extends EntityAdvanced implements ISpriteEntity {
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound nbt) {}
+	protected void writeEntityToNBT(NBTTagCompound nbt) {
+	}
 
 	@Override
 	public void updateSprite(Sprite s) {
@@ -132,7 +134,7 @@ public final class Particle extends EntityAdvanced implements ISpriteEntity {
 		s.color = color;
 		s.hasLight = hasLight;
 	}
-	
+
 	@Override
 	public boolean shouldRenderInPass(int pass) {
 		return pass == 1;
@@ -142,7 +144,5 @@ public final class Particle extends EntityAdvanced implements ISpriteEntity {
 	public boolean needViewOptimize() {
 		return false;
 	}
-	
-	
 
 }

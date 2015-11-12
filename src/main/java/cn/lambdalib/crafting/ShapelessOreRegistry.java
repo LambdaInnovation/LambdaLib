@@ -15,16 +15,15 @@ public class ShapelessOreRegistry implements IRecipeRegistry {
 
 	public static final ShapelessOreRegistry INSTANCE = new ShapelessOreRegistry();
 	private static Constructor<ShapelessOreRecipe> ctor = null;
-	
+
 	static {
 		try {
 			ctor = ShapelessOreRecipe.class.getConstructor(ItemStack.class, Object[].class);
-		}
-		catch(Throwable e) {
+		} catch (Throwable e) {
 			throw new RuntimeException("Failed to get the constructor of class \"ShapelessOreRecipe\"", e);
 		}
 	}
-	
+
 	@Override
 	public void register(String type, ItemStack output, Object[] input, int width, int height, float experience) {
 		try {
@@ -39,5 +38,5 @@ public class ShapelessOreRegistry implements IRecipeRegistry {
 
 	private ShapelessOreRegistry() {
 	}
-	
+
 }

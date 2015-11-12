@@ -25,10 +25,10 @@ import cpw.mods.fml.relauncher.IFMLCallHook;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 public class LLCorePlugin implements IFMLLoadingPlugin {
-	
+
 	@Override
 	public String[] getASMTransformerClass() {
-		return new String[] {"cn.lambdalib.core.asm.RegistryTransformer"};
+		return new String[] { "cn.lambdalib.core.asm.RegistryTransformer" };
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class LLCorePlugin implements IFMLLoadingPlugin {
 	public String getSetupClass() {
 		return null;
 	}
-	
+
 	@Override
 	public void injectData(Map<String, Object> data) {
 	}

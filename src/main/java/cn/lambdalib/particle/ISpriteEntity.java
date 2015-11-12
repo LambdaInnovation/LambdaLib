@@ -19,13 +19,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  * @author WeAthFolD
  */
 public interface ISpriteEntity {
-	
+
 	/**
 	 * Called each rendering frame before rendering to update the sprite's state
 	 */
 	@SideOnly(Side.CLIENT)
 	void updateSprite(Sprite s);
-	
+
 	boolean needViewOptimize();
-	
+
 }
