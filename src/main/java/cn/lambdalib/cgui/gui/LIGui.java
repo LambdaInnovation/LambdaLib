@@ -204,6 +204,7 @@ public class LIGui extends WidgetContainer {
 		if(node == focus) {
 			return;
 		}
+		LambdaLib.log.info("GainFocus " + node);
 		if(focus != null) {
 			removeFocus(node);
 		}
