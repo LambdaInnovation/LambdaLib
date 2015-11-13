@@ -123,8 +123,7 @@ class ArticleCompiler {
 		StringBuilder content = new StringBuilder();
 		while(peekChar() != token && !isEOF) {
 			read();
-			if(!isEOF)
-				content.append(current);
+			content.append(current);
 		}
 		return content.toString();
 	}
@@ -201,12 +200,15 @@ class ArticleCompiler {
 	}
 	
 	private Map<String, Tag> tags = new HashMap();
-	
-	private Tag
-		tagNewline = new TagNewline(),
-		tagBold = new Tag("bold"),
-		tagH1 = new Tag("h1"),
-		tagImage = new TagImg();
+
+	{
+		new TagNewline();
+		new Tag("bold");
+		for(int i = 1; i <= 6; ++i)
+			new Tag("h" + i);
+		new Tag("em");
+		new TagImg();
+	}
 	
 	private class TagImg extends Tag {
 		
@@ -250,7 +252,7 @@ class ArticleCompiler {
 	
 	private class TagNewline extends Tag {
 		TagNewline() {
-			super("ln", true);
+			super("br", true);
 		}
 		
 		@Override

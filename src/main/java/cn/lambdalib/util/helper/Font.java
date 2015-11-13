@@ -188,4 +188,8 @@ public class Font {
     	return mcFont().getStringWidth(str) * size / mcFont().FONT_HEIGHT;
     }
 
+	public double charLen(char ch, double size) {
+		return mcFont().getCharWidth(ch) * size / mcFont().FONT_HEIGHT;
+	}
+
 }
