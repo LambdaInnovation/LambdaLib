@@ -122,6 +122,7 @@ public class ArticleCompiler {
 				char ch = (char) pr.read();
 				if(ch == '"')  {
 					value = parseUntil(pr, '"');
+					require(read() == '"');
 				} else {
 					pr.unread(ch);
 					value = parseUntil(pr, ' ', true);
@@ -351,7 +352,7 @@ public class ArticleCompiler {
 		}
 
 		TokenType getType(char ch) {
-			return (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || (ch == '_' && ch == '-') ||
+			return (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || (ch == '_' || ch == '-') ||
 					Character.isWhitespace(ch) || Character.isDigit(ch)) ? TokenType.THISLINE : TokenType.NEXTLINE;
 		}
 
