@@ -70,7 +70,7 @@ tasks.withType(JavaCompile) {
 jar {
 	manifest {
 		attributes 'FMLCorePluginContainsFMLMod' : 'true'
-		attributes 'FMLCorePlugin' : 'cn.annoreg.AnnoRegCorePlugin'
+		attributes 'FMLCorePlugin' : 'cn.lambdalib.core.LLCorePlugin'
 	}
 }
 
