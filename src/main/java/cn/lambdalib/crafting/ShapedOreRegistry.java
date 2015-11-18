@@ -1,5 +1,7 @@
 package cn.lambdalib.crafting;
 
+import cn.lambdalib.core.LambdaLib;
+import cn.lambdalib.util.generic.DebugUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
@@ -33,6 +35,10 @@ public class ShapedOreRegistry implements IRecipeRegistry {
 					spec += ' ';
 			recipe[y] = spec;
 		}
+
+		debug("[ShapedOre] " +
+				RecipeRegistry.reprStack(output) + "[" + mirrored + "]" +
+				DebugUtils.formatArray(recipe));
 		GameRegistry.addRecipe(new ShapedOreRecipe(output, mirrored, recipe));
 	}
 

@@ -12,11 +12,14 @@
  */
 package cn.lambdalib.crafting;
 
+import cn.lambdalib.core.LambdaLib;
+import cn.lambdalib.util.generic.DebugUtils;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 /**
  * @author WeAthFolD
@@ -54,6 +57,10 @@ public class SmeltingRegistry implements IRecipeRegistry {
 			GameRegistry.addSmelting((Block) in, output, experience);
 		else if (in instanceof Item)
 			GameRegistry.addSmelting((Item) in, output, experience);
+
+		debug("[Smelting] " +
+				RecipeRegistry.reprStack(output) + " => " +
+				DebugUtils.formatArray(output));
 	}
 
 }

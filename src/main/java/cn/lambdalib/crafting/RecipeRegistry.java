@@ -52,7 +52,7 @@ public class RecipeRegistry {
 		if (o != null)
 			return o;
 
-		if (OreDictionary.doesOreNameExist(key))
+		if (!OreDictionary.getOres(key).isEmpty())
 			return key;
 
 		if (Item.itemRegistry.containsKey(key))
@@ -192,5 +192,12 @@ public class RecipeRegistry {
 	}
 
 	private HashMap<String, IRecipeRegistry> map = new HashMap<String, IRecipeRegistry>();
+
+	/**
+	 * Preserved for debug usage.
+	 */
+	public static String reprStack(ItemStack stack) {
+		return stack.getItem().getUnlocalizedName() + "*" + stack.stackSize + "#" + stack.getItemDamage();
+	}
 
 }
