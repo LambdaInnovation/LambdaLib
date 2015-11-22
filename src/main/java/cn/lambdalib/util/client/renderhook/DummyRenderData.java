@@ -18,7 +18,7 @@ import java.util.List;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.util.datapart.DataPart;
-import cn.lambdalib.util.datapart.PlayerData;
+import cn.lambdalib.util.datapart.EntityData;
 import cn.lambdalib.util.datapart.RegDataPart;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -32,10 +32,14 @@ import net.minecraft.nbt.NBTTagCompound;
 @SideOnly(Side.CLIENT)
 @Registrant
 @RegDataPart("DummyRender")
-public class DummyRenderData extends DataPart {
+public class DummyRenderData extends DataPart<EntityPlayer> {
+
+	public DummyRenderData() {
+		setTick();
+	}
 	
 	public static DummyRenderData get(EntityPlayer p) {
-		return PlayerData.get(p).getPart(DummyRenderData.class);
+		return EntityData.get(p).getPart(DummyRenderData.class);
 	}
 	
 	private EntityDummy entity;
@@ -44,7 +48,7 @@ public class DummyRenderData extends DataPart {
 	@Override
 	public void tick() {
 		if(entity != null) {
-			entity.player = (AbstractClientPlayer) getPlayer();
+			entity.player = (AbstractClientPlayer) getEntity();
 		}
 		
 		Iterator<PlayerRenderHook> iter = renderers.iterator();
@@ -67,7 +71,7 @@ public class DummyRenderData extends DataPart {
 	}
 	
 	public void addRenderHook(PlayerRenderHook hook) {
-		EntityPlayer player = getPlayer();
+		EntityPlayer player = getEntity();
 		hook.player = player;
 		hook.disposed = false;
 		

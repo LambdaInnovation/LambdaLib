@@ -32,7 +32,7 @@ public class InfoBlockMulti {
 	ForgeDirection dir = ForgeDirection.NORTH;
 	int subID;
 
-	private boolean loaded; // Client-Only flag. Indicate if it was synced.
+	private boolean loaded; // Client-Only flag. Indicate if it was syncedSingle.
 	int syncCD; // Ticks until sending next sync request.
 
 	InfoBlockMulti(TileEntity _te, ForgeDirection _dir, int sid) {

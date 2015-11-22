@@ -12,8 +12,8 @@
  */
 package cn.lambdalib.util.datapart;
 
+import cn.lambdalib.networkcall.s11n.StorageOption.RangedTarget;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import cn.lambdalib.annoreg.core.Registrant;
@@ -22,33 +22,102 @@ import cn.lambdalib.networkcall.s11n.InstanceSerializer;
 import cn.lambdalib.networkcall.s11n.RegSerializable;
 import cn.lambdalib.networkcall.s11n.SerializationManager;
 import cn.lambdalib.networkcall.s11n.StorageOption.Data;
-import cn.lambdalib.networkcall.s11n.StorageOption.Target;
 import cpw.mods.fml.relauncher.Side;
 
 /**
- * DataPart represents a single tickable instance attached on an EntityPlayer.
- *  It is driven by the PlayerData of this player. <br/>
+ * DataPart represents a single tickable data-storage object attached on an Entity.
+ *  It is driven by the {@link EntityData} of this entity. <br>
  *  
- * The DataPart is attached statically via {@link PlayerData#register(String, Class)}
- *  method or @RegDataPart (This should be done at init stages), and is automatically constructed when an
- *  EntityPlayer enters the world. At server, the {@link DataPart#fromNBT(NBTTagCompound)}
- *  method will be called right away, and the NBT will also be sync to client ASAP. 
+ * The DataPart is attached statically via {@link EntityData#register}
+ *  method or @RegDataPart  annotation (This should be done at init stages), and is automatically constructed
+ *  on <em>first time querying</em>. At server, the {@link DataPart#fromNBT(NBTTagCompound)}
+ *  method will be called right away, and the NBT will be sync to client ASAP. <br>
+ *
  *  Also when the world is being saved, the {@link DataPart#toNBT()} will be called to save stuffs
- *   in server.
- *  <br/>
- * 
+ *   in server. <br>
+ *
  * A simple sync helper is provided. You can use sync() in both CLIENT and SERVER side to make a new NBT
- *  synchronization. However, for complex syncs you might want to consider using NetworkCall.
+ *  synchronization. However, for complex syncs you might want to consider using NetworkCall. <br>
  *  
- * When player is available the {@link DataPart#tick()} will get called every tick. You can 
- * process update stuffs within that method. <br/>
- * 
- * TODO If tick is too slow make selective ticking optimization <br/>
+ * DataPart supports ticking by nature. Use setTick() to enable it. <br>
+ *
+ * For DataPart of EntityPlayer, all DataParts are kept except for those who called {@link DataPart#clearOnDeath()}
+ * 	in their ctor when player is respawned.
+ *
  * @author WeAthFolD
  */
 @Registrant
 @RegSerializable(instance = DataPart.Serializer.class)
-public abstract class DataPart {
+public abstract class DataPart<Ent extends Entity> {
+
+	// API
+
+	/**
+	 * The default constructor must be kept for subclasses, for using reflections to create instance.
+	 */
+	public DataPart() {}
+
+	/**
+	 * Invoked every tick if setTick() is called
+	 */
+	public void tick() {}
+
+	/**
+	 * Set this DataPart to need ticking. Called in ctor.
+	 */
+	public final void setTick() {
+		tick = true;
+	}
+
+	/**
+	 * Set this DataPart to be reset when entity is dead. Effective for EntityPlayer only. Called in ctor.
+	 * (Other entities don't revive)
+	 */
+	public final void clearOnDeath() {
+		keepOnDeath = false;
+	}
+
+	/**
+	 * Restore data of this DataPart from the NBT. Will be called externally only for world saving
+	 */
+	public abstract void fromNBT(NBTTagCompound tag);
+
+	/**
+	 * Convert data of this DataPart to a NBT. Will be called externally only for world saving
+	 */
+	public abstract NBTTagCompound toNBT();
+
+	/**
+	 * Same as fromNBT, but only get called when synchronizing across network.
+	 */
+	public void fromNBTSync(NBTTagCompound tag) { fromNBT(tag); }
+
+	/**
+	 * Same as toNBT, but only get called when synchronizing across network.
+	 */
+	public NBTTagCompound toNBTSync() { return toNBT(); }
+
+	public Ent getEntity() {
+		return data.entity;
+	}
+
+	public boolean isRemote() {
+		return getEntity().worldObj.isRemote;
+	}
+
+	public <T extends DataPart> T getPart(String name) {
+		return data.getPart(name);
+	}
+
+	public <T extends DataPart> T getPart(Class<T> type) {
+		return data.getPart(type);
+	}
+
+	public String getName() {
+		return data.getName(this);
+	}
+
+	// Internal
 
 	/**
 	 * Internal sync flag, used to determine whether this part is init in client.
@@ -60,30 +129,9 @@ public abstract class DataPart {
 	/**
 	 * The player instance when this data is available. Do NOT modify this field!
 	 */
-	PlayerData data;
-	
-	public DataPart() {}
-	
-	/**
-	 * Invoked every tick
-	 */
-	public void tick() {}
-	
-	public EntityPlayer getPlayer() {
-		return data.player;
-	}
-	
-	public boolean isRemote() {
-		return getPlayer().worldObj.isRemote;
-	}
-	
-	public <T extends DataPart> T getPart(String name) {
-		return data.getPart(name);
-	}
-	
-	public String getName() {
-		return data.getName(this);
-	}
+	EntityData<Ent> data;
+
+	boolean tick = false, keepOnDeath = true;
 	
 	/**
 	 * Return true if this data has received the initial sync.
@@ -97,7 +145,7 @@ public abstract class DataPart {
 		if(isRemote()) {
 			syncFromClient(toNBTSync());
 		} else {
-			syncFromServer(getPlayer(), toNBTSync());
+			syncFromServer(getEntity(), toNBTSync());
 		}
 	}
 	
@@ -107,17 +155,9 @@ public abstract class DataPart {
 	}
 	
 	@RegNetworkCall(side = Side.CLIENT)
-	private void syncFromServer(@Target EntityPlayer player, @Data NBTTagCompound tag) {
+	private void syncFromServer(@RangedTarget(range = 10) Entity player, @Data NBTTagCompound tag) {
 		fromNBTSync(tag);
 	}
-	
-	public abstract void fromNBT(NBTTagCompound tag);
-	
-	public abstract NBTTagCompound toNBT();
-	
-	public void fromNBTSync(NBTTagCompound tag) { fromNBT(tag); }
-	
-	public NBTTagCompound toNBTSync() { return toNBT(); }
 	
 	protected void checkSide(boolean isRemote) {
 		if(isRemote ^ isRemote()) {
@@ -135,9 +175,8 @@ public abstract class DataPart {
 			NBTBase entityTag = tag.getTag("e");
 			if(entityTag != null) {
 				Entity e = (Entity) entitySer.readInstance(entityTag);
-				if(e instanceof EntityPlayer) {
-					return PlayerData.get((EntityPlayer) e).getPart(tag.getString("n"));
-				}
+				EntityData data = EntityData.get(e);
+				return data.getPart(tag.getString("n"));
 			}
 			
 			return null;
@@ -147,7 +186,7 @@ public abstract class DataPart {
 		public NBTBase writeInstance(DataPart obj) throws Exception {
 			NBTTagCompound ret = new NBTTagCompound();
 			
-			NBTBase entityTag = entitySer.writeInstance(obj.getPlayer());
+			NBTBase entityTag = entitySer.writeInstance(obj.getEntity());
 			
 			ret.setTag("e", entityTag);
 			ret.setString("n", obj.getName());

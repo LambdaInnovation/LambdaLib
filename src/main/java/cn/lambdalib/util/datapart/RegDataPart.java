@@ -12,6 +12,8 @@
  */
 package cn.lambdalib.util.datapart;
 
+import net.minecraft.entity.player.EntityPlayer;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,7 +25,15 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RegDataPart {
-	
+
+	/**
+	 * @return The type that this DataPart applies on.
+	 */
+	Class type() default EntityPlayer.class;
+
+	/**
+	 * @return The key for this DataPart.
+	 */
 	String value();
 	
 }

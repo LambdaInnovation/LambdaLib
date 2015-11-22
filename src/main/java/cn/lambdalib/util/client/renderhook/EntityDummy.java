@@ -43,9 +43,9 @@ public class EntityDummy extends Entity implements IAssociatePlayer {
 	float lastRotationPitch;
 	
 	public EntityDummy(DummyRenderData _data) {
-		super(_data.getPlayer().worldObj);
+		super(_data.getEntity().worldObj);
 		data = _data;
-		player = (AbstractClientPlayer) _data.getPlayer();
+		player = (AbstractClientPlayer) _data.getEntity();
 		ignoreFrustumCheck = true;
 	}
 

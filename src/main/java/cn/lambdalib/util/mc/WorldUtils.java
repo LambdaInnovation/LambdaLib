@@ -15,10 +15,14 @@ package cn.lambdalib.util.mc;
 import java.util.ArrayList;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -28,13 +32,39 @@ import net.minecraft.world.World;
 import cn.lambdalib.util.helper.BlockPos;
 import cn.lambdalib.util.helper.Motion3D;
 import cn.lambdalib.util.mc.EntitySelectors.SelectorList;
+import net.minecraft.world.WorldServer;
 
 /**
  * Utils about block/entity lookup and interaction.
  * @author WeAthFolD
  */
 public class WorldUtils {
-	
+
+	/**
+	 * Judge whether a world is valid (e.g. currently in use), and false if world is null.
+	 */
+	public static boolean isWorldValid(World world) {
+		if(world == null) {
+			return false;
+		}
+		if(world.isRemote) {
+			return worldValidC(world);
+		} else {
+			WorldServer[] wss = MinecraftServer.getServer().worldServers;
+			for(World w : wss) {
+				if(w == world) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	private static boolean worldValidC(World world) {
+		return Minecraft.getMinecraft().theWorld == world;
+	}
+
 	public static AxisAlignedBB getBoundingBox(Vec3 vec1, Vec3 vec2) {
 		double minX = 0.0, minY = 0.0, minZ = 0.0, maxX = 0.0, maxY = 0.0, maxZ = 0.0;
 		if(vec1.xCoord < vec2.xCoord) {

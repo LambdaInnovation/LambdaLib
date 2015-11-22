@@ -25,7 +25,7 @@ import net.minecraft.nbt.NBTTagCompound;
 public class PlayerDataTag extends DataPart {
 	
 	public static PlayerDataTag get(EntityPlayer player) {
-		return PlayerData.get(player).getPart(PlayerDataTag.class);
+		return EntityData.get(player).getPart(PlayerDataTag.class);
 	}
 	
 	private NBTTagCompound theTag;
