@@ -61,7 +61,7 @@ public class Widget extends WidgetContainer {
 	public Widget() {}
 	
 	public boolean isVisible() {
-		return visible && transform.doesDraw;
+		return visible && transform.doesDraw && !dirty;
 	}
 		
 	/**
@@ -246,7 +246,7 @@ public class Widget extends WidgetContainer {
 
 	@Override
 	protected void onWidgetAdded(String name, Widget w) {
-		this.dirty = true;
+		// w.dirty = true; // Insertion of child will not affect parent
 		w.parent = this;
 		w.gui = gui;
 	}

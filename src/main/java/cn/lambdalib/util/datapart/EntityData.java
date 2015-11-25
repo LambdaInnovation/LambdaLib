@@ -178,17 +178,18 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
 				.filter(p -> p.getValue().filterPred.test(entity.getClass()))
 				.forEach(entry -> {
 					Registered reg = entry.getValue();
-					construct(entry.getKey(), (Class<? extends DataPart<Ent>>) reg.type);
+					construct((Class<? extends DataPart<Ent>>) reg.type);
 				});
 
 		ticked = constructed.values().stream().filter(x -> true).toArray(DataPart[]::new);
 	}
 
-	private void construct(String name, Class<? extends DataPart<Ent>> type) {
+	private DataPart<Ent> construct(Class<? extends DataPart<Ent>> type) {
 		try {
 			DataPart<Ent> dp = type.newInstance();
 			dp.data = this;
 			constructed.put(type, dp);
+			return dp;
 		} catch(InstantiationException | IllegalAccessException e) {
 			LambdaLib.log.error("Error constructing DataPart", e);
 			throw new RuntimeException(e);
@@ -371,8 +372,11 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
 				data.constructed.values().stream()
 						.filter(d -> !d.keepOnDeath)
 						.collect(Collectors.toList()) // Pre collect to eliminate cross-iterating possibility
-						.forEach(d -> data.construct(data.getName(d),
-								(Class<? extends DataPart<EntityPlayer>>) d.getClass()));
+						.forEach(d -> {
+							DataPart part = data.construct((Class<? extends DataPart<EntityPlayer>>) d.getClass());
+							part.sync();
+							part.dirty = false;
+						});
 			}
 		}
 		

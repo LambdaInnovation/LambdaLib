@@ -178,8 +178,8 @@ public abstract class RegistryType {
 						itor.remove();
 				} catch (Exception e) {
 					LLModContainer.log.error("Error when registering {}.", ad.toString());
-					LLModContainer.log.error(e);
 					itor.remove();
+					throw new RuntimeException(e);
 				}
 				break;
 			default:

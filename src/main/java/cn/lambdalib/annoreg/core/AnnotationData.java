@@ -75,6 +75,7 @@ public class AnnotationData {
 	@Override
 	public String toString() {
 		return "AnnotationData (" + anno.annotationType().getSimpleName() + ", " +
-				(isClass() ? getTheClass().getCanonicalName() : getTheField().toString()) + ")";
+				(isClass() ? getTheClass().getCanonicalName() :
+						isMethod() ? getTheMethod().toString() : getTheField().toString()) + ")";
 	}
 }
