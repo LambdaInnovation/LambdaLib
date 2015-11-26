@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import cn.lambdalib.util.client.ClientUtils;
+import cn.lambdalib.util.generic.DebugUtils;
 import cn.lambdalib.util.mc.WorldUtils;
 
 import cn.lambdalib.annoreg.core.Registrant;
@@ -37,12 +38,14 @@ import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
 /**
@@ -181,7 +184,7 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
 					construct((Class<? extends DataPart<Ent>>) reg.type);
 				});
 
-		ticked = constructed.values().stream().filter(x -> true).toArray(DataPart[]::new);
+		reconstructTickList();
 	}
 
 	private DataPart<Ent> construct(Class<? extends DataPart<Ent>> type) {
@@ -200,6 +203,10 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
 		for(DataPart p : ticked) {
 			p.tick();
 		}
+	}
+
+	private void reconstructTickList() {
+		ticked = constructed.values().stream().filter(x -> x.tick).toArray(DataPart[]::new);
 	}
 
 	@Override
@@ -355,6 +362,7 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
 			return !WorldUtils.isWorldValid(e.worldObj) || (!e.isEntityAlive() && !(e instanceof EntityPlayer));
 		}
 
+		// NOTE: gets fired only in client.
 		@SubscribeEvent
 		public void onPlayerClone(PlayerEvent.Clone event) {
 			EntityPlayer player = event.entityPlayer;
@@ -367,7 +375,16 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
 				// "Reput" the key-value pair to keep the key reference correct.
 				map.remove(event.original);
 				map.put(player, data);
+			}
+		}
 
+		@SubscribeEvent
+		public void onLivingDeath(LivingDeathEvent event) {
+			if(!(event.entity instanceof EntityPlayer))
+				return;
+
+			EntityData<EntityPlayer> data = EntityData.getNonCreate((EntityPlayer) event.entityLiving);
+			if(data != null) {
 				// Reconstruct non-consistent DataParts
 				data.constructed.values().stream()
 						.filter(d -> !d.keepOnDeath)
@@ -377,6 +394,7 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
 							part.sync();
 							part.dirty = false;
 						});
+				data.reconstructTickList();
 			}
 		}
 		
