@@ -176,7 +176,9 @@ public abstract class DataPart<Ent extends Entity> {
 			if(entityTag != null) {
 				Entity e = (Entity) entitySer.readInstance(entityTag);
 				EntityData data = EntityData.get(e);
-				return data.getPart(tag.getString("n"));
+				if(data != null) {
+					return data.getPart(tag.getString("n"));
+				}
 			}
 			
 			return null;
