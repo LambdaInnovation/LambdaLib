@@ -27,6 +27,7 @@ configurations {
 	deployerJars
 }
 
+apply plugin: 'scala'
 apply plugin: 'forge'
 
 
@@ -49,6 +50,12 @@ repositories {
 
 dependencies {
 	deployerJars "org.apache.maven.wagon:wagon-ftp:2.2"
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.java
+    from sourceSets.main.scala
+    classifier = 'sources'
 }
 
 processResources
