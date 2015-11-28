@@ -22,8 +22,6 @@ public interface IFont {
 	}
 
 	class FontOption {
-
-		public boolean bold, stroke, italic;
 		public double fontSize = 10;
 		public FontAlign align;
 		public Color color;
@@ -53,8 +51,6 @@ public interface IFont {
 		@Override
 		public FontOption clone() {
 			FontOption ret = new FontOption();
-			ret.bold = bold;
-			ret.stroke = stroke;
 			ret.fontSize = fontSize;
 			ret.align = align;
 			return ret;
@@ -73,7 +69,7 @@ public interface IFont {
 	/**
 	 * Get the width of given character when drawed with given FontOption.
 	 */
-	void getCharWidth(char chr, FontOption option);
+	double getCharWidth(int chr, FontOption option);
 
 	/**
 	 * Get the text width that will be drawn if calls the {@link IFont#draw}.
@@ -94,7 +90,7 @@ public interface IFont {
 	 * Simulates the {@link IFont#drawSeperated} and return the extent drawn.
 	 * @return A {@link Extent} describing the drawn area
 	 */
-	default Extent drawSeperated_Sim(String str, double x, double y, double limit, FontOption option) {
+	default Extent drawSeperated_Sim(String str, double limit, FontOption option) {
 		// TODO
 		return null;
 	}
