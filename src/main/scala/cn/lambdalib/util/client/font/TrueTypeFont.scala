@@ -5,10 +5,14 @@ import java.awt.image.{DataBufferByte, DataBufferInt, BufferedImage}
 import java.nio.{ByteOrder, ByteBuffer}
 import java.util
 
+import cn.lambdalib.util.client.HudUtils
 import cn.lambdalib.util.client.font.IFont.FontOption
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.util.MathHelper
+import org.lwjgl.BufferUtils
+import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11._
+import org.lwjgl.opengl.GL30
 import org.lwjgl.opengl.GL30._
 
 /**
@@ -21,7 +25,7 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
 
   class CachedChar(val ch: Int, val width: Int, val index: Int, val u: Float, val v: Float)
 
-  val TEXTURE_SZ_LIMIT = Math.min(2048, glGetInteger(GL_MAX_TEXTURE_SIZE))
+  val TEXTURE_SZ_LIMIT = Math.min(2048, GL11.glGetInteger(GL_MAX_TEXTURE_SIZE))
 
   private val maxPerCol = MathHelper.floor_float(TEXTURE_SZ_LIMIT / charSize.toFloat)
   private val maxStep = maxPerCol * maxPerCol
@@ -36,9 +40,11 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
 
   // GL Stuffs
   private val fbo = glGenFramebuffers()
+
+  newTexture()
   // GL end
 
-  println("Texture size limit: " + glGetInteger(GL_MAX_TEXTURE_SIZE))
+  println("Texture size limit: " + GL11.glGetInteger(GL_MAX_TEXTURE_SIZE))
 
   override def draw(str: String, px: Double, y: Double, option: FontOption) = {
     updateCache(str)
@@ -52,14 +58,16 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
       val v = info.v
       val sz = option.fontSize
       glBindTexture(GL_TEXTURE_2D, generated.get(info.index))
+      // glDisable(GL_TEXTURE_2D)
       t.startDrawingQuads()
       t.addVertexWithUV(x,      y,      0, u,           v          )
       t.addVertexWithUV(x,      y + sz, 0, u,           v + texStep)
       t.addVertexWithUV(x + sz, y + sz, 0, u + texStep, v + texStep)
       t.addVertexWithUV(x + sz, y,      0, u + texStep, v          )
       t.draw()
+      glEnable(GL_TEXTURE_2D)
 
-      x += info.width * option.size / charSize
+      x += info.width * option.fontSize / charSize
     }
   }
 
@@ -77,8 +85,10 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
 
   private def newTexture() = {
     val texture = glGenTextures()
+
     glBindTexture(GL_TEXTURE_2D, texture)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_SZ_LIMIT, TEXTURE_SZ_LIMIT, 0, GL_RGBA, GL_FLOAT, 0)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_SZ_LIMIT, TEXTURE_SZ_LIMIT, 0, GL_RGBA, GL_FLOAT,
+      null.asInstanceOf[ByteBuffer])
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
@@ -89,7 +99,7 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
     glBindTexture(GL_TEXTURE_2D, 0)
 
     generated.add(texture)
-    curStep = 0
+    step = 0
 
     // FIXME Is building mipmaps necessary?
     // GLU.gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA8, TEXTURE_SZ_LIMIT, TEXTURE_SZ_LIMIT, GL_RGBA, GL_UNSIGNED_BYTE, )
@@ -105,16 +115,18 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
   private def writeImage(ch: Int) = {
     // Create an image holding the character
     val image = new BufferedImage(charSize, charSize, BufferedImage.TYPE_INT_ARGB)
+    val curtex = currentTexture
 
-    val g: Graphics2D = tmpImage.getGraphics.asInstanceOf[Graphics2D]
+    val g: Graphics2D = image.getGraphics.asInstanceOf[Graphics2D]
     g.setFont(font)
-    g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
     val metrics = g.getFontMetrics
     val width = metrics.charWidth(ch)
     // Draw to the image
     g.setColor(Color.WHITE)
-    g.drawString(String.valueOf(ch), 3, 1 + metrics.getAscent)
+
+    g.drawString(new java.lang.StringBuilder().appendCodePoint(ch).toString, 3, 1 + metrics.getAscent)
 
     // Convert awt image to byte buffer
     // Original algorithm credits:
@@ -127,8 +139,9 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
 
     var byteBuffer: ByteBuffer = null
     val db = image.getData().getDataBuffer
+    val bpp = image.getColorModel.getPixelSize.toByte
     if (db.isInstanceOf[DataBufferInt]) {
-      val intI = bufferedImage.getData().getDataBuffer().asInstanceOf(DataBufferInt).getData();
+      val intI = image.getData().getDataBuffer().asInstanceOf[DataBufferInt].getData()
       val newI = new Array[Byte](intI.length * 4)
       for(i <- 0 until intI.length) yield {
         val b = intToByteArray(intI(i))
@@ -141,14 +154,14 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
       }
 
       byteBuffer = ByteBuffer.allocateDirect(
-        width*height*(bpp/8))
+        charSize*charSize*(bpp/8))
         .order(ByteOrder.nativeOrder())
         .put(newI)
     } else {
       byteBuffer = ByteBuffer.allocateDirect(
-        width*height*(bpp/8))
+        charSize*charSize*(bpp/8))
         .order(ByteOrder.nativeOrder())
-        .put(bufferedImage.getData().getDataBuffer().asInstanceOf[DataBufferByte].getData())
+        .put(image.getData().getDataBuffer().asInstanceOf[DataBufferByte].getData())
     }
     byteBuffer.flip()
 
@@ -157,15 +170,18 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
     val rasterY = (step / maxPerCol) * charSize
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo)
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, currentTexture, 0)
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curtex, 0)
 
     glRasterPos2i(rasterX, rasterY)
-    glDrawPixels(charSize, charSize, GL_RGBA, GL_RGBA, byteBuffer)
+    // glDrawPixels(charSize, charSize, GL_RGBA, GL_RGBA, byteBuffer)
+
+    glBindTexture(GL_TEXTURE_2D, curtex)
+    glTexSubImage2D(GL_TEXTURE_2D, 0, rasterX, rasterY, charSize, charSize, GL_RGBA, GL_UNSIGNED_BYTE, byteBuffer)
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
     glRasterPos2i(0, 0)
 
-    lookup.put(ch, new CachedChar(ch, width, step, rasterX.toFloat / TEXTURE_SZ_LIMIT,
+    lookup.put(ch, new CachedChar(ch, width, generated.size() - 1, rasterX.toFloat / TEXTURE_SZ_LIMIT,
       rasterY.toFloat / TEXTURE_SZ_LIMIT))
 
     step += 1
@@ -178,7 +194,7 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
   private def codePoints(str: String) = (0 until str.length).map(str.codePointAt)
 
   private def intToByteArray(value: Int) = {
-    val ret = new Array[Byte]
+    val ret = new Array[Byte](4)
     ret.update(0, (value >>> 24).toByte)
     ret.update(1, (value >>> 16).toByte)
     ret.update(2, (value >>> 8).toByte)
