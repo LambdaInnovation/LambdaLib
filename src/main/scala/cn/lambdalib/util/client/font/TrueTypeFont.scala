@@ -5,27 +5,22 @@ import java.awt.image.{DataBufferByte, DataBufferInt, BufferedImage}
 import java.nio.{ByteOrder, ByteBuffer}
 import java.util
 
-import cn.lambdalib.util.client.HudUtils
 import cn.lambdalib.util.client.font.IFont.FontOption
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.util.MathHelper
-import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11._
-import org.lwjgl.opengl.GL30
-import org.lwjgl.opengl.GL30._
-
 /**
   * This class wraps a java AWT font and make it gl-drawable. It generates font texture procedurally
   *  so that any unicode character can be supported.
   *  @param font: The underlying AWT font
-  *  @param charSize: The size of one char drawn in image.
   */
-class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
+class TrueTypeFont(val font: Font) extends IFont {
 
   class CachedChar(val ch: Int, val width: Int, val index: Int, val u: Float, val v: Float)
 
   val TEXTURE_SZ_LIMIT = Math.min(2048, GL11.glGetInteger(GL_MAX_TEXTURE_SIZE))
+  val charSize = (font.getSize * 1.4).toInt
 
   private val maxPerCol = MathHelper.floor_float(TEXTURE_SZ_LIMIT / charSize.toFloat)
   private val maxStep = maxPerCol * maxPerCol
@@ -38,11 +33,7 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
 
   val texStep = 1.0 / maxPerCol
 
-  // GL Stuffs
-  private val fbo = glGenFramebuffers()
-
   newTexture()
-  // GL end
 
   println("Texture size limit: " + GL11.glGetInteger(GL_MAX_TEXTURE_SIZE))
 
@@ -101,7 +92,7 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
     generated.add(texture)
     step = 0
 
-    // FIXME Is building mipmaps necessary?
+    // TODO Checkout if building mipmaps generates better result
     // GLU.gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA8, TEXTURE_SZ_LIMIT, TEXTURE_SZ_LIMIT, GL_RGBA, GL_UNSIGNED_BYTE, )
   }
 
@@ -169,17 +160,8 @@ class TrueTypeFont(val font: Font, val charSize: Int) extends IFont {
     val rasterX = (step % maxPerCol) * charSize
     val rasterY = (step / maxPerCol) * charSize
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo)
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curtex, 0)
-
-    glRasterPos2i(rasterX, rasterY)
-    // glDrawPixels(charSize, charSize, GL_RGBA, GL_RGBA, byteBuffer)
-
     glBindTexture(GL_TEXTURE_2D, curtex)
     glTexSubImage2D(GL_TEXTURE_2D, 0, rasterX, rasterY, charSize, charSize, GL_RGBA, GL_UNSIGNED_BYTE, byteBuffer)
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
-    glRasterPos2i(0, 0)
 
     lookup.put(ch, new CachedChar(ch, width, generated.size() - 1, rasterX.toFloat / TEXTURE_SZ_LIMIT,
       rasterY.toFloat / TEXTURE_SZ_LIMIT))

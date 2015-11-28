@@ -12,7 +12,7 @@ import net.minecraft.client.gui.ScaledResolution
 @RegAuxGui
 class FontTest extends AuxGui {
 
-  val font = new TrueTypeFont(new Font("微软雅黑", Font.PLAIN, 32), 40)
+  val font = new TrueTypeFont(new Font("微软雅黑", Font.PLAIN, 32))
 
   val option = new FontOption(15)
 
