@@ -12,7 +12,7 @@
  */
 package cn.lambdalib.cgui.gui.component;
 
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -21,6 +21,9 @@ import java.io.IOException;
 
 import javax.vecmath.Vector2d;
 
+import cn.lambdalib.util.client.font.IFont;
+import cn.lambdalib.util.client.font.IFont.FontOption;
+import cn.lambdalib.util.client.font.TrueTypeFont;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -33,14 +36,12 @@ import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.KeyEvent;
 import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.util.helper.Color;
-import cn.lambdalib.util.helper.Font;
-import cn.lambdalib.util.helper.Font.Align;
 import cn.lambdalib.util.helper.GameTimer;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.StatCollector;
 
 /**
- * Textbox displays text on the widget area, it might also be edited.
+ * Textbox displays text on the widget area, it might also be edited. TextBox is designed to handle ONE-LINE texts.
  * @author WeAthFolD
  */
 public class TextBox extends Component {
@@ -54,8 +55,17 @@ public class TextBox extends Component {
 	 * Fired each time the TextBox's input is confirmed. (a.k.a. User presses enter)
 	 */
 	public static class ConfirmInputEvent implements GuiEvent {}
+
+	private static TrueTypeFont defaultFont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 32));
+	static {
+		defaultFont.setIdeographicFont(new Font("微软雅黑", Font.PLAIN, 32));
+	}
 	
 	public String content = "";
+
+	public IFont font = defaultFont;
+
+	public FontOption option = new FontOption();
 	
 	/**
 	 * Only activated when doesn't allow edit. If activated, The display string will be StatCollector.translateToLocal(content).
@@ -109,7 +119,7 @@ public class TextBox extends Component {
 		if(doesEcho) {
 			StringBuilder sb = new StringBuilder();
 			for(int i = 0; i < str.length(); ++i) {
-				sb.append('*');
+				sb.append(echoChar);
 			}
 			str = sb.toString();
 		}
@@ -139,7 +149,7 @@ public class TextBox extends Component {
 	
 	private double[] getOffset(Widget w) {
 		double x = 0, y = 0;
-		Vector2d v = new Vector2d(Font.font.strLen(getProcessedContent(), size), size);
+		Vector2d v = new Vector2d(font.getTextWidth(getProcessedContent(), option), size);
 		
 		switch(widthAlign) {
 		case LEFT:
@@ -231,7 +241,7 @@ public class TextBox extends Component {
 			double eventX = -offset[0] + e.x;
 			
 			for(int i = 0; i < content.length(); ++i) {
-				double cw = Font.font.strLen(String.valueOf(content.charAt(i)), size);
+				double cw = font.getTextWidth(String.valueOf(content.charAt(i)), option);
 				len += cw;
 				
 				if(len > eventX) {
@@ -244,6 +254,7 @@ public class TextBox extends Component {
 		
 		listen(FrameEvent.class, (w, event) -> {
 			double[] offset = getOffset(w);
+			option.fontSize = size;
 			
 			checkCaret();
 			
@@ -251,17 +262,14 @@ public class TextBox extends Component {
 			
 			GL11.glPushMatrix();
 			GL11.glTranslated(0, 0, zLevel);
-			
-			if(emit)
-				Font.font.drawTrimmed(str, offset[0], offset[1], size, color.asHexColor(), Align.LEFT, w.transform.width - 2, "...");
-			else
-				Font.font.draw(str, offset[0], offset[1], size, color.asHexColor(), Align.LEFT);
-			
+
+			font.draw(str, offset[0], offset[1], option);
+
 			GL11.glPopMatrix();
 			
 			if(allowEdit && w.isFocused() && GameTimer.getAbsTime() % 1000 < 500) {
-				double len = Font.font.strLen(str.substring(0, caretPos), size);
-				Font.font.draw("|", len + offset[0], offset[1], size, color.asHexColor());
+				double len = font.getTextWidth(str.substring(0, caretPos), option);
+				font.draw("|", len + offset[0], offset[1], option);
 			}
 		});
 	}

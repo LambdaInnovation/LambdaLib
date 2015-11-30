@@ -6,10 +6,13 @@ import java.nio.{ByteOrder, ByteBuffer}
 import java.util
 
 import cn.lambdalib.util.client.font.IFont.FontOption
+import cn.lambdalib.util.helper.GameTimer
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.util.MathHelper
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11._
+import org.lwjgl.util.glu.GLU
+
 /**
   * This class wraps a java AWT font and make it gl-drawable. It generates font texture procedurally
   *  so that any unicode character can be supported.
@@ -18,6 +21,8 @@ import org.lwjgl.opengl.GL11._
 class TrueTypeFont(val font: Font) extends IFont {
 
   class CachedChar(val ch: Int, val width: Int, val index: Int, val u: Float, val v: Float)
+
+  private var ideoFont = font
 
   val TEXTURE_SZ_LIMIT = Math.min(2048, GL11.glGetInteger(GL_MAX_TEXTURE_SIZE))
   val charSize = (font.getSize * 1.4).toInt
@@ -35,21 +40,37 @@ class TrueTypeFont(val font: Font) extends IFont {
 
   newTexture()
 
-  println("Texture size limit: " + GL11.glGetInteger(GL_MAX_TEXTURE_SIZE))
+  /**
+    * Set the special font to be used when drawing ideographic characters.
+    * @param replace
+    */
+  def setIdeographicFont(replace: Font) = {
+    ideoFont = replace
+  }
+
+  /**
+    * Resolve the font used to draw with given code point.
+    */
+  protected def resolve(codePoint: Int) = {
+    if(Character.isIdeographic(codePoint)) ideoFont else font
+  }
 
   override def draw(str: String, px: Double, y: Double, option: FontOption) = {
-    updateCache(str)
-
-    // TODO group by texture to reduce draw calls
+    val len = getTextWidth(str, option) // Which will call updateCache()
     var x = px
+    val t = Tessellator.instance
+    val sz = option.fontSize
+    val scale = option.fontSize / charSize
+
+    option.color.bind()
+    x = px - len * option.align.lenOffset
+
+    // TODO group by texture to reduce draw calls?
     for(i <- codePoints(str)) yield {
       val info = lookup.get(i)
-      val t = Tessellator.instance
       val u = info.u
       val v = info.v
-      val sz = option.fontSize
       glBindTexture(GL_TEXTURE_2D, generated.get(info.index))
-      // glDisable(GL_TEXTURE_2D)
       t.startDrawingQuads()
       t.addVertexWithUV(x,      y,      0, u,           v          )
       t.addVertexWithUV(x,      y + sz, 0, u,           v + texStep)
@@ -58,7 +79,7 @@ class TrueTypeFont(val font: Font) extends IFont {
       t.draw()
       glEnable(GL_TEXTURE_2D)
 
-      x += info.width * option.fontSize / charSize
+      x += info.width * scale
     }
   }
 
@@ -91,9 +112,6 @@ class TrueTypeFont(val font: Font) extends IFont {
 
     generated.add(texture)
     step = 0
-
-    // TODO Checkout if building mipmaps generates better result
-    // GLU.gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA8, TEXTURE_SZ_LIMIT, TEXTURE_SZ_LIMIT, GL_RGBA, GL_UNSIGNED_BYTE, )
   }
 
   // Update the cached images to contain the given new characters.
@@ -109,7 +127,9 @@ class TrueTypeFont(val font: Font) extends IFont {
     val curtex = currentTexture
 
     val g: Graphics2D = image.getGraphics.asInstanceOf[Graphics2D]
-    g.setFont(font)
+    val drawFont = resolve(ch)
+
+    g.setFont(drawFont)
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
     val metrics = g.getFontMetrics
@@ -152,7 +172,7 @@ class TrueTypeFont(val font: Font) extends IFont {
       byteBuffer = ByteBuffer.allocateDirect(
         charSize*charSize*(bpp/8))
         .order(ByteOrder.nativeOrder())
-        .put(image.getData().getDataBuffer().asInstanceOf[DataBufferByte].getData())
+        .put(image.getData().getDataBuffer.asInstanceOf[DataBufferByte].getData())
     }
     byteBuffer.flip()
 

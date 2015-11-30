@@ -7,7 +7,15 @@ import cn.lambdalib.util.helper.Color;
  */
 public interface IFont {
 
-	enum FontAlign { LEFT, CENTER, RIGHT }
+	enum FontAlign {
+		LEFT(0), CENTER(0.5), RIGHT(1);
+
+		public final double lenOffset;
+
+		FontAlign(double _lenOffset) {
+			lenOffset = _lenOffset;
+		}
+	}
 
 	class Extent {
 		public int linesDrawn;

@@ -8,7 +8,7 @@ import cn.lambdalib.util.client.auxgui.AuxGuiRegistry.RegAuxGui
 import cn.lambdalib.util.client.font.IFont.FontOption
 import net.minecraft.client.gui.ScaledResolution
 
-@Registrant
+// @Registrant
 @RegAuxGui
 class FontTest extends AuxGui {
 
