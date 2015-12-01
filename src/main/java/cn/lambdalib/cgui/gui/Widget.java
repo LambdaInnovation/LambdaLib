@@ -47,7 +47,7 @@ public class Widget extends WidgetContainer {
 	public boolean visible = true;
 	
 	/**
-	 * *INTERNAL*Whether this widget can be copied when going down copy recursion process.
+	 * Whether this widget can be copied when going down copy recursion process.
 	 */
 	public boolean needCopy = true;
 	
@@ -59,6 +59,15 @@ public class Widget extends WidgetContainer {
 	}
 	
 	public Widget() {}
+
+	// Ctors to aid syntax simplicity
+	public Widget(double x, double y) {
+		transform.setPos(x, y);
+	}
+
+	public Widget(double x, double y, double width, double height) {
+		transform.setPos(x, y).setSize(width, height);
+	}
 	
 	public boolean isVisible() {
 		return visible && transform.doesDraw && !dirty;

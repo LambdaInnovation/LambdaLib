@@ -9,7 +9,7 @@ import cn.lambdalib.cgui.gui.event.{IGuiEventHandler, GuiEvent}
   */
 object ScalaExtensions {
 
-  class SWidget extends Widget {
+  class SWidget(x: Double=0, y: Double=0, w: Double=0, h: Double=0) extends Widget(x, y, w, h) {
 
     def listen[T <: GuiEvent](event: Class[T], handler: (Widget, T) => Unit): Unit = {
       listen(event, new IGuiEventHandler[T] {
