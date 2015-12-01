@@ -65,7 +65,7 @@ public class TextBox extends Component {
 
 	public IFont font = defaultFont;
 
-	public FontOption option = new FontOption();
+	public FontOption option;
 	
 	/**
 	 * Only activated when doesn't allow edit. If activated, The display string will be StatCollector.translateToLocal(content).
@@ -84,13 +84,14 @@ public class TextBox extends Component {
 	 */
 	public boolean emit = false;
 	
-	public double size = 5;
-	
 	public double zLevel = 0;
-	
+
+	public HeightAlign heightAlign = HeightAlign.CENTER;
+
+	// DEPRECATED
+	public double size = 5;
 	public WidthAlign widthAlign = WidthAlign.LEFT;
-	
-	public HeightAlign heightAlign = HeightAlign.BOTTOM;
+	// DEPRECATED END
 	
 	@CopyIgnore
 	public int caretPos = 0;
@@ -149,17 +150,16 @@ public class TextBox extends Component {
 	
 	private double[] getOffset(Widget w) {
 		double x = 0, y = 0;
-		Vector2d v = new Vector2d(font.getTextWidth(getProcessedContent(), option), size);
 		
-		switch(widthAlign) {
+		switch(option.align) {
 		case LEFT:
 			x = 2;
 			break;
 		case CENTER:
-			x = (w.transform.width - v.x) / 2;
+			x = w.transform.width/ 2;
 			break;
 		case RIGHT:
-			x = w.transform.width - v.x;
+			x = w.transform.width;
 			break;
 		default:
 			break;
@@ -170,20 +170,26 @@ public class TextBox extends Component {
 			y = 0;
 			break;
 		case CENTER:
-			y = (w.transform.height - v.y) / 2;
+			y = (w.transform.height - option.fontSize * 0.8) / 2;
 			break;
 		case BOTTOM:
-			y = (w.transform.height - v.y);
+			y = (w.transform.height - option.fontSize * 0.8);
 			break;
 		default:
 			break;
 		}
-		
+
 		return new double[] { x, y };
 	}
-	
+
 	public TextBox() {
+		this(new FontOption());
+	}
+	
+	public TextBox(FontOption option) {
 		super("TextBox");
+		this.option = option;
+
 		listen(KeyEvent.class, (w, event) -> {
 			if(!allowEdit)
 				return;
@@ -254,7 +260,6 @@ public class TextBox extends Component {
 		
 		listen(FrameEvent.class, (w, event) -> {
 			double[] offset = getOffset(w);
-			option.fontSize = size;
 			
 			checkCaret();
 			

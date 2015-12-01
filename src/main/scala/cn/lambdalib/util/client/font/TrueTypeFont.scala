@@ -92,7 +92,7 @@ class TrueTypeFont(val font: Font) extends IFont {
 
   override def getTextWidth(str: String, option: FontOption): Double = {
     updateCache(str)
-    codePoints(str).map(lookup.get(_).width).sum
+    codePoints(str).map(lookup.get(_).width).sum * option.fontSize / charSize
   }
 
   private def newTexture() = {
@@ -203,4 +203,14 @@ class TrueTypeFont(val font: Font) extends IFont {
     ret.update(3, value.toByte)
     ret
   }
+}
+
+object TrueTypeFont {
+  def apply(normFont: Font, ideoFont: Font) = {
+    val ret = new TrueTypeFont(normFont)
+    ret.setIdeographicFont(ideoFont)
+    ret
+  }
+
+  def apply(font: Font) = new TrueTypeFont(font)
 }
