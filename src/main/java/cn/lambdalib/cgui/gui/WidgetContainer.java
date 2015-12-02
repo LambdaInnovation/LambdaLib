@@ -140,6 +140,10 @@ public class WidgetContainer implements Iterable<Widget> {
 				return false;
 			}
 		}
+
+		if(widgets.containsValue(add)) {
+			widgets.inverse().remove(add);
+		}
 		
 		add.disposed = false; // Reset the dispose flag in case set
 		widgets.put(name, add);

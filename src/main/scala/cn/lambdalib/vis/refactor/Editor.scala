@@ -23,11 +23,21 @@ object Styles {
 
   def rgb(hex: Int) = new Color(hex | 0xFF000000)
   def pure(lum: Double) = new Color(lum, lum, lum, 1)
+
   def texture(path: String) = new ResourceLocation("lambdalib:textures/vis/" + path + ".png")
+  def elemTexture(path: String) = texture("elements/" + path)
 
   def newText(option: FontOption = new FontOption) = {
     val ret = new TextBox(option)
     ret.font = font
+    ret
+  }
+
+  def pureTint(idle: Double, hover: Double, affectTex: Boolean) = {
+    val ret = new Tint
+    ret.idleColor = pure(idle)
+    ret.hoverColor = pure(hover)
+    ret.affectTexture = affectTex
     ret
   }
 
@@ -103,6 +113,19 @@ class Editor extends LIGuiScreen {
   gui.addWidget(menuBar)
 
   root.addWidget(new Window("Testt", 50, 50, 200, 160, Window.DEFAULT))
+
+  val tab = new HierarchyTab(20, 30, 150)
+  val element0 = new Element("SomeTrans", elemTexture("comp_transform"))
+  element0 :+ new Element("x", elemTexture("float"))
+  element0 :+ new Element("y", elemTexture("float"))
+  element0 :+ new Element("z", elemTexture("float"))
+
+  val element1 = new Element("Plain", elemTexture("string"))
+
+  tab.addElement(element0)
+  tab.addElement(element1)
+
+  root.addWidget(tab)
 
   override def drawScreen(mx: Int, my: Int, w: Float) = {
     if(width != menuBar.transform.width) {
@@ -196,6 +219,8 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
 
   this :+ body
   this :+ header
+
+  transform.doesListenKey = false
 
   private var buttons = 0
 

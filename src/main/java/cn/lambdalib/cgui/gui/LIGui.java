@@ -402,6 +402,8 @@ public class LIGui extends WidgetContainer {
 			if(!widget.disposed) {
 				updateTraverse(widget, widget);
 				widget.update();
+			} else {
+
 			}
 		}
 	}
