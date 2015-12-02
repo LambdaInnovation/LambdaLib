@@ -8,7 +8,7 @@ import cn.lambdalib.annoreg.mc.RegInitCallback
 import cn.lambdalib.cgui.ScalaExtensions.SWidget
 import cn.lambdalib.cgui.gui.{Widget, LIGuiScreen}
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
-import cn.lambdalib.cgui.gui.component.{DrawTexture, TextBox, Tint}
+import cn.lambdalib.cgui.gui.component.{Transform, DrawTexture, TextBox, Tint}
 import cn.lambdalib.cgui.gui.event.{DragEvent, LeftClickEvent, LostFocusEvent}
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.client.font.TrueTypeFont
@@ -48,7 +48,8 @@ object Styles {
 import cn.lambdalib.vis.refactor.Styles._
 
 class Editor extends LIGuiScreen {
-  private class MenuBar extends SWidget {
+
+  class MenuBar extends SWidget {
     val len = 30
     val ht = 12
     var count = 0
@@ -94,38 +95,41 @@ class Editor extends LIGuiScreen {
     }
   }
 
-  private val menuBar = new MenuBar
+  private var menuBar: MenuBar = null
+  private var root: SWidget = null
 
-  val root: SWidget = new SWidget
-  root.transform.doesListenKey = false
-  root.transform.y = menuBar.ht
+  def getRoot = root
+  def getMenuBar = menuBar
 
-  menuBar.addButton("Test1", w => { println("Test1!") })
-  menuBar.addMenu("Test2", w => {
-    val testMenu = new SubMenu
-    testMenu.addItem("AAA", () => {})
-    testMenu.addItem("BBB", () => {})
-    testMenu.addItem("CCC", () => {})
-    testMenu
-  })
+  private def initWidgets(): Unit = {
+    menuBar = new MenuBar
+    root = new SWidget
 
-  gui.addWidget(root)
-  gui.addWidget(menuBar)
+    root.transform.doesListenKey = false
 
-  root.addWidget(new Window("Testt", 50, 50, 200, 160, Window.DEFAULT))
+    gui.addWidget(root)
+    gui.addWidget(menuBar)
 
-  val tab = new HierarchyTab(20, 30, 150)
-  val element0 = new Element("SomeTrans", elemTexture("comp_transform"))
-  element0 :+ new Element("x", elemTexture("float"))
-  element0 :+ new Element("y", elemTexture("float"))
-  element0 :+ new Element("z", elemTexture("float"))
+    menuBar.addMenu("Editor", w => {
+      val menu = new SubMenu
+      EditorRegistry.getEditors foreach {
+        case (name, plugin) =>
+          menu.addItem(name, () => {
+            root.dispose()
+            menuBar.dispose()
+            initWidgets()
 
-  val element1 = new Element("Plain", elemTexture("string"))
+            plugin.onActivate(this)
+          })
+      }
+      menu
+    })
 
-  tab.addElement(element0)
-  tab.addElement(element1)
+    val edit = ObjectEditor(new Transform())
+    root.addWidget(edit)
+  }
 
-  root.addWidget(tab)
+  initWidgets()
 
   override def drawScreen(mx: Int, my: Int, w: Float) = {
     if(width != menuBar.transform.width) {
@@ -206,7 +210,7 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
     val gui = w.getGui
     val ax = gui.mouseX - e.offsetX
     val ay = gui.mouseY - e.offsetY
-    this.transform.setPos(ax, ay)
+    gui.moveWidgetToAbsPos(this, ax, ay + 10)
     this.dirty = true
   })
 

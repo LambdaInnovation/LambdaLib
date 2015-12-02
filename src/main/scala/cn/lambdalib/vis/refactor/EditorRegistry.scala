@@ -4,17 +4,21 @@ import java.util
 
 trait VisPlugin {
 
-
+  def onActivate(editor: Editor)
 
 }
 
 object EditorRegistry {
 
-  private val editors = new util.HashMap[String, VisPlugin]
+  private var editors = Map[String, VisPlugin]()
 
   def register(id: String, plugin: VisPlugin) = {
-    assert(!editors.containsKey(id))
-    editors.put(id, plugin)
+    assert(!editors.contains(id))
+    editors = editors updated (id, plugin)
   }
+
+  def getEditors = editors
+
+  register("CGUI", CGUIEditor)
 
 }

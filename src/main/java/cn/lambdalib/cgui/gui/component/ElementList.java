@@ -87,7 +87,10 @@ public class ElementList extends Component {
 			w.transform.doesDraw = false;
 		}
 		
-		for(int i = progress; i < subWidgets.size() && sum <= this.widget.transform.height; ++i) {
+		for(int i = progress;
+			i < subWidgets.size() &&
+					(sum + subWidgets.get(i).transform.height) <= this.widget.transform.height;
+			++i) {
 			Widget w = subWidgets.get(i);
 			
 			w.transform.doesDraw = true;

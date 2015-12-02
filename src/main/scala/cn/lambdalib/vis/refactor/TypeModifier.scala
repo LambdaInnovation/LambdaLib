@@ -3,6 +3,7 @@ package cn.lambdalib.vis.refactor
 import java.lang.reflect.Field
 
 import cn.lambdalib.cgui.ScalaExtensions.SWidget
+import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component.TextBox.{ConfirmInputEvent, ChangeContentEvent}
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign
 import cn.lambdalib.cgui.gui.component.{Tint, TextBox, DrawTexture}
@@ -11,6 +12,33 @@ import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.util.client.font.IFont.FontOption
 
 import Styles._
+
+object TypeModifier {
+
+  type ClassPred = Class[_] => Boolean
+  type Creator = (Field, AnyRef) => Widget
+
+  private var supports: List[(ClassPred, Creator)] = List()
+
+  def addSupportPred(creator: Creator, classPred: ClassPred) = {
+    supports = supports :+ (classPred, creator)
+  }
+
+  def addSupport(creator: Creator, classes: Class[_]*) = {
+    addSupportPred(creator, c => classes exists (c2 => c2.isAssignableFrom(c)))
+  }
+
+  def isSupported(c: Class[_]) = supports.exists(_._1(c))
+
+  def create(f: Field, instance: AnyRef) = supports.filter(_._1(f.getType)).head._2(f, instance)
+
+  addSupport(new IntModifier(_, _), classOf[Int], classOf[Integer])
+  addSupport(new RealModifier(_, _), classOf[Float], classOf[java.lang.Float],
+    classOf[Double], classOf[java.lang.Double])
+  addSupport(new StringModifier(_, _), classOf[String])
+  addSupportPred(new EnumModifier(_, _), _.isEnum)
+
+}
 
 abstract class EditBox extends SWidget {
   protected val drawer: DrawTexture = new DrawTexture
@@ -129,6 +157,7 @@ class EnumModifier(field: Field, instance: AnyRef) extends SWidget {
 
     menu.transform.setPos(0, transform.height)
     this :+ menu
+    getGui.gainFocus(menu)
   })
 
 }
