@@ -5,7 +5,6 @@ import java.util
 
 import cn.lambdalib.annoreg.core.Registrant
 import cn.lambdalib.annoreg.mc.RegInitCallback
-import cn.lambdalib.cgui.ScalaExtensions.SWidget
 import cn.lambdalib.cgui.gui.{Widget, LIGuiScreen}
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.component.{Transform, DrawTexture, TextBox, Tint}
@@ -17,6 +16,8 @@ import cn.lambdalib.util.key.{KeyHandler, KeyManager}
 import net.minecraft.client.Minecraft
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
+
+import cn.lambdalib.cgui.ScalaExtensions._
 
 object Styles {
   val font = TrueTypeFont(new Font("Consolas", Font.PLAIN, 32), new Font("Arial", Font.PLAIN, 32))
@@ -49,7 +50,7 @@ import cn.lambdalib.vis.refactor.Styles._
 
 class Editor extends LIGuiScreen {
 
-  class MenuBar extends SWidget {
+  class MenuBar extends Widget {
     val len = 30
     val ht = 12
     var count = 0
@@ -62,8 +63,8 @@ class Editor extends LIGuiScreen {
 
     addComponent(newText(new FontOption(9, FontAlign.RIGHT, pure(0.4))).setContent("VisEditor 0.0 dev   "))
 
-    def addButton(name: String, func: (SWidget) => Unit) = {
-      val button = new SWidget
+    def addButton(name: String, func: (Widget) => Unit) = {
+      val button = new Widget
       button.transform.setSize(len, ht).setPos(5 + (len + 5) * count, 0)
 
       val tint = new Tint
@@ -75,16 +76,14 @@ class Editor extends LIGuiScreen {
       text.setContent(name)
 
       button.addComponents(tint, text)
-      button.listen(classOf[LeftClickEvent], (w, e: LeftClickEvent) => {
-        func(button)
-      })
+      button.listens[LeftClickEvent](() => func(button))
 
       addWidget(button)
 
       count += 1
     }
 
-    def addMenu(name: String, creator: (SWidget) => SubMenu) = {
+    def addMenu(name: String, creator: Widget => SubMenu) = {
       addButton(name, w => {
         val sub: SubMenu = creator(w)
         // Set menu to pos of button
@@ -96,14 +95,14 @@ class Editor extends LIGuiScreen {
   }
 
   private var menuBar: MenuBar = null
-  private var root: SWidget = null
+  private var root: Widget = null
 
   def getRoot = root
   def getMenuBar = menuBar
 
   private def initWidgets(): Unit = {
     menuBar = new MenuBar
-    root = new SWidget
+    root = new Widget
 
     root.transform.doesListenKey = false
 
@@ -152,20 +151,18 @@ class Editor extends LIGuiScreen {
 
 // COMMONLY USED WIDGETS
 
-class SubMenu extends SWidget {
+class SubMenu extends Widget {
 
   val len = 30
   val ht = 10
 
-  val itemList = new util.ArrayList[SWidget]
+  val itemList = new util.ArrayList[Widget]
   def items = itemList.size
 
-  listen(classOf[LostFocusEvent], (w, e: LostFocusEvent) => {
-    dispose()
-  })
+  this.listens[LostFocusEvent](() => dispose())
 
   def addItem(name: String, func: () => Unit) = {
-    val itemWidget = new SWidget
+    val itemWidget = new Widget
 
     itemWidget.transform.setSize(len, ht)
 
@@ -179,9 +176,7 @@ class SubMenu extends SWidget {
 
     itemWidget :+ tint
     itemWidget :+ text
-    itemWidget.listen(classOf[LeftClickEvent], (w, e: LeftClickEvent) => {
-      func()
-    })
+    itemWidget.listens[LeftClickEvent](func)
     itemWidget.transform.setPos(0, items * ht)
 
     this :+ itemWidget
@@ -192,12 +187,12 @@ class SubMenu extends SWidget {
 }
 
 class Window(val name: String, defX: Double, defY: Double, width: Double, height: Double, style: Int = Window.DEFAULT)
-  extends SWidget(defX, defY, width, height) {
+  extends Widget(defX, defY, width, height) {
 
   import Window._
 
   // Header
-  val header = new SWidget(0, -10, width, 10)
+  val header = new Widget(0, -10, width, 10)
 
   private val tex = new DrawTexture().setTex(null)
   tex.color = pure(0.15)
@@ -207,8 +202,8 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
   text.heightAlign = HeightAlign.CENTER
   header :+ text
 
-  header.listen(classOf[DragEvent], (w, e: DragEvent) => {
-    val gui = w.getGui
+  header.listens((e: DragEvent) => {
+    val gui = header.getGui
     val ax = gui.mouseX - e.offsetX
     val ay = gui.mouseY - e.offsetY
     gui.moveWidgetToAbsPos(this, ax, ay + 10)
@@ -216,7 +211,7 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
   })
 
   // Body (Add sub elements into body)
-  val body = new SWidget(0, 0, width, height)
+  val body = new Widget(0, 0, width, height)
 
   private val tex2 = new DrawTexture().setTex(null)
   tex2.color = pure(0.1)
@@ -233,10 +228,10 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
     val sz = 9
     val step = sz + 1
 
-    val btn = new SWidget(-step * buttons - 1, 0.5, sz, sz)
+    val btn = new Widget(-step * buttons - 1, 0.5, sz, sz)
     btn.transform.alignWidth = WidthAlign.RIGHT
-    btn.listen(classOf[LeftClickEvent], (w, e: LeftClickEvent) => {
-      callback(w)
+    btn.listens[LeftClickEvent](() => {
+      callback(btn)
     })
 
     val dt = new DrawTexture().setTex(texture("buttons/" + name))

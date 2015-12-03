@@ -140,7 +140,7 @@ public class ElementList extends Component {
 			}
 		}
 		if(!added) {
-			for(Widget w : ws) subWidgets.add(w);
+			Collections.addAll(subWidgets, ws);
 		}
 
 		for(Widget w : ws) postAdd(w);

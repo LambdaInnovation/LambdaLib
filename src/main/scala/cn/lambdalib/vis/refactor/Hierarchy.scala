@@ -1,6 +1,5 @@
 package cn.lambdalib.vis.refactor
 
-import cn.lambdalib.cgui.ScalaExtensions.SWidget
 import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
@@ -26,7 +25,7 @@ class HierarchyTab(defX: Double, defY: Double, width: Double, height: Double)
 
   var selected : Element = null
 
-  private val listArea = new SWidget(0, 10, width, height - 10)
+  private val listArea = new Widget(0, 10, width, height - 10)
   listArea :+ new DrawTexture().setTex(null).setColor4d(0.1, 0.1, 0.1, 1)
   body :+ listArea
 
@@ -91,7 +90,7 @@ class HierarchyTab(defX: Double, defY: Double, width: Double, height: Double)
       bar.listens[VerticalDragBar.DraggedEvent](() => {
         eList.setProgress((eList.getMaxProgress * cDragBar.getProgress).toInt)
       })
-      cDragBar.setProgress(eList.getProgress())
+      cDragBar.setProgress(eList.getProgress.toDouble / eList.getMaxProgress)
 
       listArea :+ bar
     }
@@ -143,7 +142,7 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
         dt.color = if (getTab.selected == this) hov else idle
       })
 
-      val iconArea = new SWidget
+      val iconArea = new Widget
       iconArea.transform.setPos(5 + indentOffset, 0).setSize(elemIconSz, elemIconSz)
       iconArea.transform.doesListenKey = false
       iconArea.transform.alignHeight = HeightAlign.CENTER

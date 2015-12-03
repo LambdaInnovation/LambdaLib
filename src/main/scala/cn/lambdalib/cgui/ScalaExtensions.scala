@@ -47,15 +47,4 @@ object ScalaExtensions {
 
   implicit def toWrapper(w: Widget): SWidgetWrapper = new SWidgetWrapper(w)
 
-  class SWidget(x: Double=0, y: Double=0, w: Double=0, h: Double=0) extends Widget(x, y, w, h) {
-
-    def listen[T <: GuiEvent](event: Class[T], handler: (Widget, T) => Unit): Unit = {
-      listen(event, new IGuiEventHandler[T] {
-        override def handleEvent(w: Widget, e: T) = {
-          handler(w, e)
-        }
-      })
-    }
-
-  }
 }

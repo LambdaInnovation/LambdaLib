@@ -2,18 +2,20 @@ package cn.lambdalib.vis.refactor
 
 import java.lang.reflect.{Modifier, Field}
 
-import cn.lambdalib.cgui.ScalaExtensions.SWidget
+import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component.{DrawTexture, ElementList}
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign
 import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.vis.editor.VisProperty
+
+import cn.lambdalib.cgui.ScalaExtensions._
 
 class ObjectEditor(val obj: AnyRef) extends HierarchyTab(100, 100, 80, 100) {
 
   val width = 80
   val klass = obj.getClass
 
-  val editpanel = new SWidget(80, 0, transform.width, transform.height)
+  val editpanel = new Widget(80, 0, transform.width, transform.height)
   editpanel :+ new DrawTexture().setTex(null).setColor4d(.08, .08, .08, 1)
   body.addWidgetBefore("EditPanel", editpanel, body.getDrawList.get(0))
 
@@ -77,11 +79,6 @@ object ObjectEditor {
 
   private var cached = Map[Class[_], ObjectEditor]()
 
-  def apply(obj: AnyRef): ObjectEditor = {
-    if(!(cached contains obj.getClass)) {
-      cached = cached updated (obj.getClass, new ObjectEditor(obj))
-    }
-    cached(obj.getClass)
-  }
+  def apply(obj: AnyRef): ObjectEditor = new ObjectEditor(obj)
 
 }

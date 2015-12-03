@@ -1,15 +1,15 @@
 package cn.lambdalib.vis.refactor
 
-import cn.lambdalib.cgui.ScalaExtensions.SWidget
 import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component.ElementList
 import cn.lambdalib.cgui.gui.event.FrameEvent
+import cn.lambdalib.cgui.ScalaExtensions._
 
 object CGUIEditor extends VisPlugin {
 
   import scala.collection.JavaConversions._
 
-  var canvas: SWidget = null
+  var canvas: Widget = null
 
   private def newElements(w: WidgetContainer, old: List[WidgetElement], t: IHierarchy): List[WidgetElement] = {
     w.getDrawList.map(w => {
@@ -48,10 +48,10 @@ object CGUIEditor extends VisPlugin {
 
   override def onActivate(editor: Editor) = {
     val hierarchy = new WidgetHierarchy()
-    canvas = new SWidget
+    canvas = new Widget
     canvas.transform.doesListenKey = false
 
-    canvas listen (classOf[FrameEvent], (w, e: FrameEvent) => {
+    canvas.listens[FrameEvent](() => {
       val t = canvas.transform
       if(t.width != editor.width || t.height != editor.height) {
         t.setSize(editor.width, editor.height)

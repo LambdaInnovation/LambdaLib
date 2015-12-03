@@ -3,7 +3,6 @@ package cn.lambdalib.vis.refactor
 import java.lang.reflect.Field
 
 import cn.lambdalib.cgui.ScalaExtensions
-import cn.lambdalib.cgui.ScalaExtensions.SWidget
 import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component.TextBox.{ConfirmInputEvent, ChangeContentEvent}
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign
@@ -43,7 +42,7 @@ object TypeModifier {
 
 }
 
-abstract class EditBox extends SWidget {
+abstract class EditBox extends Widget {
   protected val drawer: DrawTexture = new DrawTexture
   drawer.texture = null
   drawer.color = pure(0.2)
@@ -55,20 +54,21 @@ abstract class EditBox extends SWidget {
 
   transform.setSize(35, 10)
 
-  listen(classOf[LostFocusEvent], (w, e: LostFocusEvent) => {
-    val parent = w.getWidgetParent
+  /* ??? TODO CLARIFY USAGE
+  this.listens[LostFocusEvent]((e) => {
+    val parent = getWidgetParent
     if (parent != null)
       parent.post(e)
-  })
+  })*/
 
-  listen(classOf[ChangeContentEvent], (w, e: ChangeContentEvent) => {
+  this.listens[ChangeContentEvent](() => {
     drawer.color = cModified
   })
 
-  listen(classOf[TextBox.ConfirmInputEvent], (w, e: ConfirmInputEvent) => {
+  this.listens[ConfirmInputEvent](() => {
     try {
       setValue(text.content)
-      drawer.color = pure(0.25)
+      drawer.color = pure(0.2)
       updateRepr();
     } catch {
       case e: NumberFormatException =>
