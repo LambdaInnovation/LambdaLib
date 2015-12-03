@@ -123,7 +123,7 @@ public class WidgetContainer implements Iterable<Widget> {
 	public boolean addWidgetBefore(String name, Widget add, Widget pivot) {
 		int index = widgetList.indexOf(pivot);
 		if(index == -1)
-			return false;
+			index = 0;
 		if(!checkInit(name, add))
 			return false;
 		

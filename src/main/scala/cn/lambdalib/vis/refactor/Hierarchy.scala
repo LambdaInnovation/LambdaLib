@@ -3,9 +3,11 @@ package cn.lambdalib.vis.refactor
 import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
-import cn.lambdalib.cgui.gui.event.{DragEvent, FrameEvent, GainFocusEvent, LeftClickEvent}
-import cn.lambdalib.util.client.font.IFont.{FontOption}
+import cn.lambdalib.cgui.gui.event._
+import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import net.minecraft.util.ResourceLocation
+
+import org.lwjgl.opengl.GL11._
 
 import cn.lambdalib.cgui.ScalaExtensions._
 import scala.collection.JavaConversions._
@@ -18,14 +20,24 @@ object Hierarchy {
 
 import Hierarchy._
 
-class HierarchyTab(defX: Double, defY: Double, width: Double, height: Double)
-  extends Window("Hierarchy", defX, defY, width, height) with IHierarchy {
+class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
+                   width: Double, height: Double, name: String = "Hierarchy")
+  extends Window(name, defX, defY, width, height) with IHierarchy {
+
+  class SelectionChangeEvent(newSel: Element) extends GuiEvent
 
   protected var elements = List[Element]()
 
-  var selected : Element = null
+  private var selected : Element = null
 
-  private val listArea = new Widget(0, 10, width, height - 10)
+  def getSelected = selected
+  def setSelected(newSel: Element) = {
+    selected = newSel
+    post(new SelectionChangeEvent(newSel))
+  }
+
+  private val top = if(hasButton) 10 else 0
+  private val listArea = new Widget(0, top, width, height - top)
   listArea :+ new DrawTexture().setTex(null).setColor4d(0.1, 0.1, 0.1, 1)
   body :+ listArea
 
@@ -36,9 +48,33 @@ class HierarchyTab(defX: Double, defY: Double, width: Double, height: Double)
   private var eList: ElementList = null
   private var bar: Widget = null
 
+  private var buttonSz = 0
+
   def requireSelection = true
 
   def added = getGui != null
+
+  private val hintOption = new FontOption(8, FontAlign.CENTER)
+
+  def initButton(hint: String, icon: String, fn: Widget => Any) = {
+    val sz = 8
+    val step = sz + 2
+    val button = new Widget(2 + step * buttonSz, 1, sz, sz)
+    button :+ new DrawTexture().setTex(Styles.texture("buttons/" + icon))
+    button :+ new Tint(pure(0.7), pure(0.9), true)
+    button.listens((e: FrameEvent) => {
+      if(e.hovering) {
+        glPushMatrix()
+        glTranslated(0, 0, 1)
+        Styles.font.draw(hint, button.transform.width / 2, -5, hintOption)
+        glPopMatrix()
+      }
+    })
+    button.listens[LeftClickEvent](() => fn(button))
+
+    body :+ button
+    buttonSz += 1
+  }
 
   def :+(elem: Element) = {
     elements = elements :+ elem
@@ -134,12 +170,12 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
 
       if(tab.requireSelection) {
         this.listens[LeftClickEvent](() => {
-          getTab.selected = this
+          getTab.setSelected(this)
         })
       }
 
       this.listens[FrameEvent](() => {
-        dt.color = if (getTab.selected == this) hov else idle
+        dt.color = if (getTab.getSelected == this) hov else idle
       })
 
       val iconArea = new Widget

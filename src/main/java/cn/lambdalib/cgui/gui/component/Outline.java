@@ -21,7 +21,6 @@ import cn.lambdalib.util.helper.Color;
 /**
  * @author WeAthFolD
  */
-@Deprecated
 public class Outline extends Component {
 	
 	public Color color = Color.WHITE();

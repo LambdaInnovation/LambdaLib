@@ -9,24 +9,28 @@ import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.vis.editor.VisProperty
 
 import cn.lambdalib.cgui.ScalaExtensions._
+import cn.lambdalib.vis.model.CompTransform
+import net.minecraft.util.Vec3
 
-class ObjectEditor(val obj: AnyRef) extends HierarchyTab(100, 100, 80, 100) {
+class ObjectPanel(bar: Boolean, x: Double, y: Double, width: Double, height: Double, name: String)
+  extends HierarchyTab(bar, x, y, width, height, name) {
 
-  val width = 80
-  val klass = obj.getClass
-
-  val editpanel = new Widget(80, 0, transform.width, transform.height)
+  val editpanel = new Widget(transform.width, 0, 60, transform.height)
   editpanel :+ new DrawTexture().setTex(null).setColor4d(.08, .08, .08, 1)
-  body.addWidgetBefore("EditPanel", editpanel, body.getDrawList.get(0))
+  this.addWidgetBefore("EditPanel", editpanel, null)
+
+  // override def requireSelection = false
+
+}
+
+object ObjectEditor {
 
   private def nameOf(field: Field) = {
     val anno = field.getAnnotation(classOf[VisProperty])
     if(anno == null || anno.name().equals("")) field.getName else anno.name()
   }
 
-  override def requireSelection = false
-
-  private def objElements(obj: AnyRef) = {
+  def objElements(obj: AnyRef) = {
     val klass = obj.getClass
     klass.getFields filter (f => {
       val anno = f.getAnnotation(classOf[VisProperty])
@@ -34,23 +38,47 @@ class ObjectEditor(val obj: AnyRef) extends HierarchyTab(100, 100, 80, 100) {
     }) map (f => new FieldElement(f, obj))
   }
 
-  private class FieldElement(val field: Field, val instance: AnyRef)
-    extends Element(nameOf(field), null) {
+  private def fieldIcon(field: Field) = {
+    Styles.elemTexture(field.getType() match {
+      case t if t == classOf[Int] || t == classOf[Integer] => "integer"
+      case t if t == classOf[Float] || t == classOf[java.lang.Float] => "float"
+      case t if t == classOf[Double] || t == classOf[java.lang.Double] => "double"
+      case t if t == classOf[Vec3] => "vec3"
+      case t if t == classOf[CompTransform] => "comp_transform"
+      case t if t.isEnum => "enum"
+      case _ => "folder"
+    })
+  }
+
+  class FieldElement(val field: Field, val instance: AnyRef)
+    extends Element(nameOf(field), fieldIcon(field)) {
     val editWidth = 60
 
     val klass = field.getType
     val supported = TypeModifier.isSupported(klass)
 
-    if(supported) {
-      val modifier = TypeModifier.create(field, instance)
-      modifier.transform.alignHeight = HeightAlign.CENTER
-      modifier.transform.x = width + 3
-      this :+ modifier
-    } else {
-      initFoldButton()
-    }
-
     private var subelem : List[Element] = null
+
+    private var init = false
+
+    override def onAdded() = {
+      if(!init) {
+        val tab = getTab
+        transform.width = tab.transform.width
+
+        init = true
+        if (supported) {
+          val modifier = TypeModifier.create(field, instance)
+          modifier.transform.alignHeight = HeightAlign.CENTER
+          modifier.transform.x = transform.width + 3
+          this :+ modifier
+        } else {
+          initFoldButton()
+        }
+      }
+
+      super.onAdded()
+    }
 
     override def onRebuild(list: ElementList) = {
       if(!supported && !folded) {
@@ -71,14 +99,8 @@ class ObjectEditor(val obj: AnyRef) extends HierarchyTab(100, 100, 80, 100) {
 
   }
 
-  objElements(obj) foreach :+
-
-}
-
-object ObjectEditor {
-
-  private var cached = Map[Class[_], ObjectEditor]()
-
-  def apply(obj: AnyRef): ObjectEditor = new ObjectEditor(obj)
+  def addToHierarchy(hier: IHierarchy, obj: AnyRef) = {
+    objElements(obj) foreach (hier :+ _)
+  }
 
 }

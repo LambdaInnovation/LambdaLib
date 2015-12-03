@@ -89,7 +89,7 @@ class Editor extends LIGuiScreen {
         // Set menu to pos of button
         sub.transform.setPos(w.transform.x, w.transform.y + w.transform.height)
         addWidget(sub)
-        getGui.gainFocus(sub)
+        // getGui.gainFocus(sub)
       })
     }
   }
@@ -123,9 +123,6 @@ class Editor extends LIGuiScreen {
       }
       menu
     })
-
-    val edit = ObjectEditor(new Transform())
-    root.addWidget(edit)
   }
 
   initWidgets()
@@ -182,6 +179,11 @@ class SubMenu extends Widget {
     this :+ itemWidget
 
     itemList.add(itemWidget)
+  }
+
+  override def onAdded() = {
+    super.onAdded()
+    getGui.gainFocus(this)
   }
 
 }

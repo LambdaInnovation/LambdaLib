@@ -162,7 +162,6 @@ class EnumModifier(field: Field, instance: AnyRef) extends Widget {
     menu.transform.setPos(x, y + transform.height * scale)
     val gui = getGui
     gui.addWidget(menu)
-    gui.gainFocus(menu)
   })
 
 }
