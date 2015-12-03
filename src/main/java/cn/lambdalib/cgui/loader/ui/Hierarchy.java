@@ -198,7 +198,7 @@ public class Hierarchy extends Window {
 		hList.addComponent(el);
 		hList.listen(ProgressChangedEvent.class, (w, e) -> {
 			double p = (double)el.getProgress() / el.getMaxProgress();
-			VerticalDragBar.get(dragbar).setProgress(dragbar, p);
+			VerticalDragBar.get(dragbar).setProgress(p);
 		});
 		
 		

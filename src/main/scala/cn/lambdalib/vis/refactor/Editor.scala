@@ -177,7 +177,8 @@ class SubMenu extends SWidget {
     tint.idleColor = pure(0.1)
     tint.hoverColor = pure(0.3)
 
-    itemWidget :+ tint :+ text
+    itemWidget :+ tint
+    itemWidget :+ text
     itemWidget.listen(classOf[LeftClickEvent], (w, e: LeftClickEvent) => {
       func()
     })

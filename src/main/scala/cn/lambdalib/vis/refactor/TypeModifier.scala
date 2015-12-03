@@ -2,6 +2,7 @@ package cn.lambdalib.vis.refactor
 
 import java.lang.reflect.Field
 
+import cn.lambdalib.cgui.ScalaExtensions
 import cn.lambdalib.cgui.ScalaExtensions.SWidget
 import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component.TextBox.{ConfirmInputEvent, ChangeContentEvent}
@@ -10,6 +11,8 @@ import cn.lambdalib.cgui.gui.component.{Tint, TextBox, DrawTexture}
 import cn.lambdalib.cgui.gui.event.{GuiEvent, LeftClickEvent, LostFocusEvent}
 import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.util.client.font.IFont.FontOption
+
+import ScalaExtensions._
 
 import Styles._
 
@@ -65,7 +68,7 @@ abstract class EditBox extends SWidget {
   listen(classOf[TextBox.ConfirmInputEvent], (w, e: ConfirmInputEvent) => {
     try {
       setValue(text.content)
-      drawer.color = pure(0.3)
+      drawer.color = pure(0.25)
       updateRepr();
     } catch {
       case e: NumberFormatException =>
@@ -126,7 +129,7 @@ class StringModifier(field: Field, instance: AnyRef) extends ModifierBase(field,
   override def setValue(content: String) = field.set(instance, content)
 }
 
-class EnumModifier(field: Field, instance: AnyRef) extends SWidget {
+class EnumModifier(field: Field, instance: AnyRef) extends Widget {
   transform.setSize(35, 10)
 
   val enumType = field.getType
@@ -144,7 +147,7 @@ class EnumModifier(field: Field, instance: AnyRef) extends SWidget {
   text.setContent(field.get(instance).toString)
   this :+ text
 
-  this.listen(classOf[LeftClickEvent], (w, e: LeftClickEvent) => {
+  this.listens((e: LeftClickEvent) => {
     // Show the hover list
     val menu = new SubMenu
     val current = field.get(instance)
@@ -152,12 +155,14 @@ class EnumModifier(field: Field, instance: AnyRef) extends SWidget {
       menu.addItem(elem.toString, () => {
         field.set(instance, elem)
         text.setContent(elem.toString)
+        menu.dispose()
       })
     })
 
-    menu.transform.setPos(0, transform.height)
-    this :+ menu
-    getGui.gainFocus(menu)
+    menu.transform.setPos(x, y + transform.height * scale)
+    val gui = getGui
+    gui.addWidget(menu)
+    gui.gainFocus(menu)
   })
 
 }

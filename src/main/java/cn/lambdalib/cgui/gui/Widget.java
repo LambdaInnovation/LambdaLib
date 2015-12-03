@@ -61,8 +61,8 @@ public class Widget extends WidgetContainer {
 	public Widget() {}
 
 	// Ctors to aid syntax simplicity
-	public Widget(double x, double y) {
-		transform.setPos(x, y);
+	public Widget(double width, double height) {
+		transform.setPos(width, height);
 	}
 
 	public Widget(double x, double y, double width, double height) {
@@ -255,7 +255,6 @@ public class Widget extends WidgetContainer {
 
 	@Override
 	protected void onWidgetAdded(String name, Widget w) {
-		// w.dirty = true; // Insertion of child will not affect parent
 		w.parent = this;
 		w.gui = gui;
 	}

@@ -25,8 +25,8 @@ import cn.lambdalib.util.helper.Color;
 public class Tint extends Component {
 	
 	public Color 
-		idleColor = new Color(1, 1, 1, 0), 
-		hoverColor = new Color(1, 1, 1, 0.4);
+		idleColor,
+		hoverColor;
 	
 	public boolean affectTexture = false;
 
@@ -35,9 +35,21 @@ public class Tint extends Component {
 	public static Tint get(Widget w) {
 		return w.getComponent("Tint");
 	}
-	
+
 	public Tint() {
+		this(new Color(1, 1, 1, 0.6), new Color(1, 1, 1, 1));
+	}
+
+	public Tint(Color idle, Color hover, boolean _affectTexture) {
+		this(idle, hover);
+		affectTexture = _affectTexture;
+	}
+	
+	public Tint(Color idle, Color hover) {
 		super("Tint");
+
+		idleColor = idle;
+		hoverColor = hover;
 		
 		listen(FrameEvent.class, (w, event) -> {
 			if(affectTexture) {

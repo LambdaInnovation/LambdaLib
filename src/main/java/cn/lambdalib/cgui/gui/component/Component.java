@@ -27,6 +27,7 @@ import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.deprecated.TypeHelper;
+import cn.lambdalib.vis.editor.VisProperty;
 
 /**
  * <summary>
@@ -44,13 +45,13 @@ public class Component {
 	
 	public boolean enabled = true;
 	
-	@EditIgnore
+	@VisProperty(exclude = true)
 	public boolean canEdit = true;
 	
 	/**
 	 * This SHOULD NOT be edited after creation, represents the widget instance this component is in.
 	 */
-	@EditIgnore
+	@VisProperty(exclude = true)
 	@CopyIgnore
 	public Widget widget;
 	

@@ -25,7 +25,7 @@ class ObjectEditor(val obj: AnyRef) extends HierarchyTab(100, 100, 80, 100) {
   override def requireSelection = false
 
   private def objElements(obj: AnyRef) = {
-    def klass = obj.getClass
+    val klass = obj.getClass
     klass.getFields filter (f => {
       val anno = f.getAnnotation(classOf[VisProperty])
       (anno == null || !anno.exclude()) && (f.getModifiers & (Modifier.FINAL | Modifier.STATIC)) == 0

@@ -12,22 +12,22 @@
  */
 package cn.lambdalib.cgui.gui.component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.util.generic.MathUtils;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Component that can hold widgets itself and display them as a list. Only Widgets fully in the area will be shown.
- * You MUST specify the widgets BEFORE the component was added into the Widget.
+ * You can add Widgets both before adding the component and in runtime.
  * @author WeAthFolD
  */
 public class ElementList extends Component {
 	
-	List<Widget> subWidgets = new ArrayList();
+	private List<Widget> subWidgets = new LinkedList<>();
 	
 	/**
 	 * The fixed vertical spacing between widgets.
@@ -40,16 +40,15 @@ public class ElementList extends Component {
 
 	public ElementList() {
 		super("ElementList");
-		
-		listen(FrameEvent.class, (w, e) -> {
-			if(!loaded) {
-				loaded = true;
-				for(Widget ww : subWidgets) {
-					w.addWidget(ww);
-				}
-				updateList();
-			}
-		});
+	}
+
+	@Override
+	public void onAdded() {
+		loaded = true;
+		for(Widget ww : subWidgets) {
+			widget.addWidget(ww);
+		}
+		updateList();
 	}
 	
 	public static ElementList get(Widget w) {
@@ -72,13 +71,20 @@ public class ElementList extends Component {
 		setProgress(progress - 1);
 	}
 	
-	public void setProgress(int p) {
-		p = MathUtils.clampi(0, getMaxProgress(), p);
-		boolean u = progress != p;
-		progress = p;
-		if(u) {
+	public void setProgress(int newProgress) {
+		newProgress = MathUtils.clampi(0, getMaxProgress(), newProgress);
+		boolean shouldUpdate = loaded && progress != newProgress;
+		progress = newProgress;
+		if(shouldUpdate) {
 			updateList();
 		}
+	}
+
+	/**
+	 * @return A immutable list of widgets managed by this ElementList.
+	 */
+	public List<Widget> getSubWidgets() {
+		return ImmutableList.copyOf(subWidgets);
 	}
 	
 	private void updateList() {
@@ -112,13 +118,51 @@ public class ElementList extends Component {
 	public static class ProgressChangedEvent implements GuiEvent  {}
 	
 	public void addWidget(Widget w) {
-		if(loaded) return;
-		w.needCopy = false;
+		preAdd(w);
 		subWidgets.add(w);
+		postAdd(w);
+	}
+
+	/**
+	 * Add this widget before the given widget. If the given widget is not in the list, append to the end.
+	 */
+	public void addWidgetAfter(Widget pivot, Widget... ws) {
+		for(Widget w : ws) preAdd(w);
+
+		ListIterator<Widget> itr = subWidgets.listIterator();
+		boolean added = false;
+		while(itr.hasNext()) {
+			Widget iw = itr.next();
+			if(iw == pivot) {
+				for(Widget w : ws) itr.add(w);
+				added = true;
+				break;
+			}
+		}
+		if(!added) {
+			for(Widget w : ws) subWidgets.add(w);
+		}
+
+		for(Widget w : ws) postAdd(w);
+	}
+
+	private void preAdd(Widget w) {
+		w.needCopy = false; // As it's handled by the component, copying leads to chaos
+	}
+
+	private void postAdd(Widget w) {
+		if (loaded) {
+			widget.addWidget(w);
+			updateList();
+		}
 	}
 	
 	public double getFullHeight() {
 		return sumHeight(0, subWidgets.size());
+	}
+
+	public boolean shouldScroll() {
+		return widget.transform.height < getFullHeight();
 	}
 	
 	/**
@@ -128,7 +172,10 @@ public class ElementList extends Component {
 		double ret = 0.0;
 		for(int i = from; i < to; ++i) {
 			ret += subWidgets.get(i).transform.height;
+			ret += spacing;
 		}
+		if(to == subWidgets.size())
+			ret -= spacing;
 		return ret;
 	}
 	

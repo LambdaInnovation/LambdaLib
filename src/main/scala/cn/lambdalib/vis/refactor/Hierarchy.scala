@@ -2,11 +2,15 @@ package cn.lambdalib.vis.refactor
 
 import cn.lambdalib.cgui.ScalaExtensions.SWidget
 import cn.lambdalib.cgui.gui.Widget
-import cn.lambdalib.cgui.gui.component.{TextBox, DrawTexture, ElementList}
+import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
-import cn.lambdalib.cgui.gui.event.{FrameEvent, GainFocusEvent, LeftClickEvent}
+import cn.lambdalib.cgui.gui.event.{DragEvent, FrameEvent, GainFocusEvent, LeftClickEvent}
 import cn.lambdalib.util.client.font.IFont.{FontOption}
 import net.minecraft.util.ResourceLocation
+
+import cn.lambdalib.cgui.ScalaExtensions._
+import scala.collection.JavaConversions._
+import Styles._
 
 object Hierarchy {
   val elemIconSz = 8
@@ -26,11 +30,12 @@ class HierarchyTab(defX: Double, defY: Double, width: Double, height: Double)
   listArea :+ new DrawTexture().setTex(null).setColor4d(0.1, 0.1, 0.1, 1)
   body :+ listArea
 
-  body listen (classOf[LeftClickEvent], (w, e: LeftClickEvent) => {
+  body.listens[LeftClickEvent](() => {
     selected = null
   })
 
   private var eList: ElementList = null
+  private var bar: Widget = null
 
   def requireSelection = true
 
@@ -49,16 +54,47 @@ class HierarchyTab(defX: Double, defY: Double, width: Double, height: Double)
   }
 
   def rebuild() = {
+    val oldList = eList
     if (eList != null) {
       listArea.removeComponent(eList)
     }
+    if (bar != null) {
+      bar.dispose()
+    }
+
     eList = new ElementList
     elements.foreach(e => {
       e.disposed = false
       eList.addWidget(e)
       e.onRebuild(eList)
     })
+
     listArea :+ eList
+
+    if(oldList != null && eList.shouldScroll()) {
+      eList.setProgress(oldList.getProgress)
+    }
+
+    // Check scroll bar
+    if(eList.shouldScroll()) {
+      val barLength = 8
+
+      eList.getSubWidgets foreach (w => {
+        w.transform.width = width - barLength
+        w.dirty = true
+      })
+
+      bar = new Widget(width - barLength, 0, barLength, listArea.transform.height * 0.3)
+      bar :+ new Tint(pure(0.3), pure(0.5))
+      val cDragBar = new VerticalDragBar(0, listArea.transform.height - bar.transform.height)
+      bar :+ cDragBar
+      bar.listens[VerticalDragBar.DraggedEvent](() => {
+        eList.setProgress((eList.getMaxProgress * cDragBar.getProgress).toInt)
+      })
+      cDragBar.setProgress(eList.getProgress())
+
+      listArea :+ bar
+    }
   }
 
 }
@@ -68,7 +104,7 @@ trait IHierarchy {
   def level = 0
 }
 
-class Element(val name: String, val icon: ResourceLocation) extends SWidget with IHierarchy {
+class Element(val name: String, val icon: ResourceLocation) extends Widget with IHierarchy {
 
   protected var indent = 0
   private var hierarchy: IHierarchy = null
@@ -98,12 +134,12 @@ class Element(val name: String, val icon: ResourceLocation) extends SWidget with
       val idle = Styles.pure(0.12)
 
       if(tab.requireSelection) {
-        this listen(classOf[GainFocusEvent], (w, e: GainFocusEvent) => {
+        this.listens[LeftClickEvent](() => {
           getTab.selected = this
         })
       }
 
-      this listen(classOf[FrameEvent], (w, e: FrameEvent) => {
+      this.listens[FrameEvent](() => {
         dt.color = if (getTab.selected == this) hov else idle
       })
 
@@ -136,7 +172,7 @@ class Element(val name: String, val icon: ResourceLocation) extends SWidget with
     if(!foldButtonInit) {
       foldButtonInit = true
 
-      val button = new SWidget(-2, 0, 8, 8)
+      val button = new Widget(-2, 0, 8, 8)
       button.transform.alignHeight = HeightAlign.CENTER
       button.transform.alignWidth = WidthAlign.RIGHT
 
@@ -146,7 +182,7 @@ class Element(val name: String, val icon: ResourceLocation) extends SWidget with
       val tint = Styles.pureTint(0.7, 0.9, true)
       button :+ tint
 
-      button listen(classOf[LeftClickEvent], (w, e: LeftClickEvent) => {
+      button.listens[LeftClickEvent](() => {
         folded = !folded
         tex.setTex(if (folded) texMax else texMin)
         getTab.rebuild()
@@ -180,7 +216,9 @@ class Element(val name: String, val icon: ResourceLocation) extends SWidget with
     */
   def getTab = {
     var par = getWidgetParent
-    while(!par.isInstanceOf[HierarchyTab]) par = par.getWidgetParent
+    while(par != null && !par.isInstanceOf[HierarchyTab]) {
+      par = par.getWidgetParent
+    }
     par.asInstanceOf[HierarchyTab]
   }
 
