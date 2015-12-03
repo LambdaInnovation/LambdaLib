@@ -20,6 +20,8 @@ import org.lwjgl.util.glu.GLU
   */
 class TrueTypeFont(val font: Font) extends IFont {
 
+  import TrueTypeFont._
+
   class CachedChar(val ch: Int, val width: Int, val index: Int, val u: Float, val v: Float)
 
   private var ideoFont = font
@@ -126,7 +128,7 @@ class TrueTypeFont(val font: Font) extends IFont {
     val image = new BufferedImage(charSize, charSize, BufferedImage.TYPE_INT_ARGB)
     val curtex = currentTexture
 
-    val g: Graphics2D = image.getGraphics.asInstanceOf[Graphics2D]
+    val g = image.createGraphics()
     val drawFont = resolve(ch)
 
     g.setFont(drawFont)
@@ -135,9 +137,11 @@ class TrueTypeFont(val font: Font) extends IFont {
     val metrics = g.getFontMetrics
     val width = metrics.charWidth(ch)
     // Draw to the image
+    g.setBackground(BACKGRND_COLOR)
+    g.clearRect(0, 0, charSize, charSize)
     g.setColor(Color.WHITE)
 
-    g.drawString(new java.lang.StringBuilder().appendCodePoint(ch).toString, 3, 1 + metrics.getAscent)
+    g.drawString(new java.lang.StringBuilder(2).appendCodePoint(ch).toString, 3, 1 + metrics.getAscent)
 
     // Convert awt image to byte buffer
     // Original algorithm credits:
@@ -191,6 +195,8 @@ class TrueTypeFont(val font: Font) extends IFont {
       step = 0
       newTexture()
     }
+
+    g.dispose()
   }
 
   private def codePoints(str: String) = (0 until str.length).map(str.codePointAt)
@@ -213,4 +219,6 @@ object TrueTypeFont {
   }
 
   def apply(font: Font) = new TrueTypeFont(font)
+
+  private lazy val BACKGRND_COLOR = new Color(255, 255, 255, 0)
 }
