@@ -9,7 +9,6 @@ import scala.reflect.ClassTag
 class SWidgetWrapper(w: Widget) {
 
   def listens[T <: GuiEvent](handler: (Widget, T) => Any, priority: Int = 0)(implicit tag: ClassTag[T]): Unit = {
-    println("Listen " + tag.runtimeClass)
     w.listen[T](tag.runtimeClass.asInstanceOf[Class[T]], new IGuiEventHandler[T] {
       override def handleEvent(w: Widget, event: T) = {
         handler(w, event)

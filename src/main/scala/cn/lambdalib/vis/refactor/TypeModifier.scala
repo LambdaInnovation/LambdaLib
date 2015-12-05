@@ -14,6 +14,7 @@ import cn.lambdalib.util.client.font.IFont.FontOption
 import ScalaExtensions._
 
 import Styles._
+import net.minecraft.util.ResourceLocation
 
 object TypeModifier {
 
@@ -39,10 +40,21 @@ object TypeModifier {
     classOf[Double], classOf[java.lang.Double])
   addSupport(new StringModifier(_, _), classOf[String])
   addSupportPred(new EnumModifier(_, _), _.isEnum)
+  addSupport(new BooleanModifier(_, _), classOf[Boolean], classOf[java.lang.Boolean])
+  addSupport(new ResLocModifier(_, _), classOf[ResourceLocation])
 
 }
 
-abstract class EditBox extends Widget {
+/**
+  * Fired inside any Modifier Widget whenever its editing target was modified by it.
+  */
+class EditEvent extends GuiEvent
+
+trait IModifier {
+  def updateRepr(): Unit
+}
+
+abstract class EditBox extends Widget with IModifier {
   protected val drawer: DrawTexture = new DrawTexture
   drawer.texture = null
   drawer.color = pure(0.2)
@@ -54,25 +66,20 @@ abstract class EditBox extends Widget {
 
   transform.setSize(35, 10)
 
-  /* ??? TODO CLARIFY USAGE
-  this.listens[LostFocusEvent]((e) => {
-    val parent = getWidgetParent
-    if (parent != null)
-      parent.post(e)
-  })*/
-
   this.listens[ChangeContentEvent](() => {
-    drawer.color = cModified
+    drawer.color = Styles.cModified
   })
 
   this.listens[ConfirmInputEvent](() => {
     try {
       setValue(text.content)
       drawer.color = pure(0.2)
-      updateRepr();
+      updateRepr()
+      this.post(new EditEvent)
     } catch {
       case e: NumberFormatException =>
         drawer.color = cErrored
+        LambdaLib.log.error("ModifierBase.confirmInput()", e)
       case e: Exception =>
         drawer.color = cErrored
         LambdaLib.log.error("ModifierBase.confirmInput()", e)
@@ -84,7 +91,7 @@ abstract class EditBox extends Widget {
     updateRepr()
   }
 
-  private def updateRepr() = {
+  final def updateRepr() = {
     try {
       text.setContent(repr)
     } catch {
@@ -129,7 +136,34 @@ class StringModifier(field: Field, instance: AnyRef) extends ModifierBase(field,
   override def setValue(content: String) = field.set(instance, content)
 }
 
-class EnumModifier(field: Field, instance: AnyRef) extends Widget {
+class BooleanModifier(field: Field, instance: AnyRef) extends Widget with IModifier {
+
+  transform.setSize(18, 6.3)
+
+  val tex_on = Styles.texture("buttons/checkbox_on")
+  val tex_off = Styles.texture("buttons/checkbox_off")
+
+  val dt = new DrawTexture
+  this :+ dt
+
+  this :+ pureTint(0.8, 1, true)
+
+  updateTexture()
+
+  this.listens[LeftClickEvent](() => {
+    field.set(instance, !field.getBoolean(instance))
+    updateTexture()
+  })
+
+  private def updateTexture() = {
+    dt.setTex(if(field.getBoolean(instance)) tex_on else tex_off)
+  }
+
+  override def updateRepr() = updateTexture()
+
+}
+
+class EnumModifier(field: Field, instance: AnyRef) extends Widget with IModifier {
   transform.setSize(35, 10)
 
   val enumType = field.getType
@@ -155,6 +189,7 @@ class EnumModifier(field: Field, instance: AnyRef) extends Widget {
       menu.addItem(elem.toString, () => {
         field.set(instance, elem)
         text.setContent(elem.toString)
+        this.post(new EditEvent)
         menu.dispose()
       })
     })
@@ -164,4 +199,12 @@ class EnumModifier(field: Field, instance: AnyRef) extends Widget {
     gui.addWidget(menu)
   })
 
+  override def updateRepr() = {
+    text.setContent(field.get(instance).toString)
+  }
+
+}
+
+class ResLocModifier(field: Field, instance: AnyRef) extends ModifierBase(field, instance) {
+  protected override def setValue(content: String) = field.set(instance, new ResourceLocation(content))
 }

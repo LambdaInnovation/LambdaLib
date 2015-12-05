@@ -340,7 +340,21 @@ public class Widget extends WidgetContainer {
 	
 	@Override
 	public String toString() {
-		return this.getName() + "@" + this.getClass();
+		return this.getName() + "@" + this.getClass().getSimpleName();
+	}
+
+	/**
+	 * Print out the widget's hierarchical structure for debugging.
+	 */
+	public String getHierarchyStructure() {
+		StringBuilder ret = new StringBuilder();
+		ret.append(toString());
+		if(getDrawList().size() != 0) {
+			ret.append("{\n");
+			getDrawList().forEach(w -> ret.append(w.getHierarchyStructure()).append(','));
+			ret.append("\n}");
+		}
+		return ret.toString();
 	}
 
 }

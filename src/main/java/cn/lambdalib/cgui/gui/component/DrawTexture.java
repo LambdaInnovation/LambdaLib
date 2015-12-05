@@ -32,7 +32,7 @@ import net.minecraft.util.ResourceLocation;
  */
 public class DrawTexture extends Component {
 	
-	public static final ResourceLocation MISSING = new ResourceLocation("liutils:textures/cgui/missing.png");
+	public static final ResourceLocation MISSING = new ResourceLocation("lambdalib:textures/cgui/missing.png");
 	
 	public ResourceLocation texture = MISSING;
 	

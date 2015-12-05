@@ -4,10 +4,11 @@ import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event.{LeftClickEvent, FrameEvent}
 import cn.lambdalib.cgui.ScalaExtensions._
+import cn.lambdalib.vis.refactor.ObjectEditor.ElementEditEvent
 
 object CGUIEditor extends VisPlugin {
 
-  private val components = List[Component](
+  private val components: List[Component] = List(
     new DrawTexture(),
     new Tint(),
     new VerticalDragBar(),
@@ -22,6 +23,9 @@ object CGUIEditor extends VisPlugin {
   var inspector: WidgetInspector = null
   var hierarchy: WidgetHierarchy = null
 
+  /**
+    * @return A list of WidgetElement, retaining old ones if the corresponding widget is still there.
+    */
   private def newElements(w: WidgetContainer, old: List[WidgetElement], t: IHierarchy): List[WidgetElement] = {
     w.getDrawList.map(w => {
       val res = old.find(_.w == w)
@@ -48,6 +52,10 @@ object CGUIEditor extends VisPlugin {
       super.onRebuild(list)
     }
 
+    override def equals(other: Any) = other match {
+      case we: WidgetElement => w == we.w
+      case _ => false
+    }
   }
 
   class WidgetHierarchy extends HierarchyTab(true, 0, 20, 120, 100) {
@@ -64,36 +72,50 @@ object CGUIEditor extends VisPlugin {
 
   class WidgetInspector extends ObjectPanel(true, 200, 100, 120, 100, "Inspector") {
 
-    initButton("Add Component", "add", w => {
-      val selected = getSelectedWidget
-      if(selected != null) {
-        val menu = new SubMenu
-        menu.transform.x = -menu.transform.width
-        components filter (x => selected.getComponent(x.name) == null) foreach
-          (x => {
-            menu.addItem(x.name, () => {
-              selected.addComponent(x.copy())
-              updateTarget()
-            })
+    private var lastSelected: Widget = null
+
+    initButton("Add Component", "add", w => actionOnSelected(selected => {
+      val menu = new SubMenu
+      menu.transform.x = -60
+      components.filter(x => selected.getComponent(x.name) == null).foreach(
+        (x: Component) => {
+          menu.addItem(x.name, () => {
+            selected.addComponent(x.copy())
+            updateTarget(true)
           })
-        w :+ menu
-      }
-    })
+        })
+      w :+ menu
+    }))
 
     initButton("Remove Component", "remove", w => {
-      getSelectedWidget match {
-        case ce : ComponentElement => w.removeComponent(ce.c.name)
-        case _ => // Not selecting a component, NOPE
+      getSelected match {
+        case Some(ComponentElement(c)) if c.name != "Transform" =>
+          actionOnSelected(w =>{
+            w.removeComponent(c.name)
+            updateTarget(true)
+          })
+        case _ =>
       }
     })
 
-    def updateTarget() = {
-      val target = getSelectedWidget
-      elements = target.getComponentList.filter(_.canEdit).map(c => {
-        val elem = new ComponentElement(c)
-        ObjectEditor.addToHierarchy(elem, c)
-        elem
-      }).toList
+    this.listens[ElementEditEvent](() => actionOnSelected(_.dirty = true))
+
+    def updateTarget(refresh: Boolean = false) = {
+      println("Selected: " + getSelectedWidget)
+      getSelectedWidget match {
+        case Some(target) =>
+          if (refresh || target != lastSelected) {
+            elements = target.getComponentList.filter(_.canEdit).map(c => {
+              val elem = new ComponentElement(c)
+              ObjectEditor.addToHierarchy(elem, c)
+              elem
+            }).toList
+            lastSelected = target
+          }
+        case None =>
+          elements = Nil
+          lastSelected = null
+      }
       rebuild()
     }
 
@@ -101,8 +123,25 @@ object CGUIEditor extends VisPlugin {
 
   }
 
-  private def getSelectedWidget =
-    if(hierarchy.getSelected == null) null else hierarchy.getSelected.asInstanceOf[WidgetElement].w
+  /**
+    * Performs given operation on currently selected widget. Does nothing if not selecting.
+    */
+  private def actionOnSelected(fn: Widget => Any) = {
+    getSelectedWidget match {
+      case Some(target) => fn(target)
+      case _ =>
+    }
+  }
+
+  /**
+    * Gets the currently selected widget.
+    */
+  private def getSelectedWidget: Option[Widget] =
+    hierarchy.getSelected match {
+      case Some(e: WidgetElement) => Some(e.w)
+      case None => None
+      case _ => throw new RuntimeException
+    }
 
   override def onActivate(editor: Editor) = {
     hierarchy = new WidgetHierarchy()
@@ -120,8 +159,11 @@ object CGUIEditor extends VisPlugin {
     inspector = new WidgetInspector
 
     editor.getMenuBar.addButton("+Widget", w => {
-      val container: WidgetContainer =
-        if(hierarchy.getSelected == null) canvas else hierarchy.getSelected.asInstanceOf[WidgetElement].w
+      val container: WidgetContainer = hierarchy.getSelected match {
+        case Some(e: WidgetElement) => e.w
+        case None => canvas
+        case _ => throw new RuntimeException
+      }
       container.addWidget(new Widget())
 
       hierarchy.rebuild()

@@ -24,13 +24,14 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
                    width: Double, height: Double, name: String = "Hierarchy")
   extends Window(name, defX, defY, width, height) with IHierarchy {
 
+  // Hierarchy-unique events
   class SelectionChangeEvent(newSel: Element) extends GuiEvent
 
   protected var elements = List[Element]()
 
   private var selected : Element = null
 
-  def getSelected = selected
+  def getSelected: Option[Element] = Option(selected)
   def setSelected(newSel: Element) = {
     selected = newSel
     post(new SelectionChangeEvent(newSel))
@@ -42,7 +43,7 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
   body :+ listArea
 
   body.listens[LeftClickEvent](() => {
-    selected = null
+    setSelected(null)
   })
 
   private var eList: ElementList = null
@@ -89,6 +90,11 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
   }
 
   def rebuild() = {
+    // Clear current selection, but retain if still present
+    if(!elements.contains(selected)) {
+      selected = null
+    }
+
     val oldList = eList
     if (eList != null) {
       listArea.removeComponent(eList)
@@ -99,7 +105,6 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
 
     eList = new ElementList
     elements.foreach(e => {
-      e.disposed = false
       eList.addWidget(e)
       e.onRebuild(eList)
     })
@@ -146,7 +151,7 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
 
   protected var folded = true
 
-  protected var elements = List[Element]()
+  var elements = List[Element]()
 
   private val texMin = Styles.texture("buttons/minimize")
   private val texMax = Styles.texture("buttons/maximize")
@@ -155,12 +160,28 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
 
   private var init = false
 
+  val iconArea = new Widget
+  iconArea :+ new DrawTexture().setTex(icon)
+
+  val textArea = new Widget
+
   override def onAdded() = {
     if(!init) {
       init = true
 
       val tab = getTab
       transform.setSize(tab.transform.width, elementHt)
+
+      iconArea.transform.setPos(5 + indentOffset, 0).setSize(elemIconSz, elemIconSz)
+      iconArea.transform.doesListenKey = false
+      iconArea.transform.alignHeight = HeightAlign.CENTER
+      this :+ iconArea
+
+      textArea.transform.setPos(18 + indentOffset, 0).setSize(0, elementHt)
+      textArea.transform.doesListenKey = false
+      val tbox: TextBox = new TextBox(new FontOption(9)).setContent(name)
+      textArea.addComponent(tbox)
+      this :+ textArea
 
       val dt = new DrawTexture().setTex(null).setColor4d(0, 0, 0, 0)
       this :+ dt
@@ -175,22 +196,11 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
       }
 
       this.listens[FrameEvent](() => {
-        dt.color = if (getTab.getSelected == this) hov else idle
+        dt.color = getTab.getSelected match {
+          case Some(sel) if sel == this => hov
+          case _ => idle
+        }
       })
-
-      val iconArea = new Widget
-      iconArea.transform.setPos(5 + indentOffset, 0).setSize(elemIconSz, elemIconSz)
-      iconArea.transform.doesListenKey = false
-      iconArea.transform.alignHeight = HeightAlign.CENTER
-      iconArea :+ new DrawTexture().setTex(icon)
-      this :+ iconArea
-
-      val textArea = new Widget
-      textArea.transform.setPos(18 + indentOffset, 0).setSize(0, elementHt)
-      textArea.transform.doesListenKey = false
-      val tbox: TextBox = new TextBox(new FontOption(9)).setContent(name)
-      textArea.addComponent(tbox)
-      this :+ textArea
     }
   }
 
@@ -230,7 +240,10 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
   override def :+(element: Element) = {
     element.addedInto(this)
     elements = elements :+ element
+    procesesElement(element)
   }
+
+  var procesesElement = (w: Element) => {}
 
   override def level = indent
 
