@@ -12,6 +12,8 @@
  */
 package cn.lambdalib.core;
 
+import com.typesafe.config.Config;
+import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Logger;
 
 import cn.lambdalib.annoreg.core.RegistrationManager;

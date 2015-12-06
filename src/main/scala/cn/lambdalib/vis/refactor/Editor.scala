@@ -8,7 +8,7 @@ import cn.lambdalib.annoreg.mc.RegInitCallback
 import cn.lambdalib.cgui.gui.{Widget, LIGuiScreen}
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.component.{Transform, DrawTexture, TextBox, Tint}
-import cn.lambdalib.cgui.gui.event.{DragEvent, LeftClickEvent, LostFocusEvent}
+import cn.lambdalib.cgui.gui.event.{FrameEvent, DragEvent, LeftClickEvent, LostFocusEvent}
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.client.font.TrueTypeFont
 import cn.lambdalib.util.helper.Color
@@ -18,6 +18,7 @@ import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 
 import cn.lambdalib.cgui.ScalaExtensions._
+import scala.collection.JavaConversions._
 
 object Styles {
   val font = TrueTypeFont(new Font("Consolas", Font.PLAIN, 32), new Font("Arial", Font.PLAIN, 32))
@@ -94,20 +95,37 @@ class Editor extends LIGuiScreen {
     }
   }
 
+  private var menuContainer: Widget = null
+  private var menuHover: Widget = null
   private var menuBar: MenuBar = null
+
   private var root: Widget = null
 
   def getRoot = root
   def getMenuBar = menuBar
 
   private def initWidgets(): Unit = {
+    menuContainer = new Widget
     menuBar = new MenuBar
+    menuHover = new Widget(0, 0, width, 2)
     root = new Widget
+
+    menuHover :+ new DrawTexture().setTex(null).setColor(pure(0.1))
+    menuHover.transform.doesDraw = false
+    menuHover.listens((e: FrameEvent) => if(e.hovering) {
+      // Show the menu bar
+      menuHover.transform.doesDraw = false
+      menuBar.transform.doesDraw = true
+      println(menuHover.y + "," + menuHover.transform.y)
+    })
 
     root.transform.doesListenKey = false
 
+    menuContainer :+ menuBar
+    menuContainer :+ menuHover
+
     gui.addWidget(root)
-    gui.addWidget(menuBar)
+    gui.addWidget(menuContainer)
 
     menuBar.addMenu("Editor", w => {
       val menu = new SubMenu
@@ -123,23 +141,29 @@ class Editor extends LIGuiScreen {
       }
       menu
     })
+
+    menuBar.addMenu("Options", w => {
+      val menu = new SubMenu
+      menu.addItem("Hide Menu", () => {
+        // Hide the menu bar
+        menuHover.transform.doesDraw = true
+        menuBar.transform.doesDraw = false
+      })
+      menu
+    })
   }
 
   initWidgets()
 
   override def drawScreen(mx: Int, my: Int, w: Float) = {
     if(width != menuBar.transform.width) {
-      menuBar.transform.width = width
-      root.transform.width = width
-      menuBar.dirty = true
-      root.dirty = true
+      List(menuBar, menuHover, root).foreach(w => {
+        w.transform.width = width
+        w.dirty = true
+      })
     }
 
-    val bodyHt: Double = height - menuBar.transform.height
-    if(bodyHt != root.transform.height) {
-      root.transform.height = bodyHt
-      root.dirty = true
-    }
+    root.transform.setSize(width, height)
 
     super.drawScreen(mx, my, w)
   }
@@ -150,8 +174,8 @@ class Editor extends LIGuiScreen {
 
 class SubMenu extends Widget {
 
-  val len = 30
-  val ht = 10
+  var len = 30.0
+  val ht = 10.0
 
   val itemList = new util.ArrayList[Widget]
   def items = itemList.size
@@ -166,6 +190,7 @@ class SubMenu extends Widget {
     val text = newText(new FontOption(9))
     text.content = name
     text.heightAlign = HeightAlign.CENTER
+    len = math.max(len, text.font.getTextWidth(name, text.option))
 
     val tint = new Tint
     tint.idleColor = pure(0.1)
@@ -183,6 +208,10 @@ class SubMenu extends Widget {
 
   override def onAdded() = {
     super.onAdded()
+    itemList.foreach(w => {
+      w.transform.width = len + 3
+      w.dirty = true
+    })
     getGui.gainFocus(this)
   }
 

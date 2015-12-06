@@ -206,5 +206,13 @@ class EnumModifier(field: Field, instance: AnyRef) extends Widget with IModifier
 }
 
 class ResLocModifier(field: Field, instance: AnyRef) extends ModifierBase(field, instance) {
-  protected override def setValue(content: String) = field.set(instance, new ResourceLocation(content))
+  val NULL_TAG = "<null>"
+
+  override def repr: String = Option(field.get(instance).asInstanceOf[ResourceLocation]) match {
+    case r: ResourceLocation => r.toString
+    case _ => NULL_TAG
+  }
+
+  protected override def setValue(content: String) = field.set(instance,
+    if(content == NULL_TAG) null else new ResourceLocation(content))
 }

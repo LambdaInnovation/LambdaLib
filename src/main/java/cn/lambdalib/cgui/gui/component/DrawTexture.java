@@ -76,6 +76,14 @@ public class DrawTexture extends Component {
 		texture = t;
 		return this;
 	}
+
+	/**
+	 * Set the color as a **copy** of the given color.
+	 */
+	public DrawTexture setColor(Color c) {
+		this.color.from(c);
+		return this;
+	}
 	
 	public DrawTexture setColor4i(int r, int g, int b, int a) {
 		color.setColor4d(r / 255.0, g / 255.0, b / 255.0, a / 255.0);

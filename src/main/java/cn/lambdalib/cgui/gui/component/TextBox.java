@@ -133,9 +133,7 @@ public class TextBox extends Component {
 		if(cb.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
 			try {
 				return (String) cb.getData(DataFlavor.stringFlavor);
-			} catch (UnsupportedFlavorException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (UnsupportedFlavorException|IOException e) {
 				e.printStackTrace();
 			}
 		}
