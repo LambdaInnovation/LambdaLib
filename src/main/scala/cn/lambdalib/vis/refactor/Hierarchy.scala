@@ -25,16 +25,17 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
   extends Window(name, defX, defY, width, height) with IHierarchy {
 
   // Hierarchy-unique events
-  class SelectionChangeEvent(newSel: Element) extends GuiEvent
+  class SelectionChangeEvent(val previous: Element, val newSel: Element) extends GuiEvent
 
   protected var elements = List[Element]()
 
   private var selected : Element = null
 
   def getSelected: Option[Element] = Option(selected)
-  def setSelected(newSel: Element) = {
+  def setSelected(newSel: Element) = if (newSel != selected) {
+    val prev = selected
     selected = newSel
-    post(new SelectionChangeEvent(newSel))
+    post(new SelectionChangeEvent(prev, newSel))
   }
 
   private val top = if(hasButton) 10 else 0
@@ -163,7 +164,15 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
   val iconArea = new Widget
   iconArea :+ new DrawTexture().setTex(icon)
 
-  val textArea = new Widget
+  val textArea = createText()
+
+  protected def createText() = {
+    val ret = new Widget
+    ret.transform.doesListenKey = false
+    val tbox = new TextBox(new FontOption(9)).setContent(name)
+    ret :+ tbox
+    ret
+  }
 
   override def onAdded() = {
     if(!init) {
@@ -177,10 +186,7 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
       iconArea.transform.alignHeight = HeightAlign.CENTER
       this :+ iconArea
 
-      textArea.transform.setPos(18 + indentOffset, 0).setSize(0, elementHt)
-      textArea.transform.doesListenKey = false
-      val tbox: TextBox = new TextBox(new FontOption(9)).setContent(name)
-      textArea.addComponent(tbox)
+      textArea.transform.setPos(18 + indentOffset, 0).setSize(50, elementHt)
       this :+ textArea
 
       val dt = new DrawTexture().setTex(null).setColor4d(0, 0, 0, 0)

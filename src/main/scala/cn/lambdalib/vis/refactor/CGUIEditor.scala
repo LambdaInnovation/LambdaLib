@@ -1,10 +1,14 @@
 package cn.lambdalib.vis.refactor
 
+import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent
 import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event.{LeftClickEvent, FrameEvent}
 import cn.lambdalib.cgui.ScalaExtensions._
+import cn.lambdalib.util.client.HudUtils
+import cn.lambdalib.util.helper.Color
 import cn.lambdalib.vis.refactor.ObjectEditor.ElementEditEvent
+import org.lwjgl.opengl.GL11
 
 object CGUIEditor extends VisPlugin {
 
@@ -18,6 +22,15 @@ object CGUIEditor extends VisPlugin {
   )
 
   import scala.collection.JavaConversions._
+
+  class SelectionOutline extends Component("SelectionOutline") {
+
+    this.listens[FrameEvent](() => {
+      GL11.glColor4d(1, 1, 1, 0.7)
+      HudUtils.drawRectOutline(0, 0, widget.transform.width, widget.transform.height, 2)
+    })
+
+  }
 
   var canvas: Widget = null
   var inspector: WidgetInspector = null
@@ -41,10 +54,50 @@ object CGUIEditor extends VisPlugin {
 
   class WidgetElement(val w: Widget) extends Element(w.getName, Styles.elemTexture("widget")) {
 
-    override def foldable = w.getDrawList.nonEmpty
+    this.listens[LeftClickEvent](() => {
+      if (Option(w) == getSelectedWidget) {
+        setTextEditable(true)
+      }
+    })
+
+    textArea.listens[ConfirmInputEvent](() => {
+      w.rename(TextBox.get(textArea).content)
+      setTextEditable(false)
+    })
 
     if(foldable) {
       initFoldButton()
+    }
+
+    setTextEditable(false)
+
+    /**
+      * Callback when corresponding widget was deselected.
+      */
+    def onDeselect() = {
+      setTextEditable(false)
+    }
+
+    override def foldable = w.getDrawList.nonEmpty
+
+    override def createText() = {
+      val ret = new EditBox {
+        override def backColor = if(editing) new Color(1, 1, 1, 0.1) else new Color(1, 1, 1, 0)
+        override def repr = w.getName
+        override def setValue(content: String) = w.rename(content)
+      }
+      ret
+    }
+
+    private def editing = if(textArea != null) textArea.transform.doesListenKey else false
+
+    private def setTextEditable(value: Boolean) = {
+      textArea.transform.doesListenKey = value
+      TextBox.get(textArea).allowEdit = value
+
+      if (!value) {
+        DrawTexture.get(textArea).setColor4d(0, 0, 0, 0)
+      }
     }
 
     override def onRebuild(list: ElementList): Unit = {
@@ -58,10 +111,19 @@ object CGUIEditor extends VisPlugin {
     }
   }
 
+  // (Currently) WidgetHierarchy's selection determins which Widget user is selecting globally.
   class WidgetHierarchy extends HierarchyTab(true, 0, 20, 120, 100) {
 
     this.listens((e: SelectionChangeEvent) => {
       inspector.updateTarget()
+      e.previous match {
+        case we: WidgetElement =>
+          we.onDeselect()
+          we.w.removeComponent("SelectionOutline")
+        case _ => // NOPE
+      }
+
+      e.newSel.asInstanceOf[WidgetElement].w :+ new SelectionOutline
     })
 
     override def rebuild() = {

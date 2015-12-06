@@ -39,11 +39,29 @@ class SWidgetWrapper(w: Widget) {
 
 }
 
+class SComponentWrapper(c: Component) {
+  def listens[T <: GuiEvent](handler: (Widget, T) => Any)(implicit tag: ClassTag[T]): Unit = {
+    c.listen[T](tag.runtimeClass.asInstanceOf[Class[T]], new IGuiEventHandler[T] {
+      override def handleEvent(w: Widget, e: T) = handler(w, e)
+    })
+  }
+
+  def listens[T <: GuiEvent](handler: T => Any)(implicit tag: ClassTag[T]): Unit = {
+    listens((_, e:T) => handler(e))
+  }
+
+  def listens[T <: GuiEvent](handler: () => Any)(implicit tag: ClassTag[T]): Unit = {
+    listens((_, _:T) => handler())
+  }
+}
+
 /**
   * CGUI scala extensions to reduce syntax burden.
   */
 object ScalaExtensions {
 
   implicit def toWrapper(w: Widget): SWidgetWrapper = new SWidgetWrapper(w)
+
+  implicit def toComponentWrapper(c: Component): SComponentWrapper = new SComponentWrapper(c)
 
 }

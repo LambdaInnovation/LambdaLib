@@ -60,11 +60,11 @@ public class Component {
 		checkCopyFields();
 	}
 	
-	protected <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler) {
+	public <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler) {
 		listen(type, handler, 0);
 	}
 	
-	protected <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler, int prio) {
+	public <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler, int prio) {
 		if(widget != null)
 			throw new RuntimeException("Can only add event handlers before componenet is added into widget");
 		Node n = new Node();

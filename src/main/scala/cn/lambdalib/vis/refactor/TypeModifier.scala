@@ -55,9 +55,12 @@ trait IModifier {
 }
 
 abstract class EditBox extends Widget with IModifier {
+
+  protected def backColor = pure(0.2)
+
   protected val drawer: DrawTexture = new DrawTexture
   drawer.texture = null
-  drawer.color = pure(0.2)
+  drawer.color = backColor
   addComponent(drawer)
 
   protected val text: TextBox = new TextBox(new FontOption(9))
@@ -73,13 +76,10 @@ abstract class EditBox extends Widget with IModifier {
   this.listens[ConfirmInputEvent](() => {
     try {
       setValue(text.content)
-      drawer.color = pure(0.2)
+      drawer.color = backColor
       updateRepr()
       this.post(new EditEvent)
     } catch {
-      case e: NumberFormatException =>
-        drawer.color = cErrored
-        LambdaLib.log.error("ModifierBase.confirmInput()", e)
       case e: Exception =>
         drawer.color = cErrored
         LambdaLib.log.error("ModifierBase.confirmInput()", e)
@@ -209,7 +209,7 @@ class ResLocModifier(field: Field, instance: AnyRef) extends ModifierBase(field,
   val NULL_TAG = "<null>"
 
   override def repr: String = Option(field.get(instance).asInstanceOf[ResourceLocation]) match {
-    case r: ResourceLocation => r.toString
+    case Some(r: ResourceLocation) => r.toString
     case _ => NULL_TAG
   }
 
