@@ -8,7 +8,7 @@ import cn.lambdalib.annoreg.mc.RegInitCallback
 import cn.lambdalib.cgui.gui.{Widget, LIGuiScreen}
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.component.{Transform, DrawTexture, TextBox, Tint}
-import cn.lambdalib.cgui.gui.event.{FrameEvent, DragEvent, LeftClickEvent, LostFocusEvent}
+import cn.lambdalib.cgui.gui.event._
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.client.font.TrueTypeFont
 import cn.lambdalib.util.helper.Color
@@ -187,7 +187,7 @@ class SubMenu extends Widget {
 
     itemWidget.transform.setSize(len, ht)
 
-    val text = newText(new FontOption(9))
+    val text = newText(new FontOption(8))
     text.content = name
     text.heightAlign = HeightAlign.CENTER
     len = math.max(len, text.font.getTextWidth(name, text.option))
@@ -293,6 +293,20 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
       dt.setTex(if(body.transform.doesDraw) t1 else t2)
     })
   }
+
+}
+
+class ScreenCoverage(env: LIGuiScreen, blackout: Boolean = true) extends Widget {
+
+  private def updateSize() = transform.setSize(env.width, env.height)
+
+  if (blackout) {
+    this :+ new DrawTexture().setTex(null).setColor4d(0, 0, 0, 0.3)
+  }
+
+  updateSize()
+
+  this.listens[RefreshEvent](() => updateSize())
 
 }
 

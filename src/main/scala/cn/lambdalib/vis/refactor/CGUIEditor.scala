@@ -6,11 +6,16 @@ import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event.{LeftClickEvent, FrameEvent}
 import cn.lambdalib.cgui.ScalaExtensions._
 import cn.lambdalib.util.client.HudUtils
+import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.helper.Color
 import cn.lambdalib.vis.refactor.ObjectEditor.ElementEditEvent
 import org.lwjgl.opengl.GL11
 
 object CGUIEditor extends VisPlugin {
+
+  // TODO: Global refresh hierarchy event
+
+  type Vec2D = (Double, Double)
 
   private val components: List[Component] = List(
     new DrawTexture(),
@@ -32,6 +37,9 @@ object CGUIEditor extends VisPlugin {
 
   }
 
+  lazy val fo_createPosHint = new FontOption(9, FontAlign.CENTER)
+
+  var editor: Editor = null
   var canvas: Widget = null
   var inspector: WidgetInspector = null
   var hierarchy: WidgetHierarchy = null
@@ -51,6 +59,59 @@ object CGUIEditor extends VisPlugin {
       }
     }).toList
   }
+  private def startCreateWidget(createMethod: (Vec2D, Vec2D) => Any) = {
+    val coverage = new ScreenCoverage(editor)
+
+    def toPosAndSize(a: Vec2D, b: Vec2D) = ((math.min(a._1, b._1), math.min(a._2, b._2)),
+      (math.abs(a._1 - b._1), math.abs(a._2 - b._2)))
+
+    inspector.transform.doesDraw = false
+    hierarchy.transform.doesDraw = false
+
+    var state: Int = 0
+    var p0 = (0.0, 0.0)
+
+    coverage.listens((e: LeftClickEvent) => {
+      if (state == 0) {
+        p0 = (e.x, e.y)
+        state = 1
+      } else {
+        val p1 = (e.x, e.y)
+        val ps = toPosAndSize(p0, p1)
+        createMethod(ps._1, ps._2)
+
+        inspector.transform.doesDraw = true
+        hierarchy.transform.doesDraw = true
+
+        hierarchy.rebuild()
+        coverage.dispose()
+      }
+    })
+
+    coverage.listens((e: FrameEvent) => {
+      def drawPos(x: Double, y: Double) = {
+        val font = Styles.font
+        font.draw(s"($x, $y)", x - 5, y - 10, fo_createPosHint)
+      }
+
+      // Draw the position information
+      if(state == 1) {
+        drawPos(p0._1, p0._2)
+
+        GL11.glColor4d(1, 1, 1, 0.3)
+
+        toPosAndSize(p0, (e.mx, e.my)) match {
+          case ((x, y),(w, h)) => HudUtils.colorRect(x, y, w, h)
+        }
+      }
+
+      drawPos(e.mx, e.my)
+    })
+
+    editor.getRoot :+ coverage
+  }
+
+  private def toWidget(pos: Vec2D, size: Vec2D) = new Widget(pos._1, pos._2, size._1, size._2)
 
   class WidgetElement(val w: Widget) extends Element(w.getName, Styles.elemTexture("widget")) {
 
@@ -114,16 +175,51 @@ object CGUIEditor extends VisPlugin {
   // (Currently) WidgetHierarchy's selection determins which Widget user is selecting globally.
   class WidgetHierarchy extends HierarchyTab(true, 0, 20, 120, 100) {
 
+    this.initButton("Add Widget", "add", button => {
+      val selected = getSelectedWidget
+      selected match {
+        case Some(w) =>
+          val menu = new SubMenu
+          menu.addItem("Add as child", () => startCreateWidget((pos, size) => {
+            w.addWidget(toWidget(pos, size))
+          }))
+          menu.addItem("Add after", () => startCreateWidget((pos, size) => {
+            val par = w.getAbstractParent
+            par.addWidgetAfter(toWidget(pos, size), w)
+          }))
+          menu.addItem("Add before", () => startCreateWidget((pos, size) => {
+            val par = w.getAbstractParent
+            par.addWidgetBefore(toWidget(pos, size), w)
+          }))
+          menu.transform.setPos(button.x - 50, button.y)
+          editor.getRoot :+ menu
+        case _ =>
+          startCreateWidget((pos, size) => {
+            canvas.addWidget(toWidget(pos, size))
+          })
+      }
+    })
+
+    this.initButton("Remove Widget", "remove", button => getSelectedWidget match {
+        case Some(w) =>
+          w.dispose()
+          hierarchy.rebuild()
+        case None =>
+      })
+
     this.listens((e: SelectionChangeEvent) => {
       inspector.updateTarget()
       e.previous match {
         case we: WidgetElement =>
           we.onDeselect()
           we.w.removeComponent("SelectionOutline")
-        case _ => // NOPE
+        case _ =>
       }
 
-      e.newSel.asInstanceOf[WidgetElement].w :+ new SelectionOutline
+      e.newSel match {
+        case we: WidgetElement => we.w :+ new SelectionOutline
+        case _ =>
+      }
     })
 
     override def rebuild() = {
@@ -132,7 +228,7 @@ object CGUIEditor extends VisPlugin {
     }
   }
 
-  class WidgetInspector extends ObjectPanel(true, 200, 100, 120, 100, "Inspector") {
+  class WidgetInspector extends HierarchyTab(true, 200, 100, 140, 100, "Inspector") {
 
     private var lastSelected: Widget = null
 
@@ -206,6 +302,7 @@ object CGUIEditor extends VisPlugin {
     }
 
   override def onActivate(editor: Editor) = {
+    this.editor = editor
     hierarchy = new WidgetHierarchy()
     canvas = new Widget
     canvas.transform.doesListenKey = false
@@ -232,9 +329,10 @@ object CGUIEditor extends VisPlugin {
     })
 
     val root = editor.getRoot
-    root.addWidget(hierarchy)
     root.addWidget(canvas)
+    root.addWidget(hierarchy)
     root.addWidget(inspector)
   }
 
 }
+

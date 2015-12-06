@@ -15,17 +15,6 @@ import cn.lambdalib.vis.model.CompTransform
 import cn.lambdalib.vis.refactor
 import net.minecraft.util.Vec3
 
-class ObjectPanel(bar: Boolean, x: Double, y: Double, width: Double, height: Double, name: String)
-  extends HierarchyTab(bar, x, y, width, height, name) {
-
-  val editpanel = new Widget(transform.width, 0, 60, transform.height)
-  editpanel :+ new DrawTexture().setTex(null).setColor4d(.08, .08, .08, 1)
-  this.addWidgetBefore("EditPanel", editpanel, null)
-
-  // override def requireSelection = false
-
-}
-
 object ObjectEditor {
 
   /**
@@ -106,7 +95,7 @@ object ObjectEditor {
   private def setModifier(target: Element, modifier: Widget) = {
     modifier.transform.alignHeight = HeightAlign.CENTER
     modifier.transform.alignWidth = WidthAlign.RIGHT
-    modifier.transform.x = modifier.transform.width + 11
+    modifier.transform.x = modifier.transform.width - 55
     modifier.listens[EditEvent](() => {
       target.getTab.post(new ElementEditEvent(target))
     })

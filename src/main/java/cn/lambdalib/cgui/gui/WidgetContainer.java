@@ -107,6 +107,10 @@ public class WidgetContainer implements Iterable<Widget> {
 		checkAdded(name, add);
 		return true;
 	}
+
+	public boolean addWidgetAfter(Widget add, Widget pivot) {
+		return addWidgetAfter(getNextName(), add, pivot);
+	}
 	
 	public boolean addWidgetAfter(String name, Widget add, Widget pivot) {
 		int index = widgetList.indexOf(pivot);
@@ -118,6 +122,10 @@ public class WidgetContainer implements Iterable<Widget> {
 		widgetList.add(index + 1, add);
 		checkAdded(name, add);
 		return true;
+	}
+
+	public boolean addWidgetBefore(Widget add, Widget pivot) {
+		return addWidgetBefore(getNextName(), add, pivot);
 	}
 	
 	public boolean addWidgetBefore(String name, Widget add, Widget pivot) {
