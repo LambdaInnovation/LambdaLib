@@ -23,11 +23,17 @@ import cn.lambdalib.util.helper.Color;
  */
 public class Outline extends Component {
 	
-	public Color color = Color.WHITE();
+	public Color color;
 	public float lineWidth = 2;
 
 	public Outline() {
+		this(Color.WHITE());
+	}
+
+	public Outline(Color _color) {
 		super("Outline");
+
+		color = _color;
 		
 		listen(FrameEvent.class, (w, e) -> {
 			color.bind();

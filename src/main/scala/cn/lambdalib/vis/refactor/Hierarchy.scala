@@ -13,16 +13,9 @@ import cn.lambdalib.cgui.ScalaExtensions._
 import scala.collection.JavaConversions._
 import Styles._
 
-object Hierarchy {
-  val elemIconSz = 8
-  val elementHt = 10
-}
-
-import Hierarchy._
-
 class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
-                   width: Double, height: Double, name: String = "Hierarchy")
-  extends Window(name, defX, defY, width, height) with IHierarchy {
+                   width: Double, height: Double, name: String = "Hierarchy", style: Int = Window.DEFAULT)
+  extends Window(name, defX, defY, width, height, style) with IHierarchy {
 
   // Hierarchy-unique events
   class SelectionChangeEvent(val previous: Element, val newSel: Element) extends GuiEvent
@@ -93,7 +86,7 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
   def rebuild() = {
     // Clear current selection, but retain if still present
     if(!elements.contains(selected)) {
-      selected = null
+      setSelected(null)
     }
 
     val oldList = eList
@@ -145,12 +138,14 @@ trait IHierarchy {
   def level = 0
 }
 
-class Element(val name: String, val icon: ResourceLocation) extends Widget with IHierarchy {
+class Element(val name: String, val icon: ResourceLocation, implicit val height: Double = 10) extends Widget with IHierarchy {
+
+  val elemIconSz = height * 0.8
 
   protected var indent = 0
   private var hierarchy: IHierarchy = null
 
-  protected var folded = true
+  var folded = true
 
   var elements = List[Element]()
 
@@ -169,7 +164,7 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
   protected def createText() = {
     val ret = new Widget
     ret.transform.doesListenKey = false
-    val tbox = new TextBox(new FontOption(9)).setContent(name)
+    val tbox = new TextBox(new FontOption(0.9 * height)).setContent(name)
     ret :+ tbox
     ret
   }
@@ -179,14 +174,14 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
       init = true
 
       val tab = getTab
-      transform.setSize(tab.transform.width, elementHt)
+      transform.setSize(tab.transform.width, height)
 
       iconArea.transform.setPos(5 + indentOffset, 0).setSize(elemIconSz, elemIconSz)
       iconArea.transform.doesListenKey = false
       iconArea.transform.alignHeight = HeightAlign.CENTER
       this :+ iconArea
 
-      textArea.transform.setPos(18 + indentOffset, 0).setSize(50, elementHt)
+      textArea.transform.setPos(18 + indentOffset, 0).setSize(50, height)
       this :+ textArea
 
       val dt = new DrawTexture().setTex(null).setColor4d(0, 0, 0, 0)
@@ -223,7 +218,7 @@ class Element(val name: String, val icon: ResourceLocation) extends Widget with 
     if(!foldButtonInit) {
       foldButtonInit = true
 
-      val button = new Widget(-2, 0, 8, 8)
+      val button = new Widget(-2, 0, elemIconSz, elemIconSz)
       button.transform.alignHeight = HeightAlign.CENTER
       button.transform.alignWidth = WidthAlign.RIGHT
 

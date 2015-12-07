@@ -7,7 +7,7 @@ import cn.lambdalib.annoreg.core.Registrant
 import cn.lambdalib.annoreg.mc.RegInitCallback
 import cn.lambdalib.cgui.gui.{Widget, LIGuiScreen}
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
-import cn.lambdalib.cgui.gui.component.{Transform, DrawTexture, TextBox, Tint}
+import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event._
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.client.font.TrueTypeFont
@@ -32,6 +32,17 @@ object Styles {
   def newText(option: FontOption = new FontOption) = {
     val ret = new TextBox(option)
     ret.font = font
+    ret
+  }
+
+  def newButton(x: Double, y: Double, w: Double, h: Double, text: String) = {
+    val ret = new Widget(x, y, w, h)
+    ret :+ pureTint(0.25, 0.35, false)
+    ret :+ new Outline(pure(0.45))
+
+    val tbox = new TextBox(new FontOption(8, FontAlign.CENTER)).setContent(text)
+    ret :+ tbox
+
     ret
   }
 
@@ -159,6 +170,34 @@ class Editor extends LIGuiScreen {
     })
   }
 
+  def notify(msg: String, onConfirmed: () => Any) = {
+    val fontSize = 8
+    val strlen = 10 + Styles.font.getTextWidth(msg, new FontOption(fontSize))
+
+    val coverage = new ScreenCoverage(this)
+    val not = new Window("Notification", 0, 0, math.max(strlen, 80), 45, 0)
+    not.transform.setCenteredAlign()
+
+    val textArea = new Widget(0, -10, 0, 0)
+    textArea.transform.setCenteredAlign()
+
+    textArea :+ newText(new FontOption(fontSize, FontAlign.CENTER)).setContent(msg)
+
+    val button = newButton(0, -10, 15, 7, "OK")
+    button.transform.alignWidth = WidthAlign.CENTER
+    button.transform.alignHeight = HeightAlign.BOTTOM
+    button.listens[LeftClickEvent](() => {
+      onConfirmed()
+      coverage.dispose()
+    })
+
+    not :+ button
+    not :+ textArea
+
+    coverage :+ not
+    root :+ coverage
+  }
+
   initWidgets()
 
   override def drawScreen(mx: Int, my: Int, w: Float) = {
@@ -226,6 +265,11 @@ class SubMenu extends Widget {
 class Window(val name: String, defX: Double, defY: Double, width: Double, height: Double, style: Int = Window.DEFAULT)
   extends Widget(defX, defY, width, height) {
 
+  /**
+    * Fired when the window was closed.
+    */
+  class CloseEvent extends GuiEvent
+
   import Window._
 
   // Header
@@ -238,14 +282,6 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
   private val text = new TextBox(new FontOption(10)).setContent(" " + name)
   text.heightAlign = HeightAlign.CENTER
   header :+ text
-
-  header.listens((e: DragEvent) => {
-    val gui = header.getGui
-    val ax = gui.mouseX - e.offsetX
-    val ay = gui.mouseY - e.offsetY
-    gui.moveWidgetToAbsPos(this, ax, ay + 10)
-    this.dirty = true
-  })
 
   // Body (Add sub elements into body)
   val body = new Widget(0, 0, width, height)
@@ -287,6 +323,7 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
   if ((style & CLOSABLE) != 0) {
     addButton("close", w => {
       transform.doesDraw = false
+      post(new CloseEvent)
     })
   }
 
@@ -297,6 +334,16 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
       val dt = DrawTexture.get(w)
       body.transform.doesDraw = !body.transform.doesDraw
       dt.setTex(if(body.transform.doesDraw) t1 else t2)
+    })
+  }
+
+  if ((style & DRAGGABLE) != 0) {
+    header.listens((e: DragEvent) => {
+      val gui = header.getGui
+      val ax = gui.mouseX - e.offsetX
+      val ay = gui.mouseY - e.offsetY
+      gui.moveWidgetToAbsPos(this, ax, ay + 10)
+      this.dirty = true
     })
   }
 
@@ -327,8 +374,12 @@ object Window {
     * Whether the window can be minimized. Minimized window retains only top bar.
     */
   val MINIMIZABLE = 1 << 1
+  /**
+    * Whether the window can be dragged.
+    */
+  val DRAGGABLE = 1 << 2
 
-  val DEFAULT = CLOSABLE | MINIMIZABLE
+  val DEFAULT = CLOSABLE | MINIMIZABLE | DRAGGABLE
 }
 
 // TESTS

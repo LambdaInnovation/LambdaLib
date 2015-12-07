@@ -16,15 +16,15 @@ import cn.lambdalib.vis.refactor
 import net.minecraft.util.Vec3
 
 object ObjectEditor {
-
   /**
     * Fired on the editor tab whenever an property on given element was edited.
     */
   class ElementEditEvent(element: Element) extends GuiEvent
 
-  private val specialHandlers = List[((Field, AnyRef) => Boolean, (Field, AnyRef) => Element)](
-    ((f, i) => f.getType == classOf[Color], (f, i) => {
-      val ret = new FieldElement(f, i)
+  val default = new ObjectEditor
+  val specialHandlers = List[((Field, AnyRef) => Boolean, (ObjectEditor, Field, AnyRef) => Element)](
+    ((f, i) => f.getType == classOf[Color], (e, f, i) => {
+      val ret = e.createElement(f, i)
       val hex = new Element("hex", null)
       DrawTexture.get(hex.iconArea).setColor4d(0, 0, 0, 0)
 
@@ -52,28 +52,32 @@ object ObjectEditor {
         // TODO: Update r g b a fields when hex was edited
       })
 
-      setModifier(hex, hexbox)
+      e.setModifier(hex, hexbox)
       ret :+ hex
 
       println("Used me")
       ret
     })
   )
+}
+
+class ObjectEditor {
+  import ObjectEditor._
 
   private def nameOf(field: Field) = {
     val anno = field.getAnnotation(classOf[VisProperty])
     if(anno == null || anno.name().equals("")) field.getName else anno.name()
   }
 
-  def objElements(obj: AnyRef) = {
+  def objElements(obj: AnyRef): Iterable[Element] = {
     val klass = obj.getClass
     klass.getFields filter (f => {
       val anno = f.getAnnotation(classOf[VisProperty])
       (anno == null || !anno.exclude()) && (f.getModifiers & (Modifier.FINAL | Modifier.STATIC)) == 0
     }) map (f => {
       specialHandlers.find(t => t._1(f, obj)) match {
-        case Some((pred, handler)) => handler(f, obj)
-        case _ => new FieldElement(f, obj)
+        case Some((pred, handler)) => handler(this, f, obj)
+        case _ => createElement(f, obj)
       }
     })
   }
@@ -110,8 +114,10 @@ object ObjectEditor {
     }
   }
 
-  class FieldElement(val field: Field, val instance: AnyRef)
-    extends Element(nameOf(field), fieldIcon(field)) {
+  protected def createElement(field: Field, instance: AnyRef) = new FieldElement(field, instance)
+
+  class FieldElement(val field: Field, val instance: AnyRef, height: Double = 10)
+    extends Element(nameOf(field), fieldIcon(field), height) {
     val editWidth = 60
 
     val klass = field.getType

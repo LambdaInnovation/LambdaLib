@@ -1,6 +1,7 @@
 package cn.lambdalib.vis.refactor
 
 import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent
+import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event.{LeftClickEvent, FrameEvent}
@@ -40,8 +41,6 @@ class CGUIEditor(editor: Editor) {
     ret.addItem("Inspector", () => inspector.transform.doesDraw = true)
   })
 
-  // TODO: Global refresh hierarchy event
-
   type Vec2D = (Double, Double)
 
   import scala.collection.JavaConversions._
@@ -75,7 +74,7 @@ class CGUIEditor(editor: Editor) {
   tabs.addWidget(hierarchy)
   tabs.addWidget(inspector)
 
-  root.addWidget(canvas)
+  root.addWidget("Canvas", canvas)
   root.addWidget(tabs)
 
   /**
@@ -187,7 +186,7 @@ class CGUIEditor(editor: Editor) {
       setTextEditable(false)
     }
 
-    override def foldable = w.getDrawList.nonEmpty
+    override def foldable = w.getDrawList.exists(!_.disposed)
 
     override def createText() = {
       val ret = new EditBox {
@@ -255,6 +254,66 @@ class CGUIEditor(editor: Editor) {
         case None =>
       })
 
+    this.initButton("Reparent", "reparent", fn = button => getSelectedWidget match {
+      case Some(w) =>
+        val coverage = new ScreenCoverage(editor)
+
+        val tab = new HierarchyTab(false, 0, 0, 120, 150, "Select new parent...", Window.CLOSABLE)
+
+        tab.listens[CloseEvent](() => {
+          coverage.dispose()
+        })
+
+        tab.transform.setCenteredAlign()
+
+        val elem = new WidgetElement(canvas)
+        elem.folded = false
+        tab :+ elem
+
+        tab.transform.height += 15
+        tab.body.transform.height += 15
+
+        val confirmButton = Styles.newButton(0, -6, 10, 6, "OK")
+        confirmButton.transform.alignWidth = WidthAlign.CENTER
+        confirmButton.transform.alignHeight = HeightAlign.BOTTOM
+        confirmButton.listens[LeftClickEvent](() => {
+          val selected = tab.getSelected
+          selected match {
+            case Some(we: WidgetElement) if w == we.w || we.w.isChildOf(w) =>
+              editor.notify("Can't reparent to child or self", () => coverage.dispose())
+            case Some(we: WidgetElement) =>
+              setSelected(null)
+
+              var name = w.getName
+
+              val par = w.getAbstractParent
+              par.forceRemoveWidget(w)
+
+              val newpar = we.w
+
+              // Find a suitable name for widget
+              if (newpar.hasWidget(name)) {
+                var i = 0
+                while (newpar.hasWidget(name + " " + i)) {
+                  i += 1
+                }
+                name = name + " " + i
+              }
+              // Rebase!
+              newpar.addWidget(name, w)
+
+              coverage.dispose()
+              onCanvasUpdated()
+            case None =>
+          }
+        })
+
+        tab.body :+ confirmButton
+        coverage :+ tab
+        root :+ coverage
+      case None =>
+    })
+
     this.listens((e: SelectionChangeEvent) => {
       inspector.updateTarget()
       e.previous match {
@@ -312,7 +371,7 @@ class CGUIEditor(editor: Editor) {
           if (refresh || target != lastSelected) {
             elements = target.getComponentList.filter(_.canEdit).map(c => {
               val elem = new ComponentElement(c)
-              ObjectEditor.addToHierarchy(elem, c)
+              ObjectEditor.default.addToHierarchy(elem, c)
               elem
             }).toList
             lastSelected = target

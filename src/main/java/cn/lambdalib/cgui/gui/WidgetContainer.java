@@ -234,7 +234,7 @@ public class WidgetContainer implements Iterable<Widget> {
 			return;
 		widgets.remove(w.getName());
 		widgetList.remove(w);
-		//w.gui = null;
+		w.gui = null;
 		w.parent = null;
 	}
 	
