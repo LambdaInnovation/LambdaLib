@@ -12,6 +12,8 @@
  */
 package cn.lambdalib.util.helper;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import cn.lambdalib.annoreg.core.Registrant;
@@ -46,13 +48,20 @@ public enum GameTimer {
 		if(Minecraft.getMinecraft().isGamePaused()) {
 			timeLag = time - storedTime;
 		} else {
-			storedTime = time;
+			storedTime = time - timeLag;
 		}
 		return time - timeLag;
 	}
 	
 	private static long getTimeServer() {
-		return MinecraftServer.getSystemTimeMillis() - timeLag;
+		return MinecraftServer.getSystemTimeMillis();
+	}
+
+	// In case GameTimer isn't queried frequently, use this to prevent huge (and incorrect) time lag.
+	@SideOnly(Side.CLIENT)
+	@SubscribeEvent
+	public void onClientTick(ClientTickEvent event) {
+		getTimeClient();
 	}
 	
 }
