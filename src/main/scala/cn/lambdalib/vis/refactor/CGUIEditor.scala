@@ -11,12 +11,15 @@ import cn.lambdalib.util.helper.Color
 import cn.lambdalib.vis.refactor.ObjectEditor.ElementEditEvent
 import org.lwjgl.opengl.GL11
 
-object CGUIEditor extends VisPlugin {
+object CGUIPlugin extends VisPlugin {
 
-  // TODO: Global refresh hierarchy event
+  override def onActivate(editor: Editor) = {
+    new CGUIEditor(editor)
+  }
 
-  type Vec2D = (Double, Double)
+}
 
+object CGUIEditor {
   private val components: List[Component] = List(
     new DrawTexture(),
     new Tint(),
@@ -25,6 +28,21 @@ object CGUIEditor extends VisPlugin {
     new TextBox(),
     new Outline()
   )
+
+  lazy val fo_createPosHint = new FontOption(9, FontAlign.CENTER)
+}
+
+class CGUIEditor(editor: Editor) {
+  import CGUIEditor._
+
+  editor.getMenuBar.addMenu("View", ret => {
+    ret.addItem("Hierarchy", () => hierarchy.transform.doesDraw = true)
+    ret.addItem("Inspector", () => inspector.transform.doesDraw = true)
+  })
+
+  // TODO: Global refresh hierarchy event
+
+  type Vec2D = (Double, Double)
 
   import scala.collection.JavaConversions._
 
@@ -37,18 +55,34 @@ object CGUIEditor extends VisPlugin {
 
   }
 
-  lazy val fo_createPosHint = new FontOption(9, FontAlign.CENTER)
+  val root = editor.getRoot
+  val canvas = new Widget
+  val tabs = new Widget
 
-  var editor: Editor = null
-  var canvas: Widget = null
-  var inspector: WidgetInspector = null
-  var hierarchy: WidgetHierarchy = null
+  val inspector = new WidgetInspector
+  val hierarchy = new WidgetHierarchy
+
+  canvas.transform.doesListenKey = false
+
+  canvas.listens[FrameEvent](() => {
+    val t = canvas.transform
+    if(t.width != editor.width || t.height != editor.height) {
+      t.setSize(editor.width, editor.height)
+      canvas.dirty = true
+    }
+  })
+
+  tabs.addWidget(hierarchy)
+  tabs.addWidget(inspector)
+
+  root.addWidget(canvas)
+  root.addWidget(tabs)
 
   /**
     * @return A list of WidgetElement, retaining old ones if the corresponding widget is still there.
     */
   private def newElements(w: WidgetContainer, old: List[WidgetElement], t: IHierarchy): List[WidgetElement] = {
-    w.getDrawList.map(w => {
+    w.getDrawList.filter(!_.disposed).map(w => {
       val res = old.find(_.w == w)
       res match {
         case Some(x) => x
@@ -65,8 +99,7 @@ object CGUIEditor extends VisPlugin {
     def toPosAndSize(a: Vec2D, b: Vec2D) = ((math.min(a._1, b._1), math.min(a._2, b._2)),
       (math.abs(a._1 - b._1), math.abs(a._2 - b._2)))
 
-    inspector.transform.doesDraw = false
-    hierarchy.transform.doesDraw = false
+    tabs.transform.doesDraw = false
 
     var state: Int = 0
     var p0 = (0.0, 0.0)
@@ -80,10 +113,9 @@ object CGUIEditor extends VisPlugin {
         val ps = toPosAndSize(p0, p1)
         createMethod(ps._1, ps._2)
 
-        inspector.transform.doesDraw = true
-        hierarchy.transform.doesDraw = true
+        tabs.transform.doesDraw = true
 
-        hierarchy.rebuild()
+        onCanvasUpdated()
         coverage.dispose()
       }
     })
@@ -111,7 +143,23 @@ object CGUIEditor extends VisPlugin {
     editor.getRoot :+ coverage
   }
 
-  private def toWidget(pos: Vec2D, size: Vec2D) = new Widget(pos._1, pos._2, size._1, size._2)
+  private def toWidget(pos: Vec2D, size: Vec2D)(implicit parent: Widget = null) = {
+    println("Parent: " + parent)
+    var scale: Double = 1
+    var x = pos._1
+    var y = pos._2
+    if (parent != null) {
+      scale = 1 / parent.scale
+      x = (x - parent.x) / parent.scale
+      y = (y - parent.y) / parent.scale
+    }
+    new Widget(x, y, size._1 * scale, size._2 * scale)
+  }
+
+  private def onCanvasUpdated() = {
+    hierarchy.rebuild()
+    inspector.updateTarget()
+  }
 
   class WidgetElement(val w: Widget) extends Element(w.getName, Styles.elemTexture("widget")) {
 
@@ -181,15 +229,15 @@ object CGUIEditor extends VisPlugin {
         case Some(w) =>
           val menu = new SubMenu
           menu.addItem("Add as child", () => startCreateWidget((pos, size) => {
-            w.addWidget(toWidget(pos, size))
+            w.addWidget(toWidget(pos, size)(w))
           }))
           menu.addItem("Add after", () => startCreateWidget((pos, size) => {
             val par = w.getAbstractParent
-            par.addWidgetAfter(toWidget(pos, size), w)
+            par.addWidgetAfter(toWidget(pos, size)(w.getWidgetParent), w)
           }))
           menu.addItem("Add before", () => startCreateWidget((pos, size) => {
             val par = w.getAbstractParent
-            par.addWidgetBefore(toWidget(pos, size), w)
+            par.addWidgetBefore(toWidget(pos, size)(w.getWidgetParent), w)
           }))
           menu.transform.setPos(button.x - 50, button.y)
           editor.getRoot :+ menu
@@ -203,7 +251,7 @@ object CGUIEditor extends VisPlugin {
     this.initButton("Remove Widget", "remove", button => getSelectedWidget match {
         case Some(w) =>
           w.dispose()
-          hierarchy.rebuild()
+          onCanvasUpdated()
         case None =>
       })
 
@@ -259,7 +307,6 @@ object CGUIEditor extends VisPlugin {
     this.listens[ElementEditEvent](() => actionOnSelected(_.dirty = true))
 
     def updateTarget(refresh: Boolean = false) = {
-      println("Selected: " + getSelectedWidget)
       getSelectedWidget match {
         case Some(target) =>
           if (refresh || target != lastSelected) {
@@ -294,44 +341,10 @@ object CGUIEditor extends VisPlugin {
   /**
     * Gets the currently selected widget.
     */
-  private def getSelectedWidget: Option[Widget] =
-    hierarchy.getSelected match {
+  private def getSelectedWidget: Option[Widget] = hierarchy.getSelected match {
       case Some(e: WidgetElement) => Some(e.w)
       case None => None
       case _ => throw new RuntimeException
-    }
-
-  override def onActivate(editor: Editor) = {
-    this.editor = editor
-    hierarchy = new WidgetHierarchy()
-    canvas = new Widget
-    canvas.transform.doesListenKey = false
-
-    canvas.listens[FrameEvent](() => {
-      val t = canvas.transform
-      if(t.width != editor.width || t.height != editor.height) {
-        t.setSize(editor.width, editor.height)
-        canvas.dirty = true
-      }
-    })
-
-    inspector = new WidgetInspector
-
-    editor.getMenuBar.addButton("+Widget", w => {
-      val container: WidgetContainer = hierarchy.getSelected match {
-        case Some(e: WidgetElement) => e.w
-        case None => canvas
-        case _ => throw new RuntimeException
-      }
-      container.addWidget(new Widget())
-
-      hierarchy.rebuild()
-    })
-
-    val root = editor.getRoot
-    root.addWidget(canvas)
-    root.addWidget(hierarchy)
-    root.addWidget(inspector)
   }
 
 }

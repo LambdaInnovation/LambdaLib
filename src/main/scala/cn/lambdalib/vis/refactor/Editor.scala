@@ -52,6 +52,8 @@ import cn.lambdalib.vis.refactor.Styles._
 class Editor extends LIGuiScreen {
 
   class MenuBar extends Widget {
+    type MenuCallback = SubMenu => Any
+
     val len = 30
     val ht = 12
     var count = 0
@@ -79,19 +81,27 @@ class Editor extends LIGuiScreen {
       button.addComponents(tint, text)
       button.listens[LeftClickEvent](() => func(button))
 
-      addWidget(button)
+      addWidget(name, button)
 
       count += 1
     }
 
-    def addMenu(name: String, creator: Widget => SubMenu) = {
-      addButton(name, w => {
-        val sub: SubMenu = creator(w)
-        // Set menu to pos of button
-        sub.transform.setPos(w.transform.x, w.transform.y + w.transform.height)
-        addWidget(sub)
-        // getGui.gainFocus(sub)
-      })
+    var menuCallbacks = Map[String, List[MenuCallback]]()
+
+    def addMenu(name: String, creator: MenuCallback) = {
+      if (!menuCallbacks.contains(name)) {
+        menuCallbacks = menuCallbacks updated (name, List(creator))
+        addButton(name, w => {
+          val sub = new SubMenu
+          menuCallbacks(name) foreach (f => f(sub))
+          // Set menu to pos of button
+          sub.transform.setPos(w.transform.x, w.transform.y + w.transform.height)
+          addWidget(sub)
+          // getGui.gainFocus(sub)
+        })
+      } else {
+        menuCallbacks = menuCallbacks updated (name, creator :: menuCallbacks(name))
+      }
     }
   }
 
@@ -127,8 +137,7 @@ class Editor extends LIGuiScreen {
     gui.addWidget(root)
     gui.addWidget(menuContainer)
 
-    menuBar.addMenu("Editor", w => {
-      val menu = new SubMenu
+    menuBar.addMenu("Editor", menu => {
       EditorRegistry.getEditors foreach {
         case (name, plugin) =>
           menu.addItem(name, () => {
@@ -139,17 +148,14 @@ class Editor extends LIGuiScreen {
             plugin.onActivate(this)
           })
       }
-      menu
     })
 
-    menuBar.addMenu("Options", w => {
-      val menu = new SubMenu
+    menuBar.addMenu("View", menu => {
       menu.addItem("Hide Menu", () => {
         // Hide the menu bar
         menuHover.transform.doesDraw = true
         menuBar.transform.doesDraw = false
       })
-      menu
     })
   }
 
@@ -280,7 +286,7 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
 
   if ((style & CLOSABLE) != 0) {
     addButton("close", w => {
-      dispose()
+      transform.doesDraw = false
     })
   }
 
@@ -312,7 +318,14 @@ class ScreenCoverage(env: LIGuiScreen, blackout: Boolean = true) extends Widget 
 
 object Window {
   // Style constants
+  /**
+    * Whether the window can be 'closed'.
+    * Currently we just set transform.doesDraw = false, so you can redisplay it later.
+    */
   val CLOSABLE    = 1 << 0
+  /**
+    * Whether the window can be minimized. Minimized window retains only top bar.
+    */
   val MINIMIZABLE = 1 << 1
 
   val DEFAULT = CLOSABLE | MINIMIZABLE

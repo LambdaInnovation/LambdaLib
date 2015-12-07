@@ -1,7 +1,5 @@
 package cn.lambdalib.vis.refactor
 
-import java.util
-
 trait VisPlugin {
 
   def onActivate(editor: Editor)
@@ -19,6 +17,6 @@ object EditorRegistry {
 
   def getEditors = editors
 
-  register("CGUI", CGUIEditor)
+  register("CGUI", CGUIPlugin)
 
 }
