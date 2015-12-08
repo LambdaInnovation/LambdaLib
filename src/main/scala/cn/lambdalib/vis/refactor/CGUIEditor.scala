@@ -10,6 +10,7 @@ import cn.lambdalib.util.client.HudUtils
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.helper.Color
 import cn.lambdalib.vis.refactor.ObjectEditor.ElementEditEvent
+import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
 
 object CGUIPlugin extends VisPlugin {
@@ -36,6 +37,22 @@ object CGUIEditor {
 class CGUIEditor(editor: Editor) {
   import CGUIEditor._
 
+  abstract class Tool(name: String, hint: String) {
+    toolbar.addButton(hint, texture("tl_" + name), () => {
+      if (this != currentTool) {
+        currentTool.onDeactivate()
+        currentTool = this
+        this.onActivate()
+      }
+    })
+
+    def onSelectionChange(prev: Widget, next: Widget) = {}
+    def onActivate() = {}
+    def onDeactivate() = {}
+  }
+
+  private def texture(loc: String) = new ResourceLocation("lambdalib:textures/vis/cgui/" + loc + ".png")
+
   editor.getMenuBar.addMenu("View", ret => {
     ret.addItem("Hierarchy", () => hierarchy.transform.doesDraw = true)
     ret.addItem("Inspector", () => inspector.transform.doesDraw = true)
@@ -56,10 +73,15 @@ class CGUIEditor(editor: Editor) {
 
   val root = editor.getRoot
   val canvas = new Widget
+  /**
+    * Layer that places auxillary widgets such as "resizer
+    */
+  val editingHelper = new Widget
   val tabs = new Widget
 
   val inspector = new WidgetInspector
   val hierarchy = new WidgetHierarchy
+  val toolbar = new Toolbar
 
   canvas.transform.doesListenKey = false
 
@@ -71,10 +93,46 @@ class CGUIEditor(editor: Editor) {
     }
   })
 
-  tabs.addWidget(hierarchy)
-  tabs.addWidget(inspector)
+  val toolNothing = new Tool("nothing", "Nothing") {}
+  val toolResize = new Tool("resize", "Rectangle Tool") {
+    val theRect = new Widget
+    theRect :+ new DrawTexture().setTex(null).setColor4d(1, 1, 1, 0.5)
+    theRect.listens[FrameEvent](() => {
+      println((theRect.x, theRect.y, theRect.transform.width, theRect.transform.height))
+    })
+
+    private def moveRect(target: Widget) = {
+      theRect.transform.setPos(target.x, target.y)
+        .setSize(target.scale * target.transform.width, target.scale * target.transform.height)
+      theRect.dirty = true
+
+      if (theRect.disposed || theRect.getAbstractParent == null) {
+        editingHelper :+ theRect
+      }
+
+      println(editingHelper.getHierarchyStructure)
+    }
+    override def onSelectionChange(prev: Widget, next: Widget) = {
+      Option(next) match {
+        case Some(w) =>
+          moveRect(next)
+        case _ =>
+          theRect.dispose()
+      }
+    }
+    override def onActivate() = actionOnSelected(moveRect)
+    override def onDeactivate() = theRect.dispose()
+  }
+
+  var currentTool = toolNothing
+  currentTool.onActivate()
+
+  tabs :+ hierarchy
+  tabs :+ inspector
+  tabs :+ toolbar
 
   root.addWidget("Canvas", canvas)
+  root.addWidget(editingHelper)
   root.addWidget(tabs)
 
   /**
@@ -316,6 +374,8 @@ class CGUIEditor(editor: Editor) {
 
     this.listens((e: SelectionChangeEvent) => {
       inspector.updateTarget()
+      currentTool.onSelectionChange(toSelectedWidget(e.previous), toSelectedWidget(e.newSel))
+
       e.previous match {
         case we: WidgetElement =>
           we.onDeselect()
@@ -332,6 +392,11 @@ class CGUIEditor(editor: Editor) {
     override def rebuild() = {
       elements = newElements(canvas, elements.asInstanceOf[List[WidgetElement]], this)
       super.rebuild()
+    }
+
+    private def toSelectedWidget(e: Element) = e match {
+      case we: WidgetElement => we.w
+      case _  => null
     }
   }
 

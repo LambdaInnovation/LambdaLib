@@ -299,6 +299,14 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
 
   private var buttons = 0
 
+  /**
+    * Resize the window to the given size.
+    */
+  def resize(width: Double, height: Double) = {
+    body.transform.setSize(width, height)
+    dirty = true
+  }
+
   private def addButton(name: String, callback: Widget => Unit) = {
     val sz = 9
     val step = sz + 1
@@ -363,6 +371,37 @@ class ScreenCoverage(env: LIGuiScreen, blackout: Boolean = true) extends Widget 
 
   this.listens[RefreshEvent](() => updateSize())
 
+}
+
+private object Toolbar {
+  val height = 10.5
+  val iconSz = 9
+  val step = iconSz + 2
+
+  lazy val fo_buttonHint = new FontOption(8, FontAlign.CENTER)
+}
+
+class Toolbar(name: String = "Toolbar") extends Window(name, 50, 50, 70, Toolbar.height) {
+  import Toolbar._
+
+  val buttons = new util.ArrayList[Widget]
+  def buttonCount = buttons.size
+
+  def addButton(hint: String, icon: ResourceLocation, callback: () => Any) = {
+    val button = new Widget(3 + buttonCount * step, 0, iconSz, iconSz)
+    button :+ new DrawTexture().setTex(icon)
+    button.transform.alignHeight = HeightAlign.CENTER
+    button.listens[LeftClickEvent](callback)
+    button.listens((e: FrameEvent) => {
+      if (e.hovering) {
+        Styles.font.draw(hint, iconSz / 2, 10, fo_buttonHint)
+      }
+    })
+    body :+ button
+
+    resize(math.max(70, button.transform.x + 15), height)
+    buttons.add(button)
+  }
 }
 
 object Window {
