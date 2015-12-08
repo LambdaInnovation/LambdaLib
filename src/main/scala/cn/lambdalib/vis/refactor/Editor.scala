@@ -161,6 +161,8 @@ class Editor extends LIGuiScreen {
       }
     })
 
+    menuBar.addMenu("View", menu => menu.addItem("Show/Hide Cover", () => drawBack = !drawBack))
+
     menuBar.addMenu("View", menu => {
       menu.addItem("Hide Menu", () => {
         // Hide the menu bar
