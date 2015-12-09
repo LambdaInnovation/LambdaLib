@@ -27,7 +27,8 @@ object Styles {
   def pure(lum: Double) = new Color(lum, lum, lum, 1)
 
   def texture(path: String) = new ResourceLocation("lambdalib:textures/vis/" + path + ".png")
-  def elemTexture(path: String) = if(path == null) null else texture("elements/" + path)
+  def elemTexture(path: String) = texture("elements/" + path)
+  def buttonTexture(path: String) = texture("buttons/" + path)
 
   def newText(option: FontOption = new FontOption) = {
     val ret = new TextBox(option)

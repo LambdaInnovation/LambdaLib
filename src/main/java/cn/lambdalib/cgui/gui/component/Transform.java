@@ -56,5 +56,11 @@ public class Transform extends Component {
 		alignHeight = HeightAlign.CENTER;
 		return this;
 	}
+
+	public Transform setAlign(WidthAlign walign, HeightAlign halign) {
+		alignWidth = walign;
+		alignHeight = halign;
+		return this;
+	}
 	
 }

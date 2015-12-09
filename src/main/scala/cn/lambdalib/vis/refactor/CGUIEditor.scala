@@ -1,12 +1,14 @@
 package cn.lambdalib.vis.refactor
 
+import javax.vecmath.Vector2d
+
 import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component._
-import cn.lambdalib.cgui.gui.event.{LeftClickEvent, FrameEvent}
+import cn.lambdalib.cgui.gui.event._
 import cn.lambdalib.cgui.ScalaExtensions._
-import cn.lambdalib.util.client.HudUtils
+import cn.lambdalib.util.client.{RenderUtils, HudUtils}
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.helper.Color
 import cn.lambdalib.vis.refactor.ObjectEditor.ElementEditEvent
@@ -32,6 +34,10 @@ object CGUIEditor {
   )
 
   lazy val fo_createPosHint = new FontOption(9, FontAlign.CENTER)
+  lazy val fo_resizeHint = new FontOption(9, FontAlign.CENTER)
+
+  lazy val icon_DragVT = Styles.buttonTexture("drag_vt")
+  lazy val icon_DragHR = Styles.buttonTexture("drag_hr")
 }
 
 class CGUIEditor(editor: Editor) {
@@ -53,9 +59,10 @@ class CGUIEditor(editor: Editor) {
 
   abstract class ToolWithCompanion(name: String, hint: String) extends Tool(name, hint) {
     val companion = new Widget
+    val compTrans = companion.transform // Fast alias
     var selected: Widget = null
     companion.listens[FrameEvent](() => {
-      if (selected != null) {
+      if (shouldUpdateWithSelected && selected != null) {
         if (selected.x != companion.x || selected.y != companion.y ||
           selected.transform.width * selected.scale != companion.transform.width ||
           selected.transform.height * selected.scale != companion.transform.height) {
@@ -65,6 +72,8 @@ class CGUIEditor(editor: Editor) {
       }
     })
 
+    protected def shouldUpdateWithSelected = true
+
     private def updatePos() = companion.transform.setPos(selected.x, selected.y).
       setSize(selected.scale * selected.transform.width, selected.scale * selected.transform.height)
 
@@ -72,7 +81,6 @@ class CGUIEditor(editor: Editor) {
       selected = target
       updatePos()
       companion.dirty = true
-      println("MoveRect")
 
       if (companion.disposed || companion.getAbstractParent == null) {
         editingHelper :+ companion
@@ -98,7 +106,10 @@ class CGUIEditor(editor: Editor) {
     ret.addItem("Inspector", () => inspector.transform.doesDraw = true)
   })
 
-  type Vec2D = (Double, Double)
+  type Vec2D = Vector2d
+  implicit def toPair(vec: Vec2D): (Double, Double) = (vec.x, vec.y)
+  implicit def toVec(pair: (Double, Double)): Vector2d = new Vector2d(pair._1, pair._2)
+  def transformToRect(t: Transform): (Vec2D, Vec2D) = ((t.x, t.y), (t.width, t.height))
 
   import scala.collection.JavaConversions._
 
@@ -127,14 +138,105 @@ class CGUIEditor(editor: Editor) {
   val toolNothing = new ToolWithCompanion("nothing", "Nothing") {
     companion.listens[FrameEvent](() => {
       GL11.glColor4d(1, 1, 1, 0.7)
-      println("Drawing " + companion.x + "," + companion.y + "," +
-        companion.transform.width + "," + companion.transform.height)
       HudUtils.drawRectOutline(0, 0, companion.transform.width, companion.transform.height, 2)
     })
   }
 
   val toolResize = new ToolWithCompanion("resize", "Rectangle Tool") {
+    private var draggingLine: Widget = null
+    private def dragging = draggingLine != null
+    private val outline = new Outline(new Color(1, 1, 1, 0.5))
+    outline.lineWidth = 0.8f
+    companion :+ outline
+    companion.listens((e: FrameEvent) => {
+      if (dragging) {
+        val font = Styles.font
+        font.draw(s"(${compTrans.x}, ${compTrans.y})", 0, -5, fo_resizeHint)
+        font.draw(s"width:${compTrans.width}", compTrans.width / 2, compTrans.height + 2, fo_resizeHint)
+        font.draw(s"height:${compTrans.height}", compTrans.width, compTrans.height / 2, fo_resizeHint)
+      }
+    })
 
+    override def shouldUpdateWithSelected = !dragging
+
+    def createDragLn(walign: WidthAlign, halign: HeightAlign, resizer: (Double, Double) => (Vec2D, Vec2D)) = {
+
+      val line = new Widget
+
+      val csrSize = 10
+      def drawsCursor(icon: ResourceLocation) = {
+        line.listens((e: FrameEvent) => {
+          if (e.hovering || draggingLine == line) {
+            val gui = line.getGui
+            val x = gui.mouseX - line.x - csrSize / 2
+            val y = gui.mouseY - line.y - csrSize / 2
+            RenderUtils.loadTexture(icon)
+            HudUtils.rect(x, y, csrSize, csrSize)
+          }
+        })
+      }
+
+      if (walign == WidthAlign.CENTER) { // Resize width
+        line.listens[FrameEvent](() => {
+          line.transform.width = companion.transform.width
+        })
+        line.transform.height = 1
+        drawsCursor(icon_DragVT)
+      }
+      if (halign == HeightAlign.CENTER) { // Resize height
+        line.listens[FrameEvent](() => {
+          line.transform.height = companion.transform.height
+        })
+        line.transform.width = 1
+        drawsCursor(icon_DragHR)
+      }
+      line.transform.setAlign(walign, halign)
+
+      line.listens[DragEvent](() => {
+        val gui = editor.getGui
+        draggingLine = line
+        resizer(gui.mouseX, gui.mouseY) match {
+          case (pos, size) =>
+            compTrans.setPos(pos.x, pos.y).setSize(size.x, size.y)
+        }
+        gui.updateWidget(companion)
+      })
+
+      line.listens[DragStopEvent](() => {
+        updateSize(selected,
+          (compTrans.x, compTrans.y),
+          (compTrans.width, compTrans.height)
+        )
+        draggingLine = null
+      })
+
+      companion :+ line
+    }
+
+    createDragLn(WidthAlign.LEFT, HeightAlign.CENTER, (mx, my) => {
+      val nmx = math.min(mx, compTrans.x + compTrans.width)
+      ((nmx, compTrans.y),
+      (compTrans.x + compTrans.width - nmx, compTrans.height))
+    })
+
+    createDragLn(WidthAlign.RIGHT, HeightAlign.CENTER, (mx, my) => {
+      val nmx = math.max(compTrans.x, mx)
+      ((compTrans.x, compTrans.y),
+      (nmx - compTrans.x, compTrans.height)
+      )
+    })
+
+    createDragLn(WidthAlign.CENTER, HeightAlign.TOP, (mx, my) => {
+      val nmy = math.min(my, compTrans.y + compTrans.height)
+      ((compTrans.x, nmy),
+      (compTrans.width, compTrans.y + compTrans.height - nmy))
+    })
+
+    createDragLn(WidthAlign.CENTER, HeightAlign.BOTTOM, (mx, my) => {
+      val nmy = math.max(compTrans.y, my)
+      ((compTrans.x, compTrans.y),
+      (compTrans.width, nmy - compTrans.y))
+    })
   }
 
   var currentTool: Tool = toolNothing
@@ -166,8 +268,8 @@ class CGUIEditor(editor: Editor) {
   private def startCreateWidget(createMethod: (Vec2D, Vec2D) => Any) = {
     val coverage = new ScreenCoverage(editor)
 
-    def toPosAndSize(a: Vec2D, b: Vec2D) = ((math.min(a._1, b._1), math.min(a._2, b._2)),
-      (math.abs(a._1 - b._1), math.abs(a._2 - b._2)))
+    def toPosAndSize(a: Vec2D, b: Vec2D) = ((math.min(a.x, b.x), math.min(a.y, b.y)),
+      (math.abs(a.x - b.x), math.abs(a.y - b.y)))
 
     tabs.transform.doesDraw = false
 
@@ -214,15 +316,24 @@ class CGUIEditor(editor: Editor) {
   }
 
   private def toWidget(pos: Vec2D, size: Vec2D)(implicit parent: Widget = null) = {
-    var scale: Double = 1
-    var x = pos._1
-    var y = pos._2
+    val ret = new Widget
+    updateSize(ret, pos, size)
+    ret
+  }
+
+  private def updateSize(w: Widget, pos: Vec2D, size: Vec2D) = {
+    val parent = w.getWidgetParent
+    val wscale = w.transform.scale
+    var invscale: Double = wscale
+    var x = pos.x
+    var y = pos.y
     if (parent != null) {
-      scale = 1 / parent.scale
+      invscale *= parent.scale
       x = (x - parent.x) / parent.scale
       y = (y - parent.y) / parent.scale
     }
-    new Widget(x, y, size._1 * scale, size._2 * scale)
+    w.transform.setPos(x / wscale, y / wscale).setSize(size.x / invscale, size.y / invscale)
+    w.dirty = true
   }
 
   private def onCanvasUpdated() = {
