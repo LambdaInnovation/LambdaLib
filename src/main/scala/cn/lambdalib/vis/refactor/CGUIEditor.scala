@@ -206,7 +206,7 @@ class CGUIEditor(editor: Editor) {
         updateSize(selected,
           (compTrans.x, compTrans.y),
           (compTrans.width, compTrans.height)
-        )
+        )(selected.getWidgetParent)
         draggingLine = null
       })
 
@@ -317,22 +317,21 @@ class CGUIEditor(editor: Editor) {
 
   private def toWidget(pos: Vec2D, size: Vec2D)(implicit parent: Widget = null) = {
     val ret = new Widget
-    updateSize(ret, pos, size)
+    updateSize(ret, pos, size)(parent)
     ret
   }
 
-  private def updateSize(w: Widget, pos: Vec2D, size: Vec2D) = {
-    val parent = w.getWidgetParent
+  private def updateSize(w: Widget, pos: Vec2D, size: Vec2D)(implicit parent: Widget = null) = {
     val wscale = w.transform.scale
     var invscale: Double = wscale
     var x = pos.x
     var y = pos.y
     if (parent != null) {
-      invscale *= parent.scale
       x = (x - parent.x) / parent.scale
       y = (y - parent.y) / parent.scale
+      invscale *= parent.scale
     }
-    w.transform.setPos(x / wscale, y / wscale).setSize(size.x / invscale, size.y / invscale)
+    w.transform.setPos(x, y).setSize(size.x / invscale, size.y / invscale)
     w.dirty = true
   }
 
