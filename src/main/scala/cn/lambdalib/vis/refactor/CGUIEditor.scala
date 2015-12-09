@@ -51,6 +51,46 @@ class CGUIEditor(editor: Editor) {
     def onDeactivate() = {}
   }
 
+  abstract class ToolWithCompanion(name: String, hint: String) extends Tool(name, hint) {
+    val companion = new Widget
+    var selected: Widget = null
+    companion.listens[FrameEvent](() => {
+      if (selected != null) {
+        if (selected.x != companion.x || selected.y != companion.y ||
+          selected.transform.width * selected.scale != companion.transform.width ||
+          selected.transform.height * selected.scale != companion.transform.height) {
+          companion.dirty = true
+          updatePos()
+        }
+      }
+    })
+
+    private def updatePos() = companion.transform.setPos(selected.x, selected.y).
+      setSize(selected.scale * selected.transform.width, selected.scale * selected.transform.height)
+
+    private def moveRect(target: Widget) = {
+      selected = target
+      updatePos()
+      companion.dirty = true
+      println("MoveRect")
+
+      if (companion.disposed || companion.getAbstractParent == null) {
+        editingHelper :+ companion
+      }
+    }
+    override def onSelectionChange(prev: Widget, next: Widget) = {
+      Option(next) match {
+        case Some(w) =>
+          moveRect(next)
+        case _ =>
+          selected = null
+          companion.dispose()
+      }
+    }
+    override def onActivate() = actionOnSelected(moveRect)
+    override def onDeactivate() = companion.dispose()
+  }
+
   private def texture(loc: String) = new ResourceLocation("lambdalib:textures/vis/cgui/" + loc + ".png")
 
   editor.getMenuBar.addMenu("View", ret => {
@@ -61,15 +101,6 @@ class CGUIEditor(editor: Editor) {
   type Vec2D = (Double, Double)
 
   import scala.collection.JavaConversions._
-
-  class SelectionOutline extends Component("SelectionOutline") {
-
-    this.listens[FrameEvent](() => {
-      GL11.glColor4d(1, 1, 1, 0.7)
-      HudUtils.drawRectOutline(0, 0, widget.transform.width, widget.transform.height, 2)
-    })
-
-  }
 
   val root = editor.getRoot
   val canvas = new Widget
@@ -93,38 +124,20 @@ class CGUIEditor(editor: Editor) {
     }
   })
 
-  val toolNothing = new Tool("nothing", "Nothing") {}
-  val toolResize = new Tool("resize", "Rectangle Tool") {
-    val theRect = new Widget
-    theRect :+ new DrawTexture().setTex(null).setColor4d(1, 1, 1, 0.5)
-    theRect.listens[FrameEvent](() => {
-      println((theRect.x, theRect.y, theRect.transform.width, theRect.transform.height))
+  val toolNothing = new ToolWithCompanion("nothing", "Nothing") {
+    companion.listens[FrameEvent](() => {
+      GL11.glColor4d(1, 1, 1, 0.7)
+      println("Drawing " + companion.x + "," + companion.y + "," +
+        companion.transform.width + "," + companion.transform.height)
+      HudUtils.drawRectOutline(0, 0, companion.transform.width, companion.transform.height, 2)
     })
-
-    private def moveRect(target: Widget) = {
-      theRect.transform.setPos(target.x, target.y)
-        .setSize(target.scale * target.transform.width, target.scale * target.transform.height)
-      theRect.dirty = true
-
-      if (theRect.disposed || theRect.getAbstractParent == null) {
-        editingHelper :+ theRect
-      }
-
-      println(editingHelper.getHierarchyStructure)
-    }
-    override def onSelectionChange(prev: Widget, next: Widget) = {
-      Option(next) match {
-        case Some(w) =>
-          moveRect(next)
-        case _ =>
-          theRect.dispose()
-      }
-    }
-    override def onActivate() = actionOnSelected(moveRect)
-    override def onDeactivate() = theRect.dispose()
   }
 
-  var currentTool = toolNothing
+  val toolResize = new ToolWithCompanion("resize", "Rectangle Tool") {
+
+  }
+
+  var currentTool: Tool = toolNothing
   currentTool.onActivate()
 
   tabs :+ hierarchy
@@ -201,7 +214,6 @@ class CGUIEditor(editor: Editor) {
   }
 
   private def toWidget(pos: Vec2D, size: Vec2D)(implicit parent: Widget = null) = {
-    println("Parent: " + parent)
     var scale: Double = 1
     var x = pos._1
     var y = pos._2
@@ -379,12 +391,6 @@ class CGUIEditor(editor: Editor) {
       e.previous match {
         case we: WidgetElement =>
           we.onDeselect()
-          we.w.removeComponent("SelectionOutline")
-        case _ =>
-      }
-
-      e.newSel match {
-        case we: WidgetElement => we.w :+ new SelectionOutline
         case _ =>
       }
     })
