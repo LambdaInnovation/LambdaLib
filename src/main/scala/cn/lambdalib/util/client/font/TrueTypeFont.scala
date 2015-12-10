@@ -89,7 +89,7 @@ class TrueTypeFont(val font: Font) extends IFont {
     if(!lookup.containsKey(chr)) {
       writeImage(chr)
     }
-    lookup.get(chr).width
+    lookup.get(chr).width * option.fontSize / charSize
   }
 
   override def getTextWidth(str: String, option: FontOption): Double = {

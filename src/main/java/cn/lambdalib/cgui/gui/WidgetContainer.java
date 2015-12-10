@@ -27,20 +27,18 @@ import cpw.mods.fml.relauncher.SideOnly;
 /**
  * A class that has capability to store widgets. Used by LIGui and Widget.
  * Every widget is associated with a name. You can use that name to lookup a widget.
- * 
- * This is a internal implementation class. DONT TOUCH IT!
  * @author WeAthFolD
  */
 @SideOnly(Side.CLIENT)
 public class WidgetContainer implements Iterable<Widget> {
 	
 	HashBiMap<String, Widget> widgets = HashBiMap.create();
-	LinkedList<Widget> widgetList = new LinkedList(); //List sorted in non-descending widget zOrder.
+	LinkedList<Widget> widgetList = new LinkedList<>(); //List sorted in non-descending widget zOrder.
 	
 	private static final String UNNAMED_PRE = "Unnamed ";
 	
 	/**
-	 * This is light copy.
+	 * Light copy.
 	 */
 	public void addAll(WidgetContainer container) {
 		for(Map.Entry<String, Widget> entry : container.getEntries()) {
