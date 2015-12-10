@@ -15,6 +15,7 @@ package cn.lambdalib.cgui.gui;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.component.Transform;
@@ -30,7 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 public class Widget extends WidgetContainer {
 	
 	private GuiEventBus eventBus = new GuiEventBus();
-	private List<Component> components = new ArrayList();
+	private List<Component> components = new ArrayList<>();
 	
 	public boolean disposed = false;
 	public boolean dirty = true; //Indicate that this widget's pos data is dirty and requires update.
@@ -54,7 +55,7 @@ public class Widget extends WidgetContainer {
 	
 	public Transform transform;
 	
-	//Defaults
+	//Transform is always present.
 	{
 		addComponent(transform = new Transform());
 	}
@@ -69,9 +70,12 @@ public class Widget extends WidgetContainer {
 	public Widget(double x, double y, double width, double height) {
 		transform.setPos(x, y).setSize(width, height);
 	}
-	
+
+	/**
+	 * @return Whether the widget is visible (and called each draw frame).
+	 */
 	public boolean isVisible() {
-		return visible && transform.doesDraw && !dirty;
+		return transform.doesDraw && !dirty;
 	}
 		
 	/**
@@ -109,7 +113,7 @@ public class Widget extends WidgetContainer {
 	}
 	
 	/**
-	 * Called when added into a GUI.
+	 * Called when added into a GUI. Use this to do initialization.
 	 */
 	protected void onAdded() {}
 	
@@ -138,8 +142,8 @@ public class Widget extends WidgetContainer {
 	
 	//Component handling
 	/**
-	 * Java generic type is shit, so use it at your own risk.
-	 * @return the first component with the name specified, or null if no such component.
+	 * Java generic type erasure makes this unsafe, so use at your own risk.
+	 * @return the component with the name specified, or null if no such component.
 	 */
 	public <T extends Component> T getComponent(String name) {
 		for(Component c : components) {
@@ -147,6 +151,17 @@ public class Widget extends WidgetContainer {
 				return (T) c;
 		}
 		return null;
+	}
+
+	/**
+	 * Find the first component that is of the given type.
+	 * @throws NoSuchElementException if there is no value present
+	 */
+	public <T extends Component> T getComponent(Class<T> type) {
+		return (T) components.stream()
+				.filter(c -> !type.isAssignableFrom(c.getClass()))
+				.findFirst()
+				.get();
 	}
 	
 	public Widget addComponents(Component ...c) {
@@ -159,7 +174,7 @@ public class Widget extends WidgetContainer {
 	public Widget addComponent(Component c) {
 		if(c.widget != null)
 			throw new RuntimeException("Can't add one component into multiple widgets!");
-		
+
 		for(Component cc : components) {
 			if(cc.name.equals(c.name)) {
 				throw new RuntimeException("Duplicate component!");
@@ -184,7 +199,7 @@ public class Widget extends WidgetContainer {
 				c.onRemoved();
 				c.widget = null;
 				iter.remove();
-				return;
+				break;
 			}
 		}
 	}
