@@ -1,4 +1,4 @@
-package cn.lambdalib.vis.refactor
+package cn.lambdalib.vis.editor
 
 import java.awt.Font
 import java.util
@@ -59,7 +59,7 @@ object Styles {
   val cModified = rgb(0x9f5a00)
 }
 
-import cn.lambdalib.vis.refactor.Styles._
+import cn.lambdalib.vis.editor.Styles._
 
 class Editor extends LIGuiScreen {
 

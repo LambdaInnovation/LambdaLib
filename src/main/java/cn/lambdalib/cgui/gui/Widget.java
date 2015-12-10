@@ -21,6 +21,7 @@ import cn.lambdalib.cgui.gui.component.Transform;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.GuiEventBus;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -273,49 +274,6 @@ public class Widget extends WidgetContainer {
 		return isWidgetParent() ? parent : gui;
 	}
 	
-	public void moveDown() {
-		WidgetContainer parent = getAbstractParent();
-		int i = parent.locate(this);
-		if(i == -1 || i == parent.widgetList.size() - 1) return;
-		Widget next = parent.getWidget(i + 1);
-		parent.widgetList.set(i, next);
-		parent.widgetList.set(i + 1, this);
-	}
-	
-	public void moveUp() {
-		WidgetContainer parent = getAbstractParent();
-		int i = parent.locate(this);
-		if(i == -1 || i == 0) return;
-		Widget last = parent.getWidget(i - 1);
-		parent.widgetList.set(i, last);
-		parent.widgetList.set(i - 1, this);
-	}
-	
-	public void moveLeft() {
-		if(!this.isWidgetParent())
-			return;
-		WidgetContainer pp = parent.getAbstractParent();
-		String name = this.getName();
-		parent.forceRemoveWidget(this);
-		
-		this.disposed = false;
-		if(!pp.addWidget(name, this)) {
-			pp.addWidget(this);
-		}
-	}
-	
-	public void moveRight() {
-		WidgetContainer parent = getAbstractParent();
-		int i = parent.locate(this) - 1;
-		if(i >= 0) {
-			Widget newParent = parent.getWidget(i);
-			String name = this.getName();
-			parent.forceRemoveWidget(this);
-			this.disposed = false;
-			newParent.addWidget(name, this);
-		}
-	}
-	
 	public boolean rename(String newName) {
 		WidgetContainer parent = getAbstractParent();
 		if(parent.hasWidget(newName))
@@ -343,16 +301,42 @@ public class Widget extends WidgetContainer {
 		return this.getName() + "@" + this.getClass().getSimpleName();
 	}
 
+	interface IWidgetFormatter {
+		String format(Widget w);
+	}
+
 	/**
-	 * Print out the widget's hierarchical structure for debugging.
+	 * Get the widget's hierarchical structure for debugging.
 	 */
 	public String getHierarchyStructure() {
+		return getHierarchyStructure(w -> w.toString());
+	}
+
+	public String getHierarchyStructure_pos() {
+		return getHierarchyStructure(w -> String.format("%s: (%f,%f)[%f,%f]x%f", w.getName(),
+				w.transform.x, w.transform.y,
+				w.transform.width, w.transform.height,
+				w.transform.scale));
+	}
+
+	public String getHierarchyStructure(IWidgetFormatter f) {
+		return getHierarchyStructure_int(f, 0);
+	}
+
+	private String _rep(int times) {
+		StringBuilder sb = new StringBuilder(times*2);
+		while (times-- > 0) sb.append("  ");
+		return sb.toString();
+	}
+
+	private String getHierarchyStructure_int(IWidgetFormatter f, int indent) {
+		String istr = _rep(indent);
 		StringBuilder ret = new StringBuilder();
-		ret.append(toString());
+		ret.append(istr).append(f.format(this));
 		if(getDrawList().size() != 0) {
-			ret.append("{\n");
-			getDrawList().forEach(w -> ret.append(w.getHierarchyStructure()).append(','));
-			ret.append("\n}");
+			ret.append(istr).append("{\n");
+			getDrawList().forEach(w -> ret.append(w.getHierarchyStructure_int(f, indent + 1)).append(','));
+			ret.append(istr).append("\n}");
 		}
 		return ret.toString();
 	}

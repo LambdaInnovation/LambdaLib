@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Supply extra information for {@link cn.lambdalib.vis.refactor.ObjectEditor}.
+ * Supply extra information for {@link cn.lambdalib.vis.editor.ObjectEditor}.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

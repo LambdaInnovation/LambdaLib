@@ -1,4 +1,4 @@
-package cn.lambdalib.vis.refactor
+package cn.lambdalib.vis.editor
 
 trait VisPlugin {
 

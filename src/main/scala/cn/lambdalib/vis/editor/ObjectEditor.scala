@@ -1,4 +1,4 @@
-package cn.lambdalib.vis.refactor
+package cn.lambdalib.vis.editor
 
 import java.lang.reflect.{Modifier, Field}
 
@@ -12,7 +12,7 @@ import cn.lambdalib.vis.editor.VisProperty
 
 import cn.lambdalib.cgui.ScalaExtensions._
 import cn.lambdalib.vis.model.CompTransform
-import cn.lambdalib.vis.refactor
+import cn.lambdalib.vis.editor
 import net.minecraft.util.Vec3
 
 object ObjectEditor {

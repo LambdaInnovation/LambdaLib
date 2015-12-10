@@ -1,4 +1,4 @@
-package cn.lambdalib.vis.refactor
+package cn.lambdalib.vis.editor
 
 import javax.vecmath.Vector2d
 
@@ -11,7 +11,7 @@ import cn.lambdalib.cgui.ScalaExtensions._
 import cn.lambdalib.util.client.{RenderUtils, HudUtils}
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.helper.Color
-import cn.lambdalib.vis.refactor.ObjectEditor.ElementEditEvent
+import cn.lambdalib.vis.editor.ObjectEditor.ElementEditEvent
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
 
@@ -53,24 +53,16 @@ class CGUIEditor(editor: Editor) {
   private def texture(loc: String) = new ResourceLocation("lambdalib:textures/vis/cgui/" + loc + ".png")
 
   // Utils
-  private def toWidget(pos: Vec2D, size: Vec2D)(implicit parent: Widget = null) = {
-    val ret = new Widget
-    updateSize(ret, pos, size)(parent)
-    ret
-  }
 
-  private def updateSize(w: Widget, pos: Vec2D, size: Vec2D)(implicit parent: Widget = null) = {
+  private def updateSize(w: Widget, pos: Vec2D, size: Vec2D) = {
     val wscale = w.transform.scale
     var invscale: Double = wscale
-    var x = pos.x
-    var y = pos.y
-    if (parent != null) {
-      x = (x - parent.x) / parent.scale
-      y = (y - parent.y) / parent.scale
-      invscale *= parent.scale
+    w.getWidgetParent match {
+      case wp: Widget => invscale *= wp.scale
+      case _ =>
     }
-    w.transform.setPos(x, y).setSize(size.x / invscale, size.y / invscale)
-    w.dirty = true
+    editor.getGui.moveWidgetToAbsPos(w, pos.x, pos.y)
+    w.transform.setSize(size.x / invscale, size.y / invscale)
   }
 
   /**
@@ -277,27 +269,29 @@ class CGUIEditor(editor: Editor) {
   class WidgetHierarchy extends HierarchyTab(true, 0, 20, 120, 100) {
 
     this.initButton("Add Widget", "add", button => {
+      def toWidget(pos: Vec2D, size: Vec2D, adder: Widget => Any) = {
+        val ret = new Widget
+        adder(ret)
+        updateSize(ret, pos, size)
+        ret
+      }
+
       val selected = getSelectedWidget
       selected match {
         case Some(w) =>
           val menu = new SubMenu
-          menu.addItem("Add as child", () => startCreateWidget((pos, size) => {
-            w.addWidget(toWidget(pos, size)(w))
-          }))
+          menu.addItem("Add as child", () => startCreateWidget((pos, size) => toWidget(pos, size, w.addWidget)))
           menu.addItem("Add after", () => startCreateWidget((pos, size) => {
-            val par = w.getAbstractParent
-            par.addWidgetAfter(toWidget(pos, size)(w.getWidgetParent), w)
+            toWidget(pos, size, (w2) => w.getAbstractParent.addWidgetAfter(w2, w))
           }))
           menu.addItem("Add before", () => startCreateWidget((pos, size) => {
             val par = w.getAbstractParent
-            par.addWidgetBefore(toWidget(pos, size)(w.getWidgetParent), w)
+            toWidget(pos, size, (w2) => par.addWidgetBefore(w2, w))
           }))
           menu.transform.setPos(button.x - 50, button.y)
           editor.getRoot :+ menu
         case _ =>
-          startCreateWidget((pos, size) => {
-            canvas.addWidget(toWidget(pos, size))
-          })
+          startCreateWidget((pos, size) => toWidget(pos, size, canvas.addWidget))
       }
     })
 
@@ -573,7 +567,7 @@ class CGUIEditor(editor: Editor) {
         updateSize(selected,
           (compTrans.x, compTrans.y),
           (compTrans.width, compTrans.height)
-        )(selected.getWidgetParent)
+        )
         draggingLine = null
       })
 

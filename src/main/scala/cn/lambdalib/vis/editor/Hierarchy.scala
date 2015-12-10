@@ -1,4 +1,4 @@
-package cn.lambdalib.vis.refactor
+package cn.lambdalib.vis.editor
 
 import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component._
