@@ -126,6 +126,8 @@ class Editor extends CGuiScreen {
   def getRoot = root
   def getMenuBar = menuBar
 
+  private var currentPlugin: Option[VisPlugin] = None
+
   private def initWidgets(): Unit = {
     menuContainer = new Widget
     menuBar = new MenuBar
@@ -151,13 +153,15 @@ class Editor extends CGuiScreen {
 
     menuBar.addMenu("Editor", menu => {
       EditorRegistry.getEditors foreach {
-        case (name, plugin) =>
+        case (name, factory) =>
           menu.addItem(name, () => {
             root.dispose()
             menuBar.dispose()
             initWidgets()
 
-            plugin.onActivate(this)
+            val plugin = factory(this)
+            plugin.onActivate()
+            currentPlugin = Option(plugin)
           })
       }
     })
@@ -173,32 +177,43 @@ class Editor extends CGuiScreen {
     })
   }
 
-  def notify(msg: String, onConfirmed: () => Any) = {
+  def addPopup(header: String, msg: String, buttons: (String, () => Any)*) = {
     val fontSize = 8
     val strlen = 10 + Styles.font.getTextWidth(msg, new FontOption(fontSize))
+    val buttonLen = 18
+    val buttonStep = buttonLen + 5
+    val buttonW = buttonStep * buttons.length - 5
+
+    val width = math.max(strlen, math.max(80, buttonW))
 
     val cover = new ScreenCover(this)
-    val not = new Window("Notification", 0, 0, math.max(strlen, 80), 45, 0)
+    val not = new Window(header, 0, 0, width, 45, 0)
     not.transform.setCenteredAlign()
 
-    val textArea = new Widget(0, -10, 0, 0)
+    val textArea = new Widget(0, -10, width, 0)
     textArea.transform.setCenteredAlign()
 
     textArea :+ newText(new FontOption(fontSize, FontAlign.CENTER)).setContent(msg)
 
-    val button = newButton(0, -10, 15, 7, "OK")
-    button.transform.alignWidth = WidthAlign.CENTER
-    button.transform.alignHeight = HeightAlign.BOTTOM
-    button.listens[LeftClickEvent](() => {
-      onConfirmed()
-      cover.dispose()
-    })
+    buttons.zipWithIndex.foreach{
+      case (buttonspec, index) =>
+        val button = newButton(-buttonW/2 + index * buttonStep + buttonLen/2, 10, buttonLen, 7, buttonspec._1)
+        button.listens[LeftClickEvent](buttonspec._2)
+        button.transform.setCenteredAlign()
+        not :+ button
+    }
 
-    not :+ button
     not :+ textArea
-
     cover :+ not
     root :+ cover
+  }
+
+  def notify(msg: String, onConfirmed: () => Any) = {
+    addPopup("Notification", msg, ("OK", onConfirmed))
+  }
+
+  def confirm(msg: String, yesCallback: () => Any, noCallback: () => Any = () => {}) = {
+    addPopup("Notification", msg, ("OK", yesCallback), ("Cancel", noCallback))
   }
 
   initWidgets()
@@ -214,6 +229,16 @@ class Editor extends CGuiScreen {
     root.transform.setSize(width, height)
 
     super.drawScreen(mx, my, w)
+  }
+
+  override def keyTyped(char: Char, key: Int) = {
+    gui.keyTyped(char, key)
+    if (key == Keyboard.KEY_ESCAPE) {
+      currentPlugin match {
+        case Some(plugin) => plugin.handleQuit()
+        case _ => mc.displayGuiScreen(null)
+      }
+    }
   }
 
 }

@@ -1,22 +1,26 @@
 package cn.lambdalib.vis.editor
 
-trait VisPlugin {
+import net.minecraft.client.Minecraft
 
-  def onActivate(editor: Editor)
+abstract class VisPlugin(editor: Editor) {
+
+  def onActivate() = {}
+
+  def handleQuit() = Minecraft.getMinecraft.displayGuiScreen(null)
 
 }
 
 object EditorRegistry {
 
-  private var editors = Map[String, VisPlugin]()
+  private var editors = Map[String, Editor => VisPlugin]()
 
-  def register(id: String, plugin: VisPlugin) = {
+  def register(id: String, pluginFactory: Editor => VisPlugin) = {
     assert(!editors.contains(id))
-    editors = editors updated (id, plugin)
+    editors = editors updated (id, pluginFactory)
   }
 
   def getEditors = editors
 
-  register("CGUI", CGUIPlugin)
+  register("CGUI", new CGUIEditor(_))
 
 }

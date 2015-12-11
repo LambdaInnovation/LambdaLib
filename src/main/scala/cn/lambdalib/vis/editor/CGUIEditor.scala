@@ -15,14 +15,6 @@ import cn.lambdalib.vis.editor.ObjectEditor.ElementEditEvent
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
 
-object CGUIPlugin extends VisPlugin {
-
-  override def onActivate(editor: Editor) = {
-    new CGUIEditor(editor)
-  }
-
-}
-
 object CGUIEditor {
   private val components: List[Component] = List(
     new DrawTexture(),
@@ -40,7 +32,7 @@ object CGUIEditor {
   lazy val icon_DragHR = Styles.buttonTexture("drag_hr")
 }
 
-class CGUIEditor(editor: Editor) {
+class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
   import CGUIEditor._
   import scala.collection.JavaConversions._
 
@@ -104,6 +96,15 @@ class CGUIEditor(editor: Editor) {
   private def onCanvasUpdated() = {
     hierarchy.rebuild()
     inspector.updateTarget()
+  }
+
+  override def handleQuit() = {
+    editor.confirm("Save before close?",
+      () => {
+        // TODO Popup the save menu
+        editor.mc.displayGuiScreen(null)
+      },
+      () => editor.mc.displayGuiScreen(null))
   }
   //
 
