@@ -22,6 +22,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import cn.lambdalib.cgui.gui.CGui;
 import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.io.IOUtils;
@@ -31,18 +32,17 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import cn.lambdalib.cgui.gui.LIGui;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.WidgetContainer;
 import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.component.Transform;
-import cn.lambdalib.cgui.loader.EventLoader;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.generic.RegistryUtils;
 
 /**
  * @author WeAthFolD
  */
+@Deprecated
 public class CGUIDocLoader {
 	
 	private static CGUIDocLoader instance = new CGUIDocLoader();
@@ -61,12 +61,12 @@ public class CGUIDocLoader {
 		}
 	}
 	
-	public LIGui loadXml(String xml) throws Exception {
+	public CGui loadXml(String xml) throws Exception {
 		return loadXml(new ReaderInputStream(new StringReader(xml)));
 	}
 	
-	public LIGui loadXml(InputStream xml) throws Exception {
-		LIGui retval = new LIGui();
+	public CGui loadXml(InputStream xml) throws Exception {
+		CGui retval = new CGui();
 		
 		Document doc = db.parse(xml);
 		Element root = doc.getDocumentElement();
@@ -101,7 +101,7 @@ public class CGUIDocLoader {
 		if(name == null) {
 			throw new RuntimeException("No name specified for the widget");
 		}
-//		System.out.println("Add " + name + " to " + (target instanceof LIGui ? "LIGui" : ((Widget)target).getName()));
+//		System.out.println("Add " + name + " to " + (target instanceof CGui ? "CGui" : ((Widget)target).getName()));
 		target.addWidget(name, val);
 	}
 	
@@ -139,7 +139,7 @@ public class CGUIDocLoader {
 		}
 	}
 	
-	public static LIGui load(String xml) {
+	public static CGui load(String xml) {
 		try {
 			return instance.loadXml(xml);
 		} catch (Exception e) {
@@ -148,7 +148,7 @@ public class CGUIDocLoader {
 		return null;
 	}
 	
-	public static LIGui load(ResourceLocation xml) {
+	public static CGui load(ResourceLocation xml) {
 		String str = null;
 		try {
 			str = IOUtils.toString(RegistryUtils.getResourceStream(xml));
@@ -156,13 +156,6 @@ public class CGUIDocLoader {
 			LambdaLib.log.error("An error occured when loading CGUI document.", e);
 		}
 		return load(str);
-	}
-	
-	public static LIGui load(String xml, Object callbackProvider) {
-		LIGui ret = load(xml);
-		if(ret == null) return null;
-		EventLoader.load(ret, callbackProvider);
-		return ret;
 	}
 	
 }

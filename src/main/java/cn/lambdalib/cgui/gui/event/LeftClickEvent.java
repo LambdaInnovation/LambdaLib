@@ -14,7 +14,7 @@ package cn.lambdalib.cgui.gui.event;
 
 
 /**
- * Fired on LIGui and current focus when user presses left mouse button.
+ * Fired on CGui and current focus when user presses left mouse button.
  */
 public class LeftClickEvent implements GuiEvent {
 	

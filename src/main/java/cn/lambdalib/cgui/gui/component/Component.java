@@ -22,7 +22,6 @@ import java.util.Map;
 
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.annotations.CopyIgnore;
-import cn.lambdalib.cgui.gui.annotations.EditIgnore;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
 import cn.lambdalib.core.LambdaLib;

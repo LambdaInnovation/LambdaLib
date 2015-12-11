@@ -36,7 +36,7 @@ import cn.lambdalib.util.helper.GameTimer;
 /**
  * @author WeathFolD
  */
-public class LIGui extends WidgetContainer {
+public class CGui extends WidgetContainer {
 	
 	double width, height; //Only useful when calculating 'CENTER' align preference
 	
@@ -52,9 +52,9 @@ public class LIGui extends WidgetContainer {
 	Widget draggingNode;
 	double xOffset, yOffset;
 
-	public LIGui() {}
+	public CGui() {}
 	
-	public LIGui(double width, double height) {
+	public CGui(double width, double height) {
 		this.width = width;
 		this.height = height;
 	}
@@ -468,7 +468,7 @@ public class LIGui extends WidgetContainer {
 	}
 	
 	/**
-	 * Event bus delegator, will post every widget inside this LIGui. <br>
+	 * Event bus delegator, will post every widget inside this CGui. <br>
 	 * Note that this might impact peformance when used incorectlly.
 	 */
 	public void postEventHierarchically(GuiEvent event) {

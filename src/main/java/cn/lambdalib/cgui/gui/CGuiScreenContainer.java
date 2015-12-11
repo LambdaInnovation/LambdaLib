@@ -19,24 +19,24 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 /**
- * A simple wrapper for fast {@link LIGui} deploy as GuiContainer.
+ * A simple wrapper for fast {@link CGui} deploy as GuiContainer.
  * @author WeAthFolD
  */
-public class LIGuiContainer extends GuiContainer {
+public class CGuiScreenContainer extends GuiContainer {
 	
-	protected LIGui gui;
+	protected CGui gui;
 	
-	public LIGuiContainer(Container c) {
+	public CGuiScreenContainer(Container c) {
 		super(c);
-		gui = new LIGui();
+		gui = new CGui();
 	}
 	
-	public LIGuiContainer(Container c, LIGui _gui) {
+	public CGuiScreenContainer(Container c, CGui _gui) {
 		super(c);
 		gui = _gui;
 	}
 	
-	public LIGui getGui() {
+	public CGui getGui() {
 		return gui;
 	}
 	

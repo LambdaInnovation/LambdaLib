@@ -3,36 +3,34 @@
  */
 package cn.lambdalib.cgui.gui;
 
-import java.io.File;
-
 import net.minecraft.client.gui.GuiScreen;
 
 import org.lwjgl.opengl.GL11;
 
 /**
- * A simple wrapper for fast {@link LIGui} deploy as GuiScreen.
+ * A simple wrapper for fast {@link CGui} deploy as GuiScreen.
  * @author WeAthFolD
  */
-public class LIGuiScreen extends GuiScreen {
-	protected LIGui gui;
+public class CGuiScreen extends GuiScreen {
+	protected CGui gui;
 	
 	/**
 	 * Whether the black background should be drawed.
 	 */
 	protected boolean drawBack = true;
 	
-	public LIGuiScreen(LIGui _gui) {
+	public CGuiScreen(CGui _gui) {
 		gui = _gui;
 	}
 	
-	public LIGuiScreen() {
-		this(new LIGui());
+	public CGuiScreen() {
+		this(new CGui());
 	}
 	
 	/**
 	 * Set whether the black background should be drawed.
 	 */
-	public LIGuiScreen setDrawBack(boolean flag) {
+	public CGuiScreen setDrawBack(boolean flag) {
 		drawBack = flag;
 		return this;
 	}
@@ -68,7 +66,7 @@ public class LIGuiScreen extends GuiScreen {
     	gui.keyTyped(par1, par2);
     }
 	
-    public LIGui getGui() {
+    public CGui getGui() {
     	return gui;
     }
 }

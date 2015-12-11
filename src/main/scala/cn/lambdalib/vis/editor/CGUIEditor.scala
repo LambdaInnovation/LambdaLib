@@ -113,7 +113,7 @@ class CGUIEditor(editor: Editor) {
     * ``createMethod`` passed in.
     */
   private def startCreateWidget(createMethod: (Vec2D, Vec2D) => Any) = {
-    val coverage = new ScreenCoverage(editor)
+    val cover = new ScreenCover(editor)
 
     def toPosAndSize(a: Vec2D, b: Vec2D) = ((math.min(a.x, b.x), math.min(a.y, b.y)),
       (math.abs(a.x - b.x), math.abs(a.y - b.y)))
@@ -123,7 +123,7 @@ class CGUIEditor(editor: Editor) {
     var state: Int = 0
     var p0 = (0.0, 0.0)
 
-    coverage.listens((e: LeftClickEvent) => {
+    cover.listens((e: LeftClickEvent) => {
       if (state == 0) {
         p0 = (e.x, e.y)
         state = 1
@@ -135,11 +135,11 @@ class CGUIEditor(editor: Editor) {
         tabs.transform.doesDraw = true
 
         onCanvasUpdated()
-        coverage.dispose()
+        cover.dispose()
       }
     })
 
-    coverage.listens((e: FrameEvent) => {
+    cover.listens((e: FrameEvent) => {
       def drawPos(x: Double, y: Double) = {
         val font = Styles.font
         font.draw(s"($x, $y)", x - 5, y - 10, fo_createPosHint)
@@ -159,7 +159,7 @@ class CGUIEditor(editor: Editor) {
       drawPos(e.mx, e.my)
     })
 
-    editor.getRoot :+ coverage
+    editor.getRoot :+ cover
   }
   //
 
@@ -304,12 +304,12 @@ class CGUIEditor(editor: Editor) {
 
     this.initButton("Reparent", "reparent", fn = button => getSelectedWidget match {
       case Some(w) =>
-        val coverage = new ScreenCoverage(editor)
+        val cover = new ScreenCover(editor)
 
         val tab = new HierarchyTab(false, 0, 0, 120, 150, "Select new parent...", Window.CLOSABLE)
 
         tab.listens[CloseEvent](() => {
-          coverage.dispose()
+          cover.dispose()
         })
 
         tab.transform.setCenteredAlign()
@@ -328,7 +328,7 @@ class CGUIEditor(editor: Editor) {
           val selected = tab.getSelected
           selected match {
             case Some(we: WidgetElement) if w == we.w || we.w.isChildOf(w) =>
-              editor.notify("Can't reparent to child or self", () => coverage.dispose())
+              editor.notify("Can't reparent to child or self", () => cover.dispose())
             case Some(we: WidgetElement) =>
               setSelected(null)
 
@@ -350,15 +350,15 @@ class CGUIEditor(editor: Editor) {
               // Rebase!
               newpar.addWidget(name, w)
 
-              coverage.dispose()
+              cover.dispose()
               onCanvasUpdated()
             case None =>
           }
         })
 
         tab.body :+ confirmButton
-        coverage :+ tab
-        root :+ coverage
+        cover :+ tab
+        root :+ cover
       case None =>
     })
 

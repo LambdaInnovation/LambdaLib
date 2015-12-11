@@ -15,7 +15,7 @@ package cn.lambdalib.cgui.gui.event;
 import cn.lambdalib.cgui.gui.Widget;
 
 /**
- * Fired on LIGui when a new widget is added into it.
+ * Fired on CGui when a new widget is added into it.
  */
 public class AddWidgetEvent implements GuiEvent {
 	

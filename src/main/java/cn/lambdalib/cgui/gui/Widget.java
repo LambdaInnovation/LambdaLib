@@ -22,7 +22,6 @@ import cn.lambdalib.cgui.gui.component.Transform;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.GuiEventBus;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
-import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -36,7 +35,7 @@ public class Widget extends WidgetContainer {
 	public boolean disposed = false;
 	public boolean dirty = true; //Indicate that this widget's pos data is dirty and requires update.
 
-	LIGui gui;
+	CGui gui;
 	Widget parent;
 	
 	// Calculated absolute widget position and scale
@@ -129,7 +128,7 @@ public class Widget extends WidgetContainer {
 		return parent;
 	}
 	
-	public LIGui getGui() {
+	public CGui getGui() {
 		return gui;
 	}
 	

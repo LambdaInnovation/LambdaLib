@@ -25,7 +25,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
- * A class that has capability to store widgets. Used by LIGui and Widget.
+ * A class that has capability to store widgets. Used by CGui and Widget.
  * Every widget is associated with a name. You can use that name to lookup a widget.
  * @author WeAthFolD
  */

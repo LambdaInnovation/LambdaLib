@@ -13,7 +13,7 @@
 package cn.lambdalib.cgui.gui.event;
 
 /**
- * Fired on both LIGui and current focus when user presses right mouse button.
+ * Fired on both CGui and current focus when user presses right mouse button.
  */
 public class RightClickEvent implements GuiEvent {
 

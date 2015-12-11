@@ -5,7 +5,7 @@ import java.util
 
 import cn.lambdalib.annoreg.core.Registrant
 import cn.lambdalib.annoreg.mc.RegInitCallback
-import cn.lambdalib.cgui.gui.{Widget, LIGuiScreen}
+import cn.lambdalib.cgui.gui.{CGuiScreen, Widget}
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event._
@@ -61,7 +61,7 @@ object Styles {
 
 import cn.lambdalib.vis.editor.Styles._
 
-class Editor extends LIGuiScreen {
+class Editor extends CGuiScreen {
 
   class MenuBar extends Widget {
     type MenuCallback = SubMenu => Any
@@ -177,7 +177,7 @@ class Editor extends LIGuiScreen {
     val fontSize = 8
     val strlen = 10 + Styles.font.getTextWidth(msg, new FontOption(fontSize))
 
-    val coverage = new ScreenCoverage(this)
+    val cover = new ScreenCover(this)
     val not = new Window("Notification", 0, 0, math.max(strlen, 80), 45, 0)
     not.transform.setCenteredAlign()
 
@@ -191,14 +191,14 @@ class Editor extends LIGuiScreen {
     button.transform.alignHeight = HeightAlign.BOTTOM
     button.listens[LeftClickEvent](() => {
       onConfirmed()
-      coverage.dispose()
+      cover.dispose()
     })
 
     not :+ button
     not :+ textArea
 
-    coverage :+ not
-    root :+ coverage
+    cover :+ not
+    root :+ cover
   }
 
   initWidgets()
@@ -360,7 +360,7 @@ class Window(val name: String, defX: Double, defY: Double, width: Double, height
 
 }
 
-class ScreenCoverage(env: LIGuiScreen, blackout: Boolean = true) extends Widget {
+class ScreenCover(env: CGuiScreen, blackout: Boolean = true) extends Widget {
 
   private def updateSize() = transform.setSize(env.width, env.height)
 
