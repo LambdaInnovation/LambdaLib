@@ -12,10 +12,7 @@
  */
 package cn.lambdalib.cgui.gui;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.component.Transform;
@@ -30,7 +27,7 @@ import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
 public class Widget extends WidgetContainer {
 	
 	private GuiEventBus eventBus = new GuiEventBus();
-	private List<Component> components = new ArrayList<>();
+	private List<Component> components = new LinkedList<>();
 	
 	public boolean disposed = false;
 	public boolean dirty = true; //Indicate that this widget's pos data is dirty and requires update.
