@@ -1,6 +1,7 @@
 package cn.lambdalib.vis.editor
 
 import java.awt.Font
+import java.io.File
 import java.util
 
 import cn.lambdalib.annoreg.core.Registrant
@@ -128,6 +129,8 @@ class Editor extends CGuiScreen {
 
   private var currentPlugin: Option[VisPlugin] = None
 
+  initWidgets()
+
   private def initWidgets(): Unit = {
     menuContainer = new Widget
     menuBar = new MenuBar
@@ -164,6 +167,71 @@ class Editor extends CGuiScreen {
             currentPlugin = Option(plugin)
           })
       }
+    })
+
+    menuBar.addMenu("File", menu => {
+      menu.addItem("Edit work folder", () => {
+        val cover = new ScreenCover(Editor.this)
+        val window:HierarchyTab = new HierarchyTab(true, 0, 0, 150, 100, "Working Dirs", Window.CLOSABLE) {
+          this.listens[CloseEvent](() => cover.dispose())
+          override def rebuild(): Unit = {
+            elements = VisConfig.getWorkDirs.map(new Element(_, Styles.elemTexture("folder"))).toList
+            super.rebuild()
+          }
+        }
+
+        window.initButton("Add directory", "add", w => {
+          val cover = new ScreenCover(Editor.this)
+          val askPath = new Window("Enter new path...", 0, 0, 100, 30, Window.CLOSABLE)
+
+          askPath.listens[askPath.CloseEvent](() => cover.dispose())
+          askPath.transform.setCenteredAlign()
+
+          val textArea = new Widget(0, 15, 80, 12)
+          val textbox = Styles.newText(new FontOption(9, FontAlign.CENTER)).setContent("ENTER: Confirm")
+          textArea :+ textbox
+
+          val input: EditBox = new EditBox {
+            var str = ""
+
+            transform.y = -5
+            transform.width = 70
+            override def repr = str
+            override def setValue(str: String) = {
+              this.str = str
+              val file = new File(str)
+              if (file.isDirectory) {
+                VisConfig.updateWorkDirs(str :: VisConfig.getWorkDirs.toList)
+                window.rebuild()
+                cover.dispose()
+              } else {
+                textbox.option.color.setColor4d(1, 0.2, 0.2, 1)
+                textbox.content = "Invalid path"
+              }
+            }
+          }
+          input.transform.setCenteredAlign()
+
+          askPath :+ textArea
+          askPath :+ input
+
+          cover :+ askPath
+          gui.addWidget(cover)
+        })
+
+        window.initButton("Remove directory", "remove", w => {
+          window.getSelected match {
+            case Some(elem) =>
+              VisConfig.updateWorkDirs(VisConfig.getWorkDirs.filter(_ != elem.name))
+              window.rebuild()
+            case _ =>
+          }
+        })
+
+        window.transform.setCenteredAlign()
+        cover :+ window
+        gui.addWidget(cover)
+      })
     })
 
     menuBar.addMenu("View", menu => menu.addItem("Show/Hide Cover", () => drawBack = !drawBack))
@@ -215,8 +283,6 @@ class Editor extends CGuiScreen {
   def confirm(msg: String, yesCallback: () => Any, noCallback: () => Any = () => {}) = {
     addPopup("Notification", msg, ("OK", yesCallback), ("Cancel", noCallback))
   }
-
-  initWidgets()
 
   override def drawScreen(mx: Int, my: Int, w: Float) = {
     if(width != menuBar.transform.width) {
@@ -464,7 +530,6 @@ class TestKey extends KeyHandler {
 object Test {
   @RegInitCallback
   def init() = {
-    println("Inittttttttttttttt")
     KeyManager.dynamic.addKeyHandler("wtf", Keyboard.KEY_L, new TestKey)
   }
 }

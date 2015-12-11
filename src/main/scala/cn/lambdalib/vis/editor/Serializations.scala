@@ -1,9 +1,6 @@
 package cn.lambdalib.vis.editor
 
-import java.io
 import java.lang.reflect.Modifier
-import javax.xml.parsers
-import javax.xml.transform
 import org.w3c.dom.{Document, Node}
 
 import scala.reflect.ClassTag
@@ -114,6 +111,7 @@ class DOMConversion {
     bw(java.lang.Double.valueOf)
     bw(java.lang.Boolean.parseBoolean)
     bw(java.lang.Boolean.valueOf)
+    bw(String.valueOf)
   }
 
   init()
