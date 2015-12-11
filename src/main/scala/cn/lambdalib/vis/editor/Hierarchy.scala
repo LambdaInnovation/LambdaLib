@@ -31,7 +31,7 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
     post(new SelectionChangeEvent(prev, newSel))
   }
 
-  private val top = if(hasButton) 10 else 0
+  protected lazy val top = if(hasButton) 10 else 0
   private val listArea = new Widget(0, top, width, height - top)
   listArea :+ new DrawTexture().setTex(null).setColor4d(0.1, 0.1, 0.1, 1)
   body :+ listArea
@@ -181,7 +181,7 @@ class Element(val name: String, val icon: ResourceLocation, implicit val height:
       iconArea.transform.alignHeight = HeightAlign.CENTER
       this :+ iconArea
 
-      textArea.transform.setPos(18 + indentOffset, 0).setSize(50, height)
+      textArea.transform.setPos(18 + indentOffset, 0).setSize(transform.width - 25, height)
       this :+ textArea
 
       val dt = new DrawTexture().setTex(null).setColor4d(0, 0, 0, 0)

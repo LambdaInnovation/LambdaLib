@@ -243,6 +243,10 @@ class Editor extends CGuiScreen {
         menuBar.transform.doesDraw = false
       })
     })
+
+    menuBar.addMenu("File", menu => {
+      menu.addItem("Test", () => openFile(File => {}))
+    })
   }
 
   def addPopup(header: String, msg: String, buttons: (String, () => Any)*) = {
@@ -282,6 +286,110 @@ class Editor extends CGuiScreen {
 
   def confirm(msg: String, yesCallback: () => Any, noCallback: () => Any = () => {}) = {
     addPopup("Notification", msg, ("OK", yesCallback), ("Cancel", noCallback))
+  }
+
+  private def createFileWindow(name: String, buttonName: String, buttonCallback: () => Any, abortCallback: () => Any) = {
+    val cover = new ScreenCover(Editor.this)
+    val alldirs = VisConfig.getWorkDirs map (d => new File(d))
+
+    var currentPath: Option[File] = VisConfig.getCurrentDir match {
+      case Some(str) => Some(new File(str))
+      case None => None
+    }
+
+    def pathStr: String = currentPath match {
+      case Some(file) => file.getAbsolutePath
+      case None => "<no active path>"
+    }
+
+    val pathTeller = new Widget(0, 2, 100, 10)
+    val pathTellerText = new TextBox()
+    pathTeller :+ pureTint(0.3, 0.4, false)
+    pathTeller :+ pathTellerText
+
+    def updatePath(newPath: File) = {
+      currentPath = Option(newPath)
+      pathTellerText.setContent(pathStr)
+    }
+
+    updatePath(VisConfig.getCurrentDir match {
+      case Some(dir) => new File(dir)
+      case _ => null
+    })
+
+    val tab: HierarchyTab = new HierarchyTab(true, 0, 0, 150, 81, name, Window.CLOSABLE) {
+      listens[CloseEvent](() => cover.dispose())
+
+      case class NoPathElem() extends Element("Path doesn't exist", Styles.elemTexture("folder_open"))
+      case class PrevFolderElem() extends Element("..", Styles.elemTexture("folder")) {
+        this.listens((w, e: LeftClickEvent) => {
+          if (getTab.getSelected == Option(this)) {
+            currentPath = Option(currentPath.get.getParentFile)
+            rebuild()
+          }
+        }, 1)
+      }
+
+      var selectedPath = ""
+
+      transform.setCenteredAlign()
+      body.transform.height += 15
+
+      override lazy val top = 15
+
+      override def rebuild(): Unit = {
+        elements = currentPath match {
+          case Some(file) =>
+            if (file.isDirectory) {
+              val list = file.listFiles().map(f => {
+                val elem = new Element(f.getName,
+                  if(f.isDirectory) Styles.elemTexture("folder") else Styles.elemTexture("file"))
+                elem.listens((w, e: LeftClickEvent) => {
+                  if (f.isDirectory) {
+                    if (getSelected == Option(elem)) {
+                      currentPath = Some(f)
+                      rebuild()
+                    }
+                  } else {
+
+                  }
+                }, 1)
+                elem
+              }).toList
+              if (alldirs.exists(f => f.equals(file))) list else new PrevFolderElem :: list
+            } else List(new NoPathElem)
+          case _ =>
+            List(new NoPathElem)
+        }
+        super.rebuild()
+      }
+    }
+
+    pathTeller.listens[LeftClickEvent](() => {
+      val sn = new SubMenu
+      alldirs.filter(!_.equals(currentPath.orNull)).foreach(dir => {
+        sn.addItem(dir.getName, () => {
+          currentPath = Some(dir)
+          tab.rebuild()
+          pathTellerText.setContent(dir.getAbsolutePath)
+        })
+      })
+      sn.transform.y = 10
+      sn.transform.alignWidth = WidthAlign.RIGHT
+      pathTeller :+ sn
+    })
+
+    tab :+ pathTeller
+    cover :+ tab
+    gui.addWidget(cover)
+  }
+
+  def openFile(openedCallback: File => Any) = {
+    createFileWindow("Open...", "Open", () => {}, () => {})
+  }
+
+  def saveFile(saver: File => Any, abortedCallback: () => Any = () => {}) = {
+    createFileWindow("Save...", "Save", () => {}, () => {})
   }
 
   override def drawScreen(mx: Int, my: Int, w: Float) = {
