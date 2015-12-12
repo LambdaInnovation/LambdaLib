@@ -98,13 +98,13 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
     inspector.updateTarget()
   }
 
-  override def handleQuit() = {
+  override def onDeactivate(quit: Boolean) = {
     editor.confirm("Save before close?",
       () => {
         // TODO Popup the save menu
-        editor.mc.displayGuiScreen(null)
+        super.onDeactivate(quit)
       },
-      () => editor.mc.displayGuiScreen(null))
+      () => super.onDeactivate(quit))
   }
   //
 

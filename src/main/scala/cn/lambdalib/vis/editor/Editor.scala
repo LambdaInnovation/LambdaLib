@@ -6,6 +6,7 @@ import java.util
 
 import cn.lambdalib.annoreg.core.Registrant
 import cn.lambdalib.annoreg.mc.RegInitCallback
+import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent
 import cn.lambdalib.cgui.gui.{CGuiScreen, Widget}
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.component._
@@ -127,6 +128,7 @@ class Editor extends CGuiScreen {
   def getRoot = root
   def getMenuBar = menuBar
 
+  private var lastCreated: String = null
   private var currentPlugin: Option[VisPlugin] = None
 
   initWidgets()
@@ -156,83 +158,26 @@ class Editor extends CGuiScreen {
 
     menuBar.addMenu("Editor", menu => {
       EditorRegistry.getEditors foreach {
-        case (name, factory) =>
+        case (name, factory) if name != lastCreated =>
           menu.addItem(name, () => {
             root.dispose()
             menuBar.dispose()
             initWidgets()
 
+            currentPlugin match {
+              case Some(p) => p.onDeactivate(false)
+              case _ =>
+            }
+
             val plugin = factory(this)
             plugin.onActivate()
             currentPlugin = Option(plugin)
+            lastCreated = name
           })
       }
     })
 
-    menuBar.addMenu("File", menu => {
-      menu.addItem("Edit work folder", () => {
-        val cover = new ScreenCover(Editor.this)
-        val window:HierarchyTab = new HierarchyTab(true, 0, 0, 150, 100, "Working Dirs", Window.CLOSABLE) {
-          this.listens[CloseEvent](() => cover.dispose())
-          override def rebuild(): Unit = {
-            elements = VisConfig.getWorkDirs.map(new Element(_, Styles.elemTexture("folder"))).toList
-            super.rebuild()
-          }
-        }
-
-        window.initButton("Add directory", "add", w => {
-          val cover = new ScreenCover(Editor.this)
-          val askPath = new Window("Enter new path...", 0, 0, 100, 30, Window.CLOSABLE)
-
-          askPath.listens[askPath.CloseEvent](() => cover.dispose())
-          askPath.transform.setCenteredAlign()
-
-          val textArea = new Widget(0, 15, 80, 12)
-          val textbox = Styles.newText(new FontOption(9, FontAlign.CENTER)).setContent("ENTER: Confirm")
-          textArea :+ textbox
-
-          val input: EditBox = new EditBox {
-            var str = ""
-
-            transform.y = -5
-            transform.width = 70
-            override def repr = str
-            override def setValue(str: String) = {
-              this.str = str
-              val file = new File(str)
-              if (file.isDirectory) {
-                VisConfig.updateWorkDirs(str :: VisConfig.getWorkDirs.toList)
-                window.rebuild()
-                cover.dispose()
-              } else {
-                textbox.option.color.setColor4d(1, 0.2, 0.2, 1)
-                textbox.content = "Invalid path"
-              }
-            }
-          }
-          input.transform.setCenteredAlign()
-
-          askPath :+ textArea
-          askPath :+ input
-
-          cover :+ askPath
-          gui.addWidget(cover)
-        })
-
-        window.initButton("Remove directory", "remove", w => {
-          window.getSelected match {
-            case Some(elem) =>
-              VisConfig.updateWorkDirs(VisConfig.getWorkDirs.filter(_ != elem.name))
-              window.rebuild()
-            case _ =>
-          }
-        })
-
-        window.transform.setCenteredAlign()
-        cover :+ window
-        gui.addWidget(cover)
-      })
-    })
+    menuBar.addMenu("File", _.addItem("Edit work folder", startEditWorkDirs))
 
     menuBar.addMenu("View", menu => menu.addItem("Show/Hide Cover", () => drawBack = !drawBack))
 
@@ -270,7 +215,10 @@ class Editor extends CGuiScreen {
     buttons.zipWithIndex.foreach{
       case (buttonspec, index) =>
         val button = newButton(-buttonW/2 + index * buttonStep + buttonLen/2, 10, buttonLen, 7, buttonspec._1)
-        button.listens[LeftClickEvent](buttonspec._2)
+        button.listens[LeftClickEvent](() => {
+          buttonspec._2()
+          cover.dispose()
+        })
         button.transform.setCenteredAlign()
         not :+ button
     }
@@ -281,14 +229,78 @@ class Editor extends CGuiScreen {
   }
 
   def notify(msg: String, onConfirmed: () => Any) = {
-    addPopup("Notification", msg, ("OK", onConfirmed))
+    addPopup("Notification", msg, ("OK", () => onConfirmed))
   }
 
   def confirm(msg: String, yesCallback: () => Any, noCallback: () => Any = () => {}) = {
     addPopup("Notification", msg, ("OK", yesCallback), ("Cancel", noCallback))
   }
 
-  private def createFileWindow(name: String, buttonName: String, buttonCallback: () => Any, abortCallback: () => Any) = {
+  private def startEditWorkDirs() = {
+    val cover = new ScreenCover(Editor.this)
+    val window:HierarchyTab = new HierarchyTab(true, 0, 0, 150, 100, "Working Dirs", Window.CLOSABLE) {
+      this.listens[CloseEvent](() => cover.dispose())
+      override def rebuild(): Unit = {
+        elements = VisConfig.getWorkDirs.map(new Element(_, Styles.elemTexture("folder"))).toList
+        super.rebuild()
+      }
+    }
+
+    window.initButton("Add directory", "add", w => {
+      val cover = new ScreenCover(Editor.this)
+      val askPath = new Window("Enter new path...", 0, 0, 100, 30, Window.CLOSABLE)
+
+      askPath.listens[askPath.CloseEvent](() => cover.dispose())
+      askPath.transform.setCenteredAlign()
+
+      val textArea = new Widget(0, 15, 80, 12)
+      val textbox = Styles.newText(new FontOption(9, FontAlign.CENTER)).setContent("ENTER: Confirm")
+      textArea :+ textbox
+
+      val input: EditBox = new EditBox {
+        var str = ""
+
+        transform.y = -5
+        transform.width = 70
+        override def repr = str
+        override def setValue(str: String) = {
+          this.str = str
+          val file = new File(str)
+          if (file.isDirectory && !VisConfig.getWorkDirs.contains(str)) {
+            VisConfig.updateWorkDirs(str :: VisConfig.getWorkDirs.toList)
+            window.rebuild()
+            cover.dispose()
+          } else {
+            textbox.option.color.setColor4d(1, 0.2, 0.2, 1)
+            textbox.content = "Invalid path"
+          }
+        }
+      }
+      input.transform.setCenteredAlign()
+
+      askPath :+ textArea
+      askPath :+ input
+
+      cover :+ askPath
+      root :+ cover
+    })
+
+    window.initButton("Remove directory", "remove", w => {
+      window.getSelected match {
+        case Some(elem) =>
+          VisConfig.updateWorkDirs(VisConfig.getWorkDirs.filter(_ != elem.name))
+          window.rebuild()
+        case _ =>
+      }
+    })
+
+    window.transform.setCenteredAlign()
+    cover :+ window
+    root :+ cover
+  }
+
+  private def createFileWindow(name: String, buttonName: String,
+                               buttonCallback: File => Boolean, abortCallback: () => Any) = {
     val cover = new ScreenCover(Editor.this)
     val alldirs = VisConfig.getWorkDirs map (d => new File(d))
 
@@ -302,10 +314,16 @@ class Editor extends CGuiScreen {
       case None => "<no active path>"
     }
 
-    val pathTeller = new Widget(0, 2, 100, 10)
+    val pathTeller = new Widget(2, 1, 146, 10)
     val pathTellerText = new TextBox()
     pathTeller :+ pureTint(0.3, 0.4, false)
     pathTeller :+ pathTellerText
+
+    val pathInput = new Widget(2, -1, 130, 10)
+    pathInput.transform.alignHeight = HeightAlign.BOTTOM
+    val pathInput_t = new TextBox().allowEdit()
+    pathInput :+ new DrawTexture().setTex(null).setColor(pure(0.3))
+    pathInput :+ pathInput_t
 
     def updatePath(newPath: File) = {
       currentPath = Option(newPath)
@@ -317,25 +335,50 @@ class Editor extends CGuiScreen {
       case _ => null
     })
 
-    val tab: HierarchyTab = new HierarchyTab(true, 0, 0, 150, 81, name, Window.CLOSABLE) {
-      listens[CloseEvent](() => cover.dispose())
+    def go_(tab: HierarchyTab) = currentPath match {
+      case Some(f) =>
+        val path = f.getPath + "\\" + pathInput_t.content
+        val file = new File(path)
+        if (file.isFile) {
+          if (buttonCallback(file)) {
+            cover.dispose()
+          }
+        } else if(file.isDirectory) {
+          updatePath(file.getAbsoluteFile)
+          pathInput_t.setContent("")
+          tab.rebuild()
+        } else {
+          notify("Invalid file path " + pathInput_t.content, () => {})
+        }
+      case _ =>
+        notify("You must select a valid path", () => {})
+    }
+
+    val tab: HierarchyTab = new HierarchyTab(true, 0, 0, 150, 86, name, Window.CLOSABLE) {
+      this.listens[CloseEvent](() => {
+        cover.dispose()
+        abortCallback()
+      })
 
       case class NoPathElem() extends Element("Path doesn't exist", Styles.elemTexture("folder_open"))
       case class PrevFolderElem() extends Element("..", Styles.elemTexture("folder")) {
         this.listens((w, e: LeftClickEvent) => {
           if (getTab.getSelected == Option(this)) {
-            currentPath = Option(currentPath.get.getParentFile)
+            updatePath(currentPath.get.getParentFile)
             rebuild()
           }
         }, 1)
       }
 
+      listArea.transform.x += 2
+      listArea.transform.width -= 2
+
       var selectedPath = ""
 
       transform.setCenteredAlign()
-      body.transform.height += 15
+      body.transform.height += 12
 
-      override lazy val top = 15
+      override lazy val top = 12
 
       override def rebuild(): Unit = {
         elements = currentPath match {
@@ -345,13 +388,15 @@ class Editor extends CGuiScreen {
                 val elem = new Element(f.getName,
                   if(f.isDirectory) Styles.elemTexture("folder") else Styles.elemTexture("file"))
                 elem.listens((w, e: LeftClickEvent) => {
-                  if (f.isDirectory) {
-                    if (getSelected == Option(elem)) {
-                      currentPath = Some(f)
-                      rebuild()
+                  if (f.isDirectory && getSelected == Option(elem)) {
+                    updatePath(f)
+                    rebuild()
+                  }
+                  if (!f.isDirectory) {
+                    if (pathInput_t.content == f.getName) {
+                      go_(this)
                     }
-                  } else {
-
+                    pathInput_t.setContent(f.getName)
                   }
                 }, 1)
                 elem
@@ -365,10 +410,12 @@ class Editor extends CGuiScreen {
       }
     }
 
+    def go() = go_(tab)
+
     pathTeller.listens[LeftClickEvent](() => {
       val sn = new SubMenu
       alldirs.filter(!_.equals(currentPath.orNull)).foreach(dir => {
-        sn.addItem(dir.getName, () => {
+        sn.addItem(dir.getAbsolutePath, () => {
           currentPath = Some(dir)
           tab.rebuild()
           pathTellerText.setContent(dir.getAbsolutePath)
@@ -379,17 +426,27 @@ class Editor extends CGuiScreen {
       pathTeller :+ sn
     })
 
-    tab :+ pathTeller
+    pathInput.listens[ConfirmInputEvent](() => go())
+
+    val buttonAct = Styles.newButton(-1, -2, 15, 8, buttonName)
+    buttonAct.transform.alignHeight = HeightAlign.BOTTOM
+    buttonAct.transform.alignWidth = WidthAlign.RIGHT
+    buttonAct.listens[LeftClickEvent](() => go())
+
+    val body = tab.body
+    body :+ pathTeller
+    body :+ pathInput
+    body :+ buttonAct
     cover :+ tab
-    gui.addWidget(cover)
+    root :+ cover
   }
 
   def openFile(openedCallback: File => Any) = {
-    createFileWindow("Open...", "Open", () => {}, () => {})
+    createFileWindow("Open...", "Open", _ => true, () => {})
   }
 
   def saveFile(saver: File => Any, abortedCallback: () => Any = () => {}) = {
-    createFileWindow("Save...", "Save", () => {}, () => {})
+    createFileWindow("Save...", "Save", _ => true, () => {})
   }
 
   override def drawScreen(mx: Int, my: Int, w: Float) = {
@@ -409,7 +466,7 @@ class Editor extends CGuiScreen {
     gui.keyTyped(char, key)
     if (key == Keyboard.KEY_ESCAPE) {
       currentPlugin match {
-        case Some(plugin) => plugin.handleQuit()
+        case Some(plugin) => plugin.onDeactivate(true)
         case _ => mc.displayGuiScreen(null)
       }
     }
@@ -459,6 +516,8 @@ class SubMenu extends Widget {
       w.transform.width = len + 3
       w.dirty = true
     })
+    transform.width = len + 3
+    dirty = true
     getGui.gainFocus(this)
   }
 
@@ -570,6 +629,8 @@ class ScreenCover(env: CGuiScreen, blackout: Boolean = true) extends Widget {
   updateSize()
 
   this.listens[RefreshEvent](() => updateSize())
+
+  override def onAdded() = this.gainFocus()
 
 }
 

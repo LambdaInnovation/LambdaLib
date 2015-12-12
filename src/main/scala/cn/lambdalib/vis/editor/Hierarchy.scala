@@ -32,8 +32,8 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
   }
 
   protected lazy val top = if(hasButton) 10 else 0
-  private val listArea = new Widget(0, top, width, height - top)
-  listArea :+ new DrawTexture().setTex(null).setColor4d(0.1, 0.1, 0.1, 1)
+  val listArea = new Widget(0, top, width, height - top)
+  listArea :+ new DrawTexture().setTex(null).setColor(pure(0.2))
   body :+ listArea
 
   body.listens[LeftClickEvent](() => {
@@ -84,6 +84,8 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
   }
 
   def rebuild() = {
+    val width = listArea.transform.width
+
     // Clear current selection, but retain if still present
     if(!elements.contains(selected)) {
       setSelected(null)
@@ -128,6 +130,11 @@ class HierarchyTab(hasButton: Boolean, defX: Double, defY: Double,
       cDragBar.setProgress(eList.getProgress.toDouble / eList.getMaxProgress)
 
       listArea :+ bar
+    } else {
+      eList.getSubWidgets foreach (w => {
+        w.transform.width = width
+        w.dirty = true
+      })
     }
   }
 

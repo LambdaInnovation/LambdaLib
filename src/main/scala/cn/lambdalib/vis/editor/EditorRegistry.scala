@@ -6,7 +6,9 @@ abstract class VisPlugin(editor: Editor) {
 
   def onActivate() = {}
 
-  def handleQuit() = Minecraft.getMinecraft.displayGuiScreen(null)
+  def onDeactivate(quitEditor: Boolean) = if (quitEditor) {
+    Minecraft.getMinecraft.displayGuiScreen(null)
+  }
 
 }
 
