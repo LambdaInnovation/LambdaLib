@@ -1,40 +1,202 @@
 package cn.lambdalib.cgui.loader.xml;
 
+import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.WidgetContainer;
+import cn.lambdalib.cgui.gui.component.Component;
+import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.generic.RegistryUtils;
+import cn.lambdalib.util.mc.EntitySelectors.ExcludeType;
 import cn.lambdalib.vis.editor.DOMConversion;
 import net.minecraft.util.ResourceLocation;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * CGUI Doc reader and writer.
+ * Note that current implementation is NOT thread safe. You shall call it only from client thread.
  */
-public class CGUIDocument {
-
-	public static final DOMConversion converter = new DOMConversion();
-
+public enum CGUIDocument {
+	instance;
+	// API
 	/**
 	 * Reads a CGUI Document from given InputStream.
 	 */
-	public static WidgetContainer read(InputStream in) {
-		// TODO
-		return null;
+	public static WidgetContainer read(InputStream in) throws IOException,SAXException {
+		return instance.readInternal(instance.db.parse(in));
 	}
 
 	/**
 	 * Reads a CGUI Document from given ResourceLocation.
 	 */
-	public static WidgetContainer read(ResourceLocation location) {
+	public static WidgetContainer read(ResourceLocation location) throws IOException,SAXException {
 		return read(RegistryUtils.getResourceStream(location));
 	}
 
-	public static void write(WidgetContainer container, OutputStream out) {
+	/**
+	 * Reads a CGUI document, and crashes the game if not present.
+	 * Preferable when using in mod.
+	 */
+	public static WidgetContainer panicRead(ResourceLocation location) {
+		try {
+			return read(location);
+		} catch(Exception e) {
+			throw new RuntimeException("Can't read CGUI document", e);
+		}
 	}
 
-	public static void write(WidgetContainer container, File dest) {}
+	/**
+	 * Writes the given CGUI document to the output stream. The stream is to be closed by the user.
+	 */
+	public static void write(WidgetContainer container, OutputStream out) throws IOException {
+		Document doc = instance.db.newDocument();
+		instance.writeInternal(container, doc);
+		instance.writeDoc(out, doc);
+	}
+
+	/**
+	 * Writes the given CGUI document to the given file.
+	 */
+	public static void write(WidgetContainer container, File dest) throws IOException {
+		FileOutputStream ofs = null;
+		try {
+			ofs = new FileOutputStream(dest);
+			write(container, ofs);
+		} finally {
+			if (ofs != null) {
+				ofs.close();
+			}
+		}
+	}
+
+	// IMPL
+	private static final String TAG_WIDGET = "Widget", TAG_COMPONENT = "Component";
+
+	public final DOMConversion converter = new DOMConversion();
+	private final DocumentBuilder db;
+	private final Logger log = LambdaLib.log;
+
+	// Contextual
+	Document workingDoc;
+	//
+
+	CGUIDocument() {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setIgnoringElementContentWhitespace(true);
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			log.error("Can't create DocumentBuilder", e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private List<Node> toStdList(NodeList l) {
+		List<Node> ret = new ArrayList<>();
+		for (int i = 0; i < l.getLength(); ++i) {
+			ret.add (l.item(i));
+		}
+		return ret;
+	}
+
+	private WidgetContainer readInternal(Document doc) {
+		workingDoc = doc;
+		WidgetContainer ret = new WidgetContainer();
+		toStdList(workingDoc.getChildNodes())
+				.stream()
+				.filter(n -> n.getNodeName().equalsIgnoreCase(TAG_WIDGET))
+				.forEach(n -> readWidget(ret, (Element) n));
+		workingDoc = null;
+		return ret;
+	}
+
+	/**
+	 * Reads a widget from given node and add it into the container.
+	 */
+	private void readWidget(WidgetContainer container, Element node) {
+		Widget w = new Widget();
+		String name = node.getAttribute("name");
+		toStdList(node.getChildNodes()).stream()
+				.forEach(n ->
+				{
+					switch (n.getNodeName()) {
+					case TAG_WIDGET:
+						readWidget(w, (Element) n);
+						break;
+					case TAG_COMPONENT:
+						Optional<Component> comp = readComponent((Element) n);
+						comp.ifPresent(w::addComponent);
+						break;
+					}
+				});
+
+		if (!container.addWidget(name, w)) {
+			log.warn("Name clash while reading widget: %s, it is ignored.", name);
+		}
+	}
+
+	private Optional<Component> readComponent(Element node) {
+		try {
+			Class<? extends Component> klass = (Class<? extends Component>) Class.forName(node.getAttribute("class"));
+			return Optional.of(converter.convertFrom(klass, node));
+		} catch (Exception e) {
+			log.error("Failed reading component", e);
+			return Optional.empty();
+		}
+	}
+
+	private void writeInternal(WidgetContainer container, Document doc) {
+		workingDoc = doc;
+		container.getEntries()
+				.forEach(entry -> {
+					Element elem = workingDoc.createElement(TAG_WIDGET);
+					writeWidget(entry.getKey(), entry.getValue(), elem);
+					doc.appendChild(elem);
+				});
+		workingDoc = null;
+	}
+
+	private void writeWidget(String name, Widget w, Element dst) {
+		dst.setAttribute("name", name);
+		w.getComponentList().forEach(c -> dst.appendChild(writeComponent(c)));
+		w.getEntries()
+				.forEach(entry -> {
+					Element elem = workingDoc.createElement(TAG_WIDGET);
+					writeWidget(entry.getKey(), entry.getValue(), elem);
+					dst.appendChild(elem);
+				});
+	}
+
+	private Node writeComponent(Component component) {
+		return converter.convertTo(component, TAG_COMPONENT, workingDoc);
+	}
+
+	private void writeDoc(OutputStream dst, Document doc) {
+		try {
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource source = new DOMSource(doc);
+			StreamResult result = new StreamResult(dst);
+			transformer.transform(source, result);
+		} catch (Exception e) {
+			log.error("Can't write CGUI document", e);
+		}
+	}
 
 
 }

@@ -69,7 +69,7 @@ class DOMConversion {
     ret
   }
 
-  def backwardDefault[T](klass: Class[T], src: Node):T = {
+  def backwardDefault[T, U>:T](klass: Class[U], src: Node):T = {
     if (klass.isEnum) {
       val content = src.getTextContent
       klass.getEnumConstants.find(_.toString == content) match {
