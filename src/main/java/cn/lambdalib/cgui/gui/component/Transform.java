@@ -8,9 +8,19 @@ import cn.lambdalib.cgui.gui.Widget;
  */
 public class Transform extends Component {
 	
-	public enum WidthAlign { LEFT, CENTER, RIGHT };
+	public enum WidthAlign { LEFT, CENTER, RIGHT;
+		public final double factor;
+		WidthAlign() {
+			factor = ordinal() * 0.5;
+		}
+	}
 	
-	public enum HeightAlign { TOP, CENTER, BOTTOM };
+	public enum HeightAlign { TOP, CENTER, BOTTOM;
+		public final double factor;
+		HeightAlign() {
+			factor = ordinal() * 0.5;
+		}
+	}
 	
 	public double width = 0.0, height = 0.0;
 	

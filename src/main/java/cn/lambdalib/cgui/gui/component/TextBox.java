@@ -28,6 +28,7 @@ import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.client.font.TrueTypeFont;
 import cn.lambdalib.util.generic.MathUtils;
+import cn.lambdalib.vis.editor.VisProperty;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -67,6 +68,10 @@ public class TextBox extends Component {
 	
 	public String content = "";
 
+	/**
+	 * It is temporarily disabled. Ability to select fonts will be added soon.
+	 */
+	@VisProperty(exclude = true)
 	public IFont font = defaultFont;
 
 	public FontOption option;

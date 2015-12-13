@@ -67,6 +67,12 @@ class TrueTypeFont(val font: Font) extends IFont {
     option.color.bind()
     x = px - len * option.align.lenOffset
 
+    val preEnabled = glIsEnabled(GL_ALPHA_TEST)
+    val preFunc = glGetInteger(GL_ALPHA_TEST_FUNC)
+    val preRef = glGetFloat(GL_ALPHA_TEST_REF)
+    glEnable(GL_ALPHA_TEST)
+    glAlphaFunc(GL_GEQUAL, 0.1f)
+    glEnable(GL_TEXTURE_2D)
     // TODO group by texture to reduce draw calls?
     for(i <- codePoints(str)) yield {
       val info = lookup.get(i)
@@ -79,10 +85,13 @@ class TrueTypeFont(val font: Font) extends IFont {
       t.addVertexWithUV(x + sz, y + sz, 0, u + texStep, v + texStep)
       t.addVertexWithUV(x + sz, y,      0, u + texStep, v          )
       t.draw()
-      glEnable(GL_TEXTURE_2D)
 
       x += info.width * scale
     }
+    if (preEnabled) {
+      glDisable(GL_ALPHA_TEST)
+    }
+    glAlphaFunc(preFunc, preRef)
   }
 
   override def getCharWidth(chr: Int, option: FontOption): Double = {

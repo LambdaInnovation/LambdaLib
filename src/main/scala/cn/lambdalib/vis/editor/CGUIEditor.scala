@@ -12,7 +12,7 @@ import cn.lambdalib.cgui.ScalaExtensions._
 import cn.lambdalib.cgui.loader.xml.{CGUIDocLoader, CGUIDocument}
 import cn.lambdalib.util.client.{RenderUtils, HudUtils}
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
-import cn.lambdalib.util.helper.Color
+import cn.lambdalib.util.helper.{GameTimer, Color}
 import cn.lambdalib.vis.editor.ObjectEditor.ElementEditEvent
 import net.minecraft.util.ResourceLocation
 import org.apache.commons.io.IOUtils
@@ -96,6 +96,23 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
     }).toList
   }
 
+  private def startSaving(onAbort: () => Any = () => {}, onSuccess: () => Any = ()=>{}) =
+    editor.saveFile(file => {
+      var successful: Boolean = false
+      try {
+        CGUIDocument.write(canvas, file)
+        successful = true
+      } catch {
+        case e: IOException =>
+          editor.notify(s"Saving to ${file.getName} failed.", () => {})
+          e.printStackTrace()
+      }
+      if (successful) {
+        onSuccess()
+      }
+      successful
+    }, onAbort)
+
   // Events
   private def onCanvasUpdated() = {
     hierarchy.rebuild()
@@ -105,10 +122,11 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
   override def onDeactivate(quit: Boolean) = {
     editor.confirm("Save before close?",
       () => {
-        // TODO Popup the save menu
-        super.onDeactivate(quit)
+        startSaving(
+          () => {}, // Do nothing when quitted saving
+          () => super.onDeactivate(quit)) // Quit if saved
       },
-      () => super.onDeactivate(quit))
+      () => super.onDeactivate(quit)) // Quit and not save
   }
   //
 
@@ -230,19 +248,7 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
       }
       successful
     }))
-    menu.addItem("Save", () => editor.saveFile(file => {
-      var successful: Boolean = false
-      try {
-        CGUIDocument.write(canvas, file)
-        successful = true
-      } catch {
-        case e: IOException =>
-          editor.notify(s"Saving to ${file.getName} failed.", () => {})
-          e.printStackTrace()
-      }
-      successful
-    }))
-
+    menu.addItem("Save", () => startSaving())
   })
 
 
@@ -412,6 +418,24 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
       case None =>
     })
 
+    this.initButton("Move up", "up", _ => getSelectedWidget match {
+      case Some(w) =>
+        val par = w.getAbstractParent
+        val dlist = par.getDrawList
+        par.reorder(w, math.max(0, dlist.indexOf(w)-1))
+        onCanvasUpdated()
+      case _ =>
+    })
+
+    this.initButton("Move down", "down", _ => getSelectedWidget match {
+      case Some(w) =>
+        val par = w.getAbstractParent
+        val dlist = par.getDrawList
+        par.reorder(w, math.min(dlist.size, dlist.indexOf(w) + 2))
+        onCanvasUpdated()
+      case _ =>
+    })
+
     this.listens((e: SelectionChangeEvent) => {
       inspector.updateTarget()
       currentTool.onSelectionChange(toSelectedWidget(e.previous), toSelectedWidget(e.newSel))
@@ -465,7 +489,24 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
       }
     })
 
+    var lastUpdated = GameTimer.getAbsTime
+
     this.listens[ElementEditEvent](() => actionOnSelected(_.dirty = true))
+    this.listens[FrameEvent](() => { // Schedule to update the value
+      val time = GameTimer.getAbsTime
+      if (time - lastUpdated > 1000L) {
+        lastUpdated = time
+        elements foreach update
+      }
+    })
+
+    private def update(e: Element): Unit = {
+      ObjectEditor.getModifier(e) match {
+        case Some(m) => m.updateRepr()
+        case _ =>
+      }
+      e.elements foreach update
+    }
 
     def updateTarget(refresh: Boolean = false) = {
       getSelectedWidget match {
@@ -491,9 +532,12 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
   //
 
   // Tools
+  val c_toolSelected = Styles.pure(1)
+  val c_toolOther = Styles.pure(0.6)
 
   abstract class Tool(name: String, hint: String) {
-    toolbar.addButton(hint, texture("tl_" + name), () => {
+
+    val button = toolbar.addButton(hint, texture("tl_" + name), () => {
       if (this != currentTool) {
         currentTool.onDeactivate()
         currentTool = this
@@ -502,8 +546,12 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
     })
 
     def onSelectionChange(prev: Widget, next: Widget) = {}
-    def onActivate() = {}
-    def onDeactivate() = {}
+    def onActivate():Unit = {
+      DrawTexture.get(button).color = c_toolSelected
+    }
+    def onDeactivate():Unit = {
+      DrawTexture.get(button).color = c_toolOther
+    }
   }
 
   abstract class ToolWithCompanion(name: String, hint: String) extends Tool(name, hint) {
@@ -547,8 +595,14 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
           selected = null
           companion.dispose()
       }
-    override def onActivate() = actionOnSelected(moveRect)
-    override def onDeactivate() = companion.dispose()
+    override def onActivate() = {
+      super.onActivate()
+      actionOnSelected(moveRect)
+    }
+    override def onDeactivate() = {
+      super.onDeactivate()
+      companion.dispose()
+    }
   }
 
   var currentTool: Tool = new ToolWithCompanion("nothing", "Nothing") {}
@@ -661,6 +715,7 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
 
     private def decorateBar(w: Widget, tex: String) = {
       w :+ new DrawTexture().setTex(Styles.elemTexture(tex))
+      w :+ Styles.pureTint(0.8, 1, true)
       w.listens[DragStopEvent](() => {
         updateSize(selected, (compTrans.x, compTrans.y), (compTrans.width, compTrans.height))
       })
@@ -706,13 +761,13 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
     }
 
     override def onSelectionChange(prev: Widget, next: Widget) = {
-      update(next)
       super.onSelectionChange(prev, next)
+      update(next)
     }
 
     override def onActivate() = {
-      update(getSelectedWidget.orNull)
       super.onActivate()
+      update(getSelectedWidget.orNull)
     }
 
   }

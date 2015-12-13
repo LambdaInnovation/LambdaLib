@@ -146,7 +146,6 @@ public class CGui extends WidgetContainer {
 	 * Standard GuiScreen mouseClicked callback.
 	 * @param mx
 	 * @param my
-	 * @param btn the mouse button ID.
 	 * @return if any action was performed on a widget.
 	 */
 	public boolean mouseClicked(int mx, int my, int bid) {
@@ -235,14 +234,13 @@ public class CGui extends WidgetContainer {
     
     /**
      * Inverse calculation. Move this widget to the ABSOLUTE window position (x0, y0).
-     * Note that the widget's position may be further changed because of its parent widget's position change.
      */
     public void moveWidgetToAbsPos(Widget widget, double x0, double y0) {
-    	Transform transform = widget.transform;
+		Transform transform = widget.transform;
+
 		double tx, ty;
 		double tw, th;
 		double parentScale;
-		
 		if(widget.isWidgetParent()) {
 			Widget p = widget.getWidgetParent();
 			tx = p.x;
@@ -250,44 +248,16 @@ public class CGui extends WidgetContainer {
 			tw = p.transform.width * p.scale;
 			th = p.transform.height * p.scale;
 			parentScale = p.scale;
-			
-			widget.scale = transform.scale * p.scale;
 		} else {
 			tx = ty = 0;
 			tw = width;
 			th = height;
+
 			parentScale = 1;
-			
-			widget.scale = transform.scale;
 		}
 		
-		double xx = 0;
-		switch(transform.alignWidth) {
-		case CENTER:
-			xx = (x0 - tx  - (tw - transform.width * transform.scale) / 2) / parentScale;
-			break;
-		case LEFT:
-			xx = (x0 - tx) / parentScale;
-			break;
-		case RIGHT:
-			xx = (x0 - tx  - (tw - transform.width * transform.scale)) / widget.scale;
-			break;
-		}
-		transform.x = xx;
-		
-		double yy = 0;
-		switch(transform.alignHeight) {
-		case CENTER:
-			yy = (y0 - ty  - (tw - transform.width * transform.scale) / 2) / parentScale;
-			break;
-		case TOP:
-			yy = (y0 - ty) / parentScale;
-			break;
-		case BOTTOM:
-			yy = (y0 - ty  - (tw - transform.width * transform.scale)) / parentScale;
-			break;
-		}
-		transform.y = yy;
+		transform.x = (x0 - tx - transform.alignWidth.factor * (tw - transform.width * widget.scale)) / parentScale;
+		transform.y = (y0 - ty - transform.alignHeight.factor * (th - transform.height * widget.scale)) / parentScale;
 		
 		widget.x = x0;
 		widget.y = y0;
@@ -308,8 +278,10 @@ public class CGui extends WidgetContainer {
 	
 	//---Internal Processing
 	public void updateWidget(Widget widget) {
+		// Because Widgets can have sub widgets before they are added into CGui,
+		// we manually assign the gui per update process.
+		// It's up to user to not update the widget in the wrong CGui instance.
 		widget.gui = this;
-		
 		Transform transform = widget.transform;
 		
 		double tx, ty;
@@ -332,34 +304,14 @@ public class CGui extends WidgetContainer {
 			parentScale = 1;
 			widget.scale = transform.scale;
 		}
-		
-		double x0 = 0;
-		switch(transform.alignWidth) {
-		case CENTER:
-			x0 = tx + (tw - transform.width * widget.scale) / 2 + transform.x * parentScale;
-			break;
-		case LEFT:
-			x0 = tx + transform.x * parentScale;
-			break;
-		case RIGHT:
-			x0 = tx + (tw - transform.width * widget.scale) + transform.x * parentScale;
-			break;
-		}
-		widget.x = x0;
-		
-		double y0 = 0;
-		switch(transform.alignHeight) {
-		case CENTER:
-			y0 = ty + (th - transform.height * widget.scale) / 2 + transform.y * parentScale;
-			break;
-		case TOP:
-			y0 = ty + transform.y * parentScale;
-			break;
-		case BOTTOM:
-			y0 = ty + (th - transform.height * widget.scale) + transform.y * parentScale;
-			break;
-		}
-		widget.y = y0;
+
+		widget.x = tx +
+				(tw - transform.width * widget.scale) * transform.alignWidth.factor +
+				transform.x 						  * parentScale;
+
+		widget.y = ty +
+				(th - transform.height * widget.scale) * transform.alignHeight.factor +
+				transform.y 						   * parentScale;
 		
 		widget.dirty = false;
 		

@@ -39,10 +39,6 @@ public class Widget extends WidgetContainer {
 	// Will only be updated if widget.dirty = true each frame
 	public double x, y;
 	public double scale;
-	/**
-	 * *INTERNAL*Used ONLY in editing gui.
-	 */
-	public boolean visible = true;
 	
 	/**
 	 * Whether this widget can be copied when going down copy recursion process.

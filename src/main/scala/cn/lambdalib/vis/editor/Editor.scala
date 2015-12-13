@@ -668,6 +668,7 @@ class Toolbar(name: String = "Toolbar") extends Window(name, 50, 50, 70, Toolbar
 
     resize(math.max(70, button.transform.x + 15), height)
     buttons.add(button)
+    button
   }
 }
 

@@ -52,13 +52,31 @@ object ObjectEditor {
         // TODO: Update r g b a fields when hex was edited
       })
 
-      e.setModifier(hex, hexbox)
+      setModifier(hex, hexbox)
       ret :+ hex
 
       println("Used me")
       ret
     })
   )
+
+  def setModifier(target: Element, modifier: Widget) = {
+    modifier.transform.alignHeight = HeightAlign.CENTER
+    modifier.transform.alignWidth = WidthAlign.RIGHT
+    modifier.transform.x = modifier.transform.width - 55
+    modifier.listens[EditEvent](() => {
+      target.getTab.post(new ElementEditEvent(target))
+    })
+    target :+ ("Modifier", modifier)
+  }
+
+  def getModifier(target: Element): Option[IModifier] = {
+    val ret = target.getWidget("Modifier")
+    ret match {
+      case r: IModifier => Some(r)
+      case _ => None
+    }
+  }
 }
 
 class ObjectEditor {
@@ -94,24 +112,6 @@ class ObjectEditor {
       case t if t == classOf[Color]                                      => null
       case _                                                             => "folder"
     })
-  }
-
-  private def setModifier(target: Element, modifier: Widget) = {
-    modifier.transform.alignHeight = HeightAlign.CENTER
-    modifier.transform.alignWidth = WidthAlign.RIGHT
-    modifier.transform.x = modifier.transform.width - 55
-    modifier.listens[EditEvent](() => {
-      target.getTab.post(new ElementEditEvent(target))
-    })
-    target :+ ("Modifier", modifier)
-  }
-
-  private def getModifier(target: Element): Option[IModifier] = {
-    val ret = target.getWidget("Modifier")
-    ret match {
-      case r: IModifier => Some(r)
-      case _ => None
-    }
   }
 
   protected def createElement(field: Field, instance: AnyRef) = new FieldElement(field, instance)
