@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 
 /**
  * CGUI Doc reader and writer.
- * Note that current implementation is NOT thread safe. You shall call it only from client thread.
  */
 public enum CGUIDocument {
 	instance;
@@ -91,10 +90,6 @@ public enum CGUIDocument {
 	private final DocumentBuilder db;
 	private final Logger log = LambdaLib.log;
 
-	// Contextual
-	Document workingDoc;
-	//
-
 	CGUIDocument() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setIgnoringElementContentWhitespace(true);
@@ -115,13 +110,11 @@ public enum CGUIDocument {
 	}
 
 	private WidgetContainer readInternal(Document doc) {
-		workingDoc = doc;
 		WidgetContainer ret = new WidgetContainer();
-		toStdList(workingDoc.getChildNodes())
+		toStdList(doc.getChildNodes())
 				.stream()
 				.filter(n -> n.getNodeName().equalsIgnoreCase(TAG_WIDGET))
 				.forEach(n -> readWidget(ret, (Element) n));
-		workingDoc = null;
 		return ret;
 	}
 
@@ -161,29 +154,28 @@ public enum CGUIDocument {
 	}
 
 	private void writeInternal(WidgetContainer container, Document doc) {
-		workingDoc = doc;
 		container.getEntries()
 				.forEach(entry -> {
-					Element elem = workingDoc.createElement(TAG_WIDGET);
+					Element elem = doc.createElement(TAG_WIDGET);
 					writeWidget(entry.getKey(), entry.getValue(), elem);
 					doc.appendChild(elem);
 				});
-		workingDoc = null;
 	}
 
 	private void writeWidget(String name, Widget w, Element dst) {
+		Document doc = dst.getOwnerDocument();
 		dst.setAttribute("name", name);
-		w.getComponentList().forEach(c -> dst.appendChild(writeComponent(c)));
+		w.getComponentList().forEach(c -> dst.appendChild(writeComponent(c, doc)));
 		w.getEntries()
 				.forEach(entry -> {
-					Element elem = workingDoc.createElement(TAG_WIDGET);
+					Element elem = doc.createElement(TAG_WIDGET);
 					writeWidget(entry.getKey(), entry.getValue(), elem);
 					dst.appendChild(elem);
 				});
 	}
 
-	private Node writeComponent(Component component) {
-		return converter.convertTo(component, TAG_COMPONENT, workingDoc);
+	private Node writeComponent(Component component, Document doc) {
+		return converter.convertTo(component, TAG_COMPONENT, doc);
 	}
 
 	private void writeDoc(OutputStream dst, Document doc) {
