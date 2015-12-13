@@ -1,5 +1,6 @@
 package cn.lambdalib.vis.editor
 
+import java.io.{FileInputStream, IOException}
 import javax.vecmath.Vector2d
 
 import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent
@@ -8,12 +9,15 @@ import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event._
 import cn.lambdalib.cgui.ScalaExtensions._
+import cn.lambdalib.cgui.loader.xml.{CGUIDocLoader, CGUIDocument}
 import cn.lambdalib.util.client.{RenderUtils, HudUtils}
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.helper.Color
 import cn.lambdalib.vis.editor.ObjectEditor.ElementEditEvent
 import net.minecraft.util.ResourceLocation
+import org.apache.commons.io.IOUtils
 import org.lwjgl.opengl.GL11
+import org.xml.sax.SAXException
 
 object CGUIEditor {
   private val components: List[Component] = List(
@@ -193,8 +197,53 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
   editor.getMenuBar.addMenu("View", ret => {
     ret.addItem("Hierarchy", () => hierarchy.transform.doesDraw = true)
     ret.addItem("Inspector", () => inspector.transform.doesDraw = true)
+    ret.addItem("Toolbar", () => toolbar.transform.doesDraw = true)
   })
 
+  editor.getMenuBar.addMenu("File", menu => {
+    menu.addItem("Open Legacy...", () => editor.openFile(file => {
+      var successful: Boolean = false
+      try {
+        val container = CGUIDocLoader.load(IOUtils.toString(
+          new FileInputStream(file)))
+        canvas.clear()
+        canvas.addAll(container)
+        onCanvasUpdated()
+        successful = true
+      } catch {
+        case e @ (_:IOException | _:SAXException) =>
+          editor.notify(s"Opening ${file.getName} failed.", () => {})
+      }
+      successful
+    }))
+    menu.addItem("Open", () => editor.openFile(file => {
+      var successful: Boolean = false
+      try {
+        val container = CGUIDocument.read(file)
+        canvas.clear()
+        canvas.addAll(container)
+        onCanvasUpdated()
+        successful = true
+      } catch {
+        case e @ (_:IOException | _:SAXException) =>
+          editor.notify(s"Opening ${file.getName} failed.", () => {})
+      }
+      successful
+    }))
+    menu.addItem("Save", () => editor.saveFile(file => {
+      var successful: Boolean = false
+      try {
+        CGUIDocument.write(canvas, file)
+        successful = true
+      } catch {
+        case e: IOException =>
+          editor.notify(s"Saving to ${file.getName} failed.", () => {})
+          e.printStackTrace()
+      }
+      successful
+    }))
+
+  })
 
 
   tabs :+ hierarchy

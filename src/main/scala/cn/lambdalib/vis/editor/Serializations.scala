@@ -8,7 +8,9 @@ import scala.reflect.ClassTag
 private object ReflectionHelper {
 
   def getExposedFields(c: Class[_]) = c.getFields.filter(f => {
+    val anno = f.getAnnotation(classOf[VisProperty])
     val modifiers = f.getModifiers
+    (anno == null || !anno.exclude()) &&
     (modifiers & Modifier.FINAL) == 0 && (modifiers & Modifier.PUBLIC) != 0 && (modifiers & Modifier.STATIC) == 0
   })
 
@@ -62,14 +64,18 @@ class DOMConversion {
     val fields = getExposedFields(obj.getClass).toList
     for (f <- fields) {
       Option(f.get(obj)) match {
-        case Some(x) => ret.appendChild(convertTo(x, f.getName))
+        case Some(x) =>
+          ret.appendChild(convertTo(x, f.getName))
         case _ =>
+          val nullNode = document.createElement(f.getName)
+          nullNode.setAttribute("isNull", "true")
+          ret.appendChild(nullNode)
       }
     }
     ret
   }
 
-  def backwardDefault[T, U>:T](klass: Class[U], src: Node):T = {
+  def backwardDefault[T, U<:T](klass: Class[U], src: Node):T = {
     if (klass.isEnum) {
       val content = src.getTextContent
       klass.getEnumConstants.find(_.toString == content) match {
@@ -80,24 +86,31 @@ class DOMConversion {
       val fields = getExposedFields(klass).toList
       val childs = src.getChildNodes
       // Loop through all the fields and fetch corresponding elements from document
-      (1 until childs.getLength).map(childs.item).foreach(
-        node => fields.find(f => node.getNodeName == f.getName) match {
-          case Some(field) =>
-            field.set(ret, convertFrom(field.getType, node))
-          case None =>
-        })
+      (0 until childs.getLength).map(childs.item)
+        .foreach({ case elem: DOMElement =>
+          fields.find(f => elem.getNodeName == f.getName) match {
+            case Some(field) =>
+              val attr = elem.getAttribute("isNull")
+              field.set(ret, if(!attr.isEmpty) null else convertFrom(field.getType, elem))
+            case _ =>
+          }
+      })
       ret
     }
   }
 
   private def init() {
+    def addText(node: Node, content: String) =
+      node.appendChild(node.getOwnerDocument.createTextNode(content))
+
     // Primitive types
-    addForwardType((obj, node) => node.appendChild(node.getOwnerDocument.createTextNode(obj.toString)),
+    addForwardType((obj, node) => addText(node, obj.toString),
       classOf[Int], classOf[Integer],
       classOf[Float], classOf[java.lang.Float],
       classOf[Double], classOf[java.lang.Double],
       classOf[Boolean], classOf[java.lang.Boolean],
       classOf[String])
+    addForward(_.getClass.isEnum, (obj, node) => addText(node, obj.toString))
 
     def bw[T](parseMethod: String => T)(implicit evidence: ClassTag[T]) =
       addBackward[T]((_, n) => parseMethod(n.getTextContent))

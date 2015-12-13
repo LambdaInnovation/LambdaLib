@@ -51,7 +51,6 @@ public class Component {
 	 * This SHOULD NOT be edited after creation, represents the widget instance this component is in.
 	 */
 	@VisProperty(exclude = true)
-	@CopyIgnore
 	public Widget widget;
 	
 	public Component(String _name) {

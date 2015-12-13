@@ -152,6 +152,7 @@ public class WidgetContainer implements Iterable<Widget> {
 		}
 		
 		add.disposed = false; // Reset the dispose flag in case set
+		add.dirty = true; // Force update
 		widgets.put(name, add);
 		return true;
 	}

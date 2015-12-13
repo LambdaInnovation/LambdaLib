@@ -3,6 +3,7 @@ package cn.lambdalib.cgui.loader.xml;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.WidgetContainer;
 import cn.lambdalib.cgui.gui.component.Component;
+import cn.lambdalib.cgui.gui.component.Transform;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.generic.RegistryUtils;
 import cn.lambdalib.util.mc.EntitySelectors.ExcludeType;
@@ -45,6 +46,20 @@ public enum CGUIDocument {
 	 */
 	public static WidgetContainer read(ResourceLocation location) throws IOException,SAXException {
 		return read(RegistryUtils.getResourceStream(location));
+	}
+
+	/**
+	 * Reads a CGUI Document from given File.
+	 */
+	public static WidgetContainer read(File location) throws IOException, SAXException {
+		FileInputStream ifs = null;
+		try {
+			ifs = new FileInputStream(location);
+			return read(ifs);
+		} finally {
+			if (ifs != null)
+				ifs.close();
+		}
 	}
 
 	/**
@@ -109,11 +124,18 @@ public enum CGUIDocument {
 		return ret;
 	}
 
-	private WidgetContainer readInternal(Document doc) {
+	private WidgetContainer readInternal(Document doc) throws IOException {
 		WidgetContainer ret = new WidgetContainer();
-		toStdList(doc.getChildNodes())
+		log.info("ReadInternal");
+		Node root = doc.getFirstChild();
+		if (root == null || !root.getNodeName().equals("Root"))
+			throw new IOException("Root widget invalid");
+		toStdList(root.getChildNodes())
 				.stream()
-				.filter(n -> n.getNodeName().equalsIgnoreCase(TAG_WIDGET))
+				.filter(n -> {
+					log.info(n.getNodeName());
+					return n.getNodeName().equalsIgnoreCase(TAG_WIDGET);
+				})
 				.forEach(n -> readWidget(ret, (Element) n));
 		return ret;
 	}
@@ -124,6 +146,7 @@ public enum CGUIDocument {
 	private void readWidget(WidgetContainer container, Element node) {
 		Widget w = new Widget();
 		String name = node.getAttribute("name");
+		log.info("ReadWidget " + name);
 		toStdList(node.getChildNodes()).stream()
 				.forEach(n ->
 				{
@@ -133,7 +156,13 @@ public enum CGUIDocument {
 						break;
 					case TAG_COMPONENT:
 						Optional<Component> comp = readComponent((Element) n);
-						comp.ifPresent(w::addComponent);
+						comp.ifPresent(c -> {
+							if (c.name.equals("Transform")) { // Currently Transform needs special treatment
+								w.removeComponent("Transform");
+								w.transform = (Transform) c;
+							}
+							w.addComponent(c);
+						});
 						break;
 					}
 				});
@@ -154,12 +183,14 @@ public enum CGUIDocument {
 	}
 
 	private void writeInternal(WidgetContainer container, Document doc) {
+		Element root = doc.createElement("Root");
 		container.getEntries()
 				.forEach(entry -> {
 					Element elem = doc.createElement(TAG_WIDGET);
 					writeWidget(entry.getKey(), entry.getValue(), elem);
-					doc.appendChild(elem);
+					root.appendChild(elem);
 				});
+		doc.appendChild(root);
 	}
 
 	private void writeWidget(String name, Widget w, Element dst) {
@@ -175,7 +206,9 @@ public enum CGUIDocument {
 	}
 
 	private Node writeComponent(Component component, Document doc) {
-		return converter.convertTo(component, TAG_COMPONENT, doc);
+		Element ret = (Element) converter.convertTo(component, TAG_COMPONENT, doc);
+		ret.setAttribute("class", component.getClass().getCanonicalName());
+		return ret;
 	}
 
 	private void writeDoc(OutputStream dst, Document doc) {

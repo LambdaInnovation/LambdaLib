@@ -174,6 +174,7 @@ class Editor extends CGuiScreen {
             currentPlugin = Option(plugin)
             lastCreated = name
           })
+        case _ =>
       }
     })
 
@@ -187,10 +188,6 @@ class Editor extends CGuiScreen {
         menuHover.transform.doesDraw = true
         menuBar.transform.doesDraw = false
       })
-    })
-
-    menuBar.addMenu("File", menu => {
-      menu.addItem("Test", () => openFile(File => {}))
     })
   }
 
@@ -299,7 +296,7 @@ class Editor extends CGuiScreen {
     root :+ cover
   }
 
-  private def createFileWindow(name: String, buttonName: String,
+  private def createFileWindow(allowNewFile: Boolean)(name: String, buttonName: String,
                                buttonCallback: File => Boolean, abortCallback: () => Any) = {
     val cover = new ScreenCover(Editor.this)
     val alldirs = VisConfig.getWorkDirs map (d => new File(d))
@@ -339,7 +336,8 @@ class Editor extends CGuiScreen {
       case Some(f) =>
         val path = f.getPath + "\\" + pathInput_t.content
         val file = new File(path)
-        if (file.isFile) {
+        if (file.isFile || // Is file
+          allowNewFile) { // Or need to create a new one
           if (buttonCallback(file)) {
             cover.dispose()
           }
@@ -441,12 +439,20 @@ class Editor extends CGuiScreen {
     root :+ cover
   }
 
-  def openFile(openedCallback: File => Any) = {
-    createFileWindow("Open...", "Open", _ => true, () => {})
+  /**
+    * Opens a open file dialogue.
+    * @param openedCallback returns: Should the window be closed.
+    */
+  def openFile(openedCallback: File => Boolean) = {
+    createFileWindow(false)("Open...", "Open", openedCallback, () => {})
   }
 
-  def saveFile(saver: File => Any, abortedCallback: () => Any = () => {}) = {
-    createFileWindow("Save...", "Save", _ => true, () => {})
+  /**
+    * Opens a save file dialogue.
+    * @param saver returns: Should the window be closed.
+    */
+  def saveFile(saver: File => Boolean, abortedCallback: () => Any = () => {}) = {
+    createFileWindow(true)("Save...", "Save", saver, abortedCallback)
   }
 
   override def drawScreen(mx: Int, my: Int, w: Float) = {
