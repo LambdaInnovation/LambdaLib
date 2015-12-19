@@ -220,6 +220,10 @@ public class Widget extends WidgetContainer {
 	public <T extends GuiEvent> void unlisten(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
 		eventBus.unlisten(clazz, handler);
 	}
+
+	public <T extends GuiEvent> void unlisten(IGuiEventHandler<T> handler) {
+		eventBus.unlisten(handler);
+	}
 	
 	/**
 	 * Post a event to this widget's event bus.

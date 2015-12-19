@@ -1,11 +1,6 @@
 package cn.lambdalib.cgui.gui.event;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import cn.lambdalib.cgui.gui.Widget;
@@ -14,8 +9,8 @@ public final class GuiEventBus {
 	
 	private class NodeCollection extends LinkedList<GuiHandlerNode> {
 		
-		List<GuiHandlerNode> toadd = new ArrayList();
-		List<Object> toremove = new ArrayList();
+		List<GuiHandlerNode> toadd = new ArrayList<>();
+		List<Object> toremove = new ArrayList<>();
 		
 		boolean iterating;
 		
@@ -27,7 +22,7 @@ public final class GuiEventBus {
 			} else {
 				boolean res = super.add(node);
 				if(res) {
-					Collections.sort(this);
+					Collections.sort(this, priorityCmp);
 				}
 				return res;
 			}
@@ -50,7 +45,7 @@ public final class GuiEventBus {
 			addAll(toadd);
 			removeAll(toremove);
 			if(!toadd.isEmpty()) {
-				Collections.sort(this);
+				Collections.sort(this, priorityCmp);
 			}
 			toadd.clear();
 			toremove.clear();
@@ -60,7 +55,7 @@ public final class GuiEventBus {
 	
 	public GuiEventBus() {}
 	
-	Map< Class<? extends GuiEvent>, NodeCollection > eventHandlers = new HashMap();
+	Map< Class<? extends GuiEvent>, NodeCollection > eventHandlers = new HashMap<>();
 	
 	public final void postEvent(Widget widget, GuiEvent event) {
 		NodeCollection list = eventHandlers.get(event.getClass());
@@ -77,11 +72,11 @@ public final class GuiEventBus {
 		listen(clazz, handler, 0);
 	}
 	
-	public <T extends GuiEvent> void listen(Class<? extends GuiEvent> clazz, IGuiEventHandler handler, int priority) {
+	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority) {
 		listen(clazz, handler, priority, true);
 	}
 	
-	public <T extends GuiEvent> void listen(Class<? extends GuiEvent> clazz, IGuiEventHandler handler, int priority, boolean copyable) {
+	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler, int priority, boolean copyable) {
 		NodeCollection list = getRawList(clazz);
 		// Perform gracefully if handler is duplicated. This allows safe copy.
 		for(GuiHandlerNode n : list) {
@@ -90,11 +85,24 @@ public final class GuiEventBus {
 		}
 		list.add(new GuiHandlerNode(handler, priority, copyable));
 	}
-	
+
+	/**
+	 * Remove the given listener from this event bus, if it is in the bus. This approach is slightly faster.
+	 */
 	public <T extends GuiEvent> void unlisten(Class<? extends GuiEvent> clazz, IGuiEventHandler<T> handler) {
 		getRawList(clazz).remove(new GuiHandlerNode(handler, 0, false));
 	}
-	
+
+	/**
+	 * Remove the given listener from this event bus, if it is in the bus.
+	 */
+	public <T extends GuiEvent> void unlisten(IGuiEventHandler<T> handler) {
+		GuiHandlerNode cmp = new GuiHandlerNode(handler);
+		for (NodeCollection col : eventHandlers.values()) {
+			col.remove(cmp);
+		}
+	}
+
 	private NodeCollection getRawList(Class<? extends GuiEvent> clazz) {
 		NodeCollection ret = eventHandlers.get(clazz);
 		if(ret == null) {
@@ -122,10 +130,14 @@ public final class GuiEventBus {
 		return ret;
 	}
 	
-	private class GuiHandlerNode implements Comparable<GuiHandlerNode> {
+	private class GuiHandlerNode {
 		final IGuiEventHandler handler;
 		final int priority;
 		final boolean copySensitive;
+
+		public GuiHandlerNode(IGuiEventHandler _handler) {
+			this(_handler, 0, false);
+		}
 		
 		public GuiHandlerNode(IGuiEventHandler _handler, int _priority, boolean _copySensitive) {
 			handler = _handler;
@@ -142,11 +154,9 @@ public final class GuiEventBus {
 		public int hashCode() {
 			return handler.hashCode();
 		}
-
-		@Override
-		public int compareTo(GuiHandlerNode handler) {
-			return -((Integer) priority).compareTo(handler.priority);
-		}
 	}
+
+	static final Comparator<GuiHandlerNode> priorityCmp = (n1, n2) ->
+			-Integer.valueOf(n1.priority).compareTo(n2.priority);
 	
 }
