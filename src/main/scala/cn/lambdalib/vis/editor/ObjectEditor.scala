@@ -8,11 +8,9 @@ import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.event.GuiEvent
 import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.util.helper.Color
-import cn.lambdalib.vis.editor.VisProperty
 
 import cn.lambdalib.cgui.ScalaExtensions._
 import cn.lambdalib.vis.model.CompTransform
-import cn.lambdalib.vis.editor
 import net.minecraft.util.Vec3
 
 object ObjectEditor {
@@ -89,10 +87,9 @@ class ObjectEditor {
 
   def objElements(obj: AnyRef): Iterable[Element] = {
     val klass = obj.getClass
-    klass.getFields filter (f => {
-      val anno = f.getAnnotation(classOf[VisProperty])
-      (anno == null || !anno.exclude()) && (f.getModifiers & (Modifier.FINAL | Modifier.STATIC)) == 0
-    }) map (f => {
+    klass.getFields filter (f =>
+      !f.isAnnotationPresent(classOf[VisExcluded]) && (f.getModifiers & (Modifier.FINAL | Modifier.STATIC)) == 0
+    ) map (f => {
       specialHandlers.find(t => t._1(f, obj)) match {
         case Some((pred, handler)) => handler(this, f, obj)
         case _ => createElement(f, obj)

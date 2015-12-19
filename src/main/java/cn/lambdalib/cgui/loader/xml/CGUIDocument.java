@@ -6,8 +6,7 @@ import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.component.Transform;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.generic.RegistryUtils;
-import cn.lambdalib.util.mc.EntitySelectors.ExcludeType;
-import cn.lambdalib.vis.editor.DOMConversion;
+import cn.lambdalib.util.convert.DOMSerialization;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
@@ -26,7 +25,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * CGUI Doc reader and writer.
@@ -101,7 +99,7 @@ public enum CGUIDocument {
 	// IMPL
 	private static final String TAG_WIDGET = "Widget", TAG_COMPONENT = "Component";
 
-	public final DOMConversion converter = new DOMConversion();
+	public final DOMSerialization converter = new DOMSerialization();
 	private final DocumentBuilder db;
 	private final Logger log = LambdaLib.log;
 

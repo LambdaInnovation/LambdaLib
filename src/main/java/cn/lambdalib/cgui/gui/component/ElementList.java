@@ -15,7 +15,6 @@ package cn.lambdalib.cgui.gui.component;
 import java.util.*;
 
 import cn.lambdalib.cgui.gui.Widget;
-import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.util.generic.MathUtils;
 import com.google.common.collect.ImmutableList;

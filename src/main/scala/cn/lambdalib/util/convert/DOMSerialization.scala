@@ -1,26 +1,16 @@
-package cn.lambdalib.vis.editor
+package cn.lambdalib.util.convert
 
-import java.lang.reflect.Modifier
+import cn.lambdalib.util.serialization.SerializationHelper
+import net.minecraft.util.{ResourceLocation, Vec3}
 import org.w3c.dom.{Document, Node}
 
+import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 
-private object ReflectionHelper {
-
-  def getExposedFields(c: Class[_]) = c.getFields.filter(f => {
-    val anno = f.getAnnotation(classOf[VisProperty])
-    val modifiers = f.getModifiers
-    (anno == null || !anno.exclude()) &&
-    (modifiers & Modifier.FINAL) == 0 && (modifiers & Modifier.PUBLIC) != 0 && (modifiers & Modifier.STATIC) == 0
-  })
-
-}
-import ReflectionHelper._
-
 /**
-  * Dom conversion used to read and write XML documents.
+  * DOM serialization used to read and write XML documents.
   */
-class DOMConversion {
+class DOMSerialization {
   type DOMElement = org.w3c.dom.Element
 
   type Forwarder = (AnyRef, Node) => Any
@@ -29,9 +19,15 @@ class DOMConversion {
   private var forwarders = List[(AnyRef => Boolean, Forwarder)]()
   private var backwarders = Map[Class[_], Backwarder[_]]()
 
+  private val serHelper = new SerializationHelper {
+    addSerializedType(classOf[Vec3])
+  }
+
   def addForward(cond: AnyRef => Boolean, forwarder: Forwarder) = forwarders = (cond, forwarder) :: forwarders
-  def addForwardType(forwarder:Forwarder, classes: Class[_]*) =
+  def addForwardType(forwarder:Forwarder, classes: Class[_]*) = {
     addForward(obj => classes.exists(_.isInstance(obj)), forwarder)
+    classes.foreach(serHelper.addSerializedType)
+  }
   def addBackward[T](backwarder: Backwarder[T])(implicit evidence: ClassTag[T]) =
     backwarders = backwarders updated (evidence.runtimeClass, backwarder)
 
@@ -61,7 +57,7 @@ class DOMConversion {
 
   def forwardDefault(obj: AnyRef, name: String)(implicit document: Document): Node = {
     val ret: DOMElement = document.createElement(name)
-    val fields = getExposedFields(obj.getClass).toList
+    val fields = serHelper.getExposedFields(obj.getClass).toList
     for (f <- fields) {
       Option(f.get(obj)) match {
         case Some(x) =>
@@ -83,7 +79,7 @@ class DOMConversion {
       }
     } else {
       val ret = klass.newInstance
-      val fields = getExposedFields(klass).toList
+      val fields = serHelper.getExposedFields(klass).toList
       val childs = src.getChildNodes
       // Loop through all the fields and fetch corresponding elements from document
       (0 until childs.getLength).map(childs.item)
@@ -109,7 +105,7 @@ class DOMConversion {
       classOf[Float], classOf[java.lang.Float],
       classOf[Double], classOf[java.lang.Double],
       classOf[Boolean], classOf[java.lang.Boolean],
-      classOf[String])
+      classOf[String], classOf[ResourceLocation])
     addForward(_.getClass.isEnum, (obj, node) => addText(node, obj.toString))
 
     def bw[T](parseMethod: String => T)(implicit evidence: ClassTag[T]) =
@@ -125,6 +121,7 @@ class DOMConversion {
     bw(java.lang.Boolean.parseBoolean)
     bw(java.lang.Boolean.valueOf)
     bw(String.valueOf)
+    bw(str => new ResourceLocation(str))
   }
 
   init()

@@ -1,7 +1,5 @@
 package cn.lambdalib.cgui.gui.component;
 
-import cn.lambdalib.cgui.gui.Widget;
-
 /**
  * Transform is the base component of a widget. It cannot be removed. It provides some meta-information such as widget align and placement.
  * @author WeAthFolD

@@ -18,24 +18,17 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 
-import javax.vecmath.Vector2d;
-
+import cn.lambdalib.cgui.gui.*;
 import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.client.font.TrueTypeFont;
 import cn.lambdalib.util.generic.MathUtils;
-import cn.lambdalib.vis.editor.VisProperty;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.annotations.CopyIgnore;
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign;
-import cn.lambdalib.cgui.gui.component.Transform.WidthAlign;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.KeyEvent;
@@ -68,10 +61,6 @@ public class TextBox extends Component {
 	
 	public String content = "";
 
-	/**
-	 * It is temporarily disabled. Ability to select fonts will be added soon.
-	 */
-	@VisProperty(exclude = true)
 	public IFont font = defaultFont;
 
 	public FontOption option;
@@ -135,7 +124,7 @@ public class TextBox extends Component {
 	
 	private String getProcessedContent() {
 		String str = getProcessedContentRaw();
-		if (!localized && canEdit) {
+		if (!localized && allowEdit) {
 			str = str.substring(displayOffset);
 
 			double width = getDrawSize();

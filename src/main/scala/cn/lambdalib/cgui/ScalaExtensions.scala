@@ -1,7 +1,7 @@
 package cn.lambdalib.cgui
 
-import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component.Component
+import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.event.{IGuiEventHandler, GuiEvent}
 
 import scala.reflect.ClassTag
