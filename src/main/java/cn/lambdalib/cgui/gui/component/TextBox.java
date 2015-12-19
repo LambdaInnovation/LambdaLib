@@ -12,35 +12,34 @@
  */
 package cn.lambdalib.cgui.gui.component;
 
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
-import javax.vecmath.Vector2d;
-
+import cn.lambdalib.cgui.gui.*;
+import cn.lambdalib.util.client.font.IFont;
+import cn.lambdalib.util.client.font.IFont.FontOption;
+import cn.lambdalib.util.client.font.TrueTypeFont;
+import cn.lambdalib.util.generic.MathUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.annotations.CopyIgnore;
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign;
-import cn.lambdalib.cgui.gui.component.Transform.WidthAlign;
 import cn.lambdalib.cgui.gui.event.FrameEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.KeyEvent;
 import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.util.helper.Color;
-import cn.lambdalib.util.helper.Font;
-import cn.lambdalib.util.helper.Font.Align;
 import cn.lambdalib.util.helper.GameTimer;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.StatCollector;
 
 /**
- * Textbox displays text on the widget area, it might also be edited.
+ * Textbox displays text on the widget area, it might also be edited. TextBox is designed to handle ONE-LINE texts.
  * @author WeAthFolD
  */
 public class TextBox extends Component {
@@ -54,16 +53,29 @@ public class TextBox extends Component {
 	 * Fired each time the TextBox's input is confirmed. (a.k.a. User presses enter)
 	 */
 	public static class ConfirmInputEvent implements GuiEvent {}
+
+	private static TrueTypeFont defaultFont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 32));
+	static {
+		defaultFont.setIdeographicFont(new Font("微软雅黑", Font.PLAIN, 32));
+	}
 	
 	public String content = "";
+
+	public IFont font = defaultFont;
+
+	public FontOption option;
 	
 	/**
-	 * Only activated when doesn't allow edit. If activated, The display string will be StatCollector.translateToLocal(content).
+	 * Only activated when doesn't allow edit. If activated, The display string will be
+	 *  <code>StatCollector.translateToLocal(content).</code>
 	 */
 	public boolean localized = false;
-	
+
+	/**
+	 * Whether the editing is enabled.
+	 */
 	public boolean allowEdit = false;
-	
+
 	public boolean doesEcho = false;
 	public char echoChar = '*';
 	
@@ -72,23 +84,16 @@ public class TextBox extends Component {
 	/**
 	 * Whether this textBox doesn't draw chars that are out of bounds.
 	 */
-	public boolean emit = false;
-	
-	public double size = 5;
+	public boolean emit = true;
 	
 	public double zLevel = 0;
-	
-	public WidthAlign widthAlign = WidthAlign.LEFT;
-	
-	public HeightAlign heightAlign = HeightAlign.BOTTOM;
+
+	public HeightAlign heightAlign = HeightAlign.CENTER;
 	
 	@CopyIgnore
-	public int caretPos = 0;
-	
-	public TextBox setSize(double s) {
-		size = s;
-		return this;
-	}
+	private int caretPos = 0;
+
+	private int displayOffset = 0;
 	
 	public TextBox allowEdit() {
 		allowEdit = true;
@@ -99,21 +104,38 @@ public class TextBox extends Component {
 		content = str;
 		return this;
 	}
-	
-	private String getProcessedContent() {
+
+	private String getProcessedContentRaw() {
 		String str = content;
-		if(!allowEdit && localized) {
+		if (!allowEdit && localized) {
 			str = StatCollector.translateToLocal(str);
 		}
-		
+
 		if(doesEcho) {
 			StringBuilder sb = new StringBuilder();
 			for(int i = 0; i < str.length(); ++i) {
-				sb.append('*');
+				sb.append(echoChar);
 			}
 			str = sb.toString();
 		}
-		
+
+		return str;
+	}
+	
+	private String getProcessedContent() {
+		String str = getProcessedContentRaw();
+		if (!localized && allowEdit) {
+			str = str.substring(displayOffset);
+
+			double width = getDrawSize();
+			double lengthSum = 0.0;
+			for(int i = 1; i < str.length(); ++i) { // At least display one char :)
+				lengthSum += font.getCharWidth(str.codePointAt(i), option);
+				if (lengthSum >= width) {
+					str = str.substring(0, i);
+				}
+			}
+		}
 		return str;
 	}
 	
@@ -122,9 +144,7 @@ public class TextBox extends Component {
 		if(cb.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
 			try {
 				return (String) cb.getData(DataFlavor.stringFlavor);
-			} catch (UnsupportedFlavorException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (UnsupportedFlavorException|IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -139,17 +159,16 @@ public class TextBox extends Component {
 	
 	private double[] getOffset(Widget w) {
 		double x = 0, y = 0;
-		Vector2d v = new Vector2d(Font.font.strLen(getProcessedContent(), size), size);
 		
-		switch(widthAlign) {
+		switch(option.align) {
 		case LEFT:
 			x = 2;
 			break;
 		case CENTER:
-			x = (w.transform.width - v.x) / 2;
+			x = w.transform.width/ 2;
 			break;
 		case RIGHT:
-			x = w.transform.width - v.x;
+			x = w.transform.width;
 			break;
 		default:
 			break;
@@ -160,24 +179,29 @@ public class TextBox extends Component {
 			y = 0;
 			break;
 		case CENTER:
-			y = (w.transform.height - v.y) / 2;
+			y = (w.transform.height - option.fontSize * 0.8) / 2;
 			break;
 		case BOTTOM:
-			y = (w.transform.height - v.y);
+			y = (w.transform.height - option.fontSize * 0.8);
 			break;
 		default:
 			break;
 		}
-		
+
 		return new double[] { x, y };
 	}
-	
+
 	public TextBox() {
+		this(new FontOption());
+	}
+	
+	public TextBox(FontOption option) {
 		super("TextBox");
+		this.option = option;
+
 		listen(KeyEvent.class, (w, event) -> {
 			if(!allowEdit)
 				return;
-			checkCaret();
 			
 			int par2 = event.keyCode;
 			
@@ -215,14 +239,15 @@ public class TextBox extends Component {
 				content = "";
 				w.post(new ChangeContentEvent());
 			}
+
 			if (ChatAllowedCharacters.isAllowedCharacter(event.inputChar)) {
 				content = content.substring(0, caretPos) + event.inputChar +
 						(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
 				caretPos += 1;
 				w.post(new ChangeContentEvent());
 			}
-			
-			checkCaret();
+
+			check();
 		});
 		
 		listen(LeftClickEvent.class, (w, e) -> {
@@ -231,7 +256,7 @@ public class TextBox extends Component {
 			double eventX = -offset[0] + e.x;
 			
 			for(int i = 0; i < content.length(); ++i) {
-				double cw = Font.font.strLen(String.valueOf(content.charAt(i)), size);
+				double cw = font.getTextWidth(String.valueOf(content.charAt(i)), option);
 				len += cw;
 				
 				if(len > eventX) {
@@ -244,32 +269,46 @@ public class TextBox extends Component {
 		
 		listen(FrameEvent.class, (w, event) -> {
 			double[] offset = getOffset(w);
-			
-			checkCaret();
-			
 			String str = getProcessedContent();
 			
 			GL11.glPushMatrix();
 			GL11.glTranslated(0, 0, zLevel);
-			
-			if(emit)
-				Font.font.drawTrimmed(str, offset[0], offset[1], size, color.asHexColor(), Align.LEFT, w.transform.width - 2, "...");
-			else
-				Font.font.draw(str, offset[0], offset[1], size, color.asHexColor(), Align.LEFT);
-			
+
+			font.draw(str, offset[0], offset[1], option);
+
 			GL11.glPopMatrix();
 			
 			if(allowEdit && w.isFocused() && GameTimer.getAbsTime() % 1000 < 500) {
-				double len = Font.font.strLen(str.substring(0, caretPos), size);
-				Font.font.draw("|", len + offset[0], offset[1], size, color.asHexColor());
+				double len = font.getTextWidth(str.substring(0, MathUtils.clampi(0, str.length(), caretPos - displayOffset)), option) - 1;
+				font.draw("|", len + offset[0], offset[1], option);
 			}
 		});
 	}
-	
-	private void checkCaret() {
-		if(caretPos > content.length())
-			caretPos = content.length() - 1;
-		if(caretPos < 0) caretPos = 0;
+
+	private double getDrawSize() {
+		return widget.transform.width - 3;
+	}
+
+	private void check() {
+		caretPos = MathUtils.clampi(0, content.length(), caretPos);
+		if (emit) {
+			checkEmitted();
+		}
+	}
+
+	private void checkEmitted() {
+		double width = getDrawSize();
+
+		displayOffset = MathUtils.clampi(0, caretPos - 1, displayOffset);
+		String rawContent = getProcessedContentRaw();
+
+		double lengthSum = 0.0;
+		int j;
+		for(j = caretPos - 1; j > 0 && lengthSum < width; j--) {
+			lengthSum += font.getCharWidth(rawContent.codePointAt(j), option);
+		}
+		// j is now start index of text box that can minimally display the caret
+		displayOffset = Math.max(0, j);
 	}
 	
 	public static TextBox get(Widget w) {

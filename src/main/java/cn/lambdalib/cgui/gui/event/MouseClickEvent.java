@@ -13,7 +13,7 @@
 package cn.lambdalib.cgui.gui.event;
 
 /**
- * Fired on both LIGui and current focus when any mouse button except for LMB and RMB is clicked.
+ * Fired on both CGui and current focus when any mouse button except for LMB and RMB is clicked.
  * (For convenience reasons, they are handled in {@link LeftClickEvent} and {@link RightClickEvent}.)
  */
 public class MouseClickEvent implements GuiEvent {

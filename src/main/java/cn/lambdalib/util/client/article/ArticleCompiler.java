@@ -51,11 +51,20 @@ public class ArticleCompiler {
 	private double x = 0, y = 0, lfs;
 
 	public ArticleCompiler(String str) {
-		this(new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8)));
+		this(str, new ArticlePlotter());
 	}
 
-	public ArticleCompiler(InputStream _stream) {
-		reader = new PushbackReader(new InputStreamReader(_stream));
+	public ArticleCompiler(InputStream stream) {
+		this(stream, new ArticlePlotter());
+	}
+
+	public ArticleCompiler(String str, ArticlePlotter plotter) {
+		this(new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8)), plotter);
+	}
+
+	public ArticleCompiler(InputStream stream, ArticlePlotter _plotter) {
+		reader = new PushbackReader(new InputStreamReader(stream));
+		plotter = _plotter;
 	}
 
 	// Rendering options
@@ -75,8 +84,6 @@ public class ArticleCompiler {
 	}
 
 	public ArticlePlotter compile() {
-		require(plotter == null, "Can compile only once");
-		plotter = new ArticlePlotter();
 		try {
 			parse();
 		} catch(Exception e) {

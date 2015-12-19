@@ -23,10 +23,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import cn.lambdalib.cgui.gui.CGui;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import cn.lambdalib.cgui.gui.LIGui;
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.WidgetContainer;
 import cn.lambdalib.cgui.gui.component.Component;
@@ -34,6 +34,7 @@ import cn.lambdalib.cgui.gui.component.Component;
 /**
  * @author WeAthFolD
  */
+@Deprecated
 public class CGUIDocWriter {
 	
 	public static CGUIDocWriter instance = new CGUIDocWriter();
@@ -57,7 +58,7 @@ public class CGUIDocWriter {
 		container.clear();
 	}
 	
-	public void feed(LIGui gui) {
+	public void feed(CGui gui) {
 		for(Map.Entry<String, Widget> entry : gui.getEntries()) {
 			container.addWidget(entry.getKey(), entry.getValue());
 		}
@@ -120,7 +121,7 @@ public class CGUIDocWriter {
 		return root;
 	}
 	
-	public static boolean save(LIGui gui, File file) {
+	public static boolean save(CGui gui, File file) {
 		instance.clearContent();
 		instance.feed(gui);
 		return instance.saveToXml(file);

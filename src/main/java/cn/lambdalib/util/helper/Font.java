@@ -24,9 +24,13 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 /**
- * A wrapper for better font drawing of mc fonts.
+ * A wrapper for better font drawing of mc fonts. <br>
+ *
+ * Deprecated because MC font is BAD and the interface is not clean enough. Use
+ * 	{@link cn.lambdalib.util.client.font.IFont} family instead.
  * @author WeathFolD
  */
+@Deprecated
 public class Font {
     
     public static Font font = new Font();

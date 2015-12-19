@@ -12,6 +12,9 @@
  */
 package cn.lambdalib.core;
 
+import com.typesafe.config.Config;
+import cpw.mods.fml.common.event.*;
+import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Logger;
 
 import cn.lambdalib.annoreg.core.RegistrationManager;
@@ -24,10 +27,6 @@ import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraft.command.CommandHandler;
@@ -46,8 +45,14 @@ public class LambdaLib {
 
 	public static Logger log = FMLLog.getLogger();
 
+	private static Configuration config;
+
 	@RegMessageHandler.WrapperInstance
 	public static SimpleNetworkWrapper netHandler = NetworkRegistry.INSTANCE.newSimpleChannel("LambdaLib");
+
+	public static Configuration getConfig() {
+		return config;
+	}
 
 	@EventHandler()
 	public void preInit(FMLPreInitializationEvent event) {
@@ -57,6 +62,8 @@ public class LambdaLib {
 
 		ResourceCheck.init();
 		LIFMLGameEventDispatcher.init();
+
+		config = new Configuration(event.getSuggestedConfigurationFile());
 
 		RegistrationManager.INSTANCE.registerAll(this, "PreInit");
 	}
@@ -69,6 +76,11 @@ public class LambdaLib {
 	@EventHandler()
 	public void postInit(FMLPostInitializationEvent event) {
 		RegistrationManager.INSTANCE.registerAll(this, "PostInit");
+	}
+
+	@EventHandler
+	public void serverStopping(FMLServerStoppingEvent event) {
+		config.save();
 	}
 
 	@EventHandler()

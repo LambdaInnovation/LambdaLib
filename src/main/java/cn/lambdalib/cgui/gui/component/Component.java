@@ -22,15 +22,16 @@ import java.util.Map;
 
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.annotations.CopyIgnore;
-import cn.lambdalib.cgui.gui.annotations.EditIgnore;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.deprecated.TypeHelper;
+import cn.lambdalib.util.serialization.SerializeExcluded;
+import cn.lambdalib.vis.editor.VisExcluded;
 
 /**
  * <summary>
- * Component is the concrete material of Widget. It can define a set of EventHandlers and store information itself.
+ * Component is attached to Widget. It can define a set of EventHandlers and store information by itself.
  * </summary>
  * <p>
  * Components supports prototype patteren natively. They can be copied to make duplicates, typically when its 
@@ -43,15 +44,19 @@ public class Component {
 	public final String name;
 	
 	public boolean enabled = true;
-	
-	@EditIgnore
+
+	/**
+	 * Whether this component can be edited in editor inspector.
+	 */
+	@VisExcluded
+	@SerializeExcluded
 	public boolean canEdit = true;
 	
 	/**
-	 * This SHOULD NOT be edited after creation, represents the widget instance this component is in.
+	 * The widget that this component is attached to. To ease impl and usage, this is exposed as
+	 *  public field, but DONT assign it, else it yields undefined behaviour.
 	 */
-	@EditIgnore
-	@CopyIgnore
+	@VisExcluded
 	public Widget widget;
 	
 	public Component(String _name) {
@@ -59,16 +64,16 @@ public class Component {
 		checkCopyFields();
 	}
 	
-	protected <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler) {
+	public <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler) {
 		listen(type, handler, 0);
 	}
 	
-	protected <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler, int prio) {
+	public <T extends GuiEvent> void listen(Class<? extends T> type, IGuiEventHandler<T> handler, int prio) {
 		if(widget != null)
 			throw new RuntimeException("Can only add event handlers before componenet is added into widget");
 		Node n = new Node();
 		n.type = type;
-		n.handler = new EHWrapper(handler);
+		n.handler = new EHWrapper<>(handler);
 		n.prio = prio;
 		addedHandlers.add(n);
 	}
@@ -122,7 +127,7 @@ public class Component {
 	
 	@Deprecated
 	public Map<String, String> getPropertyMap() {
-		Map<String, String> ret = new HashMap();
+		Map<String, String> ret = new HashMap<>();
 		for(Field f : checkCopyFields()) {
 			String val = TypeHelper.repr(f, this);
 			if(val != null) {
@@ -151,9 +156,9 @@ public class Component {
 		return ret;
 	}
 	
-	private static Map<Class, List<Field>> copiedFields = new HashMap();
+	private static Map<Class, List<Field>> copiedFields = new HashMap<>();
 	
-	private List<Node> addedHandlers = new ArrayList();
+	private List<Node> addedHandlers = new ArrayList<>();
 	
 	private final class EHWrapper<T extends GuiEvent> implements IGuiEventHandler<T> {
 		

@@ -15,7 +15,7 @@ package cn.lambdalib.cgui.gui.event;
 import cn.lambdalib.cgui.gui.Widget;
 
 /**
- * Fired on LIGui and current widget focus, when player presses any key.
+ * Fired on CGui and current widget focus, when player presses any key.
  */
 public class KeyEvent implements GuiEvent {
 	public final char inputChar;

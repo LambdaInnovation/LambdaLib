@@ -12,6 +12,7 @@
  */
 package cn.lambdalib.util.helper;
 
+import cn.lambdalib.util.serialization.SerializeType;
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.relauncher.Side;
@@ -20,6 +21,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 /**
  * @author WeAthFolD
  */
+@SerializeType
 public class Color {
 	
 	public double r, g, b, a;

@@ -12,9 +12,7 @@
  */
 package cn.lambdalib.cgui.gui;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.component.Transform;
@@ -29,39 +27,47 @@ import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
 public class Widget extends WidgetContainer {
 	
 	private GuiEventBus eventBus = new GuiEventBus();
-	private List<Component> components = new ArrayList();
+	private List<Component> components = new LinkedList<>();
 	
 	public boolean disposed = false;
 	public boolean dirty = true; //Indicate that this widget's pos data is dirty and requires update.
 
-	LIGui gui;
+	CGui gui;
 	Widget parent;
 	
 	// Calculated absolute widget position and scale
 	// Will only be updated if widget.dirty = true each frame
 	public double x, y;
 	public double scale;
-	/**
-	 * *INTERNAL*Used ONLY in editing gui.
-	 */
-	public boolean visible = true;
 	
 	/**
-	 * *INTERNAL*Whether this widget can be copied when going down copy recursion process.
+	 * Whether this widget can be copied when going down copy recursion process.
 	 */
 	public boolean needCopy = true;
 	
 	public Transform transform;
 	
-	//Defaults
+	//Transform is always present.
 	{
 		addComponent(transform = new Transform());
 	}
 	
 	public Widget() {}
-	
+
+	// Ctors to aid syntax simplicity
+	public Widget(double width, double height) {
+		transform.setPos(width, height);
+	}
+
+	public Widget(double x, double y, double width, double height) {
+		transform.setPos(x, y).setSize(width, height);
+	}
+
+	/**
+	 * @return Whether the widget is visible (and called each draw frame).
+	 */
 	public boolean isVisible() {
-		return visible && transform.doesDraw && !dirty;
+		return transform.doesDraw && !dirty;
 	}
 		
 	/**
@@ -99,7 +105,7 @@ public class Widget extends WidgetContainer {
 	}
 	
 	/**
-	 * Called when added into a GUI.
+	 * Called when added into a GUI. Use this to do initialization.
 	 */
 	protected void onAdded() {}
 	
@@ -115,7 +121,7 @@ public class Widget extends WidgetContainer {
 		return parent;
 	}
 	
-	public LIGui getGui() {
+	public CGui getGui() {
 		return gui;
 	}
 	
@@ -128,8 +134,8 @@ public class Widget extends WidgetContainer {
 	
 	//Component handling
 	/**
-	 * Java generic type is shit, so use it at your own risk.
-	 * @return the first component with the name specified, or null if no such component.
+	 * Java generic type erasure makes this unsafe, so use at your own risk.
+	 * @return the component with the name specified, or null if no such component.
 	 */
 	public <T extends Component> T getComponent(String name) {
 		for(Component c : components) {
@@ -137,6 +143,17 @@ public class Widget extends WidgetContainer {
 				return (T) c;
 		}
 		return null;
+	}
+
+	/**
+	 * Find the first component that is of the given type.
+	 * @throws NoSuchElementException if there is no value present
+	 */
+	public <T extends Component> T getComponent(Class<T> type) {
+		return (T) components.stream()
+				.filter(c -> !type.isAssignableFrom(c.getClass()))
+				.findFirst()
+				.get();
 	}
 	
 	public Widget addComponents(Component ...c) {
@@ -149,7 +166,7 @@ public class Widget extends WidgetContainer {
 	public Widget addComponent(Component c) {
 		if(c.widget != null)
 			throw new RuntimeException("Can't add one component into multiple widgets!");
-		
+
 		for(Component cc : components) {
 			if(cc.name.equals(c.name)) {
 				throw new RuntimeException("Duplicate component!");
@@ -174,7 +191,7 @@ public class Widget extends WidgetContainer {
 				c.onRemoved();
 				c.widget = null;
 				iter.remove();
-				return;
+				break;
 			}
 		}
 	}
@@ -246,7 +263,6 @@ public class Widget extends WidgetContainer {
 
 	@Override
 	protected void onWidgetAdded(String name, Widget w) {
-		// w.dirty = true; // Insertion of child will not affect parent
 		w.parent = this;
 		w.gui = gui;
 	}
@@ -263,49 +279,6 @@ public class Widget extends WidgetContainer {
 	
 	public WidgetContainer getAbstractParent() {
 		return isWidgetParent() ? parent : gui;
-	}
-	
-	public void moveDown() {
-		WidgetContainer parent = getAbstractParent();
-		int i = parent.locate(this);
-		if(i == -1 || i == parent.widgetList.size() - 1) return;
-		Widget next = parent.getWidget(i + 1);
-		parent.widgetList.set(i, next);
-		parent.widgetList.set(i + 1, this);
-	}
-	
-	public void moveUp() {
-		WidgetContainer parent = getAbstractParent();
-		int i = parent.locate(this);
-		if(i == -1 || i == 0) return;
-		Widget last = parent.getWidget(i - 1);
-		parent.widgetList.set(i, last);
-		parent.widgetList.set(i - 1, this);
-	}
-	
-	public void moveLeft() {
-		if(!this.isWidgetParent())
-			return;
-		WidgetContainer pp = parent.getAbstractParent();
-		String name = this.getName();
-		parent.forceRemoveWidget(this);
-		
-		this.disposed = false;
-		if(!pp.addWidget(name, this)) {
-			pp.addWidget(this);
-		}
-	}
-	
-	public void moveRight() {
-		WidgetContainer parent = getAbstractParent();
-		int i = parent.locate(this) - 1;
-		if(i >= 0) {
-			Widget newParent = parent.getWidget(i);
-			String name = this.getName();
-			parent.forceRemoveWidget(this);
-			this.disposed = false;
-			newParent.addWidget(name, this);
-		}
 	}
 	
 	public boolean rename(String newName) {
@@ -332,7 +305,47 @@ public class Widget extends WidgetContainer {
 	
 	@Override
 	public String toString() {
-		return this.getName() + "@" + this.getClass();
+		return this.getName() + "@" + this.getClass().getSimpleName();
+	}
+
+	interface IWidgetFormatter {
+		String format(Widget w);
+	}
+
+	/**
+	 * Get the widget's hierarchical structure for debugging.
+	 */
+	public String getHierarchyStructure() {
+		return getHierarchyStructure(w -> w.toString());
+	}
+
+	public String getHierarchyStructure_pos() {
+		return getHierarchyStructure(w -> String.format("%s: (%f,%f)[%f,%f]x%f", w.getName(),
+				w.transform.x, w.transform.y,
+				w.transform.width, w.transform.height,
+				w.transform.scale));
+	}
+
+	public String getHierarchyStructure(IWidgetFormatter f) {
+		return getHierarchyStructure_int(f, 0);
+	}
+
+	private String _rep(int times) {
+		StringBuilder sb = new StringBuilder(times*2);
+		while (times-- > 0) sb.append("  ");
+		return sb.toString();
+	}
+
+	private String getHierarchyStructure_int(IWidgetFormatter f, int indent) {
+		String istr = _rep(indent);
+		StringBuilder ret = new StringBuilder();
+		ret.append(istr).append(f.format(this));
+		if(getDrawList().size() != 0) {
+			ret.append(istr).append("{\n");
+			getDrawList().forEach(w -> ret.append(w.getHierarchyStructure_int(f, indent + 1)).append(','));
+			ret.append(istr).append("\n}");
+		}
+		return ret.toString();
 	}
 
 }

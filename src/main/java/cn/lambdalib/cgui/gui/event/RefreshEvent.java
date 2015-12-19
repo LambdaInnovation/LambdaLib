@@ -14,6 +14,6 @@ package cn.lambdalib.cgui.gui.event;
 
 
 /**
- * Fired when target widget is marked 'dirty' and is about to be updated by the LIGui.
+ * Fired when target widget is marked 'dirty' and is about to be updated by the CGui.
  */
 public class RefreshEvent implements GuiEvent {}

@@ -1,16 +1,24 @@
 package cn.lambdalib.cgui.gui.component;
 
-import cn.lambdalib.cgui.gui.Widget;
-
 /**
  * Transform is the base component of a widget. It cannot be removed. It provides some meta-information such as widget align and placement.
  * @author WeAthFolD
  */
 public class Transform extends Component {
 	
-	public enum WidthAlign { LEFT, CENTER, RIGHT };
+	public enum WidthAlign { LEFT, CENTER, RIGHT;
+		public final double factor;
+		WidthAlign() {
+			factor = ordinal() * 0.5;
+		}
+	}
 	
-	public enum HeightAlign { TOP, CENTER, BOTTOM };
+	public enum HeightAlign { TOP, CENTER, BOTTOM;
+		public final double factor;
+		HeightAlign() {
+			factor = ordinal() * 0.5;
+		}
+	}
 	
 	public double width = 0.0, height = 0.0;
 	
@@ -54,6 +62,12 @@ public class Transform extends Component {
 	public Transform setCenteredAlign() {
 		alignWidth = WidthAlign.CENTER;
 		alignHeight = HeightAlign.CENTER;
+		return this;
+	}
+
+	public Transform setAlign(WidthAlign walign, HeightAlign halign) {
+		alignWidth = walign;
+		alignHeight = halign;
 		return this;
 	}
 	

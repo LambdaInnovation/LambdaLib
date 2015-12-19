@@ -18,6 +18,7 @@ import static org.lwjgl.opengl.GL11.glPushMatrix;
 
 import java.io.IOException;
 
+import cn.lambdalib.vis.editor.VisProperty;
 import org.lwjgl.opengl.GL11;
 
 import com.google.gson.TypeAdapter;
@@ -26,7 +27,6 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import cn.lambdalib.util.client.RenderUtils;
-import cn.lambdalib.vis.editor.common.EditorHelper.VisEditable;
 import cn.lambdalib.vis.gson.GsonAdapters;
 import cn.lambdalib.vis.model.CompTransform;
 import cn.lambdalib.vis.model.PartedModel;
@@ -43,13 +43,13 @@ import net.minecraftforge.client.IItemRenderer;
  */
 public class ItemModelRenderer implements IItemRenderer {
 
-	@VisEditable("Standard")
+	@VisProperty(name = "Standard")
 	public CompTransform stdTransform = new CompTransform();
-	@VisEditable("FirstPerson")
+	@VisProperty(name = "FirstPerson")
 	public CompTransform fpTransform = new CompTransform();
-	@VisEditable("ThirdPerson")
+	@VisProperty(name = "ThirdPerson")
 	public CompTransform tpTransform = new CompTransform();
-	@VisEditable("EntityItem")
+	@VisProperty(name = "EntityItem")
 	public CompTransform entityItemTransform = new CompTransform();
 	
 	public PartedModel model;

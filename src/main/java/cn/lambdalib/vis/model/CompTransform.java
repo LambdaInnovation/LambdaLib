@@ -2,6 +2,7 @@ package cn.lambdalib.vis.model;
 
 import java.io.IOException;
 
+import cn.lambdalib.util.serialization.SerializeType;
 import org.lwjgl.opengl.GL11;
 
 import com.google.gson.TypeAdapter;
@@ -12,6 +13,7 @@ import cn.lambdalib.util.client.RenderUtils;
 import cn.lambdalib.util.generic.VecUtils;
 import net.minecraft.util.Vec3;
 
+@SerializeType
 public class CompTransform {
 	
 	public Vec3 transform = Vec3.createVectorHelper(0, 0, 0);

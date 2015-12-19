@@ -12,11 +12,7 @@
  */
 package cn.lambdalib.cgui.gui;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
@@ -25,22 +21,20 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
- * A class that has capability to store widgets. Used by LIGui and Widget.
+ * A class that has capability to store widgets. Used by CGui and Widget.
  * Every widget is associated with a name. You can use that name to lookup a widget.
- * 
- * This is a internal implementation class. DONT TOUCH IT!
  * @author WeAthFolD
  */
 @SideOnly(Side.CLIENT)
 public class WidgetContainer implements Iterable<Widget> {
 	
 	HashBiMap<String, Widget> widgets = HashBiMap.create();
-	LinkedList<Widget> widgetList = new LinkedList(); //List sorted in non-descending widget zOrder.
+	LinkedList<Widget> widgetList = new LinkedList<>(); //List sorted in non-descending widget zOrder.
 	
 	private static final String UNNAMED_PRE = "Unnamed ";
 	
 	/**
-	 * This is light copy.
+	 * Light copy.
 	 */
 	public void addAll(WidgetContainer container) {
 		for(Map.Entry<String, Widget> entry : container.getEntries()) {
@@ -107,6 +101,10 @@ public class WidgetContainer implements Iterable<Widget> {
 		checkAdded(name, add);
 		return true;
 	}
+
+	public boolean addWidgetAfter(Widget add, Widget pivot) {
+		return addWidgetAfter(getNextName(), add, pivot);
+	}
 	
 	public boolean addWidgetAfter(String name, Widget add, Widget pivot) {
 		int index = widgetList.indexOf(pivot);
@@ -119,11 +117,15 @@ public class WidgetContainer implements Iterable<Widget> {
 		checkAdded(name, add);
 		return true;
 	}
+
+	public boolean addWidgetBefore(Widget add, Widget pivot) {
+		return addWidgetBefore(getNextName(), add, pivot);
+	}
 	
 	public boolean addWidgetBefore(String name, Widget add, Widget pivot) {
 		int index = widgetList.indexOf(pivot);
 		if(index == -1)
-			return false;
+			index = 0;
 		if(!checkInit(name, add))
 			return false;
 		
@@ -140,8 +142,13 @@ public class WidgetContainer implements Iterable<Widget> {
 				return false;
 			}
 		}
+
+		if(widgets.containsValue(add)) {
+			widgets.inverse().remove(add);
+		}
 		
-		add.disposed = false; // Reset the dispose flag in case set
+		add.disposed = false; // Reset the dispose flag
+		add.dirty = true; // Force update
 		widgets.put(name, add);
 		return true;
 	}
@@ -222,7 +229,7 @@ public class WidgetContainer implements Iterable<Widget> {
 			return;
 		widgets.remove(w.getName());
 		widgetList.remove(w);
-		//w.gui = null;
+		w.gui = null;
 		w.parent = null;
 	}
 	
@@ -240,9 +247,53 @@ public class WidgetContainer implements Iterable<Widget> {
 	public void changeWidgetName(Widget w, String newName) {
 		widgets.inverse().put(w, newName);
 	}
-	
+
+	/**
+	 * @return An immutable list of all widgets in this WidgetContainer in draw order.
+	 */
 	public List<Widget> getDrawList() {
 		return ImmutableList.copyOf(widgetList);
+	}
+
+	public int widgetCount() {
+		return widgetList.size();
+	}
+
+	/**
+	 * Reorder the given widget before the pivot. The target and pivot must be all within this container,
+	 * 	or the result is undefined.
+	 * @param target The target to reorder
+	 * @param pivot if null, put at the beginning of the draw list, otherwise after the given pivot.
+	 */
+	public void reorder(Widget target, Widget pivot) {
+		widgetList.remove(target);
+		ListIterator<Widget> litr = widgetList.listIterator();
+		if (pivot == null) {
+			litr.add(target);
+		} else {
+			while (litr.hasNext()) {
+				Widget w = litr.next();
+				if (w == pivot) {
+					litr.add(target);
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Reorder the given widget to before the element at the given index, in view of the draw list before reordering.
+	 * @throws NoSuchElementException if newIndex > size
+	 */
+	public void reorder(Widget target, int newIndex) {
+		int prevIndex = widgetList.indexOf(target);
+		widgetList.remove(prevIndex);
+		System.out.println("Reorder " + newIndex + "," + prevIndex);
+		if (newIndex > prevIndex) {
+			widgetList.add(newIndex - 1, target);
+		} else {
+			widgetList.add(newIndex, target);
+		}
 	}
 	
 	public Iterator<Widget> iterator() {
