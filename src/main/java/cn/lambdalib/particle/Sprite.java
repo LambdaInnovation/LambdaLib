@@ -21,7 +21,6 @@ import cn.lambdalib.util.client.shader.ShaderSimple;
 import cn.lambdalib.util.helper.Color;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 
 /**
  * Represents a drawable sprite in origin. Always face (0, 0, -1).
@@ -35,7 +34,7 @@ public final class Sprite {
 	 */
 	public ResourceLocation texture;
 	public float width = 1.0f, height = 1.0f;
-	public Color color = Color.WHITE();
+	public Color color = Color.white();
 	public boolean hasLight = false;
 	public boolean cullFace = true;
 

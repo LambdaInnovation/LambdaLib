@@ -1,4 +1,4 @@
-package cn.lambdalib.cgui.loader.xml;
+package cn.lambdalib.cgui.xml;
 
 import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.WidgetContainer;
@@ -182,12 +182,12 @@ public enum CGUIDocument {
 
 	private void writeInternal(WidgetContainer container, Document doc) {
 		Element root = doc.createElement("Root");
-		container.getEntries()
-				.forEach(entry -> {
-					Element elem = doc.createElement(TAG_WIDGET);
-					writeWidget(entry.getKey(), entry.getValue(), elem);
-					root.appendChild(elem);
-				});
+		// Use drawList to preserve order
+		container.getDrawList().forEach(widget -> {
+			Element elem = doc.createElement(TAG_WIDGET);
+			writeWidget(widget.getName(), widget, elem);
+			root.appendChild(elem);
+		});
 		doc.appendChild(root);
 	}
 

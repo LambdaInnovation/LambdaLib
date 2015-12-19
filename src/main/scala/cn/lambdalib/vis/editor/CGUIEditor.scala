@@ -9,7 +9,8 @@ import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event._
 import cn.lambdalib.cgui.ScalaExtensions._
-import cn.lambdalib.cgui.loader.xml.{CGUIDocLoader, CGUIDocument}
+import cn.lambdalib.cgui.loader.xml.CGUIDocLoader
+import cn.lambdalib.cgui.xml.CGUIDocument
 import cn.lambdalib.util.client.{RenderUtils, HudUtils}
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.helper.{GameTimer, Color}

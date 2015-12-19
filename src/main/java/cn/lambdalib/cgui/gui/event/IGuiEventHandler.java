@@ -9,19 +9,5 @@ import cn.lambdalib.cgui.gui.Widget;
 public interface IGuiEventHandler<T extends GuiEvent> {
 
 	void handleEvent(Widget w, T event);
-
-	/**
-	 * Remove this event handler from the given bus, if it is in the bus.
-	 */
-	default void removeFrom(GuiEventBus bus) {
-		bus.unlisten(this);
-	}
-
-	/**
-	 * Remove this event handler from the given widget, if it is in the widget.
-	 */
-	default void removeFrom(Widget widget) {
-		widget.unlisten(this);
-	}
 	
 }

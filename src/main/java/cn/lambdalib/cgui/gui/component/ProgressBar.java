@@ -40,7 +40,7 @@ public class ProgressBar extends Component {
 		fluctRegion = 0.15; //fluct in (progress - 0.5*fluctRegion, progress + 0.5 * fluctRegion)
 	public Direction dir = Direction.RIGHT;
 	public double progress;
-	public Color color = Color.WHITE();
+	public Color color = Color.white();
 	
 	double curFluct;
 	double curSpeed;

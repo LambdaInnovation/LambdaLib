@@ -124,7 +124,7 @@ public class TextBox extends Component {
 	
 	private String getProcessedContent() {
 		String str = getProcessedContentRaw();
-		if (!localized && allowEdit) {
+		if (emit) {
 			str = str.substring(displayOffset);
 
 			double width = getDrawSize();
@@ -291,12 +291,12 @@ public class TextBox extends Component {
 
 	private void check() {
 		caretPos = MathUtils.clampi(0, content.length(), caretPos);
-		if (emit) {
-			checkEmitted();
+		if (emit && allowEdit) {
+			checkCaretOverflow();
 		}
 	}
 
-	private void checkEmitted() {
+	private void checkCaretOverflow() {
 		double width = getDrawSize();
 
 		displayOffset = MathUtils.clampi(0, caretPos - 1, displayOffset);

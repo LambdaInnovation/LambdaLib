@@ -27,7 +27,7 @@ public class Outline extends Component {
 	public float lineWidth = 2;
 
 	public Outline() {
-		this(Color.WHITE());
+		this(Color.white());
 	}
 
 	public Outline(Color _color) {

@@ -12,7 +12,6 @@
  */
 package cn.lambdalib.particle;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import cn.lambdalib.annoreg.core.Registrant;
@@ -37,7 +36,7 @@ public final class Particle extends EntityAdvanced implements ISpriteEntity {
 	public static RenderParticle render;
 
 	public ResourceLocation texture = null;
-	public Color color = Color.WHITE();
+	public Color color = Color.white();
 	public float size = 1.0f;
 	public boolean hasLight = false;
 	public double gravity = 0.0;

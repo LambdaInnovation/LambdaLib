@@ -47,7 +47,7 @@ public interface IFont {
 		}
 
 		public FontOption(double _fontsz, FontAlign _align) {
-			this(_fontsz, _align, Color.WHITE());
+			this(_fontsz, _align, Color.white());
 		}
 
 		public FontOption(double _fontsz, FontAlign _align, Color _color) {

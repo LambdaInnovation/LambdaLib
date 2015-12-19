@@ -96,8 +96,20 @@ public class Color {
 		return "Color(" + r + ',' + g + ',' + b + ',' + a + ")";
 	}
 	
-	public static Color WHITE() {
-		return new Color(1, 1, 1, 1);
+	public static Color white() {
+		return mono(1);
+	}
+
+	public static Color whiteBlend(double alpha) {
+		return monoBlend(1, alpha);
+	}
+
+	public static Color mono(double luminance) {
+		return new Color(luminance, luminance, luminance, 1);
+	}
+
+	public static Color monoBlend(double luminance, double alpha) {
+		return new Color(luminance, luminance, luminance, alpha);
 	}
 	
 }
