@@ -53,8 +53,8 @@ public class Component {
 	public boolean canEdit = true;
 	
 	/**
-	 * The widget that this component is attach to. To ease impl and usage, this is exposed as
-	 *  public fields, but DONT assign it, else yields undefined behaviour.
+	 * The widget that this component is attached to. To ease impl and usage, this is exposed as
+	 *  public field, but DONT assign it, else it yields undefined behaviour.
 	 */
 	@VisExcluded
 	public Widget widget;
