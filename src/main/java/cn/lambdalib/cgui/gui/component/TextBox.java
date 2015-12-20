@@ -53,15 +53,10 @@ public class TextBox extends Component {
 	 * Fired each time the TextBox's input is confirmed. (a.k.a. User presses enter)
 	 */
 	public static class ConfirmInputEvent implements GuiEvent {}
-
-	private static TrueTypeFont defaultFont = new TrueTypeFont(new Font("Consolas", Font.PLAIN, 32));
-	static {
-		defaultFont.setIdeographicFont(new Font("微软雅黑", Font.PLAIN, 32));
-	}
 	
 	public String content = "";
 
-	public IFont font = defaultFont;
+	public IFont font = TrueTypeFont.defaultFont();
 
 	public FontOption option;
 	

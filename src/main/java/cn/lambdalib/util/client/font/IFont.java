@@ -1,6 +1,11 @@
 package cn.lambdalib.util.client.font;
 
+import cn.lambdalib.util.client.font.Fragmentor.IFontSizeProvider;
+import cn.lambdalib.util.client.font.Fragmentor.TokenType;
 import cn.lambdalib.util.helper.Color;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
 
 /**
  * A generic font interface.
@@ -81,17 +86,17 @@ public interface IFont {
 
 	/**
 	 * Get the text width that will be drawn if calls the {@link IFont#draw}.
-	 * @param str
-	 * @param option
-	 * @return
 	 */
 	double getTextWidth(String str, FontOption option);
 
 	/**
 	 * Draws a line-seperated string at the given position.
 	 */
-	default void drawSeperated(String str, double x, double y, double limit, FontOption option) {
-		// TODO
+	default void drawSeperated(String str, final double x, double y, double limit, FontOption option) {
+		List<String> lines = Fragmentor.toMultiline(str, provider(option), limit);
+		for (int i = 0; i < lines.size(); ++i) {
+			draw(lines.get(i), x, y + i * option.fontSize, option);
+		}
 	}
 
 	/**
@@ -99,8 +104,23 @@ public interface IFont {
 	 * @return A {@link Extent} describing the drawn area
 	 */
 	default Extent drawSeperated_Sim(String str, double limit, FontOption option) {
-		// TODO
-		return null;
+		List<String> lines = Fragmentor.toMultiline(str, provider(option), limit);
+		return new Extent(lines.size(), lines.size() == 1 ? getTextWidth(lines.get(0), option) : limit
+			, lines.size() * option.fontSize);
+	}
+
+	default IFontSizeProvider provider(FontOption option) {
+		return new IFontSizeProvider() {
+			@Override
+			public double getCharWidth(int chr) {
+				return IFont.this.getCharWidth(chr, option);
+			}
+
+			@Override
+			public double getTextWidth(String str) {
+				return IFont.this.getTextWidth(str, option);
+			}
+		};
 	}
 
 }

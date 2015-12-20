@@ -23,7 +23,7 @@ import cn.lambdalib.cgui.ScalaExtensions._
 import scala.collection.JavaConversions._
 
 object Styles {
-  val font = TrueTypeFont(new Font("Consolas", Font.PLAIN, 32), new Font("Arial", Font.PLAIN, 32))
+  val font = TrueTypeFont.defaultFont
 
   def rgb(hex: Int) = new Color(hex | 0xFF000000)
   def pure(lum: Double) = new Color(lum, lum, lum, 1)

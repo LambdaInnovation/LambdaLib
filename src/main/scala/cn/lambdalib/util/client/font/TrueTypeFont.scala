@@ -1,17 +1,15 @@
 package cn.lambdalib.util.client.font
 
-import java.awt.{Color, RenderingHints, Graphics2D, Font}
+import java.awt.{GraphicsEnvironment, Color, RenderingHints, Font}
 import java.awt.image.{DataBufferByte, DataBufferInt, BufferedImage}
 import java.nio.{ByteOrder, ByteBuffer}
 import java.util
 
 import cn.lambdalib.util.client.font.IFont.FontOption
-import cn.lambdalib.util.helper.GameTimer
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.util.MathHelper
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11._
-import org.lwjgl.util.glu.GLU
 
 /**
   * This class wraps a java AWT font and make it gl-drawable. It generates font texture procedurally
@@ -23,8 +21,6 @@ class TrueTypeFont(val font: Font) extends IFont {
   import TrueTypeFont._
 
   class CachedChar(val ch: Int, val width: Int, val index: Int, val u: Float, val v: Float)
-
-  private var ideoFont = font
 
   val TEXTURE_SZ_LIMIT = Math.min(2048, GL11.glGetInteger(GL_MAX_TEXTURE_SIZE))
   val charSize = (font.getSize * 1.4).toInt
@@ -43,19 +39,9 @@ class TrueTypeFont(val font: Font) extends IFont {
   newTexture()
 
   /**
-    * Set the special font to be used when drawing ideographic characters.
-    * @param replace
-    */
-  def setIdeographicFont(replace: Font) = {
-    ideoFont = replace
-  }
-
-  /**
     * Resolve the font used to draw with given code point.
     */
-  protected def resolve(codePoint: Int) = {
-    if(Character.isIdeographic(codePoint)) ideoFont else font
-  }
+  protected def resolve(codePoint: Int) = font
 
   override def draw(str: String, px: Double, y: Double, option: FontOption) = {
     val len = getTextWidth(str, option) // Which will call updateCache()
@@ -221,10 +207,18 @@ class TrueTypeFont(val font: Font) extends IFont {
 }
 
 object TrueTypeFont {
-  def apply(normFont: Font, ideoFont: Font) = {
-    val ret = new TrueTypeFont(normFont)
-    ret.setIdeographicFont(ideoFont)
-    ret
+
+  val defaultFont = withFallback(Font.PLAIN, 32, "微软雅黑", "黑体", "STHeiti", "Consolas", "Monospace", "Arial")
+
+  def withFallback2(style: Int, size: Int, fallbackNames: Array[String]) =
+    withFallback(style, size, fallbackNames.toSeq: _*)
+
+  def withFallback(style: Int, size: Int, fallbackNames: String*) = {
+    val allfonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAllFonts
+    val used = fallbackNames.filter(n => allfonts.exists(_.getName.equalsIgnoreCase(n))).take(1)
+    print(s"used: ${Option(used.head)}")
+    if (used.isEmpty) TrueTypeFont(new Font(null, style, size))
+    else TrueTypeFont(new Font(used.head, style, size))
   }
 
   def apply(font: Font) = new TrueTypeFont(font)

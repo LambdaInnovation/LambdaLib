@@ -1,24 +1,23 @@
 package cn.lambdalib.util.client.article;
 
-import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.client.RenderUtils;
-import cn.lambdalib.util.helper.Font;
+import cn.lambdalib.util.client.font.IFont;
+import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.key.KeyManager;
 import net.minecraft.util.ResourceLocation;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 
 public class ArticlePlotter {
 
 	private List<Instruction> instructions = new ArrayList<>();
 	private double maxHeight = 0.0;
 	private IKeyResolver resolver = null;
+
+	IFont font;
+	FontOption option;
 
 	private interface Instruction {
 		void invoke();
@@ -31,6 +30,8 @@ public class ArticlePlotter {
 		int resolve(String keyid);
 	}
 
+	ArticlePlotter() {}
+
 	public void setKeyResolver(IKeyResolver _resolver) {
 		resolver = _resolver;
 	}
@@ -39,16 +40,14 @@ public class ArticlePlotter {
 
 	/**
 	 * Instructs to draw a text.
-	 * @return The length of the string drawn
 	 */
-	public double iText(double x, double y, String str, double size) {
+	public void iText(double x, double y, String str, double size) {
 		debug(String.format("%s (%.2f,%.2f)-%.2f", str, x, y, size));
 		updht(y + size);
 		instructions.add(() -> {
-			Font.font.draw(str, x, y, size, 0xffffff);
+			option.fontSize = size;
+			font.draw(str, x, y, option);
 		});
-		// TODO migrate to new font
-		return 0;
 	}
 
 	/**

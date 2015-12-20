@@ -2,7 +2,11 @@ package cn.lambdalib.util.client.article;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.core.LambdaLib;
-import cn.lambdalib.util.helper.Font;
+import cn.lambdalib.util.client.font.Fragmentor;
+import cn.lambdalib.util.client.font.Fragmentor.TokenType;
+import cn.lambdalib.util.client.font.IFont;
+import cn.lambdalib.util.client.font.IFont.FontOption;
+import cn.lambdalib.util.client.font.TrueTypeFont;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -13,23 +17,13 @@ import java.util.*;
 @Registrant
 public class ArticleCompiler {
 
-	enum TokenType { NULL, NEXTLINE, THISLINE }
-
 	private static final String BOLD = "§l";
-	private static final char puncts[] = { ',', '.', ':', '，', '。', '、', '；', '：' };
 	private static final float headerScales[] = { 1.6f, 1.5f, 1.4f, 1.3f, 1.2f, 1.1f };
 	private static final String headerPrefixes[] = { BOLD, BOLD, BOLD, "", "", "", };
 	private static final Set<String> inlineTags = new HashSet<>();
 	static {
 		inlineTags.add("img");
 		inlineTags.add("br");
-	}
-
-	private static boolean isPunct(char ch) {
-		for(char c : puncts)
-			if(c == ch)
-				return true;
-		return false;
 	}
 
 	private final PushbackReader reader;
@@ -41,10 +35,10 @@ public class ArticleCompiler {
 
 	private Stack<String> tags = new Stack<>();
 
-	private Font font = Font.font;
-
 	// Render parameteres
-	private float fontSize = 10;
+	private IFont font = TrueTypeFont.defaultFont();
+	private FontOption fontOption = new FontOption();
+
 	private double spacing = 3, width = 2333;
 
 	// Compile-time render states
@@ -68,8 +62,13 @@ public class ArticleCompiler {
 	}
 
 	// Rendering options
-	public ArticleCompiler setFontSize(float sz) {
-		fontSize = sz;
+	public ArticleCompiler setFont(IFont _font) {
+		font = _font;
+		return this;
+	}
+
+	public ArticleCompiler setFontOption(FontOption _option) {
+		fontOption = _option;
 		return this;
 	}
 
@@ -86,6 +85,9 @@ public class ArticleCompiler {
 	public ArticlePlotter compile() {
 		try {
 			parse();
+
+			plotter.font = font;
+			plotter.option = fontOption.clone();
 		} catch(Exception e) {
 			LambdaLib.log.fatal("Error compiling article", e);
 		}
@@ -94,7 +96,7 @@ public class ArticleCompiler {
 
 	// Internal
 	private void parse() throws IOException {
-		lfs = fontSize;
+		lfs = fontOption.fontSize;
 
 		while(!eof) {
 			if(peekChar() == '[') {
@@ -239,12 +241,12 @@ public class ArticleCompiler {
 
 			String pref = "";
 
-			float size = fontSize;
+			double size = fontOption.fontSize;
 			for(String tag : tags) {
 				if(tag.startsWith("h")) {
 					int hid = Integer.valueOf(tag.substring(1)) - 1;
 					require(hid >= 0 && hid < 6);
-					size = fontSize * headerScales[hid];
+					size = fontOption.fontSize * headerScales[hid];
 					pref = headerPrefixes[hid];
 				} else if(tag.equals("em")) {
 					pref = BOLD;
@@ -262,21 +264,21 @@ public class ArticleCompiler {
 		}
 	}
 
-	private void procFragment(TokenType type, String pref, String str, float size) {
+	private void procFragment(TokenType type, String pref, String str, double size) {
 		debug("FRAG " + type + " " + str);
-		double len = font.strLen(str, size);
+		double len = font.getTextWidth(str, fontOption);
 		if(x + len > width) {
 			if(type == TokenType.THISLINE) {
-				x = font.strLen(str, size);
+				x = len;
 				y += size;// + spacing;
 				plotter.iText(0, y, pref + str, size);
 			} else {
 				double acc = 0.0;
 				int i = 0;
 				for(; i < str.length() && x + acc < width; ++i) {
-					acc += font.charLen(str.charAt(i), size);
+					acc += font.getCharWidth(str.charAt(i), fontOption);
 				}
-				if(i < str.length() && isPunct(str.charAt(i))) {
+				if(i < str.length() && Fragmentor.isPunct(str.charAt(i))) {
 					// Grab the punctuation mark
 					++i;
 				}
@@ -293,7 +295,7 @@ public class ArticleCompiler {
 	}
 
 	private void debug(Object msg) {
-		 LambdaLib.log.info("[ACR] " + msg);
+		 // LambdaLib.log.info("[ACR] " + msg);
 	}
 
 	private char read() throws IOException {
@@ -331,38 +333,6 @@ public class ArticleCompiler {
 		throw new RuntimeException("[ArticleCompiler] " + errmsg);
 	}
 
-	private static class Fragmentor {
 
-		final String str;
-		int index = 0;
-
-		Fragmentor(String _str) {
-			str = _str;
-		}
-
-		Pair<TokenType, String> next() {
-			if(index == str.length()) {
-				return Pair.of(TokenType.NULL, null);
-			} else {
-				TokenType init = getType(str.charAt(index));
-				int lindex = index;
-				for(++index; index < str.length(); ++index) {
-					if(getType(str.charAt(index)) != init)
-						break;
-				}
-				return Pair.of(init, str.substring(lindex, index));
-			}
-		}
-
-		public boolean hasNext() {
-			return index < str.length();
-		}
-
-		TokenType getType(char ch) {
-			return (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || (ch == '_' || ch == '-') ||
-					Character.isWhitespace(ch) || Character.isDigit(ch)) ? TokenType.THISLINE : TokenType.NEXTLINE;
-		}
-
-	}
 
 }
