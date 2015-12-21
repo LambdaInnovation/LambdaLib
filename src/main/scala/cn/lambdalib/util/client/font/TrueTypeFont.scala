@@ -47,10 +47,10 @@ class TrueTypeFont(val font: Font) extends IFont {
   override def draw(str: String, px: Double, y: Double, option: FontOption) = {
     val len = getTextWidth(str, option) // Which will call updateCache()
 
-    (0 until dirty.size()).map(i => (i, dirty.get(i))).filter(_._2).foreach {
-      case (index, _) =>
-        GL30.glGenerateMipmap(GL_TEXTURE_2D)
-    }
+    (0 until dirty.size()).filter(dirty.get).foreach(index => {
+      glBindTexture(GL_TEXTURE_2D, generated.get(index))
+      GL30.glGenerateMipmap(GL_TEXTURE_2D)
+    })
     dirty.clear()
 
     var x = px
