@@ -8,7 +8,7 @@ import java.util
 import cn.lambdalib.util.client.font.IFont.FontOption
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.util.MathHelper
-import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.{GL30, GL11}
 import org.lwjgl.opengl.GL11._
 
 /**
@@ -29,6 +29,7 @@ class TrueTypeFont(val font: Font) extends IFont {
   private val maxStep = maxPerCol * maxPerCol
 
   private val generated = new util.ArrayList[Int]
+  private val dirty = new util.BitSet()
   private val lookup = new util.HashMap[Int, CachedChar]
 
   private def currentTexture = generated.get(generated.size - 1)
@@ -45,6 +46,13 @@ class TrueTypeFont(val font: Font) extends IFont {
 
   override def draw(str: String, px: Double, y: Double, option: FontOption) = {
     val len = getTextWidth(str, option) // Which will call updateCache()
+
+    (0 until dirty.size()).map(i => (i, dirty.get(i))).filter(_._2).foreach {
+      case (index, _) =>
+        GL30.glGenerateMipmap(GL_TEXTURE_2D)
+    }
+    dirty.clear()
+
     var x = px
     val t = Tessellator.instance
     val sz = option.fontSize
@@ -56,8 +64,8 @@ class TrueTypeFont(val font: Font) extends IFont {
     val preEnabled = glIsEnabled(GL_ALPHA_TEST)
     val preFunc = glGetInteger(GL_ALPHA_TEST_FUNC)
     val preRef = glGetFloat(GL_ALPHA_TEST_REF)
-    glEnable(GL_ALPHA_TEST)
-    glAlphaFunc(GL_GEQUAL, 0.1f)
+    glDisable(GL_ALPHA_TEST)
+    // glAlphaFunc(GL_GEQUAL, 0.1f)
     glEnable(GL_TEXTURE_2D)
     // TODO group by texture to reduce draw calls?
     for(i <- codePoints(str)) yield {
@@ -75,7 +83,7 @@ class TrueTypeFont(val font: Font) extends IFont {
       x += info.width * scale
     }
     if (preEnabled) {
-      glDisable(GL_ALPHA_TEST)
+      glEnable(GL_ALPHA_TEST)
     }
     glAlphaFunc(preFunc, preRef)
   }
@@ -99,8 +107,8 @@ class TrueTypeFont(val font: Font) extends IFont {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_SZ_LIMIT, TEXTURE_SZ_LIMIT, 0, GL_RGBA, GL_FLOAT,
       null.asInstanceOf[ByteBuffer])
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
@@ -190,6 +198,8 @@ class TrueTypeFont(val font: Font) extends IFont {
       step = 0
       newTexture()
     }
+
+    dirty.set(generated.size - 1)
 
     g.dispose()
   }
