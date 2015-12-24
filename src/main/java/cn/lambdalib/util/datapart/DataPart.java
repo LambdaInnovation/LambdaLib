@@ -13,6 +13,7 @@
 package cn.lambdalib.util.datapart;
 
 import cn.lambdalib.networkcall.s11n.StorageOption.RangedTarget;
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -116,6 +117,13 @@ public abstract class DataPart<Ent extends Entity> {
 	public String getName() {
 		return data.getName(this);
 	}
+
+    // Utils
+    protected void assertSide(Side side) {
+        if (FMLCommonHandler.instance().getEffectiveSide() != side) {
+            throw new RuntimeException("Invalid side, should be " + side);
+        }
+    }
 
 	// Internal
 
