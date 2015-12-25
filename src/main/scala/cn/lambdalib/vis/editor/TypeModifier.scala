@@ -58,6 +58,8 @@ abstract class EditBox extends Widget with IModifier {
 
   protected def backColor = pure(0.2)
 
+  private var editing = false
+
   protected val drawer: DrawTexture = new DrawTexture
   drawer.texture = null
   drawer.color = backColor
@@ -71,6 +73,7 @@ abstract class EditBox extends Widget with IModifier {
 
   this.listens[ChangeContentEvent](() => {
     drawer.color = Styles.cModified
+    editing = true
   })
 
   this.listens[ConfirmInputEvent](() => {
@@ -84,6 +87,7 @@ abstract class EditBox extends Widget with IModifier {
         drawer.color = cErrored
         LambdaLib.log.error("ModifierBase.confirmInput()", e)
     }
+    editing = false
   })
 
   override def onAdded() = {
@@ -100,6 +104,8 @@ abstract class EditBox extends Widget with IModifier {
         text.setContent("<error>")
     }
   }
+
+  def isEditing = editing
 
   @throws(classOf[Exception])
   protected def repr: String

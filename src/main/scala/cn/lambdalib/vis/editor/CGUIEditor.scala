@@ -497,12 +497,14 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
       val time = GameTimer.getAbsTime
       if (time - lastUpdated > 1000L) {
         lastUpdated = time
+        // Update not-editing elements only
         elements foreach update
       }
     })
 
     private def update(e: Element): Unit = {
       ObjectEditor.getModifier(e) match {
+        case Some(m: EditBox) if m.isEditing => // Do nothing if editing
         case Some(m) => m.updateRepr()
         case _ =>
       }

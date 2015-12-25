@@ -141,6 +141,7 @@ public class WidgetContainer implements Iterable<Widget> {
 			if(!w.disposed) {
 				return false;
 			}
+            widgets.remove(name); // Remove the previously disposed widget
 		}
 
 		if(widgets.containsValue(add)) {

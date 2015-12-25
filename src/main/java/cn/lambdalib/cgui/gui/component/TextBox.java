@@ -190,9 +190,9 @@ public class TextBox extends Component {
 		this(new FontOption());
 	}
 	
-	public TextBox(FontOption option) {
+	public TextBox(FontOption _option) {
 		super("TextBox");
-		this.option = option;
+		this.option = _option;
 
 		listen(KeyEvent.class, (w, event) -> {
 			if(!allowEdit)

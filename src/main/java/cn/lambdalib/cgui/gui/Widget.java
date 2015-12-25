@@ -67,7 +67,7 @@ public class Widget extends WidgetContainer {
 
 
     // Construction sugar
-    public Widget at(double x, double y) {
+    public Widget pos(double x, double y) {
         transform.setPos(x, y);
         return this;
     }
@@ -89,6 +89,11 @@ public class Widget extends WidgetContainer {
 
     public Widget centered() {
         transform.setCenteredAlign();
+        return this;
+    }
+
+    public Widget scale(double s) {
+        transform.scale = s;
         return this;
     }
 
