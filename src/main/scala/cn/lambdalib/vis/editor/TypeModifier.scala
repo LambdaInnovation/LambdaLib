@@ -2,7 +2,7 @@ package cn.lambdalib.vis.editor
 
 import java.lang.reflect.Field
 
-import cn.lambdalib.cgui.ScalaExtensions
+import cn.lambdalib.cgui.ScalaCGUI
 import cn.lambdalib.cgui.gui.Widget
 import cn.lambdalib.cgui.gui.component.TextBox.{ConfirmInputEvent, ChangeContentEvent}
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign
@@ -11,7 +11,7 @@ import cn.lambdalib.cgui.gui.event.{GuiEvent, LeftClickEvent, LostFocusEvent}
 import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.util.client.font.IFont.FontOption
 
-import ScalaExtensions._
+import ScalaCGUI._
 
 import Styles._
 import net.minecraft.util.ResourceLocation

@@ -76,6 +76,7 @@ class DOMSerialization {
       val content = src.getTextContent
       klass.getEnumConstants.find(_.toString == content) match {
         case Some(e) => e.asInstanceOf[T]
+        case _ => throw new RuntimeException("No enum with literal name " + content)
       }
     } else {
       val ret = klass.newInstance

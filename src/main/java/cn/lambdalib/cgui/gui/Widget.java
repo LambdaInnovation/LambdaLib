@@ -16,6 +16,8 @@ import java.util.*;
 
 import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.cgui.gui.component.Transform;
+import cn.lambdalib.cgui.gui.component.Transform.HeightAlign;
+import cn.lambdalib.cgui.gui.component.Transform.WidthAlign;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.GuiEventBus;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
@@ -62,6 +64,45 @@ public class Widget extends WidgetContainer {
 	public Widget(double x, double y, double width, double height) {
 		transform.setPos(x, y).setSize(width, height);
 	}
+
+
+    // Construction sugar
+    public Widget at(double x, double y) {
+        transform.setPos(x, y);
+        return this;
+    }
+
+    public Widget size(double w, double h) {
+        transform.setSize(w, h);
+        return this;
+    }
+
+    public  Widget walign(WidthAlign align) {
+        transform.alignWidth = align;
+        return this;
+    }
+
+    public Widget halign(HeightAlign align) {
+        transform.alignHeight = align;
+        return this;
+    }
+
+    public Widget centered() {
+        transform.setCenteredAlign();
+        return this;
+    }
+
+    public Widget withChild(Widget child) {
+        addWidget(child);
+        return this;
+    }
+
+    public Widget withChild(String name, Widget child) {
+        addWidget(name, child);
+        return this;
+    }
+
+    //
 
 	/**
 	 * @return Whether the widget is visible (and called each draw frame).

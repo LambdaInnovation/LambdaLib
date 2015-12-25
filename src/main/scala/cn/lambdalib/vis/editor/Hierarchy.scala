@@ -9,7 +9,7 @@ import net.minecraft.util.ResourceLocation
 
 import org.lwjgl.opengl.GL11._
 
-import cn.lambdalib.cgui.ScalaExtensions._
+import cn.lambdalib.cgui.ScalaCGUI._
 import scala.collection.JavaConversions._
 import Styles._
 

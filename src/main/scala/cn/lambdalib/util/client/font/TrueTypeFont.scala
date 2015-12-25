@@ -159,7 +159,7 @@ class TrueTypeFont(val font: Font) extends IFont {
     val db = image.getData().getDataBuffer
     val bpp = image.getColorModel.getPixelSize.toByte
     if (db.isInstanceOf[DataBufferInt]) {
-      val intI = image.getData().getDataBuffer().asInstanceOf[DataBufferInt].getData()
+      val intI = image.getData().getDataBuffer.asInstanceOf[DataBufferInt].getData()
       val newI = new Array[Byte](intI.length * 4)
       for(i <- 0 until intI.length) yield {
         val b = intToByteArray(intI(i))

@@ -8,19 +8,24 @@ import scala.reflect.ClassTag
 
 class RichWidget(val w: Widget) extends AnyVal {
 
-  def listens[T <: GuiEvent](handler: (Widget, T) => Any, priority: Int = 0)(implicit evidence: ClassTag[T]): Unit = {
+  def listens[T <: GuiEvent](handler: (Widget, T) => Any, priority: Int = 0)(implicit evidence: ClassTag[T]) = {
     w.listen[T](evidence.runtimeClass.asInstanceOf[Class[T]], new IGuiEventHandler[T] {
       override def handleEvent(w: Widget, event: T) = {
         handler(w, event)
       }
     }, priority)
+    w
   }
 
-  def listens[T <: GuiEvent](handler: T => Any)(implicit evidence: ClassTag[T]): Unit =
+  def listens[T <: GuiEvent](handler: T => Any)(implicit evidence: ClassTag[T]) = {
     listens((_, e: T) => handler(e))
+    w
+  }
 
-  def listens[T <: GuiEvent](handler: () => Any)(implicit evidence: ClassTag[T]): Unit =
+  def listens[T <: GuiEvent](handler: () => Any)(implicit evidence: ClassTag[T]) = {
     listens((_, _: T) => handler())
+    w
+  }
 
   def :+(add: Widget): Unit = w.addWidget(add)
 
@@ -49,7 +54,7 @@ class RichComponent(val c: Component) extends AnyVal {
 /**
   * CGUI scala extensions to reduce syntax burden.
   */
-object ScalaExtensions {
+object ScalaCGUI {
 
   implicit def toWrapper(w: Widget): RichWidget = new RichWidget(w)
 

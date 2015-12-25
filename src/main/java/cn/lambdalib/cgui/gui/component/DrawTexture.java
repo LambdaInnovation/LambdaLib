@@ -36,7 +36,7 @@ public class DrawTexture extends Component {
 	
 	public ResourceLocation texture = MISSING;
 	
-	public Color color = new Color(1, 1, 1, 1);
+	public Color color;
 	
 	public double zLevel = 0;
 	
@@ -45,28 +45,36 @@ public class DrawTexture extends Component {
 	private int shaderId = 0;
 
 	public DrawTexture() {
-		super("DrawTexture");
-		listen(FrameEvent.class, (w, e) -> 
-		{
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glDisable(GL_ALPHA_TEST);
-			glDepthMask(writeDepth);
-			glUseProgram(shaderId);
-			color.bind();
-			double preLevel = HudUtils.zLevel;
-			HudUtils.zLevel = zLevel;
-			
-			if(texture != null && !texture.getResourcePath().equals("<null>")) {
-				RenderUtils.loadTexture(texture);
-				HudUtils.rect(0, 0, w.transform.width, w.transform.height);
-			} else {
-				HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
-			}
-			HudUtils.zLevel = preLevel;
-			glUseProgram(0);
-			glDepthMask(true);
-		});
+		this(MISSING);
 	}
+
+    public DrawTexture(ResourceLocation texture) {
+        this(texture, Color.white());
+    }
+
+    public DrawTexture(ResourceLocation texture, Color color) {
+        super("DrawTexture");
+        listen(FrameEvent.class, (w, e) ->
+        {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDisable(GL_ALPHA_TEST);
+            glDepthMask(writeDepth);
+            glUseProgram(shaderId);
+            color.bind();
+            double preLevel = HudUtils.zLevel;
+            HudUtils.zLevel = zLevel;
+
+            if(texture != null && !texture.getResourcePath().equals("<null>")) {
+                RenderUtils.loadTexture(texture);
+                HudUtils.rect(0, 0, w.transform.width, w.transform.height);
+            } else {
+                HudUtils.colorRect(0, 0, w.transform.width, w.transform.height);
+            }
+            HudUtils.zLevel = preLevel;
+            glUseProgram(0);
+            glDepthMask(true);
+        });
+    }
 	
 	public void setShaderId(int id) {
 		shaderId = id;

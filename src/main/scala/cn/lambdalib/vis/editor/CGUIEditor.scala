@@ -8,7 +8,7 @@ import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event._
-import cn.lambdalib.cgui.ScalaExtensions._
+import cn.lambdalib.cgui.ScalaCGUI._
 import cn.lambdalib.cgui.loader.xml.CGUIDocLoader
 import cn.lambdalib.cgui.xml.CGUIDocument
 import cn.lambdalib.util.client.{RenderUtils, HudUtils}

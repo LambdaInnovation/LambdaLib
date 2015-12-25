@@ -19,7 +19,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 
-import cn.lambdalib.cgui.ScalaExtensions._
+import cn.lambdalib.cgui.ScalaCGUI._
 import scala.collection.JavaConversions._
 
 object Styles {

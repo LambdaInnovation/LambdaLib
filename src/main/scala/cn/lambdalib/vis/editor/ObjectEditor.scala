@@ -9,7 +9,7 @@ import cn.lambdalib.cgui.gui.event.GuiEvent
 import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.util.helper.Color
 
-import cn.lambdalib.cgui.ScalaExtensions._
+import cn.lambdalib.cgui.ScalaCGUI._
 import cn.lambdalib.vis.model.CompTransform
 import net.minecraft.util.Vec3
 
