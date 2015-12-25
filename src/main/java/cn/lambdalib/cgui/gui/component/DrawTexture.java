@@ -34,7 +34,7 @@ public class DrawTexture extends Component {
 	
 	public static final ResourceLocation MISSING = new ResourceLocation("lambdalib:textures/cgui/missing.png");
 	
-	public ResourceLocation texture = MISSING;
+	public ResourceLocation texture;
 	
 	public Color color;
 	
@@ -52,8 +52,11 @@ public class DrawTexture extends Component {
         this(texture, Color.white());
     }
 
-    public DrawTexture(ResourceLocation texture, Color color) {
+    public DrawTexture(ResourceLocation _texture, Color _color) {
         super("DrawTexture");
+        this.texture = _texture;
+        this.color = _color;
+
         listen(FrameEvent.class, (w, e) ->
         {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
