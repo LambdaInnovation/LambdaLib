@@ -282,7 +282,6 @@ public class RenderUtils {
 	
 	/**
 	 * 直接在物品栏渲染物品icon。确认你已经绑定好贴图。
-	 * @param item
 	 */
 	public static void renderItemInventory(IIcon icon) {
 		if(icon != null) {
