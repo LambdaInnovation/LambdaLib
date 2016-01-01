@@ -84,8 +84,7 @@ public class TextBox extends Component {
 	public double zLevel = 0;
 
 	public HeightAlign heightAlign = HeightAlign.CENTER;
-	
-	@CopyIgnore
+
 	private int caretPos = 0;
 
 	private int displayOffset = 0;

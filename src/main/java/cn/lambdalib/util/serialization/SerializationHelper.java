@@ -1,6 +1,7 @@
 package cn.lambdalib.util.serialization;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -10,7 +11,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * TODO not completed
+ */
 public class SerializationHelper {
+
+    public static final SerializationHelper instance = new SerializationHelper();
+
+    private SerializationHelper() {}
 
 	private Set<Class<?>> serializeTypes = new HashSet<>();
 
@@ -39,9 +47,25 @@ public class SerializationHelper {
 	//
 
 	// Behaviour alternation
-	public void addSerializedType(Class<?> type) {
+	private void addSerializedType(Class<?> type) {
 		serializeTypes.add(type);
 	}
+
+    {
+        Class[] types = {
+                float.class, Float.class,
+                int.class, Integer.class,
+                double.class, Double.class,
+                boolean.class, Boolean.class,
+                String.class,
+                Vec3.class,
+                ResourceLocation.class
+        };
+
+        for (Class c : types) {
+            addSerializedType(c);
+        }
+    }
 	//
 
 }

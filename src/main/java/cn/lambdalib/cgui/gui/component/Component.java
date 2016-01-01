@@ -26,6 +26,7 @@ import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.deprecated.TypeHelper;
+import cn.lambdalib.util.serialization.CopyHelper;
 import cn.lambdalib.util.serialization.SerializeExcluded;
 import cn.lambdalib.vis.editor.VisExcluded;
 
@@ -94,26 +95,14 @@ public class Component {
 	}
 	
 	public Component copy() {
-		try {
-			Component c = getClass().newInstance();
-			for(Field f : copiedFields.get(getClass())) {
-				TypeHelper.set(f, c, TypeHelper.copy(f, this));
-			}
-			return c;
-		} catch(Exception e) {
-			LambdaLib.log.error("Unexpected error occured copying component of type " + getClass());
-			e.printStackTrace();
-		}
-		return null;
+		return CopyHelper.instance.copy(this);
 	}
 	
 	public boolean canStore() {
 		return true;
 	}
 	
-	/**
-	 * Recover all the data fields within the component with the data map specified.
-	 */
+	// Obsolete copy methods, preserved until old GUIs are all converted.
 	@Deprecated
 	public void fromPropertyMap(Map<String, String> map) {
 		List<Field> fields = checkCopyFields();
@@ -137,11 +126,13 @@ public class Component {
 		
 		return ret;
 	}
-	
+
+    @Deprecated
 	public Collection<Field> getPropertyList() {
 		return copiedFields.get(getClass());
 	}
-	
+
+    @Deprecated
 	private List<Field> checkCopyFields() {
 		if(copiedFields.containsKey(getClass()))
 			return copiedFields.get(getClass());
@@ -155,8 +146,11 @@ public class Component {
 		copiedFields.put(getClass(), ret);
 		return ret;
 	}
-	
+
+    @Deprecated
 	private static Map<Class, List<Field>> copiedFields = new HashMap<>();
+
+    // Obsolete end
 	
 	private List<Node> addedHandlers = new ArrayList<>();
 	

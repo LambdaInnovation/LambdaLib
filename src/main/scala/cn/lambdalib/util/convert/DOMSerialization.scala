@@ -19,14 +19,11 @@ class DOMSerialization {
   private var forwarders = List[(AnyRef => Boolean, Forwarder)]()
   private var backwarders = Map[Class[_], Backwarder[_]]()
 
-  private val serHelper = new SerializationHelper {
-    addSerializedType(classOf[Vec3])
-  }
+  private val serHelper = SerializationHelper.instance
 
   def addForward(cond: AnyRef => Boolean, forwarder: Forwarder) = forwarders = (cond, forwarder) :: forwarders
   def addForwardType(forwarder:Forwarder, classes: Class[_]*) = {
     addForward(obj => classes.exists(_.isInstance(obj)), forwarder)
-    classes.foreach(serHelper.addSerializedType)
   }
   def addBackward[T](backwarder: Backwarder[T])(implicit evidence: ClassTag[T]) =
     backwarders = backwarders updated (evidence.runtimeClass, backwarder)
