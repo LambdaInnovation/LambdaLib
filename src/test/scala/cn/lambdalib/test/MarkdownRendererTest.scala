@@ -1,4 +1,4 @@
-package test
+package cn.lambdalib.test
 
 import java.awt.Font
 
@@ -10,7 +10,7 @@ import cn.lambdalib.util.client.font.TrueTypeFont
 import cn.lambdalib.util.markdown.{GLMarkdownRenderer, MarkdownParser}
 import net.minecraft.client.gui.ScaledResolution
 
-// @Registrant
+@Registrant
 @RegAuxGui
 class MarkdownRendererTest extends AuxGui {
 
@@ -37,8 +37,6 @@ class MarkdownRendererTest extends AuxGui {
       |> dafsdfasdf
       |
       |> asa2dfdfdf
-      |
-      |![img src=lambdalib:textures/cgui/missing.png width=100 height=100]
     """.stripMargin
 
   val font = TrueTypeFont.defaultFont
@@ -48,13 +46,14 @@ class MarkdownRendererTest extends AuxGui {
   val renderer = new GLMarkdownRenderer
   renderer.boldFont = fontBold
   renderer.italicFont = fontItalic
-  renderer.widthLimit = 100
+  renderer.fontSize = 8
+  renderer.widthLimit = 180
 
   MarkdownParser.accept(markdown, renderer)
 
   override def draw(sr : ScaledResolution) = {
     renderer.render()
-    HudUtils.colorRect(100, 0, 2, 200)
+    HudUtils.colorRect(180, 0, 2, 200)
   }
 
   override def isForeground = false

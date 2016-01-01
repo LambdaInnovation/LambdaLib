@@ -23,17 +23,23 @@ class GLMarkdownRenderer extends MarkdownRenderer {
 
   val headerPrefixes = List(1.0, 1.2, 1.4, 1.6, 1.8).reverse.toArray
 
-  var font = TrueTypeFont.defaultFont
-  var boldFont = TrueTypeFont.defaultFont
-  var italicFont = TrueTypeFont.defaultFont
+  var font: IFont = TrueTypeFont.defaultFont
+  var boldFont: IFont = TrueTypeFont.defaultFont
+  var italicFont: IFont  = TrueTypeFont.defaultFont
 
   var fontSize = 10.0
-  var lineSpacing = 2.0
+  var lineSpacing = 4
   var widthLimit = Double.MaxValue
 
   var textColor = Color.white()
   var refTextColor = new Color(0xffe1c385)
-  val refBackgroundColor = new Color(0.5, 0.5, 0.5, 0.4)
+  var refBackgroundColor = new Color(0.5, 0.5, 0.5, 0.4)
+
+  def setFonts(_font: IFont, _boldFont: IFont, _italicFont: IFont) = {
+    font = _font
+    boldFont = _boldFont
+    italicFont = _italicFont
+  }
 
   //
 
@@ -101,7 +107,7 @@ class GLMarkdownRenderer extends MarkdownRenderer {
     val lines = toMultiline(text, new IFontSizeProvider {
       override def getCharWidth(chr: Int): Double = usedFont.getCharWidth(chr, option)
       override def getTextWidth(str: String): Double = usedFont.getTextWidth(str, option)
-    }, widthLimit - rc.x, widthLimit)
+    }, rc.x, widthLimit)
 
     if (listElement) {
       val dotSize = usedSize * 0.2
@@ -116,28 +122,19 @@ class GLMarkdownRenderer extends MarkdownRenderer {
       rc.x += dotSize * 2
     }
 
-    println(lines.toList)
-    if (lines.length == 1) {
-      val txt = lines(0)
-      val width = usedFont.getTextWidth(txt, option)
+    for (i <- 0 until lines.length) {
+      val ln = lines(i)
 
-      insr(new TextInsr(txt, rc.x, rc.y, usedFont, option))
+      val width = usedFont.getTextWidth(ln, option)
+
+      if (i != 0) {
+        newline(true)
+      }
 
       rc.lastSize = option.fontSize
-      rc.x += width
-      rc.lineBegin = false
-    } else {
-      for (i <- 0 until lines.size) {
-        val ln = lines(i)
-        insr(new TextInsr(ln, rc.x, rc.y, usedFont, option))
 
-        rc.lastSize = option.fontSize
-        if (i != lines.size - 1) {
-          newline(continue = true)
-        } else {
-          rc.x = usedFont.getTextWidth(ln, option)
-        }
-      }
+      insr(new TextInsr(ln, rc.x, rc.y, usedFont, option))
+      rc.x += width
     }
   }
 
@@ -164,7 +161,7 @@ class GLMarkdownRenderer extends MarkdownRenderer {
         val hover = attr.get("hover")
         var scale = if (attr.contains("scale")) attr("scale").toDouble else 1
 
-        val size = if (attr.contains("width") && attr.contains("height")) {
+        var size = if (attr.contains("width") && attr.contains("height")) {
           (attr("width").toDouble * scale, attr("height").toDouble * scale)
         } else {
           RenderUtils.loadTexture(src)
@@ -174,24 +171,38 @@ class GLMarkdownRenderer extends MarkdownRenderer {
           (twidth * scale, theight * scale)
         }
 
-        if (size._1 * scale + rc.x > widthLimit) {
+        if (size._1 + rc.x > widthLimit) {
           scale = (widthLimit - rc.x) / size._1
+          size = (size._1 * scale, size._2 * scale)
         }
 
         val x = rc.x
-        val y = rc.y
+        val y = if (size._2 >= rc.lastSize) rc.y else rc.y + rc.lastSize - size._2
         insr(() => {
           RenderUtils.loadTexture(src)
           GL11.glColor4f(1, 1, 1, 1)
           HudUtils.rect(x, y, size._1, size._2)
         })
 
+        val newY = rc.y + math.max(0, size._2 - fontSize)
+        // Take all contents rendered in same line previously and alter their position
+        // Note that this will be buggy when multiple images are introduced.
+        // Maybe we should introduce line number to make this easy to proccess?
+        instructions.reverse.drop(1).takeWhile(_.isInstanceOf[TextInsr]).foreach {
+          case insr : TextInsr if insr.y == rc.y => insr.y = newY
+          case _ =>
+        }
+
         rc.x += size._1
+        rc.y = newY
+        rc.lastSize = fontSize
 
       case _ => // Ignore
     }
   }
 
   def render() = instructions foreach (_.apply())
+
+  def getMaxHeight = rc.y + fontSize
 
 }

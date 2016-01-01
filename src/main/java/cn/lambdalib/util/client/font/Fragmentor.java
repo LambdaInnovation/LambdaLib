@@ -26,13 +26,11 @@ public class Fragmentor {
 		double getTextWidth(String str);
 	}
 
-    public static List<String> toMultiline(String str, IFontSizeProvider font, double headLimit, double restLimit) {
+    public static List<String> toMultiline(String str, IFontSizeProvider font, double local_x, double limit) {
         Fragmentor frag = new Fragmentor(str);
         List<String> ret = new ArrayList<>();
 
         StringBuilder builder = new StringBuilder();
-        double local_x = 0;
-        double limit = headLimit;
         while (frag.hasNext()) {
             Pair<TokenType, String> next = frag.next();
             TokenType type = next.getLeft();
@@ -42,7 +40,6 @@ public class Fragmentor {
                 if (!type.canSplit) { // Draws as whole in next line
                     if (builder.length() > 0) {
                         ret.add(builder.toString());
-                        limit = restLimit;
                     }
                     builder.setLength(0);
                     builder.append(content);
@@ -59,8 +56,10 @@ public class Fragmentor {
                             ++i;
                         }
 
-                        ret.add(builder.append(content.substring(0, i)).toString());
-                        limit = restLimit;
+                        builder.append(content.substring(0, i));
+                        String add = builder.toString();
+                        System.out.println(add);
+                        ret.add(add);
 
                         builder.setLength(0);
                         local_x = 0;
@@ -85,7 +84,7 @@ public class Fragmentor {
 	 * Converts a string with linesep to a list of string, based on the display property of the given font.
 	 */
 	public static List<String> toMultiline(String str, IFontSizeProvider font, double limit) {
-		return toMultiline(str, font, limit, limit);
+		return toMultiline(str, font, 0, limit);
 	}
 
 	public static boolean isPunct(char ch) {
@@ -117,9 +116,10 @@ public class Fragmentor {
 			int lindex = index;
 			for(++index; index < str.length(); ++index) {
                 TokenType type = getType(str.charAt(index));
-				if(type != init && type != TokenType.PUNCT)
-					break;
+				if(init != TokenType.CJKV && init != type && type != TokenType.PUNCT)
+                    break;
 			}
+            System.out.println("F::" + str.substring(lindex, index));
 			return Pair.of(init, str.substring(lindex, index));
 		}
 	}
