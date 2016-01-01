@@ -7,11 +7,12 @@ import java.util.List;
 
 /**
  * A helper to 'fragmentize' string to draw in multi-line in a sane way.
+ * Currently isn't perfecct, but is viable.
  * @author WeAthFolD
  */
 public class Fragmentor {
 
-	private static final char puncts[] = { ',', '.', ':', '，', '。', '、', '；', '：' };
+	private static final String puncts = ",.<>?;:'\"[]{}【】：；“‘《》，。？";
 
 	public interface IFontSizeProvider {
 		/**
@@ -25,69 +26,81 @@ public class Fragmentor {
 		double getTextWidth(String str);
 	}
 
+    public static List<String> toMultiline(String str, IFontSizeProvider font, double headLimit, double restLimit) {
+        Fragmentor frag = new Fragmentor(str);
+        List<String> ret = new ArrayList<>();
+
+        StringBuilder builder = new StringBuilder();
+        double local_x = 0;
+        double limit = headLimit;
+        while (frag.hasNext()) {
+            Pair<TokenType, String> next = frag.next();
+            TokenType type = next.getLeft();
+            String content = next.getRight();
+            double len = font.getTextWidth(content);
+            if (local_x + len > limit) {
+                if (!type.canSplit) { // Draws as whole in next line
+                    if (builder.length() > 0) {
+                        ret.add(builder.toString());
+                        limit = restLimit;
+                    }
+                    builder.setLength(0);
+                    builder.append(content);
+                    local_x = len;
+                } else { // Seperate to this line and next line
+                    while (!content.isEmpty()) {
+                        double acc = 0.0;
+                        int i = 0;
+                        for (; i < content.length() && local_x + acc <= limit; ++i) {
+                            acc += font.getCharWidth(content.charAt(i));
+                        }
+
+                        if (i < content.length() && isPunct(content.charAt(i))) {
+                            ++i;
+                        }
+
+                        ret.add(builder.append(content.substring(0, i)).toString());
+                        limit = restLimit;
+
+                        builder.setLength(0);
+                        local_x = 0;
+
+                        content = content.substring(i);
+                    }
+                }
+            } else {
+                builder.append(content);
+                local_x += len;
+            }
+        }
+
+        if (builder.length() > 0) {
+            ret.add(builder.toString());
+        }
+
+        return ret;
+    }
+
 	/**
 	 * Converts a string with linesep to a list of string, based on the display property of the given font.
 	 */
 	public static List<String> toMultiline(String str, IFontSizeProvider font, double limit) {
-		Fragmentor frag = new Fragmentor(str);
-		List<String> ret = new ArrayList<>();
-
-		StringBuilder builder = new StringBuilder();
-		double local_x = 0;
-		while (frag.hasNext()) {
-			Pair<TokenType, String> next = frag.next();
-			TokenType type = next.getLeft();
-			String content = next.getRight();
-			double len = font.getTextWidth(content);
-			if (local_x + len > limit) {
-				if (type == TokenType.THISLINE) { // Draws as whole in next line
-					if (builder.length() > 0) {
-						ret.add(builder.toString());
-					}
-					builder.setLength(0);
-					builder.append(content);
-					local_x = len;
-				} else { // Seperate to this line and next line
-					while (!content.isEmpty()) {
-						double acc = 0.0;
-						int i = 0;
-						for (; i < content.length() && local_x + acc <= limit; ++i) {
-							acc += font.getCharWidth(content.charAt(i));
-						}
-
-						if (i < content.length() && isPunct(content.charAt(i))) {
-							++i;
-						}
-
-						ret.add(builder.append(content.substring(0, i)).toString());
-
-						builder.setLength(0);
-						local_x = 0;
-
-						content = content.substring(i);
-					}
-				}
-			} else {
-				builder.append(content);
-				local_x += len;
-			}
-		}
-
-		if (builder.length() > 0) {
-			ret.add(builder.toString());
-		}
-
-		return ret;
+		return toMultiline(str, font, limit, limit);
 	}
 
 	public static boolean isPunct(char ch) {
-		for(char c : puncts)
-			if(c == ch)
-				return true;
-		return false;
+		for (int i = 0; i < puncts.length(); ++i) {
+            if (puncts.charAt(i) == ch) return true;
+        }
+        return false;
 	}
 
-	public enum TokenType { NULL, NEXTLINE, THISLINE }
+	public enum TokenType { NULL(true), WORD(false), SPACE(true), CJKV(true), PUNCT(true);
+        public final boolean canSplit;
+        TokenType(boolean _canSplit) {
+            canSplit = _canSplit;
+        }
+    }
 
 	final String str;
 	int index = 0;
@@ -103,7 +116,8 @@ public class Fragmentor {
 			TokenType init = getType(str.charAt(index));
 			int lindex = index;
 			for(++index; index < str.length(); ++index) {
-				if(getType(str.charAt(index)) != init)
+                TokenType type = getType(str.charAt(index));
+				if(type != init && type != TokenType.PUNCT)
 					break;
 			}
 			return Pair.of(init, str.substring(lindex, index));
@@ -115,8 +129,15 @@ public class Fragmentor {
 	}
 
 	TokenType getType(char ch) {
-		return (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || (ch == '_' || ch == '-') ||
-				Character.isWhitespace(ch) || Character.isDigit(ch)) ? TokenType.THISLINE : TokenType.NEXTLINE;
+        if (isPunct(ch)) {
+            return TokenType.PUNCT;
+        } else if (Character.isWhitespace(ch)) {
+            return TokenType.SPACE;
+        } else if (Character.isIdeographic(ch)) {
+            return TokenType.CJKV;
+        } else {
+            return TokenType.WORD;
+        }
 	}
 
 }

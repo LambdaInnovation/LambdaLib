@@ -268,7 +268,7 @@ public class ArticleCompiler {
 		debug("FRAG " + type + " " + str);
 		double len = font.getTextWidth(str, fontOption);
 		if(x + len > width) {
-			if(type == TokenType.THISLINE) {
+			if(!type.canSplit) {
 				x = len;
 				y += size;// + spacing;
 				plotter.iText(0, y, pref + str, size);
