@@ -69,4 +69,8 @@ public class CGuiScreen extends GuiScreen {
     public CGui getGui() {
     	return gui;
     }
+
+    // Scala sugar
+
+    public CGui gui() { return gui; }
 }

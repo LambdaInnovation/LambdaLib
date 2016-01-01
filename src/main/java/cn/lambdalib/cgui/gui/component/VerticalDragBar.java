@@ -17,8 +17,10 @@ import cn.lambdalib.cgui.gui.event.DragEvent;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 
 /**
+ * Prefer using {@link DragBar} instead.
  * @author WeAthFolD
  */
+@Deprecated
 public class VerticalDragBar extends Component {
 	
 	public static class DraggedEvent implements GuiEvent {}

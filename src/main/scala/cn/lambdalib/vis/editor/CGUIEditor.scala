@@ -27,7 +27,8 @@ object CGUIEditor {
     new VerticalDragBar(),
     new ProgressBar(),
     new TextBox(),
-    new Outline()
+    new Outline(),
+    new DragBar()
   )
 
   lazy val fo_createPosHint = new FontOption(9, FontAlign.CENTER)
