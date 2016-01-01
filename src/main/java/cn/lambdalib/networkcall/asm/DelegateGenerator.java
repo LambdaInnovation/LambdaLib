@@ -12,6 +12,7 @@
  */
 package cn.lambdalib.networkcall.asm;
 
+import cn.lambdalib.networkcall.RegNetworkCall;
 import net.minecraft.entity.player.EntityPlayer;
 
 import org.objectweb.asm.AnnotationVisitor;
@@ -139,7 +140,7 @@ public class DelegateGenerator {
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, 
                     //delegateClassType.getInternalName(), //changed to original class
                     className.replace('.', '/'),
-                    delegateFunctionName, desc);
+                    delegateFunctionName, desc, false);
             mv.visitInsn(Opcodes.RETURN);
             mv.visitMaxs(args.length + 2, 2);
             mv.visitEnd();
@@ -400,7 +401,6 @@ public class DelegateGenerator {
                 for (int i = 0; i < options.length; ++i) {
                     options[i] = StorageOption.Option.NULL; //set default value
                 }
-                options[0] = StorageOption.Option.INSTANCE;
             }
             
             @Override
@@ -490,7 +490,26 @@ public class DelegateGenerator {
                 return super.visitParameterAnnotation(parameter, desc, visible);
             }
             
-            //TODO this option (from annotation)
+            // this option (from annotation)
+            @Override
+            public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                Type type = Type.getType(desc);
+                if (type.equals(Type.getType(RegNetworkCall.class))) {
+                    return new AnnotationVisitor(Opcodes.ASM5, super.visitAnnotation(desc, visible)) {
+                        @Override
+                        public void visitEnum(String name, String desc, String value) {
+                            if (name.equals("thisStorage")) {
+                                StorageOption.Option opt = StorageOption.Option.valueOf(value);
+                                options[0] = opt;
+                            }
+
+                            super.visitEnum(name, desc, value);
+                        }
+                    };
+                }
+
+                return super.visitAnnotation(desc, visible);
+            }
             
             @Override
             public void visitEnd() {

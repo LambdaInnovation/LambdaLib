@@ -12,6 +12,7 @@
  */
 package cn.lambdalib.util.datapart;
 
+import cn.lambdalib.networkcall.s11n.StorageOption.Option;
 import cn.lambdalib.networkcall.s11n.StorageOption.RangedTarget;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.entity.Entity;
@@ -157,12 +158,12 @@ public abstract class DataPart<Ent extends Entity> {
 		}
 	}
 	
-	@RegNetworkCall(side = Side.SERVER)
+	@RegNetworkCall(side = Side.SERVER, thisStorage = Option.INSTANCE)
 	private void syncFromClient(@Data NBTTagCompound tag) {
 		fromNBTSync(tag);
 	}
 	
-	@RegNetworkCall(side = Side.CLIENT)
+	@RegNetworkCall(side = Side.CLIENT, thisStorage = Option.INSTANCE)
 	private void syncFromServer(@RangedTarget(range = 10) Entity player, @Data NBTTagCompound tag) {
 		fromNBTSync(tag);
 	}

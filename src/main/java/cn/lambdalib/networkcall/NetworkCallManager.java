@@ -183,6 +183,7 @@ public class NetworkCallManager {
 				for (int i = 0; i < args.length; ++i) {
 					params.appendTag(SerializationManager.INSTANCE.serialize(args[i], options[i]));
 				}
+
 				netHandler.sendToServer(new NetworkCallMessage(delegateName, params));
 			}
 		});
