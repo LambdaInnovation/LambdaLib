@@ -22,7 +22,9 @@ object ObjectEditor {
   val default = new ObjectEditor
   val specialHandlers = List[((Field, AnyRef) => Boolean, (ObjectEditor, Field, AnyRef) => Element)](
     ((f, i) => f.getType == classOf[Color], (e, f, i) => {
+
       val ret = e.createElement(f, i)
+
       val hex = new Element("hex", null)
       DrawTexture.get(hex.iconArea).setColor4d(0, 0, 0, 0)
 
@@ -155,7 +157,10 @@ class ObjectEditor {
         }
 
         if(subelem != null) {
-          subelem foreach list.addWidget
+          subelem foreach (e => {
+            list.addWidget(e)
+            e.onRebuild(list)
+          })
         }
       }
     }

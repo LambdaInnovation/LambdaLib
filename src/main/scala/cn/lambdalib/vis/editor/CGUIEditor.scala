@@ -505,7 +505,7 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
 
     private def update(e: Element): Unit = {
       ObjectEditor.getModifier(e) match {
-        case Some(m: EditBox) if m.isEditing => // Do nothing if editing
+        case Some(m: EditBox) if m.isEditing || !e.isFocused =>
         case Some(m) => m.updateRepr()
         case _ =>
       }
