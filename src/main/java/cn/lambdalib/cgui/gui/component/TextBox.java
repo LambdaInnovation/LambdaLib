@@ -24,6 +24,7 @@ import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.client.font.TrueTypeFont;
 import cn.lambdalib.util.generic.MathUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -38,8 +39,10 @@ import cn.lambdalib.util.helper.GameTimer;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.StatCollector;
 
+import javax.vecmath.Vector2d;
+
 /**
- * Textbox displays text on the widget area, it might also be edited. TextBox is designed to handle ONE-LINE texts.
+ * Textbox displays text on the widget area, it might also be edited. TextBox is designed to handle single-line texts.
  * @author WeAthFolD
  */
 public class TextBox extends Component {
@@ -59,7 +62,9 @@ public class TextBox extends Component {
 	public IFont font = TrueTypeFont.defaultFont();
 
 	public FontOption option;
-	
+
+    public HeightAlign heightAlign = HeightAlign.CENTER;
+
 	/**
 	 * Only activated when doesn't allow edit. If activated, The display string will be
 	 *  <code>StatCollector.translateToLocal(content).</code>
@@ -71,23 +76,133 @@ public class TextBox extends Component {
 	 */
 	public boolean allowEdit = false;
 
-	public boolean doesEcho = false;
-	public char echoChar = '*';
-	
-	public Color color = new Color(0xffffffff);
-	
 	/**
 	 * Whether this textBox doesn't draw chars that are out of bounds.
 	 */
 	public boolean emit = true;
+
+    public boolean doesEcho = false;
+    public char echoChar = '*';
 	
 	public double zLevel = 0;
 
-	public HeightAlign heightAlign = HeightAlign.CENTER;
+    public double xOffset, yOffset;
 
 	private int caretPos = 0;
 
 	private int displayOffset = 0;
+
+    public TextBox() {
+        this(new FontOption());
+    }
+
+    public TextBox(FontOption _option) {
+        super("TextBox");
+        this.option = _option;
+    }
+
+    {
+        // Draws the content
+        listen(FrameEvent.class, (w, e) -> {
+            validate();
+
+            final Vector2d origin = origin();
+            final double widthLimit = w.transform.width - xOffset;
+
+            final String processed = processedContent().substring(displayOffset);
+
+            final int localCaret = caretPos - displayOffset; // ∈[0, processed.length]
+
+            double acc = 0.0;
+            int i = processed.length();
+            if (emit) {
+                for (i = 0; i < processed.length() && acc < widthLimit; ++i) {
+                    acc += font.getCharWidth(processed.codePointAt(i), option);
+                }
+            }
+
+            final String display = processed.substring(0, i);
+            font.draw(display, origin.x, origin.y, option);
+
+            if (w.isFocused() && allowEdit && GameTimer.getAbsTime() % 2000 < 1000) {
+                font.draw("|", origin.x + sumLength(display, 0, localCaret), origin.y - 1, option);
+            }
+        });
+
+        // Handles input
+        listen(KeyEvent.class, (__, evt) -> {
+            if (!allowEdit) {
+                return;
+            }
+
+            final char input = evt.inputChar;
+            final int keyCode = evt.keyCode;
+
+            if (keyCode == Keyboard.KEY_RIGHT) {
+                caretPos = Math.min(content.length(), caretPos + 1);
+                checkCaretRegion();
+            } else if (keyCode == Keyboard.KEY_LEFT) {
+                caretPos = Math.max(0, caretPos - 1);
+                if (caretPos < displayOffset) {
+                    displayOffset = caretPos;
+                }
+            } else if (keyCode == Keyboard.KEY_V && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+                setContent(content.substring(0, caretPos) + getClipboardContent() + content.substring(caretPos));
+                validate();
+
+                widget.post(new ChangeContentEvent());
+            } else if (keyCode == Keyboard.KEY_C && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+                saveClipboardContent();
+            } else if (keyCode == Keyboard.KEY_BACK) {
+                if (caretPos != 0) {
+                    content = content.substring(0, caretPos - 1) + content.substring(caretPos);
+                    --caretPos;
+                    if (displayOffset != 0) {
+                        --displayOffset;
+                    }
+
+                    checkCaretRegion();
+                    validate();
+                }
+            } else if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER) {
+                widget.post(new ConfirmInputEvent());
+            } else if (keyCode == Keyboard.KEY_DELETE) {
+                content = "";
+                widget.post(new ChangeContentEvent());
+
+                validate();
+            } else if (ChatAllowedCharacters.isAllowedCharacter(input)) {
+                content = content.substring(0, caretPos) + input + content.substring(caretPos);
+                caretPos = Math.min(content.length(), caretPos + 1);
+
+                checkCaretRegion();
+            }
+        });
+
+        // Mouse caret pos selection
+        listen(LeftClickEvent.class, (w, evt) -> {
+            if (!allowEdit) {
+                return;
+            }
+
+            final Vector2d origin = origin();
+            final String display = processedContent().substring(displayOffset);
+            final double rel_x = origin.x - font.getTextWidth(display, option) * option.align.lenOffset + evt.x;
+
+            double acc = 0.0;
+            int ind = 0;
+            for (; acc < rel_x && ind < display.length(); ++ind) {
+                acc += font.getCharWidth(display.codePointAt(ind), option);
+            }
+
+            if (ind > 0 && rel_x < acc - font.getCharWidth(display.codePointAt(ind - 1), option) * 0.5) {
+                ind--;
+            }
+
+            caretPos = displayOffset + ind;
+            checkCaretRegion();
+        });
+    }
 	
 	public TextBox allowEdit() {
 		allowEdit = true;
@@ -99,39 +214,65 @@ public class TextBox extends Component {
 		return this;
 	}
 
-	private String getProcessedContentRaw() {
-		String str = content;
-		if (!allowEdit && localized) {
-			str = StatCollector.translateToLocal(str);
-		}
+    private void validate() {
+        if (!allowEdit) {
+            displayOffset = caretPos = 0;
+            return;
+        }
 
-		if(doesEcho) {
-			StringBuilder sb = new StringBuilder();
-			for(int i = 0; i < str.length(); ++i) {
-				sb.append(echoChar);
-			}
-			str = sb.toString();
-		}
+        if (displayOffset >= content.length() || caretPos > content.length()) {
+            displayOffset = caretPos = 0;
+        }
+    }
 
-		return str;
-	}
-	
-	private String getProcessedContent() {
-		String str = getProcessedContentRaw();
-		if (emit) {
-			str = str.substring(displayOffset);
+    private Vector2d origin() {
+        return new Vector2d(
+                widget.transform.width * option.align.lenOffset + xOffset,
+                Math.max(0, widget.transform.height - option.fontSize) * heightAlign.factor + yOffset
+        );
+    }
 
-			double width = getDrawSize();
-			double lengthSum = 0.0;
-			for(int i = 1; i < str.length(); ++i) { // At least display one char :)
-				lengthSum += font.getCharWidth(str.codePointAt(i), option);
-				if (lengthSum >= width) {
-					str = str.substring(0, i);
-				}
-			}
-		}
-		return str;
-	}
+    private boolean shouldLocalize() {
+        return !allowEdit && localized;
+    }
+
+    private void checkCaretRegion() {
+        final double widthLimit = widthLimit();
+        final String local = processedContent().substring(displayOffset);
+
+        int localCaret = caretPos - displayOffset;
+        if (sumLength(local, 0, localCaret) > widthLimit) {
+            double acc = 0.0;
+            int mini = local.length() - 1;
+            for (; mini > 0 && acc < widthLimit; --mini) {
+                acc += font.getCharWidth(local.codePointAt(mini), option);
+            }
+
+            mini = Math.min(local.length() - 1, mini + 1);
+
+            displayOffset += mini;
+        }
+    }
+
+    private double widthLimit() {
+        return widget.transform.width - xOffset;
+    }
+
+    private String processedContent() {
+        String ret = content;
+        if (shouldLocalize()) {
+            ret = StatCollector.translateToLocal(ret);
+        }
+        if (doesEcho) {
+            ret = StringUtils.repeat(echoChar, ret.length());
+        }
+
+        return ret;
+    }
+
+    private double sumLength(String str, int begin, int end) {
+        return font.getTextWidth(str.substring(begin, end), option);
+    }
 	
 	private String getClipboardContent() {
 		Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -149,160 +290,6 @@ public class TextBox extends Component {
 		Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection ss = new StringSelection(content);
 		cb.setContents(ss, ss);
-	}
-	
-	private double[] getOffset(Widget w) {
-		double x = 0, y = 0;
-		
-		switch(option.align) {
-		case LEFT:
-			x = 2;
-			break;
-		case CENTER:
-			x = w.transform.width/ 2;
-			break;
-		case RIGHT:
-			x = w.transform.width;
-			break;
-		default:
-			break;
-		}
-		
-		switch(heightAlign) {
-		case TOP:
-			y = 0;
-			break;
-		case CENTER:
-			y = (w.transform.height - option.fontSize * 0.8) / 2;
-			break;
-		case BOTTOM:
-			y = (w.transform.height - option.fontSize * 0.8);
-			break;
-		default:
-			break;
-		}
-
-		return new double[] { x, y };
-	}
-
-	public TextBox() {
-		this(new FontOption());
-	}
-	
-	public TextBox(FontOption _option) {
-		super("TextBox");
-		this.option = _option;
-
-		listen(KeyEvent.class, (w, event) -> {
-			if(!allowEdit)
-				return;
-			
-			int par2 = event.keyCode;
-			
-			if(par2 == Keyboard.KEY_RIGHT) {
-				caretPos++;
-			} else if(par2 == Keyboard.KEY_LEFT) {
-				caretPos--;
-			}
-			
-			if(caretPos < 0) caretPos = 0;
-			if(caretPos > content.length()) caretPos = content.length();
-			
-			if(event.keyCode == Keyboard.KEY_V && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-				String str1 = content.substring(0, caretPos), str2 = getClipboardContent(), str3 = content.substring(caretPos);
-				content = str1 + str2 + str3;
-				w.post(new ChangeContentEvent());
-				return;
-			}
-			
-			if(event.keyCode == Keyboard.KEY_C && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-				saveClipboardContent();
-				return;
-			}
-			
-			if (par2 == Keyboard.KEY_BACK && content.length() > 0) {
-				if(caretPos > 0) {
-					content = content.substring(0, caretPos - 1) + 
-						(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
-					--caretPos;
-				}
-				w.post(new ChangeContentEvent());
-			} else if(par2 == Keyboard.KEY_RETURN || par2 == Keyboard.KEY_NUMPADENTER) {
-				w.post(new ConfirmInputEvent());
-			} else if(par2 == Keyboard.KEY_DELETE) {
-				content = "";
-				w.post(new ChangeContentEvent());
-			}
-
-			if (ChatAllowedCharacters.isAllowedCharacter(event.inputChar)) {
-				content = content.substring(0, caretPos) + event.inputChar +
-						(caretPos == content.length() ? "" : content.substring(caretPos, content.length()));
-				caretPos += 1;
-				w.post(new ChangeContentEvent());
-			}
-
-			check();
-		});
-		
-		listen(LeftClickEvent.class, (w, e) -> {
-			double len = 3;
-			double[] offset = getOffset(w);
-			double eventX = -offset[0] + e.x;
-			
-			for(int i = 0; i < content.length(); ++i) {
-				double cw = font.getTextWidth(String.valueOf(content.charAt(i)), option);
-				len += cw;
-				
-				if(len > eventX) {
-					caretPos = (eventX - len + cw > cw / 2) ? i + 1 : i;
-					return;
-				}
-			}
-			caretPos = content.length();
-		});
-		
-		listen(FrameEvent.class, (w, event) -> {
-			double[] offset = getOffset(w);
-			String str = getProcessedContent();
-			
-			GL11.glPushMatrix();
-			GL11.glTranslated(0, 0, zLevel);
-
-			font.draw(str, offset[0], offset[1], option);
-
-			GL11.glPopMatrix();
-			
-			if(allowEdit && w.isFocused() && GameTimer.getAbsTime() % 1000 < 500) {
-				double len = font.getTextWidth(str.substring(0, MathUtils.clampi(0, str.length(), caretPos - displayOffset)), option) - 1;
-				font.draw("|", len + offset[0], offset[1], option);
-			}
-		});
-	}
-
-	private double getDrawSize() {
-		return widget.transform.width - 3;
-	}
-
-	private void check() {
-		caretPos = MathUtils.clampi(0, content.length(), caretPos);
-		if (emit && allowEdit) {
-			checkCaretOverflow();
-		}
-	}
-
-	private void checkCaretOverflow() {
-		double width = getDrawSize();
-
-		displayOffset = MathUtils.clampi(0, caretPos - 1, displayOffset);
-		String rawContent = getProcessedContentRaw();
-
-		double lengthSum = 0.0;
-		int j;
-		for(j = caretPos - 1; j > 0 && lengthSum < width; j--) {
-			lengthSum += font.getCharWidth(rawContent.codePointAt(j), option);
-		}
-		// j is now start index of text box that can minimally display the caret
-		displayOffset = Math.max(0, j);
 	}
 	
 	public static TextBox get(Widget w) {
