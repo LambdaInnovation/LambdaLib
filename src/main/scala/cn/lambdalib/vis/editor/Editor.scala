@@ -1,6 +1,5 @@
 package cn.lambdalib.vis.editor
 
-import java.awt.Font
 import java.io.File
 import java.util
 
@@ -15,6 +14,7 @@ import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.client.font.TrueTypeFont
 import cn.lambdalib.util.helper.Color
 import cn.lambdalib.util.key.{KeyHandler, KeyManager}
+import cpw.mods.fml.relauncher.{Side, SideOnly}
 import net.minecraft.client.Minecraft
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
@@ -691,9 +691,9 @@ object Window {
   val DEFAULT = CLOSABLE | MINIMIZABLE | DRAGGABLE
 }
 
-// TESTS
+// Execution (temp)
 
-class TestKey extends KeyHandler {
+class ExecutionKey extends KeyHandler {
 
   override def onKeyDown() = {
     println("Pressed")
@@ -702,10 +702,11 @@ class TestKey extends KeyHandler {
 
 }
 
+@SideOnly(Side.CLIENT)
 @Registrant
-object Test {
+object EditorRegistration {
   @RegInitCallback
   def init() = {
-    KeyManager.dynamic.addKeyHandler("wtf", Keyboard.KEY_L, new TestKey)
+    KeyManager.dynamic.addKeyHandler("wtf", Keyboard.KEY_L, new ExecutionKey)
   }
 }

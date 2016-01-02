@@ -19,6 +19,8 @@ import java.util.List;
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
 import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -27,6 +29,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 /**
  * @author WeAthFolD
  */
+@SideOnly(Side.CLIENT)
 @Registrant
 public abstract class ParticleFactoryBase {
 

@@ -25,7 +25,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Every widget is associated with a name. You can use that name to lookup a widget.
  * @author WeAthFolD
  */
-@SideOnly(Side.CLIENT)
 public class WidgetContainer implements Iterable<Widget> {
 	
 	HashBiMap<String, Widget> widgets = HashBiMap.create();
