@@ -17,10 +17,10 @@ package cn.lambdalib.util.deprecated;
  */
 public enum RenderStage {
 
-	START,
-	TRANSFORM,
-	BEFORE_TESSELLATE,
-	START_TESSELLATE,
-	END
-	
+    START,
+    TRANSFORM,
+    BEFORE_TESSELLATE,
+    START_TESSELLATE,
+    END
+    
 }

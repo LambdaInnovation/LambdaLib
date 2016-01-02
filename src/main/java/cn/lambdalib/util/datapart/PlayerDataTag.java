@@ -23,27 +23,27 @@ import net.minecraft.nbt.NBTTagCompound;
 @Registrant
 @RegDataPart("DataTag")
 public class PlayerDataTag extends DataPart {
-	
-	public static PlayerDataTag get(EntityPlayer player) {
-		return EntityData.get(player).getPart(PlayerDataTag.class);
-	}
-	
-	private NBTTagCompound theTag;
+    
+    public static PlayerDataTag get(EntityPlayer player) {
+        return EntityData.get(player).getPart(PlayerDataTag.class);
+    }
+    
+    private NBTTagCompound theTag;
 
-	@Override
-	public void fromNBT(NBTTagCompound tag) {
-		theTag = tag;
-	}
+    @Override
+    public void fromNBT(NBTTagCompound tag) {
+        theTag = tag;
+    }
 
-	@Override
-	public NBTTagCompound toNBT() {
-		return theTag;
-	}
-	
-	public NBTTagCompound getTag() {
-		if(theTag == null)
-			theTag = new NBTTagCompound();
-		return theTag;
-	}
+    @Override
+    public NBTTagCompound toNBT() {
+        return theTag;
+    }
+    
+    public NBTTagCompound getTag() {
+        if(theTag == null)
+            theTag = new NBTTagCompound();
+        return theTag;
+    }
 
 }

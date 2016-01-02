@@ -28,90 +28,90 @@ import net.minecraft.client.renderer.Tessellator;
  */
 public class HudUtils {
 
-	public static double zLevel = 0;
-	
-	static double stack = Double.NEGATIVE_INFINITY;
-	
-	public static void pushZLevel() {
-		if(stack != Double.NEGATIVE_INFINITY)
-			throw new RuntimeException("Stack overflow");
-		stack = zLevel;
-	}
-	
-	public static void popZLevel() {
-		if(stack == Double.NEGATIVE_INFINITY)
-			throw new RuntimeException("Stack underflow");
-		zLevel = stack;
-		stack = Double.NEGATIVE_INFINITY;
-	}
-	
-	public static void rect(double width, double height) {
-		rect(0, 0, width, height);
-	}
-	
-	public static void rect(double x, double y, double width, double height) {
-		rawRect(x, y, 0, 0, width, height, 1, 1);
-	}
-	
-	public static void rect(double x, double y, double u, double v, double width, double height) {
-		rect(x, y, u, v, width, height, width, height);
-	}
-	
-	public static void rect(double x, double y, double u, double v, double width, double height, double texWidth, double texHeight) {
-		int twidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH),
-		    theight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
-		double f = 1.0 / twidth, f1 = 1.0 / theight;
+    public static double zLevel = 0;
+    
+    static double stack = Double.NEGATIVE_INFINITY;
+    
+    public static void pushZLevel() {
+        if(stack != Double.NEGATIVE_INFINITY)
+            throw new RuntimeException("Stack overflow");
+        stack = zLevel;
+    }
+    
+    public static void popZLevel() {
+        if(stack == Double.NEGATIVE_INFINITY)
+            throw new RuntimeException("Stack underflow");
+        zLevel = stack;
+        stack = Double.NEGATIVE_INFINITY;
+    }
+    
+    public static void rect(double width, double height) {
+        rect(0, 0, width, height);
+    }
+    
+    public static void rect(double x, double y, double width, double height) {
+        rawRect(x, y, 0, 0, width, height, 1, 1);
+    }
+    
+    public static void rect(double x, double y, double u, double v, double width, double height) {
+        rect(x, y, u, v, width, height, width, height);
+    }
+    
+    public static void rect(double x, double y, double u, double v, double width, double height, double texWidth, double texHeight) {
+        int twidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH),
+            theight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+        double f = 1.0 / twidth, f1 = 1.0 / theight;
         Tessellator t = Tessellator.instance;
         t.startDrawingQuads();
-        t.addVertexWithUV(x + 0, 	 y + height, zLevel, (u + 0) * f, 		 (v + texHeight) * f1);
+        t.addVertexWithUV(x + 0,      y + height, zLevel, (u + 0) * f,          (v + texHeight) * f1);
         t.addVertexWithUV(x + width, y + height, zLevel, (u + texWidth) * f, (v + texHeight) * f1);
-        t.addVertexWithUV(x + width, y + 0, 	 zLevel, (u + texWidth) * f, (v + 0) * f1);
-        t.addVertexWithUV(x + 0, 	 y + 0, 	 zLevel, (u + 0) * f, 		 (v + 0) * f1);
+        t.addVertexWithUV(x + width, y + 0,      zLevel, (u + texWidth) * f, (v + 0) * f1);
+        t.addVertexWithUV(x + 0,      y + 0,      zLevel, (u + 0) * f,          (v + 0) * f1);
         t.draw();
-	}
-	
-	public static void rawRect(double x, double y, double u, double v, double width, double height, double texWidth, double texHeight) {
+    }
+    
+    public static void rawRect(double x, double y, double u, double v, double width, double height, double texWidth, double texHeight) {
         Tessellator t = Tessellator.instance;
         t.startDrawingQuads();
-        t.addVertexWithUV(x + 0, 	 y + height, zLevel, (u + 0), 		 (v + texHeight));
+        t.addVertexWithUV(x + 0,      y + height, zLevel, (u + 0),          (v + texHeight));
         t.addVertexWithUV(x + width, y + height, zLevel, (u + texWidth), (v + texHeight));
-        t.addVertexWithUV(x + width, y + 0,		 zLevel, (u + texWidth), (v + 0));
-        t.addVertexWithUV(x + 0, 	 y + 0, 	 zLevel, (u + 0), 		 (v + 0));
+        t.addVertexWithUV(x + width, y + 0,         zLevel, (u + texWidth), (v + 0));
+        t.addVertexWithUV(x + 0,      y + 0,      zLevel, (u + 0),          (v + 0));
         t.draw();
-	}
-	
-	public static void colorRect(double x, double y, double width, double height) {
-		boolean prev = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		Tessellator t = Tessellator.instance;
+    }
+    
+    public static void colorRect(double x, double y, double width, double height) {
+        boolean prev = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        Tessellator t = Tessellator.instance;
         t.startDrawingQuads();
-        t.addVertex(x + 0, 	   y + height, zLevel);
+        t.addVertex(x + 0,        y + height, zLevel);
         t.addVertex(x + width, y + height, zLevel);
-        t.addVertex(x + width, y + 0,	   zLevel);
-        t.addVertex(x + 0, 	   y + 0, 	   zLevel);
+        t.addVertex(x + width, y + 0,       zLevel);
+        t.addVertex(x + 0,        y + 0,        zLevel);
         t.draw();
         
-		if(prev) GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}
-	
-    public static void drawRectOutline(double x, double y, double w, double h, float lineWidth) {
-    	GL11.glLineWidth(lineWidth);
-    	Tessellator t = Tessellator.instance;
-    	GL11.glDisable(GL11.GL_TEXTURE_2D);
-    	t.startDrawing(GL11.GL_LINE_LOOP);
-    	double lw = lineWidth * 0.2;
-    	x -= lw;
-    	y -= lw;
-    	w += 2 * lw;
-    	h += 2 * lw;
-    	t.addVertex(x, y, zLevel);
-    	t.addVertex(x, y + h, zLevel);
-    	t.addVertex(x + w, y + h, zLevel);
-    	t.addVertex(x + w, y, zLevel);
-    	t.draw();
-    	GL11.glEnable(GL11.GL_TEXTURE_2D);
+        if(prev) GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
-	
+    
+    public static void drawRectOutline(double x, double y, double w, double h, float lineWidth) {
+        GL11.glLineWidth(lineWidth);
+        Tessellator t = Tessellator.instance;
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        t.startDrawing(GL11.GL_LINE_LOOP);
+        double lw = lineWidth * 0.2;
+        x -= lw;
+        y -= lw;
+        w += 2 * lw;
+        h += 2 * lw;
+        t.addVertex(x, y, zLevel);
+        t.addVertex(x, y + h, zLevel);
+        t.addVertex(x + w, y + h, zLevel);
+        t.addVertex(x + w, y, zLevel);
+        t.draw();
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+    }
+    
     public static void drawHoveringText(List par1List, int x, int y, FontRenderer font, int width, int height) {
         if (!par1List.isEmpty()) {
             GL11.glDisable(GL12.GL_RESCALE_NORMAL);
@@ -207,5 +207,5 @@ public class HudUtils {
         GL11.glEnable(GL11.GL_ALPHA_TEST);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
-	
+    
 }

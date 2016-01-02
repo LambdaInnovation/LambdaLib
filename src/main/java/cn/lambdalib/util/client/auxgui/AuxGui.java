@@ -26,62 +26,62 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 @SideOnly(Side.CLIENT)
 public abstract class AuxGui {
-	
-	// Intrusive states
-	boolean lastFrameActive = false;
-	long lastActivateTime;
-	
-	// Parameters
-	/**
-	 * Whether this AuxGui needs fixed timestep update (ticking). If set to true tick() method will get called each tick.
-	 */
-	protected boolean requireTicking = false;
-	
-	public AuxGui() {}
-	
-	protected long getTimeActive() {
-		return GameTimer.getTime() - lastActivateTime;
-	}
-	
-	private boolean disposed;
-	
-	public boolean isDisposed() {
-		return disposed;
-	}
-	
-	public void dispose() {
-		disposed = true;
-	}
-	
-	/**
-	 * Consistent GUI won't get removed when player is dead.
-	 */
-	public boolean isConsistent() {
-		return true;
-	}
-	
-	/**
-	 * Called when this AuxGui instance is literally removed from the draw list.
-	 */
-	public void onDisposed() {
-		
-	}
-	
-	/**
-	 * Called when this AuxGui instance is literally added into the draw list.
-	 */
-	public void onAdded() {
-		
-	}
-	
-	/**
-	 * Judge if this GUI is a foreground GUI and interrupts key listening.
-	 */
-	public abstract boolean isForeground();
-	public abstract void draw(ScaledResolution sr);
-	public void tick() {}
-	
-	public static void register(AuxGui gui) {
-		AuxGuiHandler.register(gui);
-	}
+    
+    // Intrusive states
+    boolean lastFrameActive = false;
+    long lastActivateTime;
+    
+    // Parameters
+    /**
+     * Whether this AuxGui needs fixed timestep update (ticking). If set to true tick() method will get called each tick.
+     */
+    protected boolean requireTicking = false;
+    
+    public AuxGui() {}
+    
+    protected long getTimeActive() {
+        return GameTimer.getTime() - lastActivateTime;
+    }
+    
+    private boolean disposed;
+    
+    public boolean isDisposed() {
+        return disposed;
+    }
+    
+    public void dispose() {
+        disposed = true;
+    }
+    
+    /**
+     * Consistent GUI won't get removed when player is dead.
+     */
+    public boolean isConsistent() {
+        return true;
+    }
+    
+    /**
+     * Called when this AuxGui instance is literally removed from the draw list.
+     */
+    public void onDisposed() {
+        
+    }
+    
+    /**
+     * Called when this AuxGui instance is literally added into the draw list.
+     */
+    public void onAdded() {
+        
+    }
+    
+    /**
+     * Judge if this GUI is a foreground GUI and interrupts key listening.
+     */
+    public abstract boolean isForeground();
+    public abstract void draw(ScaledResolution sr);
+    public void tick() {}
+    
+    public static void register(AuxGui gui) {
+        AuxGuiHandler.register(gui);
+    }
 }

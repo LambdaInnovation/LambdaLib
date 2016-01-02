@@ -23,11 +23,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface RegEventHandler {
-	
-	public enum Bus {
-		FML,
-		Forge,
-	}
-	
-	Bus[] value() default {Bus.FML, Bus.Forge};
+    
+    public enum Bus {
+        FML,
+        Forge,
+    }
+    
+    Bus[] value() default {Bus.FML, Bus.Forge};
 }

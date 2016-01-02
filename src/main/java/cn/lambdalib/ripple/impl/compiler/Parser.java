@@ -90,7 +90,7 @@ public class Parser {
                 
                 this.currentPath = parentPath;
                 if(currentToken.isInteger() || currentToken.isDouble()) {
-                	this.parseValue(new Path(currentPath, path));
+                    this.parseValue(new Path(currentPath, path));
                 }
                 if (!currentToken.isSingleChar('}')) {
                     throw new RippleCompilerException("Invalid token. Should be '}' but got " + currentToken, this);
@@ -151,18 +151,18 @@ public class Parser {
     }
     
     private void parseValue(Path valuePath) throws IOException {
-    	ScriptObject obj = new ScriptObject();
-    	obj.path = valuePath.path;
-    	if(currentToken.isDouble())
-    		obj.value = currentToken.doubleValue;
-    	else if(currentToken.isInteger())
-    		obj.value = currentToken.integerValue;
-    	else
-    		throw new RippleCompilerException("Invalid value when parsing value: " + currentToken, this);
-    	this.readToken();
-    	
-    	// System.out.println("Parsed value " + valuePath.path);
-    	this.parsedObject.add(obj);
+        ScriptObject obj = new ScriptObject();
+        obj.path = valuePath.path;
+        if(currentToken.isDouble())
+            obj.value = currentToken.doubleValue;
+        else if(currentToken.isInteger())
+            obj.value = currentToken.integerValue;
+        else
+            throw new RippleCompilerException("Invalid value when parsing value: " + currentToken, this);
+        this.readToken();
+        
+        // System.out.println("Parsed value " + valuePath.path);
+        this.parsedObject.add(obj);
     }
     
     private void parseExpression(CodeGenerator gen) throws IOException {
@@ -419,7 +419,7 @@ public class Parser {
             if (Character.isWhitespace(c)) {
                 readToken(); //read again
                 if(c == '\n' || c == '\r')
-                	lineNumber++;
+                    lineNumber++;
                 return;
             } else if (Character.isLetter(c) || c == '_') {
                 readIdentifier(c);
@@ -443,10 +443,10 @@ public class Parser {
     
     //debug
     public int getLineNumber() {
-    	return lineNumber;
+        return lineNumber;
     }
     
     public String getScriptName() {
-    	return scriptName;
+        return scriptName;
     }
 }

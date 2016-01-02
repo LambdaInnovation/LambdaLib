@@ -25,15 +25,15 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @RegistryTypeDecl
 public class WorldGenRegistration extends RegistrationFieldSimple<RegWorldGen, IWorldGenerator> {
 
-	public WorldGenRegistration() {
-		super(RegWorldGen.class, "WorldGen");
-		this.setLoadStage(LoadStage.PRE_INIT);
-	}
+    public WorldGenRegistration() {
+        super(RegWorldGen.class, "WorldGen");
+        this.setLoadStage(LoadStage.PRE_INIT);
+    }
 
-	@Override
-	protected void register(IWorldGenerator value, RegWorldGen anno, String field)
-			throws Exception {
-		GameRegistry.registerWorldGenerator(value, anno.value());
-	}
+    @Override
+    protected void register(IWorldGenerator value, RegWorldGen anno, String field)
+            throws Exception {
+        GameRegistry.registerWorldGenerator(value, anno.value());
+    }
 
 }

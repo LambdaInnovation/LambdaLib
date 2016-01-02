@@ -19,26 +19,26 @@ import net.minecraftforge.client.model.IModelCustom;
  */
 public class CustomPartedModel extends PartedModel {
 
-	public final IModelCustom model;
-	public final String name;
-	
-	public CustomPartedModel(IModelCustom _model) {
-		this(_model, null);
-	}
-	
-	public CustomPartedModel(IModelCustom _model, String _part) {
-		model = _model;
-		name = _part;
-	}
-	
-	@Override
-	protected void handleDraw() {
-		if(name == null) {
-			model.renderAll();
-		} else {
-			model.renderPart(name);
-		}
-	}
-	
+    public final IModelCustom model;
+    public final String name;
+    
+    public CustomPartedModel(IModelCustom _model) {
+        this(_model, null);
+    }
+    
+    public CustomPartedModel(IModelCustom _model, String _part) {
+        model = _model;
+        name = _part;
+    }
+    
+    @Override
+    protected void handleDraw() {
+        if(name == null) {
+            model.renderAll();
+        } else {
+            model.renderPart(name);
+        }
+    }
+    
 
 }

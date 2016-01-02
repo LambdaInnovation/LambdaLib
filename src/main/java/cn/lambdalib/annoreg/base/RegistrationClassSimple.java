@@ -28,29 +28,29 @@ import cn.lambdalib.core.LLModContainer;
  * @param <BASE>
  */
 public abstract class RegistrationClassSimple<ANNO extends Annotation, BASE> 
-		extends RegistrationWithPostWork<Class<? extends BASE>> {
+        extends RegistrationWithPostWork<Class<? extends BASE>> {
 
-	public RegistrationClassSimple(Class<ANNO> annoClass, String name) {
-		super(annoClass, name);
-	}
+    public RegistrationClassSimple(Class<ANNO> annoClass, String name) {
+        super(annoClass, name);
+    }
 
-	protected abstract void register(Class<? extends BASE> theClass, ANNO anno) throws Exception;
+    protected abstract void register(Class<? extends BASE> theClass, ANNO anno) throws Exception;
 
-	@Override
-	public boolean registerClass(AnnotationData data) throws Exception {
-		Class<? extends BASE> clazz = (Class<? extends BASE>) data.getTheClass();
-		register(clazz, (ANNO) data.getAnnotation());
-		this.doPostRegWork(clazz, clazz);
-		return true;
-	}
+    @Override
+    public boolean registerClass(AnnotationData data) throws Exception {
+        Class<? extends BASE> clazz = (Class<? extends BASE>) data.getTheClass();
+        register(clazz, (ANNO) data.getAnnotation());
+        this.doPostRegWork(clazz, clazz);
+        return true;
+    }
 
-	@Override
-	public boolean registerField(AnnotationData data) throws Exception {
-		throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on field.");
-	}
-	
-	@Override
-	public boolean registerMethod(AnnotationData data) throws Exception {
-		throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on method.");
-	}
+    @Override
+    public boolean registerField(AnnotationData data) throws Exception {
+        throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on field.");
+    }
+    
+    @Override
+    public boolean registerMethod(AnnotationData data) throws Exception {
+        throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on method.");
+    }
 }

@@ -18,20 +18,20 @@ package cn.lambdalib.cgui.gui.event;
  */
 public class MouseClickEvent implements GuiEvent {
 
-	/**
-	 * Mouse position in local coordinate space.
-	 */
-	public final double mx, my;
-	
-	/**
-	 * Pressed button id.
-	 */
-	public final int button;
-	
-	public MouseClickEvent(double _mx, double _my, int bid) {
-		mx = _mx;
-		my = _my;
-		button = bid;
-	}
+    /**
+     * Mouse position in local coordinate space.
+     */
+    public final double mx, my;
+    
+    /**
+     * Pressed button id.
+     */
+    public final int button;
+    
+    public MouseClickEvent(double _mx, double _my, int bid) {
+        mx = _mx;
+        my = _my;
+        button = bid;
+    }
 
 }

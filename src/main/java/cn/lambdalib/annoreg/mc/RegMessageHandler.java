@@ -27,20 +27,20 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RegMessageHandler {
-	public enum Side {
-		SERVER,
-		CLIENT,
-	}
-	
-	Class<?> msg();
-	Side side();
+    public enum Side {
+        SERVER,
+        CLIENT,
+    }
+    
+    Class<?> msg();
+    Side side();
 
-	/**
-	 * Populate this on a public static SimpleNetworkWrapper instance in your mod class,
-	 * and AR will record it and treat it as an internal registration source. You can 
-	 * later send messages registered using that SimpleNetworkWrapper.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface WrapperInstance {}
+    /**
+     * Populate this on a public static SimpleNetworkWrapper instance in your mod class,
+     * and AR will record it and treat it as an internal registration source. You can 
+     * later send messages registered using that SimpleNetworkWrapper.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface WrapperInstance {}
 }

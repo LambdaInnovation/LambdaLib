@@ -10,24 +10,24 @@ import cn.lambdalib.core.LambdaLib;
 
 public class CustomMappingHelper {
 
-	@Target(ElementType.FIELD)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface RecipeName {
-		String value();
-	}
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface RecipeName {
+        String value();
+    }
 
-	public static void addMapping(RecipeRegistry reg, Class klass) {
-		try {
-			for (Field f : klass.getFields()) {
-				if (f.isAnnotationPresent(RecipeName.class)) {
-					RecipeName anno = f.getAnnotation(RecipeName.class);
-					reg.map(anno.value(), f.get(null));
-				}
-			}
-		} catch (Exception e) {
-			LambdaLib.log.error("An error occured analyzing recipe custom mapping");
-			e.printStackTrace();
-		}
-	}
+    public static void addMapping(RecipeRegistry reg, Class klass) {
+        try {
+            for (Field f : klass.getFields()) {
+                if (f.isAnnotationPresent(RecipeName.class)) {
+                    RecipeName anno = f.getAnnotation(RecipeName.class);
+                    reg.map(anno.value(), f.get(null));
+                }
+            }
+        } catch (Exception e) {
+            LambdaLib.log.error("An error occured analyzing recipe custom mapping");
+            e.printStackTrace();
+        }
+    }
 
 }

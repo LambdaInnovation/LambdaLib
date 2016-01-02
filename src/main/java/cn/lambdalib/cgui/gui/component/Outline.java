@@ -22,24 +22,24 @@ import cn.lambdalib.util.helper.Color;
  * @author WeAthFolD
  */
 public class Outline extends Component {
-	
-	public Color color;
-	public float lineWidth = 2;
+    
+    public Color color;
+    public float lineWidth = 2;
 
-	public Outline() {
-		this(Color.white());
-	}
+    public Outline() {
+        this(Color.white());
+    }
 
-	public Outline(Color _color) {
-		super("Outline");
+    public Outline(Color _color) {
+        super("Outline");
 
-		color = _color;
-		
-		listen(FrameEvent.class, (w, e) -> {
-			color.bind();
-			HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, lineWidth);
-			GL11.glColor4f(1, 1, 1, 1);
-		});
-	}
+        color = _color;
+        
+        listen(FrameEvent.class, (w, e) -> {
+            color.bind();
+            HudUtils.drawRectOutline(0, 0, w.transform.width, w.transform.height, lineWidth);
+            GL11.glColor4f(1, 1, 1, 1);
+        });
+    }
 
 }

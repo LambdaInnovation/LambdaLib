@@ -17,12 +17,12 @@ package cn.lambdalib.cgui.gui.event;
  * Fired on CGui and current focus when user presses left mouse button.
  */
 public class LeftClickEvent implements GuiEvent {
-	
-	public final double x, y;
-	
-	public LeftClickEvent(double _x, double _y) {
-		x = _x;
-		y = _y;
-	}
+    
+    public final double x, y;
+    
+    public LeftClickEvent(double _x, double _y) {
+        x = _x;
+        y = _y;
+    }
 
 }

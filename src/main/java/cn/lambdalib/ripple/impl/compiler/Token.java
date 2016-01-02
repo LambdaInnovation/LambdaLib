@@ -146,6 +146,6 @@ public final class Token {
     
     @Override
     public String toString() {
-    	return "[" + type + " " + sSymbol + " " + str + "]";
+        return "[" + type + " " + sSymbol + " " + str + "]";
     }
 }

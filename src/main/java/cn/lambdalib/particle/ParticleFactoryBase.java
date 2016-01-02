@@ -33,57 +33,57 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 @Registrant
 public abstract class ParticleFactoryBase {
 
-	static final int MAX_POOL_SIZE = 1000;
+    static final int MAX_POOL_SIZE = 1000;
 
-	static List<Particle> alive = new ArrayList(), dead = new ArrayList();
+    static List<Particle> alive = new ArrayList(), dead = new ArrayList();
 
-	public abstract Particle next(World world);
+    public abstract Particle next(World world);
 
-	protected final Particle queryParticle() {
-		Particle ret;
-		if (!dead.isEmpty()) {
-			Iterator<Particle> iter = dead.iterator();
-			ret = iter.next();
-			iter.remove();
-		} else {
-			ret = new Particle();
-		}
+    protected final Particle queryParticle() {
+        Particle ret;
+        if (!dead.isEmpty()) {
+            Iterator<Particle> iter = dead.iterator();
+            ret = iter.next();
+            iter.remove();
+        } else {
+            ret = new Particle();
+        }
 
-		if (alive.size() < MAX_POOL_SIZE) {
-			alive.add(ret);
-		}
+        if (alive.size() < MAX_POOL_SIZE) {
+            alive.add(ret);
+        }
 
-		ret.isDead = false;
-		ret.ticksExisted = 0;
-		ret.resetEntityX();
-		ret.reset();
-		return ret;
-	}
+        ret.isDead = false;
+        ret.ticksExisted = 0;
+        ret.resetEntityX();
+        ret.reset();
+        return ret;
+    }
 
-	@RegEventHandler(Bus.FML)
-	public static class EventHandlers {
-		static final int UPDATE_RATE = 40;
-		int ticker;
+    @RegEventHandler(Bus.FML)
+    public static class EventHandlers {
+        static final int UPDATE_RATE = 40;
+        int ticker;
 
-		@SubscribeEvent
-		public void onClientTick(ClientTickEvent event) {
-			if (event.phase == Phase.END && ++ticker == UPDATE_RATE) {
-				ticker = 0;
+        @SubscribeEvent
+        public void onClientTick(ClientTickEvent event) {
+            if (event.phase == Phase.END && ++ticker == UPDATE_RATE) {
+                ticker = 0;
 
-				Iterator<Particle> iter = alive.iterator();
-				while (iter.hasNext()) {
-					Particle p = iter.next();
-					if (p.isDead) {
-						iter.remove();
-						if (dead.size() < MAX_POOL_SIZE) {
-							dead.add(p);
-						}
-					}
-				}
-				// System.out.println("GC: " + alive.size() + " / " +
-				// dead.size());
-			}
-		}
-	}
+                Iterator<Particle> iter = alive.iterator();
+                while (iter.hasNext()) {
+                    Particle p = iter.next();
+                    if (p.isDead) {
+                        iter.remove();
+                        if (dead.size() < MAX_POOL_SIZE) {
+                            dead.add(p);
+                        }
+                    }
+                }
+                // System.out.println("GC: " + alive.size() + " / " +
+                // dead.size());
+            }
+        }
+    }
 
 }

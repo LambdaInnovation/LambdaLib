@@ -23,41 +23,41 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
 public class ServerProxy {
-	
-	public void regEntityRender(Class<? extends Entity> clazz, Object obj) {
-		LLModContainer.log.fatal("Try to load renderer on server.");
-	}
-	
-	public void regTileEntityRender(Class<? extends TileEntity> clazz, Object obj) {
-		LLModContainer.log.fatal("Try to load renderer on server.");
-	}
-	
-	public void regItemRender(Item item, Object obj) {
-		LLModContainer.log.fatal("Try to load renderer on server.");
-	}
-	
-	public World getWorld(int dimension) {
-		return DimensionManager.getWorld(dimension);
-	}
+    
+    public void regEntityRender(Class<? extends Entity> clazz, Object obj) {
+        LLModContainer.log.fatal("Try to load renderer on server.");
+    }
+    
+    public void regTileEntityRender(Class<? extends TileEntity> clazz, Object obj) {
+        LLModContainer.log.fatal("Try to load renderer on server.");
+    }
+    
+    public void regItemRender(Item item, Object obj) {
+        LLModContainer.log.fatal("Try to load renderer on server.");
+    }
+    
+    public World getWorld(int dimension) {
+        return DimensionManager.getWorld(dimension);
+    }
 
-	public Container getPlayerContainer(EntityPlayer player, int windowId) {
-		Container ret = player.openContainer;
-		if (ret.windowId == windowId) {
-			return ret;
-		}
-		return null;
-	}
-	
-	public EntityPlayer getThePlayer() {
-		return null;
-	}
-	
-	public EntityPlayer getPlayerOnServer(String name) {
-	    return MinecraftServer.getServer().getConfigurationManager().func_152612_a(name);
-	}
-	
-	public Object[] getPlayerList() {
-	    return MinecraftServer.getServer().getConfigurationManager().playerEntityList.toArray();
-	}
-	
+    public Container getPlayerContainer(EntityPlayer player, int windowId) {
+        Container ret = player.openContainer;
+        if (ret.windowId == windowId) {
+            return ret;
+        }
+        return null;
+    }
+    
+    public EntityPlayer getThePlayer() {
+        return null;
+    }
+    
+    public EntityPlayer getPlayerOnServer(String name) {
+        return MinecraftServer.getServer().getConfigurationManager().func_152612_a(name);
+    }
+    
+    public Object[] getPlayerList() {
+        return MinecraftServer.getServer().getConfigurationManager().playerEntityList.toArray();
+    }
+    
 }

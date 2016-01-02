@@ -26,41 +26,41 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
  */
 public class SmeltingRegistry implements IRecipeRegistry {
 
-	public static final SmeltingRegistry INSTANCE = new SmeltingRegistry();
+    public static final SmeltingRegistry INSTANCE = new SmeltingRegistry();
 
-	private SmeltingRegistry() {
-	}
+    private SmeltingRegistry() {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see cn.lambdalib.crafting.IRecipeRegistry#register(java.lang.String,
-	 * net.minecraft.item.ItemStack, java.lang.Object[], int, int)
-	 */
-	@Override
-	public void register(String type, ItemStack output, Object[] input, int width, int height, float experience) {
-		if (width != 1 || height != 1) {
-			throw new IllegalArgumentException("You can only specify 1 input for smelting!");
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see cn.lambdalib.crafting.IRecipeRegistry#register(java.lang.String,
+     * net.minecraft.item.ItemStack, java.lang.Object[], int, int)
+     */
+    @Override
+    public void register(String type, ItemStack output, Object[] input, int width, int height, float experience) {
+        if (width != 1 || height != 1) {
+            throw new IllegalArgumentException("You can only specify 1 input for smelting!");
+        }
 
-		Object in;
-		if (input[0] instanceof String) {
-			in = OreDictionary.getOres((String) input[0]).get(0);
-		} else {
-			in = input[0];
-		}
+        Object in;
+        if (input[0] instanceof String) {
+            in = OreDictionary.getOres((String) input[0]).get(0);
+        } else {
+            in = input[0];
+        }
 
-		// 辣鸡java
-		if (in instanceof ItemStack)
-			GameRegistry.addSmelting((ItemStack) in, output, experience);
-		else if (in instanceof Block)
-			GameRegistry.addSmelting((Block) in, output, experience);
-		else if (in instanceof Item)
-			GameRegistry.addSmelting((Item) in, output, experience);
+        // 辣鸡java
+        if (in instanceof ItemStack)
+            GameRegistry.addSmelting((ItemStack) in, output, experience);
+        else if (in instanceof Block)
+            GameRegistry.addSmelting((Block) in, output, experience);
+        else if (in instanceof Item)
+            GameRegistry.addSmelting((Item) in, output, experience);
 
-		debug("[Smelting] " +
-				RecipeRegistry.reprStack(output) + " => " +
-				DebugUtils.formatArray(output));
-	}
+        debug("[Smelting] " +
+                RecipeRegistry.reprStack(output) + " => " +
+                DebugUtils.formatArray(output));
+    }
 
 }

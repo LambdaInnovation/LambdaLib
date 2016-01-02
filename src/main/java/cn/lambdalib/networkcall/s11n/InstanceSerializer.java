@@ -15,8 +15,8 @@ package cn.lambdalib.networkcall.s11n;
 import net.minecraft.nbt.NBTBase;
 
 public interface InstanceSerializer<T> {
-	
-	T readInstance(NBTBase nbt) throws Exception;
-	NBTBase writeInstance(T obj) throws Exception;
-	
+    
+    T readInstance(NBTBase nbt) throws Exception;
+    NBTBase writeInstance(T obj) throws Exception;
+    
 }

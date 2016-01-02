@@ -26,28 +26,28 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 public class LLCorePlugin implements IFMLLoadingPlugin {
 
-	@Override
-	public String[] getASMTransformerClass() {
-		return new String[] { "cn.lambdalib.core.asm.RegistryTransformer" };
-	}
+    @Override
+    public String[] getASMTransformerClass() {
+        return new String[] { "cn.lambdalib.core.asm.RegistryTransformer" };
+    }
 
-	@Override
-	public String getModContainerClass() {
-		return "cn.lambdalib.core.LLModContainer";
-	}
+    @Override
+    public String getModContainerClass() {
+        return "cn.lambdalib.core.LLModContainer";
+    }
 
-	@Override
-	public String getSetupClass() {
-		return null;
-	}
+    @Override
+    public String getSetupClass() {
+        return null;
+    }
 
-	@Override
-	public void injectData(Map<String, Object> data) {
-	}
+    @Override
+    public void injectData(Map<String, Object> data) {
+    }
 
-	@Override
-	public String getAccessTransformerClass() {
-		return null;
-	}
+    @Override
+    public String getAccessTransformerClass() {
+        return null;
+    }
 
 }

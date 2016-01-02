@@ -19,11 +19,11 @@ import cpw.mods.fml.common.eventhandler.Event;
  * @author WeAthFolD
  */
 public class OpenAuxGuiEvent extends Event {
-	
-	public final AuxGui gui;
+    
+    public final AuxGui gui;
 
-	public OpenAuxGuiEvent(AuxGui _gui) {
-		gui = _gui;
-	}
+    public OpenAuxGuiEvent(AuxGui _gui) {
+        gui = _gui;
+    }
 
 }

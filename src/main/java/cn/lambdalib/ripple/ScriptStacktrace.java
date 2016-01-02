@@ -12,50 +12,50 @@ import com.google.common.collect.ImmutableList;
  *
  */
 public final class ScriptStacktrace {
-	private static final ThreadLocal<Stack<String>> threadStacktrace = new ThreadLocal<Stack<String>>() {
-		@Override
-		protected Stack<String> initialValue() {
-			return new Stack<String>();
-		}
-	};
+    private static final ThreadLocal<Stack<String>> threadStacktrace = new ThreadLocal<Stack<String>>() {
+        @Override
+        protected Stack<String> initialValue() {
+            return new Stack<String>();
+        }
+    };
 
-	public final ImmutableList<String> stacktrace;
+    public final ImmutableList<String> stacktrace;
 
-	private ScriptStacktrace() {
-		this.stacktrace = ImmutableList.copyOf(threadStacktrace.get());
-	}
+    private ScriptStacktrace() {
+        this.stacktrace = ImmutableList.copyOf(threadStacktrace.get());
+    }
 
-	public static ScriptStacktrace getStacktrace() {
-		return new ScriptStacktrace();
-	}
+    public static ScriptStacktrace getStacktrace() {
+        return new ScriptStacktrace();
+    }
 
-	// internal use only
-	public static int pushFrame(String path) {
-		Stack<String> s = threadStacktrace.get();
-		int ret = s.size();
-		s.push(path);
-		return ret;
-	}
+    // internal use only
+    public static int pushFrame(String path) {
+        Stack<String> s = threadStacktrace.get();
+        int ret = s.size();
+        s.push(path);
+        return ret;
+    }
 
-	// internal use only
-	public static void popFrame() {
-		threadStacktrace.get().pop();
-	}
+    // internal use only
+    public static void popFrame() {
+        threadStacktrace.get().pop();
+    }
 
-	static void adjustFrame(int count) {
-		threadStacktrace.get().setSize(count);
-	}
+    static void adjustFrame(int count) {
+        threadStacktrace.get().setSize(count);
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Script stacktrace: \n");
-		for (int i = stacktrace.size() - 1; i >= 0; --i) {
-			String s = stacktrace.get(i);
-			sb.append("    in function ");
-			sb.append(s);
-			sb.append('\n');
-		}
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Script stacktrace: \n");
+        for (int i = stacktrace.size() - 1; i >= 0; --i) {
+            String s = stacktrace.get(i);
+            sb.append("    in function ");
+            sb.append(s);
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
 }

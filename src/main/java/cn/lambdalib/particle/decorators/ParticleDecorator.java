@@ -19,6 +19,6 @@ import cn.lambdalib.particle.Particle;
  */
 public interface ParticleDecorator {
 
-	void decorate(Particle particle);
+    void decorate(Particle particle);
 
 }

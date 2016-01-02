@@ -25,21 +25,21 @@ import net.minecraftforge.client.model.IModelCustom;
 @Deprecated
 public class ItemModelCustom implements IItemModel {
 
-	private IModelCustom theModel;
-	
-	public ItemModelCustom(IModelCustom model) {
-		theModel = model;
-	}
+    private IModelCustom theModel;
+    
+    public ItemModelCustom(IModelCustom model) {
+        theModel = model;
+    }
 
-	@Override
-	public void render(ItemStack is, float scale, float f) {
-		GL11.glScalef(scale, scale, scale);
-		theModel.renderAll();
-	}
+    @Override
+    public void render(ItemStack is, float scale, float f) {
+        GL11.glScalef(scale, scale, scale);
+        theModel.renderAll();
+    }
 
-	@Override
-	public void setRotationAngles(ItemStack is, double posX, double posY,
-			double posZ, float f) {
-	}
+    @Override
+    public void setRotationAngles(ItemStack is, double posX, double posY,
+            double posZ, float f) {
+    }
 
 }

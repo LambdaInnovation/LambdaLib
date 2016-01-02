@@ -23,41 +23,41 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface RegItem {
-	
-	/**
-	 * Add this annotation to set unlocalized name and texture name.
-	 * tname is set to mod.res (+ ":") + value.
-	 * uname is set to mod.prefix + value.
-	 * If value is empty, the RegItem.name will be used.
-	 * @author acaly
-	 *
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface UTName {
-		String value();
-	}
+    
+    /**
+     * Add this annotation to set unlocalized name and texture name.
+     * tname is set to mod.res (+ ":") + value.
+     * uname is set to mod.prefix + value.
+     * If value is empty, the RegItem.name will be used.
+     * @author acaly
+     *
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface UTName {
+        String value();
+    }
 
-	/**
-	 * Reg this item into oreDictionary.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface OreDict {
-		String value();
-	}
-	
-	/**
-	 * Populated on Item instance, indicating this item has an render.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface HasRender {}
+    /**
+     * Reg this item into oreDictionary.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface OreDict {
+        String value();
+    }
+    
+    /**
+     * Populated on Item instance, indicating this item has an render.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface HasRender {}
 
-	/**
-	 * Used with @HasRender on public static <? extends IItemRenderer> classes, will find that instance and register it.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface Render {}
+    /**
+     * Used with @HasRender on public static <? extends IItemRenderer> classes, will find that instance and register it.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface Render {}
 }

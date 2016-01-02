@@ -18,11 +18,11 @@ import cn.lambdalib.cgui.gui.Widget;
  * Fired on target widget when it has lost input focus.
  */
 public class LostFocusEvent implements GuiEvent {
-	
-	public Widget newFocus;
-	
-	public LostFocusEvent(Widget _newFocus) {
-		newFocus = _newFocus;
-	}
-	
+    
+    public Widget newFocus;
+    
+    public LostFocusEvent(Widget _newFocus) {
+        newFocus = _newFocus;
+    }
+    
 }

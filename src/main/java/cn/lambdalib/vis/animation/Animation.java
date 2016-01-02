@@ -5,22 +5,22 @@ package cn.lambdalib.vis.animation;
  * @author WeAthFolD
  */
 public abstract class Animation {
-	
-	public boolean disposed = false;
-	
-	/**
-	 * Perform the animation at the given timepoint.
-	 */
-	public abstract void perform(double timePoint);
-	
-	/**
-	 * Callback when animation is started.
-	 */
-	public void onStarted() {}
-	
-	/**
-	 * Callback when animation is ended.
-	 */
-	public void onEnded() {}
-	
+    
+    public boolean disposed = false;
+    
+    /**
+     * Perform the animation at the given timepoint.
+     */
+    public abstract void perform(double timePoint);
+    
+    /**
+     * Callback when animation is started.
+     */
+    public void onStarted() {}
+    
+    /**
+     * Callback when animation is ended.
+     */
+    public void onEnded() {}
+    
 }

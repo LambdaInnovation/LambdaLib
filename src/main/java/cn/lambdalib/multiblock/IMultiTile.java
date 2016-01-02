@@ -21,8 +21,8 @@ package cn.lambdalib.multiblock;
  */
 public interface IMultiTile {
 
-	InfoBlockMulti getBlockInfo();
+    InfoBlockMulti getBlockInfo();
 
-	void setBlockInfo(InfoBlockMulti i);
+    void setBlockInfo(InfoBlockMulti i);
 
 }

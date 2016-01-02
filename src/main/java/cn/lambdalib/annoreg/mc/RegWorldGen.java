@@ -28,8 +28,8 @@ import net.minecraft.util.WeightedRandomChestContent;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface RegWorldGen {
-	/**
-	 * @return Mod Generation Weight.
-	 */ 
-	int value();
+    /**
+     * @return Mod Generation Weight.
+     */ 
+    int value();
 }

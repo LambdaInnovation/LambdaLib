@@ -23,16 +23,16 @@ import cpw.mods.fml.relauncher.Side;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface RegNetworkCall {
-	// WARNING: Don't modify this class!
-	// This annotation is used with ASM library.
-	// The class name and method name are hard-coded.
+    // WARNING: Don't modify this class!
+    // This annotation is used with ASM library.
+    // The class name and method name are hard-coded.
 
-	// For static method, use the default NULL.
-	// For non-static method, you must use another option.
-	StorageOption.Option thisStorage() default StorageOption.Option.NULL;
+    // For static method, use the default NULL.
+    // For non-static method, you must use another option.
+    StorageOption.Option thisStorage() default StorageOption.Option.NULL;
 
-	// The side is the callee's side.
-	// If a method is call by client and run in server, the side should be
-	// SERVER.
-	Side side();
+    // The side is the callee's side.
+    // If a method is call by client and run in server, the side should be
+    // SERVER.
+    Side side();
 }

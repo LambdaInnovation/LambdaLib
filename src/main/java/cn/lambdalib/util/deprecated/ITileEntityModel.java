@@ -21,8 +21,8 @@ import net.minecraft.tileentity.TileEntity;
 @Deprecated
 public interface ITileEntityModel {
 
-	public void render(TileEntity is, float f1, float f);
-	
-	public void renderPart(TileEntity te, String name , float f1, float f);
-	
+    public void render(TileEntity is, float f1, float f);
+    
+    public void renderPart(TileEntity te, String name , float f1, float f);
+    
 }

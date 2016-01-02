@@ -22,41 +22,41 @@ import net.minecraft.world.World;
  */
 public class BlockPos {
 
-	public final World world;
-	
-	public final int x, y, z;
-	
-	public BlockPos(World _world, int _x, int _y, int _z) {
-		world = _world;
-		x = _x;
-		y = _y;
-		z = _z;
-	}
-	
-	public Block getBlock() {
-		return world.getBlock(x, y, z);
-	}
-	
-	public TileEntity getTile() {
-		return world.getTileEntity(x, y, z);
-	}
-	
-	@Override
-	public String toString() {
-		return "BlockPos[" + world.provider.dimensionId + " (" + x + ", " + y + ", " + z + ")]";
-	}
-	
-	@Override
-	public int hashCode() {
-		return x ^ y ^ z + world.provider.dimensionId;
-	}
-	
-	@Override
-	public boolean equals(Object another) {
-		if(!(another instanceof BlockPos))
-			return false;
-		BlockPos b = (BlockPos) another;
-		return b.world.equals(world) && b.x == x && b.y == y && b.z == z;
-	}
-	
+    public final World world;
+    
+    public final int x, y, z;
+    
+    public BlockPos(World _world, int _x, int _y, int _z) {
+        world = _world;
+        x = _x;
+        y = _y;
+        z = _z;
+    }
+    
+    public Block getBlock() {
+        return world.getBlock(x, y, z);
+    }
+    
+    public TileEntity getTile() {
+        return world.getTileEntity(x, y, z);
+    }
+    
+    @Override
+    public String toString() {
+        return "BlockPos[" + world.provider.dimensionId + " (" + x + ", " + y + ", " + z + ")]";
+    }
+    
+    @Override
+    public int hashCode() {
+        return x ^ y ^ z + world.provider.dimensionId;
+    }
+    
+    @Override
+    public boolean equals(Object another) {
+        if(!(another instanceof BlockPos))
+            return false;
+        BlockPos b = (BlockPos) another;
+        return b.world.equals(world) && b.x == x && b.y == y && b.z == z;
+    }
+    
 }

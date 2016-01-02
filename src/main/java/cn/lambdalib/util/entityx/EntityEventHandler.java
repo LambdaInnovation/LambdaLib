@@ -16,10 +16,10 @@ package cn.lambdalib.util.entityx;
  * @author WeAthFolD
  */
 public abstract class EntityEventHandler<T extends EntityEvent> {
-	
-	public boolean active = true;
+    
+    public boolean active = true;
 
-	public abstract Class<? extends EntityEvent> getHandledEvent();
-	
-	public abstract void onEvent(T event);
+    public abstract Class<? extends EntityEvent> getHandledEvent();
+    
+    public abstract void onEvent(T event);
 }

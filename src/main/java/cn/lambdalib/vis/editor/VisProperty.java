@@ -13,10 +13,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface VisProperty {
 
-	/**
-	 * @return The name of this property displayed in the editor tab. If not supplied,
-	 * 	will use the field name.
-	 */
-	String name() default "";
+    /**
+     * @return The name of this property displayed in the editor tab. If not supplied,
+     *     will use the field name.
+     */
+    String name() default "";
 
 }

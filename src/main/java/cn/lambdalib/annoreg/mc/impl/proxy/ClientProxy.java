@@ -30,45 +30,45 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends ServerProxy {
-	@Override
-	public void regEntityRender(Class<? extends Entity> clazz, Object obj) {
-		RenderingRegistry.registerEntityRenderingHandler(clazz, (Render) obj);
-	}
-
-	@Override
-	public void regTileEntityRender(Class<? extends TileEntity> clazz, Object obj) {
-		ClientRegistry.bindTileEntitySpecialRenderer(clazz, (TileEntitySpecialRenderer) obj);
-	}
-	
-	@Override
-	public void regItemRender(Item item, Object obj) {
-		MinecraftForgeClient.registerItemRenderer(item, (IItemRenderer) obj);
-	}
-	
-	@Override
-	public World getWorld(int dimension) {
-		World theWorld = Minecraft.getMinecraft().theWorld;
-		if (theWorld != null && theWorld.provider.dimensionId == dimension) {
-			return theWorld;
-		} else {
-			return null;
-		}
-	}
-	
-	@Override
-	public Container getPlayerContainer(EntityPlayer player, int windowId) {
-		Container ret = Minecraft.getMinecraft().thePlayer.openContainer;
-		if (ret.windowId == windowId) {
-			return ret;
-		} else {
-			return null;
-		}
-	}
+    @Override
+    public void regEntityRender(Class<? extends Entity> clazz, Object obj) {
+        RenderingRegistry.registerEntityRenderingHandler(clazz, (Render) obj);
+    }
 
     @Override
-	public EntityPlayer getThePlayer() {
-		return Minecraft.getMinecraft().thePlayer;
-	}
+    public void regTileEntityRender(Class<? extends TileEntity> clazz, Object obj) {
+        ClientRegistry.bindTileEntitySpecialRenderer(clazz, (TileEntitySpecialRenderer) obj);
+    }
+    
+    @Override
+    public void regItemRender(Item item, Object obj) {
+        MinecraftForgeClient.registerItemRenderer(item, (IItemRenderer) obj);
+    }
+    
+    @Override
+    public World getWorld(int dimension) {
+        World theWorld = Minecraft.getMinecraft().theWorld;
+        if (theWorld != null && theWorld.provider.dimensionId == dimension) {
+            return theWorld;
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public Container getPlayerContainer(EntityPlayer player, int windowId) {
+        Container ret = Minecraft.getMinecraft().thePlayer.openContainer;
+        if (ret.windowId == windowId) {
+            return ret;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public EntityPlayer getThePlayer() {
+        return Minecraft.getMinecraft().thePlayer;
+    }
 
     @Override
     public EntityPlayer getPlayerOnServer(String name) {

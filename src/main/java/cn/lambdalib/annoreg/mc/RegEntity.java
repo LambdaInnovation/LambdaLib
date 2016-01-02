@@ -23,39 +23,39 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RegEntity {
-	
-	int trackRange() default 32;
-	int freq() default 3;
-	boolean updateVel() default true;
-	
-	/**
-	 * Whether we don't register the entity and just register the entity render or not.
-	 */
-	boolean clientOnly() default false;
-	
-	/**
-	 * Mark that this entity needs to register a render. Populated on entity class.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	public @interface HasRender {}
+    
+    int trackRange() default 32;
+    int freq() default 3;
+    boolean updateVel() default true;
+    
+    /**
+     * Whether we don't register the entity and just register the entity render or not.
+     */
+    boolean clientOnly() default false;
+    
+    /**
+     * Mark that this entity needs to register a render. Populated on entity class.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface HasRender {}
 
-	/**
-	 * Used to mark the render instance inside the entity class. Instance must be public static.
-	 * e.g.</br>
-	 * <code>
-	 * #RegistrationClass
-	 * #RegEntity
-	 * #RegEntity.HasRender
-	 * public class MyEntity {
-	 * 		#RegEntity.Render
-	 * 		#SideOnly(Side.CLIENT)
-	 * 		public static MyRender renderer;
-	 * }
-	 * </code>
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface Render {}
-	
+    /**
+     * Used to mark the render instance inside the entity class. Instance must be public static.
+     * e.g.</br>
+     * <code>
+     * #RegistrationClass
+     * #RegEntity
+     * #RegEntity.HasRender
+     * public class MyEntity {
+     *         #RegEntity.Render
+     *         #SideOnly(Side.CLIENT)
+     *         public static MyRender renderer;
+     * }
+     * </code>
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface Render {}
+    
 }

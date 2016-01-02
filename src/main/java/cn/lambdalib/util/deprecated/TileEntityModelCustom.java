@@ -20,21 +20,21 @@ import net.minecraftforge.client.model.IModelCustom;
  * @author WeAthFolD
  */
 public class TileEntityModelCustom implements ITileEntityModel {
-	
-	IModelCustom theModel;
+    
+    IModelCustom theModel;
 
-	public TileEntityModelCustom(IModelCustom model) {
-		theModel = model;
-	}
+    public TileEntityModelCustom(IModelCustom model) {
+        theModel = model;
+    }
 
-	@Override
-	public void render(TileEntity is, float f1, float f) {
-		theModel.renderAll();
-	}
+    @Override
+    public void render(TileEntity is, float f1, float f) {
+        theModel.renderAll();
+    }
 
-	@Override
-	public void renderPart(TileEntity te, String name, float f1, float f) {
-		theModel.renderPart(name);
-	}
+    @Override
+    public void renderPart(TileEntity te, String name, float f1, float f) {
+        theModel.renderPart(name);
+    }
 
 }

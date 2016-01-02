@@ -34,58 +34,58 @@ import net.minecraft.nbt.NBTTagCompound;
 @RegDataPart("DummyRender")
 public class DummyRenderData extends DataPart<EntityPlayer> {
 
-	public DummyRenderData() {
-		setTick();
-	}
-	
-	public static DummyRenderData get(EntityPlayer p) {
-		return EntityData.get(p).getPart(DummyRenderData.class);
-	}
-	
-	private EntityDummy entity;
-	List<PlayerRenderHook> renderers = new LinkedList();
-	
-	@Override
-	public void tick() {
-		if(entity != null) {
-			entity.player = (AbstractClientPlayer) getEntity();
-		}
-		
-		Iterator<PlayerRenderHook> iter = renderers.iterator();
-		while(iter.hasNext()) {
-			PlayerRenderHook val = iter.next();
-			if(val.disposed)
-				iter.remove();
-		}
-		
-		// Destroy the entity when no more needed, saving resources
-		if(entity != null && renderers.size() == 0) {
-			entity.setDead();
-			entity = null;
-		}
-	}
-	
-	@Override
-	public void fromNBT(NBTTagCompound tag) {
-		// N/A
-	}
-	
-	public void addRenderHook(PlayerRenderHook hook) {
-		EntityPlayer player = getEntity();
-		hook.player = player;
-		hook.disposed = false;
-		
-		if(entity == null) {
-			player.worldObj.spawnEntityInWorld(
-				entity = new EntityDummy(this));
-		}
-		
-		renderers.add(hook);
-	}
+    public DummyRenderData() {
+        setTick();
+    }
+    
+    public static DummyRenderData get(EntityPlayer p) {
+        return EntityData.get(p).getPart(DummyRenderData.class);
+    }
+    
+    private EntityDummy entity;
+    List<PlayerRenderHook> renderers = new LinkedList();
+    
+    @Override
+    public void tick() {
+        if(entity != null) {
+            entity.player = (AbstractClientPlayer) getEntity();
+        }
+        
+        Iterator<PlayerRenderHook> iter = renderers.iterator();
+        while(iter.hasNext()) {
+            PlayerRenderHook val = iter.next();
+            if(val.disposed)
+                iter.remove();
+        }
+        
+        // Destroy the entity when no more needed, saving resources
+        if(entity != null && renderers.size() == 0) {
+            entity.setDead();
+            entity = null;
+        }
+    }
+    
+    @Override
+    public void fromNBT(NBTTagCompound tag) {
+        // N/A
+    }
+    
+    public void addRenderHook(PlayerRenderHook hook) {
+        EntityPlayer player = getEntity();
+        hook.player = player;
+        hook.disposed = false;
+        
+        if(entity == null) {
+            player.worldObj.spawnEntityInWorld(
+                entity = new EntityDummy(this));
+        }
+        
+        renderers.add(hook);
+    }
 
-	@Override
-	public NBTTagCompound toNBT() {
-		return new NBTTagCompound();
-	}
+    @Override
+    public NBTTagCompound toNBT() {
+        return new NBTTagCompound();
+    }
 
 }

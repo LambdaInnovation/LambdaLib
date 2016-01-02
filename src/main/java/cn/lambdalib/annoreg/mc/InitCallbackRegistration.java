@@ -24,14 +24,14 @@ import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 @RegistryTypeDecl
 public class InitCallbackRegistration extends RegistrationMethodSimple<RegInitCallback> {
 
-	public InitCallbackRegistration() {
-		super(RegInitCallback.class, "InitCallback");
-		setLoadStage(LoadStage.INIT);
-	}
+    public InitCallbackRegistration() {
+        super(RegInitCallback.class, "InitCallback");
+        setLoadStage(LoadStage.INIT);
+    }
 
-	@Override
-	protected void register(Method method, RegInitCallback value) throws Exception {
-		method.invoke(null);
-	}
-	
+    @Override
+    protected void register(Method method, RegInitCallback value) throws Exception {
+        method.invoke(null);
+    }
+    
 }

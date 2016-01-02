@@ -14,17 +14,17 @@ import cpw.mods.fml.common.registry.GameRegistry;
  */
 public class ShapelessOreRegistry implements IRecipeRegistry {
 
-	public static final ShapelessOreRegistry INSTANCE = new ShapelessOreRegistry();
+    public static final ShapelessOreRegistry INSTANCE = new ShapelessOreRegistry();
 
-	@Override
-	public void register(String type, ItemStack output, Object[] input, int width, int height, float experience) {
-		GameRegistry.addRecipe(new ShapelessOreRecipe(output, input));
+    @Override
+    public void register(String type, ItemStack output, Object[] input, int width, int height, float experience) {
+        GameRegistry.addRecipe(new ShapelessOreRecipe(output, input));
 
-		debug("[ShapelessOre] " +
-				RecipeRegistry.reprStack(output) + " => " +
-				DebugUtils.formatArray(input));
-	}
+        debug("[ShapelessOre] " +
+                RecipeRegistry.reprStack(output) + " => " +
+                DebugUtils.formatArray(input));
+    }
 
-	private ShapelessOreRegistry() {}
+    private ShapelessOreRegistry() {}
 
 }

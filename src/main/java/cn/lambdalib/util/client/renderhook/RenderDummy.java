@@ -28,43 +28,43 @@ import net.minecraft.util.ResourceLocation;
  */
 public class RenderDummy extends Render {
 
-	@Override
-	public void doRender(Entity _entity, double x, double y, double z, float a, float b) {
-		EntityDummy entity = (EntityDummy) _entity;
-		glPushMatrix();
-		glTranslated(x, y, z);
-		
-		boolean fp = ViewOptimize.isFirstPerson(entity);
-		
-		float yy, ly;
-		if(fp) {
-			yy = entity.rotationYawHead;
-			ly = entity.lastRotationYawHead;
-		} else {
-			yy = entity.rotationYaw;
-			ly = entity.lastRotationYaw;
-		}
-		
-		float yaw = MathUtils.lerpf(ly, yy, b);
-		glRotated(180 - yaw, 0, 1, 0);
-		
-		// Render hand
-		
-		if(fp) {
-			glRotated(-entity.rotationPitch, 1, 0, 0);
-		} else {
-			ViewOptimize.fixThirdPerson();
-		}
-		
-		for(PlayerRenderHook hook : entity.data.renderers) {
-			hook.renderHand(fp);
-		}
-		glPopMatrix();
-	}
+    @Override
+    public void doRender(Entity _entity, double x, double y, double z, float a, float b) {
+        EntityDummy entity = (EntityDummy) _entity;
+        glPushMatrix();
+        glTranslated(x, y, z);
+        
+        boolean fp = ViewOptimize.isFirstPerson(entity);
+        
+        float yy, ly;
+        if(fp) {
+            yy = entity.rotationYawHead;
+            ly = entity.lastRotationYawHead;
+        } else {
+            yy = entity.rotationYaw;
+            ly = entity.lastRotationYaw;
+        }
+        
+        float yaw = MathUtils.lerpf(ly, yy, b);
+        glRotated(180 - yaw, 0, 1, 0);
+        
+        // Render hand
+        
+        if(fp) {
+            glRotated(-entity.rotationPitch, 1, 0, 0);
+        } else {
+            ViewOptimize.fixThirdPerson();
+        }
+        
+        for(PlayerRenderHook hook : entity.data.renderers) {
+            hook.renderHand(fp);
+        }
+        glPopMatrix();
+    }
 
-	@Override
-	protected ResourceLocation getEntityTexture(Entity e) {
-		return null;
-	}
+    @Override
+    protected ResourceLocation getEntityTexture(Entity e) {
+        return null;
+    }
 
 }

@@ -25,14 +25,14 @@ import net.minecraft.server.MinecraftServer;
 @RegistryTypeDecl
 public class CommandRegistration extends RegistrationClassRepeat<RegCommand, ICommand> {
 
-	public CommandRegistration() {
-		super(RegCommand.class, "Command");
-		this.setLoadStage(LoadStage.START_SERVER);
-	}
+    public CommandRegistration() {
+        super(RegCommand.class, "Command");
+        this.setLoadStage(LoadStage.START_SERVER);
+    }
 
-	@Override
-	protected void register( Class<? extends ICommand> theClass, RegCommand anno) throws Exception {
-		CommandHandler ch = (CommandHandler) MinecraftServer.getServer().getCommandManager();
-		ch.registerCommand(theClass.newInstance());
-	}
+    @Override
+    protected void register( Class<? extends ICommand> theClass, RegCommand anno) throws Exception {
+        CommandHandler ch = (CommandHandler) MinecraftServer.getServer().getCommandManager();
+        ch.registerCommand(theClass.newInstance());
+    }
 }

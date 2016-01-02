@@ -28,48 +28,48 @@ import net.minecraft.util.Vec3;
  */
 public class RenderParticle extends Render {
 
-	static Sprite sprite = new Sprite();
+    static Sprite sprite = new Sprite();
 
-	public RenderParticle() {
-		this.shadowOpaque = 0;
-	}
+    public RenderParticle() {
+        this.shadowOpaque = 0;
+    }
 
-	@Override
-	public void doRender(Entity ent, double x, double y, double z, float a, float b) {
-		if (RenderUtils.isInShadowPass())
-			return;
+    @Override
+    public void doRender(Entity ent, double x, double y, double z, float a, float b) {
+        if (RenderUtils.isInShadowPass())
+            return;
 
-		Particle ish = (Particle) ent;
-		if (!ish.updated)
-			return;
+        Particle ish = (Particle) ent;
+        if (!ish.updated)
+            return;
 
-		ish.updateSprite(sprite);
+        ish.updateSprite(sprite);
 
-		GL11.glAlphaFunc(GL11.GL_GREATER, 0.05f);
-		GL11.glPushMatrix();
+        GL11.glAlphaFunc(GL11.GL_GREATER, 0.05f);
+        GL11.glPushMatrix();
 
-		if (ish.needViewOptimize()) {
-			GL11.glTranslated(0, -0.2, 0);
-		}
+        if (ish.needViewOptimize()) {
+            GL11.glTranslated(0, -0.2, 0);
+        }
 
-		GL11.glTranslated(x, y, z);
-		if (ish.customRotation) {
-			GL11.glRotatef(ish.rotationYaw, 0, 1, 0);
-			GL11.glRotatef(ish.rotationPitch, 0, 0, 1);
-		} else {
-			GL11.glRotatef(180F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-			GL11.glRotatef(-this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-		}
+        GL11.glTranslated(x, y, z);
+        if (ish.customRotation) {
+            GL11.glRotatef(ish.rotationYaw, 0, 1, 0);
+            GL11.glRotatef(ish.rotationPitch, 0, 0, 1);
+        } else {
+            GL11.glRotatef(180F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+            GL11.glRotatef(-this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+        }
 
-		sprite.draw();
+        sprite.draw();
 
-		GL11.glPopMatrix();
-		GL11.glAlphaFunc(GL11.GL_GEQUAL, 0.1f);
-	}
+        GL11.glPopMatrix();
+        GL11.glAlphaFunc(GL11.GL_GEQUAL, 0.1f);
+    }
 
-	@Override
-	protected ResourceLocation getEntityTexture(Entity p_110775_1_) {
-		return null;
-	}
+    @Override
+    protected ResourceLocation getEntityTexture(Entity p_110775_1_) {
+        return null;
+    }
 
 }

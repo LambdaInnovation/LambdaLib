@@ -26,24 +26,24 @@ import cpw.mods.fml.common.eventhandler.EventBus;
 @RegistryTypeDecl
 public class EventHandlerRegistration extends RegistrationInstance<RegEventHandler, Object> {
 
-	public EventHandlerRegistration() {
-		super(RegEventHandler.class, "EventHandler");
-		this.setLoadStage(LoadStage.INIT);
-	}
-	
-	@Override
-	protected void register(Object obj, RegEventHandler anno) throws Exception {
-		for (RegEventHandler.Bus bus : anno.value()) {
-			switch (bus) {
-			case FML:
-				FMLCommonHandler.instance().bus().register(obj);
-				break;
-			case Forge:
-				MinecraftForge.EVENT_BUS.register(obj);
-				break;
-			default:
-			}
-		}
-	}
-	
+    public EventHandlerRegistration() {
+        super(RegEventHandler.class, "EventHandler");
+        this.setLoadStage(LoadStage.INIT);
+    }
+    
+    @Override
+    protected void register(Object obj, RegEventHandler anno) throws Exception {
+        for (RegEventHandler.Bus bus : anno.value()) {
+            switch (bus) {
+            case FML:
+                FMLCommonHandler.instance().bus().register(obj);
+                break;
+            case Forge:
+                MinecraftForge.EVENT_BUS.register(obj);
+                break;
+            default:
+            }
+        }
+    }
+    
 }

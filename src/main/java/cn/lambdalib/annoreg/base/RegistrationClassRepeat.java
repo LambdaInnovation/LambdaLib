@@ -21,29 +21,29 @@ import cn.lambdalib.core.LLModContainer;
 
 public abstract class RegistrationClassRepeat<ANNO extends Annotation, BASE> extends RegistryType {
 
-	public RegistrationClassRepeat(Class<ANNO> annoClass, String name) {
-		super(annoClass, name);
-	}
+    public RegistrationClassRepeat(Class<ANNO> annoClass, String name) {
+        super(annoClass, name);
+    }
 
-	protected abstract void register(Class<? extends BASE> theClass, ANNO anno) throws Exception;
+    protected abstract void register(Class<? extends BASE> theClass, ANNO anno) throws Exception;
 
-	@Override
-	public boolean registerClass(AnnotationData data) throws Exception {
-		register((Class<? extends BASE>) data.getTheClass(), (ANNO) data.getAnnotation());
-		return false;
-	}
+    @Override
+    public boolean registerClass(AnnotationData data) throws Exception {
+        register((Class<? extends BASE>) data.getTheClass(), (ANNO) data.getAnnotation());
+        return false;
+    }
 
-	@Override
-	public boolean registerField(AnnotationData data) throws Exception {
-		throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on field.");
-	}
-	
-	@Override
-	public boolean registerMethod(AnnotationData data) throws Exception {
-		throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on method.");
-	}
+    @Override
+    public boolean registerField(AnnotationData data) throws Exception {
+        throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on field.");
+    }
+    
+    @Override
+    public boolean registerMethod(AnnotationData data) throws Exception {
+        throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on method.");
+    }
 
-	@Override
-	public void checkLoadState() {
-	}
+    @Override
+    public void checkLoadState() {
+    }
 }

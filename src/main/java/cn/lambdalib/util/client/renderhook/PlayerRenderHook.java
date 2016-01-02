@@ -8,23 +8,23 @@ import net.minecraft.entity.player.EntityPlayer;
  * @author WeAthFolD
  */
 public abstract class PlayerRenderHook {
-	
-	EntityPlayer player;
-	boolean disposed;
-	long createTime = GameTimer.getTime();
-	
-	public void renderHand(boolean firstPerson) {}
-	
-	public void dispose() {
-		disposed = true;
-	}
-	
-	public final EntityPlayer getPlayer() {
-		return player;
-	}
-	
-	protected long getDeltaTime() {
-		return GameTimer.getTime() - createTime;
-	}
-	
+    
+    EntityPlayer player;
+    boolean disposed;
+    long createTime = GameTimer.getTime();
+    
+    public void renderHand(boolean firstPerson) {}
+    
+    public void dispose() {
+        disposed = true;
+    }
+    
+    public final EntityPlayer getPlayer() {
+        return player;
+    }
+    
+    protected long getDeltaTime() {
+        return GameTimer.getTime() - createTime;
+    }
+    
 }

@@ -19,6 +19,6 @@ import net.minecraft.entity.Entity;
  */
 public interface EntityCallback<T extends Entity> {
 
-	void execute(T target);
-	
+    void execute(T target);
+    
 }

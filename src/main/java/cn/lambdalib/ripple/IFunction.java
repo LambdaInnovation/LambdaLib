@@ -9,6 +9,6 @@ package cn.lambdalib.ripple;
  */
 public interface IFunction {
 
-	Object call(Object[] args);
+    Object call(Object[] args);
 
 }

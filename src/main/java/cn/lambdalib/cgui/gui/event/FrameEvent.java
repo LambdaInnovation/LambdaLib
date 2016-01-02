@@ -17,12 +17,12 @@ package cn.lambdalib.cgui.gui.event;
  * Fired every frame for any widget if it is to be drawed. (i.e. <code>widget.transform.doesDraw=true</code>)
  */
 public class FrameEvent implements GuiEvent {
-	public final double mx, my;
-	public final boolean hovering;
-	
-	public FrameEvent(double _mx, double _my, boolean hov) {
-		mx = _mx;
-		my = _my;
-		hovering = hov;
-	}
+    public final double mx, my;
+    public final boolean hovering;
+    
+    public FrameEvent(double _mx, double _my, boolean hov) {
+        mx = _mx;
+        my = _my;
+        hovering = hov;
+    }
 }

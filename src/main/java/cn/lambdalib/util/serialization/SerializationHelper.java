@@ -20,36 +20,36 @@ public class SerializationHelper {
 
     private SerializationHelper() {}
 
-	private Set<Class<?>> serializeTypes = new HashSet<>();
+    private Set<Class<?>> serializeTypes = new HashSet<>();
 
-	// API
+    // API
 
-	/**
-	 * Get the fields exposed by the rules of this SerializationHelper.
-	 */
-	public List<Field> getExposedFields(Class<?> type) {
-		return Arrays.stream(type.getFields())
-				.filter(f -> {
-					int modifiers = f.getModifiers();
-					boolean canSerialize = (modifiers & (Modifier.FINAL | Modifier.STATIC)) == 0 &&
-							!f.isAnnotationPresent(SerializeExcluded.class) && isSerializable(f.getType());
-					return canSerialize && ((modifiers & Modifier.PUBLIC) != 0 ||
-							f.isAnnotationPresent(SerializeIncluded.class));
-				})
-				.collect(Collectors.toList());
-	}
+    /**
+     * Get the fields exposed by the rules of this SerializationHelper.
+     */
+    public List<Field> getExposedFields(Class<?> type) {
+        return Arrays.stream(type.getFields())
+                .filter(f -> {
+                    int modifiers = f.getModifiers();
+                    boolean canSerialize = (modifiers & (Modifier.FINAL | Modifier.STATIC)) == 0 &&
+                            !f.isAnnotationPresent(SerializeExcluded.class) && isSerializable(f.getType());
+                    return canSerialize && ((modifiers & Modifier.PUBLIC) != 0 ||
+                            f.isAnnotationPresent(SerializeIncluded.class));
+                })
+                .collect(Collectors.toList());
+    }
 
-	public boolean isSerializable(Class<?> type) {
-		return type.isEnum() ||
-				type.isAnnotationPresent(SerializeType.class) ||
-				serializeTypes.contains(type);
-	}
-	//
+    public boolean isSerializable(Class<?> type) {
+        return type.isEnum() ||
+                type.isAnnotationPresent(SerializeType.class) ||
+                serializeTypes.contains(type);
+    }
+    //
 
-	// Behaviour alternation
-	private void addSerializedType(Class<?> type) {
-		serializeTypes.add(type);
-	}
+    // Behaviour alternation
+    private void addSerializedType(Class<?> type) {
+        serializeTypes.add(type);
+    }
 
     {
         Class[] types = {
@@ -66,6 +66,6 @@ public class SerializationHelper {
             addSerializedType(c);
         }
     }
-	//
+    //
 
 }

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Mark a type to be able to be auto-serialized. When serializing an object, only all fields of serializable types
- * 	within the object class can be serialized.
+ *     within the object class can be serialized.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -20,13 +20,13 @@ import cn.lambdalib.cgui.gui.event.DragEvent;
  */
 public class Draggable extends Component {
 
-	public Draggable() {
-		super("Draggable");
-		
-		listen(DragEvent.class, (w, e) -> {
-			w.getGui().updateDragWidget();
-			w.dirty = true;
-		});
-	}
+    public Draggable() {
+        super("Draggable");
+        
+        listen(DragEvent.class, (w, e) -> {
+            w.getGui().updateDragWidget();
+            w.dirty = true;
+        });
+    }
 
 }

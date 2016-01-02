@@ -29,34 +29,34 @@ import cpw.mods.fml.relauncher.Side;
 
 @RegistryTypeDecl
 public class MessageHandlerRegistration extends RegistrationClassSimple<RegMessageHandler, IMessageHandler> {
-	
-	public MessageHandlerRegistration() {
-		super(RegMessageHandler.class, "MessageHandler");
-		this.setLoadStage(LoadStage.INIT);
-		
-		//Set this annotation to prepare for calling getModField.
-		helper.setModFieldAnnotation(RegMessageHandler.WrapperInstance.class);
-	}
-	
-	private <REQ extends IMessage> void register(Class<?> handler, Class<REQ> msg, Side side) {
-		Class<? extends IMessageHandler<REQ, IMessage>> messageHandler = (Class<? extends IMessageHandler<REQ, IMessage>>) handler;
-		SimpleNetworkWrapper wrapper = (SimpleNetworkWrapper) helper.getModField();
-		int id = helper.getNextIDForMod();
-		//System.out.println(msg + " -> " + id);
-		wrapper.registerMessage(messageHandler, msg, id, side);
-	}
-	
-	@Override
-	protected void register(Class theClass, RegMessageHandler anno) throws Exception {
-		Class<? extends IMessage> msg = (Class<? extends IMessage>) anno.msg();
-		switch (anno.side()) {
-		case CLIENT:
-			register(theClass, msg, Side.CLIENT);
-			break;
-		case SERVER:
-			register(theClass, msg, Side.SERVER);
-			break;
-		}
-	}
+    
+    public MessageHandlerRegistration() {
+        super(RegMessageHandler.class, "MessageHandler");
+        this.setLoadStage(LoadStage.INIT);
+        
+        //Set this annotation to prepare for calling getModField.
+        helper.setModFieldAnnotation(RegMessageHandler.WrapperInstance.class);
+    }
+    
+    private <REQ extends IMessage> void register(Class<?> handler, Class<REQ> msg, Side side) {
+        Class<? extends IMessageHandler<REQ, IMessage>> messageHandler = (Class<? extends IMessageHandler<REQ, IMessage>>) handler;
+        SimpleNetworkWrapper wrapper = (SimpleNetworkWrapper) helper.getModField();
+        int id = helper.getNextIDForMod();
+        //System.out.println(msg + " -> " + id);
+        wrapper.registerMessage(messageHandler, msg, id, side);
+    }
+    
+    @Override
+    protected void register(Class theClass, RegMessageHandler anno) throws Exception {
+        Class<? extends IMessage> msg = (Class<? extends IMessage>) anno.msg();
+        switch (anno.side()) {
+        case CLIENT:
+            register(theClass, msg, Side.CLIENT);
+            break;
+        case SERVER:
+            register(theClass, msg, Side.SERVER);
+            break;
+        }
+    }
 
 }

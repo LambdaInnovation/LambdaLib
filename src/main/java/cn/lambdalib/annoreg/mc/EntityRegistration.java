@@ -23,27 +23,27 @@ import net.minecraft.entity.Entity;
 @RegistryTypeDecl
 public class EntityRegistration extends RegistrationClassSimple<RegEntity, Entity> {
 
-	public EntityRegistration() {
-		super(RegEntity.class, "Entity");
-		this.setLoadStage(LoadStage.INIT);
-		
-		this.addWork(RegEntity.HasRender.class, new PostWork<RegEntity.HasRender, Class<? extends Entity>>() {
-			@Override
-			public void invoke(HasRender anno, Class<? extends Entity> obj) throws Exception {
-				if (ProxyHelper.isClient()) {
-					ProxyHelper.regEntityRender(obj, helper.getFieldFromClass(obj, RegEntity.Render.class));
-					//System.out.println("[AR]Registered render " + helper.getFieldFromClass(obj, RegEntity.Render.class) + "for " + obj);
-				}
-			}
-		});
-	}
-	
-	@Override
-	protected void register(Class<? extends Entity> theClass, RegEntity anno) throws Exception {
-		if (!anno.clientOnly()) {
-			EntityRegistry.registerModEntity(theClass, getSuggestedName(), 
-					helper.getNextIDForMod(), getCurrentMod().getModInstance(), 
-					anno.trackRange(), anno.freq(), anno.updateVel());
-		}
-	}
+    public EntityRegistration() {
+        super(RegEntity.class, "Entity");
+        this.setLoadStage(LoadStage.INIT);
+        
+        this.addWork(RegEntity.HasRender.class, new PostWork<RegEntity.HasRender, Class<? extends Entity>>() {
+            @Override
+            public void invoke(HasRender anno, Class<? extends Entity> obj) throws Exception {
+                if (ProxyHelper.isClient()) {
+                    ProxyHelper.regEntityRender(obj, helper.getFieldFromClass(obj, RegEntity.Render.class));
+                    //System.out.println("[AR]Registered render " + helper.getFieldFromClass(obj, RegEntity.Render.class) + "for " + obj);
+                }
+            }
+        });
+    }
+    
+    @Override
+    protected void register(Class<? extends Entity> theClass, RegEntity anno) throws Exception {
+        if (!anno.clientOnly()) {
+            EntityRegistry.registerModEntity(theClass, getSuggestedName(), 
+                    helper.getNextIDForMod(), getCurrentMod().getModInstance(), 
+                    anno.trackRange(), anno.freq(), anno.updateVel());
+        }
+    }
 }

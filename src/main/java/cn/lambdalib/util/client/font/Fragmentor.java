@@ -12,19 +12,19 @@ import java.util.List;
  */
 public class Fragmentor {
 
-	private static final String puncts = ",.<>?;:'\"[]{}【】：；“‘《》，。？";
+    private static final String puncts = ",.<>?;:'\"[]{}【】：；“‘《》，。？";
 
-	public interface IFontSizeProvider {
-		/**
-		 * Get the width of given character when drawed.
-		 */
-		double getCharWidth(int chr);
+    public interface IFontSizeProvider {
+        /**
+         * Get the width of given character when drawed.
+         */
+        double getCharWidth(int chr);
 
-		/**
-		 * Get the text width that will be drawn.
-		 */
-		double getTextWidth(String str);
-	}
+        /**
+         * Get the text width that will be drawn.
+         */
+        double getTextWidth(String str);
+    }
 
     public static List<String> toMultiline(String str, IFontSizeProvider font, double local_x, double limit) {
         Fragmentor frag = new Fragmentor(str);
@@ -80,55 +80,55 @@ public class Fragmentor {
         return ret;
     }
 
-	/**
-	 * Converts a string with linesep to a list of string, based on the display property of the given font.
-	 */
-	public static List<String> toMultiline(String str, IFontSizeProvider font, double limit) {
-		return toMultiline(str, font, 0, limit);
-	}
+    /**
+     * Converts a string with linesep to a list of string, based on the display property of the given font.
+     */
+    public static List<String> toMultiline(String str, IFontSizeProvider font, double limit) {
+        return toMultiline(str, font, 0, limit);
+    }
 
-	public static boolean isPunct(char ch) {
-		for (int i = 0; i < puncts.length(); ++i) {
+    public static boolean isPunct(char ch) {
+        for (int i = 0; i < puncts.length(); ++i) {
             if (puncts.charAt(i) == ch) return true;
         }
         return false;
-	}
+    }
 
-	public enum TokenType { NULL(true), WORD(false), SPACE(true), CJKV(true), PUNCT(true);
+    public enum TokenType { NULL(true), WORD(false), SPACE(true), CJKV(true), PUNCT(true);
         public final boolean canSplit;
         TokenType(boolean _canSplit) {
             canSplit = _canSplit;
         }
     }
 
-	final String str;
-	int index = 0;
+    final String str;
+    int index = 0;
 
-	public Fragmentor(String _str) {
-		str = _str;
-	}
+    public Fragmentor(String _str) {
+        str = _str;
+    }
 
-	public Pair<TokenType, String> next() {
-		if(index == str.length()) {
-			return Pair.of(TokenType.NULL, null);
-		} else {
-			TokenType init = getType(str.charAt(index));
-			int lindex = index;
-			for(++index; index < str.length(); ++index) {
+    public Pair<TokenType, String> next() {
+        if(index == str.length()) {
+            return Pair.of(TokenType.NULL, null);
+        } else {
+            TokenType init = getType(str.charAt(index));
+            int lindex = index;
+            for(++index; index < str.length(); ++index) {
                 TokenType type = getType(str.charAt(index));
-				if(init != TokenType.CJKV && init != type && type != TokenType.PUNCT)
+                if(init != TokenType.CJKV && init != type && type != TokenType.PUNCT)
                     break;
-			}
+            }
             System.out.println("F::" + str.substring(lindex, index));
-			return Pair.of(init, str.substring(lindex, index));
-		}
-	}
+            return Pair.of(init, str.substring(lindex, index));
+        }
+    }
 
-	public boolean hasNext() {
-		return index < str.length();
-	}
+    public boolean hasNext() {
+        return index < str.length();
+    }
 
-	TokenType getType(char ch) {
+    TokenType getType(char ch) {
         if (isPunct(ch)) {
             return TokenType.PUNCT;
         } else if (Character.isWhitespace(ch)) {
@@ -138,6 +138,6 @@ public class Fragmentor {
         } else {
             return TokenType.WORD;
         }
-	}
+    }
 
 }

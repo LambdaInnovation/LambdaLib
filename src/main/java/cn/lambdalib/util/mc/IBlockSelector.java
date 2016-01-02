@@ -20,7 +20,7 @@ import net.minecraft.world.World;
  *
  */
 public interface IBlockSelector {
-	
-	boolean accepts(World world, int x, int y, int z, Block block);
-	
+    
+    boolean accepts(World world, int x, int y, int z, Block block);
+    
 }

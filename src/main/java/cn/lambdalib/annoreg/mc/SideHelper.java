@@ -12,7 +12,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 // FIXME Cross reference across multiple domains. Move it to generic utils and give it a better meaning.
 public class SideHelper {
-	//TODO load client on server?
+    //TODO load client on server?
     private static ThreadLocal<SideHelper> threadProxy = new ThreadLocal<SideHelper>() {
         @Override protected SideHelper initialValue() {
             Side s = FMLCommonHandler.instance().getEffectiveSide();
@@ -26,7 +26,7 @@ public class SideHelper {
         // FIXME: TEMP WORKAROUND
         @SideOnly(Side.CLIENT)
         private ServerProxy getClientProxy() {
-        	return new ClientProxy();
+            return new ClientProxy();
         }
     };
     

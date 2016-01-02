@@ -29,92 +29,92 @@ import net.minecraft.util.ResourceLocation;
  */
 public final class Sprite {
 
-	/**
-	 * If the texture is null draw pure-colored sprite.
-	 */
-	public ResourceLocation texture;
-	public float width = 1.0f, height = 1.0f;
-	public Color color = Color.white();
-	public boolean hasLight = false;
-	public boolean cullFace = true;
+    /**
+     * If the texture is null draw pure-colored sprite.
+     */
+    public ResourceLocation texture;
+    public float width = 1.0f, height = 1.0f;
+    public Color color = Color.white();
+    public boolean hasLight = false;
+    public boolean cullFace = true;
 
-	public Sprite() {
-	}
+    public Sprite() {
+    }
 
-	public Sprite(ResourceLocation rl) {
-		texture = rl;
-	}
+    public Sprite(ResourceLocation rl) {
+        texture = rl;
+    }
 
-	public Sprite setTexture(ResourceLocation rl) {
-		texture = rl;
-		return this;
-	}
+    public Sprite setTexture(ResourceLocation rl) {
+        texture = rl;
+        return this;
+    }
 
-	public Sprite setSize(float w, float h) {
-		width = w;
-		height = h;
-		return this;
-	}
+    public Sprite setSize(float w, float h) {
+        width = w;
+        height = h;
+        return this;
+    }
 
-	public Sprite enableLight() {
-		hasLight = true;
-		return this;
-	}
+    public Sprite enableLight() {
+        hasLight = true;
+        return this;
+    }
 
-	public Sprite disableCullFace() {
-		cullFace = false;
-		return this;
-	}
+    public Sprite disableCullFace() {
+        cullFace = false;
+        return this;
+    }
 
-	public Sprite setColor(Color nc) {
-		color = nc;
-		return this;
-	}
+    public Sprite setColor(Color nc) {
+        color = nc;
+        return this;
+    }
 
-	public void draw() {
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    public void draw() {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		if (texture != null) {
-			RenderUtils.loadTexture(texture);
-		} else {
-			glDisable(GL_TEXTURE_2D);
-		}
+        if (texture != null) {
+            RenderUtils.loadTexture(texture);
+        } else {
+            glDisable(GL_TEXTURE_2D);
+        }
 
-		if (!cullFace) {
-			glDisable(GL_CULL_FACE);
-		}
+        if (!cullFace) {
+            glDisable(GL_CULL_FACE);
+        }
 
-		color.bind();
-		Tessellator t = Tessellator.instance;
-		float hw = width / 2, hh = height / 2;
+        color.bind();
+        Tessellator t = Tessellator.instance;
+        float hw = width / 2, hh = height / 2;
 
-		if (hasLight) {
-			t.startDrawingQuads();
-			t.setNormal(0, 0, -1);
-			t.addVertexWithUV(-hw, hh, 0, 0, 0);
-			t.addVertexWithUV(-hw, -hh, 0, 0, 1);
-			t.addVertexWithUV(hw, -hh, 0, 1, 1);
-			t.addVertexWithUV(hw, hh, 0, 1, 0);
-			t.draw();
-		} else {
-			// Use legacy routine to avoid ShaderMod to ruin the render
-			ShaderSimple.instance().useProgram();
-			glBegin(GL_QUADS);
-			glTexCoord2f(0, 0);
-			glVertex3f(-hw, hh, 0);
-			glTexCoord2f(0, 1);
-			glVertex3f(-hw, -hh, 0);
-			glTexCoord2f(1, 1);
-			glVertex3f(hw, -hh, 0);
-			glTexCoord2f(1, 0);
-			glVertex3f(hw, hh, 0);
-			glEnd();
-			GL20.glUseProgram(0);
-		}
+        if (hasLight) {
+            t.startDrawingQuads();
+            t.setNormal(0, 0, -1);
+            t.addVertexWithUV(-hw, hh, 0, 0, 0);
+            t.addVertexWithUV(-hw, -hh, 0, 0, 1);
+            t.addVertexWithUV(hw, -hh, 0, 1, 1);
+            t.addVertexWithUV(hw, hh, 0, 1, 0);
+            t.draw();
+        } else {
+            // Use legacy routine to avoid ShaderMod to ruin the render
+            ShaderSimple.instance().useProgram();
+            glBegin(GL_QUADS);
+            glTexCoord2f(0, 0);
+            glVertex3f(-hw, hh, 0);
+            glTexCoord2f(0, 1);
+            glVertex3f(-hw, -hh, 0);
+            glTexCoord2f(1, 1);
+            glVertex3f(hw, -hh, 0);
+            glTexCoord2f(1, 0);
+            glVertex3f(hw, hh, 0);
+            glEnd();
+            GL20.glUseProgram(0);
+        }
 
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_TEXTURE_2D);
-	}
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_TEXTURE_2D);
+    }
 
 }

@@ -27,29 +27,29 @@ import net.minecraft.item.ItemBlock;
 @Target(ElementType.FIELD)
 public @interface RegBlock {
 
-	/**
-	 * Register block's oreDictionary.
-	 * @par oreDict name
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface OreDict {
-		String value();
-	}
-	
-	/**
-	 * Register the block's unlocalized name and icon name at once.
-	 * e.g. @RegBlock.BTName("fff") in mod "academy" will give unlocalized name "fff" and icon name "academy:fff".
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface BTName {
-		String value();
-	}
-	
-	/**
-	 * The ItemBlock class that this block will use.
-	 */
-	Class<? extends ItemBlock> item() default ItemBlock.class;
-	
+    /**
+     * Register block's oreDictionary.
+     * @par oreDict name
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface OreDict {
+        String value();
+    }
+    
+    /**
+     * Register the block's unlocalized name and icon name at once.
+     * e.g. @RegBlock.BTName("fff") in mod "academy" will give unlocalized name "fff" and icon name "academy:fff".
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface BTName {
+        String value();
+    }
+    
+    /**
+     * The ItemBlock class that this block will use.
+     */
+    Class<? extends ItemBlock> item() default ItemBlock.class;
+    
 }

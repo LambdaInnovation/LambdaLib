@@ -21,19 +21,19 @@ import net.minecraft.util.MovingObjectPosition;
  */
 public class CollideEvent extends EntityEvent {
 
-	public final MovingObjectPosition result;
-	
-	public CollideEvent(MovingObjectPosition mop) {
-		result = mop;
-	}
-	
-	public static abstract class CollideHandler extends EntityEventHandler<CollideEvent> {
+    public final MovingObjectPosition result;
+    
+    public CollideEvent(MovingObjectPosition mop) {
+        result = mop;
+    }
+    
+    public static abstract class CollideHandler extends EntityEventHandler<CollideEvent> {
 
-		@Override
-		public Class<? extends EntityEvent> getHandledEvent() {
-			return CollideEvent.class;
-		}
-		
-	}
-	
+        @Override
+        public Class<? extends EntityEvent> getHandledEvent() {
+            return CollideEvent.class;
+        }
+        
+    }
+    
 }

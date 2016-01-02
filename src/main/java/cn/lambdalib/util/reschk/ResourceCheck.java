@@ -29,31 +29,31 @@ import net.minecraft.util.ResourceLocation;
  * @author EAirPeter
  */
 public final class ResourceCheck {
-	
-	private static final ByteBuf buf = Unpooled.buffer();
-	private static final HandlerServer handler = new HandlerServer();
-	
-	public static void init() {
-		FMLCommonHandler.instance().bus().register(handler);
-	}
-	
-	/**
-	 * Add a resource which will be verified when client connected to server.
-	 * @param res The resource to be verified
-	 */
-	public static void add(ResourceLocation res) {
-		buf.writeInt(res.hashCode());
-		buf.writeBytes(HashUtils.SHA1.hash(RegistryUtils.getResourceStream(res)));
-	}
-	
-	@RegNetworkCall(side = Side.CLIENT)
-	public static void sRequestCheck(@Target EntityPlayer player) {
-		cChecklist(player, buf.array());
-	}
-	
-	@RegNetworkCall(side = Side.SERVER)
-	public static void cChecklist(@Instance EntityPlayer player, @Data byte[] data) {
-		handler.processPlayer((EntityPlayerMP) player, Arrays.equals(buf.array(), data));
-	}
+    
+    private static final ByteBuf buf = Unpooled.buffer();
+    private static final HandlerServer handler = new HandlerServer();
+    
+    public static void init() {
+        FMLCommonHandler.instance().bus().register(handler);
+    }
+    
+    /**
+     * Add a resource which will be verified when client connected to server.
+     * @param res The resource to be verified
+     */
+    public static void add(ResourceLocation res) {
+        buf.writeInt(res.hashCode());
+        buf.writeBytes(HashUtils.SHA1.hash(RegistryUtils.getResourceStream(res)));
+    }
+    
+    @RegNetworkCall(side = Side.CLIENT)
+    public static void sRequestCheck(@Target EntityPlayer player) {
+        cChecklist(player, buf.array());
+    }
+    
+    @RegNetworkCall(side = Side.SERVER)
+    public static void cChecklist(@Instance EntityPlayer player, @Data byte[] data) {
+        handler.processPlayer((EntityPlayerMP) player, Arrays.equals(buf.array(), data));
+    }
 
 }

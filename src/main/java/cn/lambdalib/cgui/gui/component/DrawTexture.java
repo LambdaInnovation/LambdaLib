@@ -31,22 +31,22 @@ import net.minecraft.util.ResourceLocation;
  * Draws a squared texture that fills the area of the given widget.
  */
 public class DrawTexture extends Component {
-	
-	public static final ResourceLocation MISSING = new ResourceLocation("lambdalib:textures/cgui/missing.png");
-	
-	public ResourceLocation texture;
-	
-	public Color color;
-	
-	public double zLevel = 0;
-	
-	public boolean writeDepth = true;
-	
-	private int shaderId = 0;
+    
+    public static final ResourceLocation MISSING = new ResourceLocation("lambdalib:textures/cgui/missing.png");
+    
+    public ResourceLocation texture;
+    
+    public Color color;
+    
+    public double zLevel = 0;
+    
+    public boolean writeDepth = true;
+    
+    private int shaderId = 0;
 
-	public DrawTexture() {
-		this(MISSING);
-	}
+    public DrawTexture() {
+        this(MISSING);
+    }
 
     public DrawTexture(ResourceLocation texture) {
         this(texture, Color.white());
@@ -78,36 +78,36 @@ public class DrawTexture extends Component {
             glDepthMask(true);
         });
     }
-	
-	public void setShaderId(int id) {
-		shaderId = id;
-	}
-	
-	public DrawTexture setTex(ResourceLocation t) {
-		texture = t;
-		return this;
-	}
+    
+    public void setShaderId(int id) {
+        shaderId = id;
+    }
+    
+    public DrawTexture setTex(ResourceLocation t) {
+        texture = t;
+        return this;
+    }
 
-	/**
-	 * Set the color as a **copy** of the given color.
-	 */
-	public DrawTexture setColor(Color c) {
-		this.color.from(c);
-		return this;
-	}
-	
-	public DrawTexture setColor4i(int r, int g, int b, int a) {
-		color.setColor4d(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
-		return this;
-	}
-	
-	public DrawTexture setColor4d(double _r, double _g, double _b, double _a) {
-		color.setColor4d(_r, _g, _b, _a);
-		return this;
-	}
-	
-	public static DrawTexture get(Widget w) {
-		return w.getComponent("DrawTexture");
-	}
+    /**
+     * Set the color as a **copy** of the given color.
+     */
+    public DrawTexture setColor(Color c) {
+        this.color.from(c);
+        return this;
+    }
+    
+    public DrawTexture setColor4i(int r, int g, int b, int a) {
+        color.setColor4d(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+        return this;
+    }
+    
+    public DrawTexture setColor4d(double _r, double _g, double _b, double _a) {
+        color.setColor4d(_r, _g, _b, _a);
+        return this;
+    }
+    
+    public static DrawTexture get(Widget w) {
+        return w.getComponent("DrawTexture");
+    }
 
 }

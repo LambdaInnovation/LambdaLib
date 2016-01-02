@@ -18,11 +18,11 @@ import cn.lambdalib.cgui.gui.Widget;
  * Fired on CGui when a new widget is added into it.
  */
 public class AddWidgetEvent implements GuiEvent {
-	
-	public final Widget widget;
-	
-	public AddWidgetEvent(Widget w) {
-		widget = w;
-	}
-	
+    
+    public final Widget widget;
+    
+    public AddWidgetEvent(Widget w) {
+        widget = w;
+    }
+    
 }

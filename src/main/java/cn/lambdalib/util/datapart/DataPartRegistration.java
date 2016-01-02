@@ -24,17 +24,17 @@ import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 @RegistryTypeDecl
 public class DataPartRegistration extends RegistryType {
 
-	public DataPartRegistration() {
-		super(RegDataPart.class, "LL_DataPart");
-		setLoadStage(LoadStage.INIT);
-	}
+    public DataPartRegistration() {
+        super(RegDataPart.class, "LL_DataPart");
+        setLoadStage(LoadStage.INIT);
+    }
 
-	@Override
-	public boolean registerClass(AnnotationData data) throws Exception {
-		Class c = data.getTheClass();
-		RegDataPart anno = data.getAnnotation();
-		EntityData.register(anno.value(), c);
-		return true;
-	}
+    @Override
+    public boolean registerClass(AnnotationData data) throws Exception {
+        Class c = data.getTheClass();
+        RegDataPart anno = data.getAnnotation();
+        EntityData.register(anno.value(), c);
+        return true;
+    }
 
 }

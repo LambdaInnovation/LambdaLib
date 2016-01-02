@@ -43,164 +43,164 @@ import net.minecraft.util.IntHashMap;
 @RegInit
 @RegEventHandler(Bus.Forge)
 public class ControlOverrider {
-	
-	private static IntHashMap kbMap;
-	private static Field pressedField;
-	private static Field kbMapField;
-	
-	private static Map<Integer, Override> activeOverrides = new HashMap();
-	
-	private static boolean completeOverriding;
-	
-	public static void init() {
-		try {
-			kbMapField = RegistryUtils.getObfField(KeyBinding.class, "hash", "field_74514_b");
-			kbMap = getOriginalKbMap();
-			
-			pressedField = RegistryUtils.getObfField(KeyBinding.class, "pressed", "field_74513_e");
-			Field modifiersField = Field.class.getDeclaredField("modifiers");
-		    modifiersField.setAccessible(true);
-		    modifiersField.setInt(kbMapField, kbMapField.getModifiers() & (~Modifier.FINAL));
-		} catch(Exception e) {
-			error("init", e);
-			e.printStackTrace();
-		}
-	}
-	
-	private static IntHashMap createCopy(IntHashMap from, IntHashMap to) {
-		if(to == null)
-			to = new IntHashMap();
-		// Awkward, but who knows if this is faster than reflection?
-		for(int i = -100; i <= 250; ++i) {
-			if(from.containsItem(i))
-				to.addKey(i, from.lookup(i));
-		}
-		return to;
-	}
-	
-	private static IntHashMap getOriginalKbMap() {
-		try {
-			return (IntHashMap) kbMapField.get(null);
-		} catch (Exception e) {
-			error("getOriginalKbMap", e);
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	// SUPERHACKTECH Starts
-	/**
-	 * A complete override stops ALL minecraft keys to function. Currently you can open up complete override globally only once.
-	 */
-	public static void startCompleteOverride() {
-		if(!completeOverriding) {
-			completeOverriding = true;
-			kbMap = createCopy(kbMap, null);
-			getOriginalKbMap().clearMap();
-		}
-	}
-	
-	public static void endCompleteOverride() {
-		if(completeOverriding) {
-			completeOverriding = false;
-			createCopy(kbMap, getOriginalKbMap());
-			kbMap = getOriginalKbMap();
-		} else {
-			error("Try to stop complete override while not overriding at all", new RuntimeException());
-		}
-	}
-	// SUPERHACKTECH Ends
-	
-	public static void override(int keyID) {
-		if(activeOverrides.containsKey(keyID)) {
-			activeOverrides.get(keyID).count++;
-			if(activeOverrides.get(keyID).count > 100)
-				LambdaLib.log.warn("Over 100 override locks for " + 
-						keyID + ". Might be a programming error?");
-			log("Override increment " + "[" + keyID + "]" + activeOverrides.get(keyID).count);
-			return;
-		}
-		
-		KeyBinding kb = (KeyBinding) kbMap.removeObject(keyID);
-		if(kb != null) {
-			try {
-				pressedField.set(kb, false);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			//kb.setKeyCode(-1);
-			activeOverrides.put(keyID, new Override(kb));
-			log("Override new [" + keyID + "]");
-		} else {
-			log("Override ignored [" + keyID + "]");
-		}
-	}
-	
-	public static void removeOverride(int keyID) {
-		Override ovr = activeOverrides.get(keyID);
-		if(ovr == null)
-			return;
-		
-		if(ovr.count > 1) {
-			ovr.count--;
-			
-			log("Override decrement [" + keyID + "]" + ovr.count);
-		} else {
-			activeOverrides.remove(keyID);
-			
-			ovr.kb.setKeyCode(keyID);
-			kbMap.addKey(keyID, ovr.kb);
-			
-			log("Override remove [" + keyID + "]");
-		}
-	}
-	
-	private static void releaseLocks() {
-		for(Map.Entry<Integer, Override> ao: activeOverrides.entrySet()) {
-			kbMap.addKey(ao.getKey(), ao.getValue().kb);
-		}
-	}
-	
-	private static void restoreLocks() {
-		for(Map.Entry<Integer, Override> ao: activeOverrides.entrySet()) {
-			try {
-				pressedField.set(ao.getValue().kb, false);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			kbMap.removeObject(ao.getKey());
-		}
-	}
-	
-	GuiScreen lastTickGui;
-	@SubscribeEvent
-	public void onClientTick(ClientTickEvent cte) {
-		GuiScreen cgs = Minecraft.getMinecraft().currentScreen;
-		if(lastTickGui == null && cgs != null) {
-			releaseLocks();
-		}
-		if(lastTickGui != null && cgs == null) {
-			restoreLocks();
-		}
-		lastTickGui = cgs;
-	}
-	
-	private static void log(String s) {
-		if(LambdaLib.DEBUG)
-			LambdaLib.log.info(s);
-	}
-	
-	private static void error(String s, Exception e) {
-		LambdaLib.log.error("ControlOverrider error: " + s, e);
-	}
-	
-	private static class Override {
-		final KeyBinding kb;
-		int count;
-		
-		public Override(KeyBinding _kb) {
-			kb = _kb;
-			count = 1;
-		}
-	}
+    
+    private static IntHashMap kbMap;
+    private static Field pressedField;
+    private static Field kbMapField;
+    
+    private static Map<Integer, Override> activeOverrides = new HashMap();
+    
+    private static boolean completeOverriding;
+    
+    public static void init() {
+        try {
+            kbMapField = RegistryUtils.getObfField(KeyBinding.class, "hash", "field_74514_b");
+            kbMap = getOriginalKbMap();
+            
+            pressedField = RegistryUtils.getObfField(KeyBinding.class, "pressed", "field_74513_e");
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(kbMapField, kbMapField.getModifiers() & (~Modifier.FINAL));
+        } catch(Exception e) {
+            error("init", e);
+            e.printStackTrace();
+        }
+    }
+    
+    private static IntHashMap createCopy(IntHashMap from, IntHashMap to) {
+        if(to == null)
+            to = new IntHashMap();
+        // Awkward, but who knows if this is faster than reflection?
+        for(int i = -100; i <= 250; ++i) {
+            if(from.containsItem(i))
+                to.addKey(i, from.lookup(i));
+        }
+        return to;
+    }
+    
+    private static IntHashMap getOriginalKbMap() {
+        try {
+            return (IntHashMap) kbMapField.get(null);
+        } catch (Exception e) {
+            error("getOriginalKbMap", e);
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    // SUPERHACKTECH Starts
+    /**
+     * A complete override stops ALL minecraft keys to function. Currently you can open up complete override globally only once.
+     */
+    public static void startCompleteOverride() {
+        if(!completeOverriding) {
+            completeOverriding = true;
+            kbMap = createCopy(kbMap, null);
+            getOriginalKbMap().clearMap();
+        }
+    }
+    
+    public static void endCompleteOverride() {
+        if(completeOverriding) {
+            completeOverriding = false;
+            createCopy(kbMap, getOriginalKbMap());
+            kbMap = getOriginalKbMap();
+        } else {
+            error("Try to stop complete override while not overriding at all", new RuntimeException());
+        }
+    }
+    // SUPERHACKTECH Ends
+    
+    public static void override(int keyID) {
+        if(activeOverrides.containsKey(keyID)) {
+            activeOverrides.get(keyID).count++;
+            if(activeOverrides.get(keyID).count > 100)
+                LambdaLib.log.warn("Over 100 override locks for " + 
+                        keyID + ". Might be a programming error?");
+            log("Override increment " + "[" + keyID + "]" + activeOverrides.get(keyID).count);
+            return;
+        }
+        
+        KeyBinding kb = (KeyBinding) kbMap.removeObject(keyID);
+        if(kb != null) {
+            try {
+                pressedField.set(kb, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //kb.setKeyCode(-1);
+            activeOverrides.put(keyID, new Override(kb));
+            log("Override new [" + keyID + "]");
+        } else {
+            log("Override ignored [" + keyID + "]");
+        }
+    }
+    
+    public static void removeOverride(int keyID) {
+        Override ovr = activeOverrides.get(keyID);
+        if(ovr == null)
+            return;
+        
+        if(ovr.count > 1) {
+            ovr.count--;
+            
+            log("Override decrement [" + keyID + "]" + ovr.count);
+        } else {
+            activeOverrides.remove(keyID);
+            
+            ovr.kb.setKeyCode(keyID);
+            kbMap.addKey(keyID, ovr.kb);
+            
+            log("Override remove [" + keyID + "]");
+        }
+    }
+    
+    private static void releaseLocks() {
+        for(Map.Entry<Integer, Override> ao: activeOverrides.entrySet()) {
+            kbMap.addKey(ao.getKey(), ao.getValue().kb);
+        }
+    }
+    
+    private static void restoreLocks() {
+        for(Map.Entry<Integer, Override> ao: activeOverrides.entrySet()) {
+            try {
+                pressedField.set(ao.getValue().kb, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            kbMap.removeObject(ao.getKey());
+        }
+    }
+    
+    GuiScreen lastTickGui;
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent cte) {
+        GuiScreen cgs = Minecraft.getMinecraft().currentScreen;
+        if(lastTickGui == null && cgs != null) {
+            releaseLocks();
+        }
+        if(lastTickGui != null && cgs == null) {
+            restoreLocks();
+        }
+        lastTickGui = cgs;
+    }
+    
+    private static void log(String s) {
+        if(LambdaLib.DEBUG)
+            LambdaLib.log.info(s);
+    }
+    
+    private static void error(String s, Exception e) {
+        LambdaLib.log.error("ControlOverrider error: " + s, e);
+    }
+    
+    private static class Override {
+        final KeyBinding kb;
+        int count;
+        
+        public Override(KeyBinding _kb) {
+            kb = _kb;
+            count = 1;
+        }
+    }
 }

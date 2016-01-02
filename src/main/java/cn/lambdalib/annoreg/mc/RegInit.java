@@ -23,11 +23,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface RegInit {
-	
-	public enum Side {
-		CLIENT_ONLY,
-		BOTH,
-	}
-	
-	Side side() default Side.BOTH;
+    
+    public enum Side {
+        CLIENT_ONLY,
+        BOTH,
+    }
+    
+    Side side() default Side.BOTH;
 }

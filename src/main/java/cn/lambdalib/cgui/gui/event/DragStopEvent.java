@@ -18,6 +18,6 @@ package cn.lambdalib.cgui.gui.event;
  */
 public class DragStopEvent implements GuiEvent {
 
-	public DragStopEvent() {}
+    public DragStopEvent() {}
 
 }

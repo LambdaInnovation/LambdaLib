@@ -29,45 +29,45 @@ import cpw.mods.fml.relauncher.SideOnly;
 @RegTileEntity
 public class TileMulti extends TileEntity implements IMultiTile {
 
-	InfoBlockMulti info = new InfoBlockMulti(this);
+    InfoBlockMulti info = new InfoBlockMulti(this);
 
-	@Override
-	public void updateEntity() {
-		if (info != null)
-			info.update();
-	}
+    @Override
+    public void updateEntity() {
+        if (info != null)
+            info.update();
+    }
 
-	@Override
-	public InfoBlockMulti getBlockInfo() {
-		return info;
-	}
+    @Override
+    public InfoBlockMulti getBlockInfo() {
+        return info;
+    }
 
-	@Override
-	public void setBlockInfo(InfoBlockMulti i) {
-		info = i;
-	}
+    @Override
+    public void setBlockInfo(InfoBlockMulti i) {
+        info = i;
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		info = new InfoBlockMulti(this, nbt);
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        info = new InfoBlockMulti(this, nbt);
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		info.save(nbt);
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        info.save(nbt);
+    }
 
-	@SideOnly(Side.CLIENT)
-	@Override
-	public AxisAlignedBB getRenderBoundingBox() {
-		Block block = getBlockType();
-		if (block instanceof BlockMulti) {
-			return ((BlockMulti) block).getRenderBB(xCoord, yCoord, zCoord, info.getDir());
-		} else {
-			return super.getRenderBoundingBox();
-		}
-	}
+    @SideOnly(Side.CLIENT)
+    @Override
+    public AxisAlignedBB getRenderBoundingBox() {
+        Block block = getBlockType();
+        if (block instanceof BlockMulti) {
+            return ((BlockMulti) block).getRenderBB(xCoord, yCoord, zCoord, info.getDir());
+        } else {
+            return super.getRenderBoundingBox();
+        }
+    }
 
 }

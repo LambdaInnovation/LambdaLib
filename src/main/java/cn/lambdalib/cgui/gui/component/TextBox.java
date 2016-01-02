@@ -46,51 +46,51 @@ import javax.vecmath.Vector2d;
  * @author WeAthFolD
  */
 public class TextBox extends Component {
-	
-	/**
-	 * Fired each time the TextBox's content is being edited.
-	 */
-	public static class ChangeContentEvent implements GuiEvent {}
-	
-	/**
-	 * Fired each time the TextBox's input is confirmed. (a.k.a. User presses enter)
-	 */
-	public static class ConfirmInputEvent implements GuiEvent {}
-	
-	public String content = "";
+    
+    /**
+     * Fired each time the TextBox's content is being edited.
+     */
+    public static class ChangeContentEvent implements GuiEvent {}
+    
+    /**
+     * Fired each time the TextBox's input is confirmed. (a.k.a. User presses enter)
+     */
+    public static class ConfirmInputEvent implements GuiEvent {}
+    
+    public String content = "";
 
-	public IFont font = TrueTypeFont.defaultFont();
+    public IFont font = TrueTypeFont.defaultFont();
 
-	public FontOption option;
+    public FontOption option;
 
     public HeightAlign heightAlign = HeightAlign.CENTER;
 
-	/**
-	 * Only activated when doesn't allow edit. If activated, The display string will be
-	 *  <code>StatCollector.translateToLocal(content).</code>
-	 */
-	public boolean localized = false;
+    /**
+     * Only activated when doesn't allow edit. If activated, The display string will be
+     *  <code>StatCollector.translateToLocal(content).</code>
+     */
+    public boolean localized = false;
 
-	/**
-	 * Whether the editing is enabled.
-	 */
-	public boolean allowEdit = false;
+    /**
+     * Whether the editing is enabled.
+     */
+    public boolean allowEdit = false;
 
-	/**
-	 * Whether this textBox doesn't draw chars that are out of bounds.
-	 */
-	public boolean emit = true;
+    /**
+     * Whether this textBox doesn't draw chars that are out of bounds.
+     */
+    public boolean emit = true;
 
     public boolean doesEcho = false;
     public char echoChar = '*';
-	
-	public double zLevel = 0;
+    
+    public double zLevel = 0;
 
     public double xOffset, yOffset;
 
-	private int caretPos = 0;
+    private int caretPos = 0;
 
-	private int displayOffset = 0;
+    private int displayOffset = 0;
 
     public TextBox() {
         this(new FontOption());
@@ -209,16 +209,16 @@ public class TextBox extends Component {
             checkCaretRegion();
         });
     }
-	
-	public TextBox allowEdit() {
-		allowEdit = true;
-		return this;
-	}
-	
-	public TextBox setContent(String str) {
-		content = str;
-		return this;
-	}
+    
+    public TextBox allowEdit() {
+        allowEdit = true;
+        return this;
+    }
+    
+    public TextBox setContent(String str) {
+        content = str;
+        return this;
+    }
 
     private void validate() {
         if (!allowEdit) {
@@ -279,27 +279,27 @@ public class TextBox extends Component {
     private double sumLength(String str, int begin, int end) {
         return font.getTextWidth(str.substring(begin, end), option);
     }
-	
-	private String getClipboardContent() {
-		Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-		if(cb.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
-			try {
-				return (String) cb.getData(DataFlavor.stringFlavor);
-			} catch (UnsupportedFlavorException|IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return "";
-	}
-	
-	private void saveClipboardContent() {
-		Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection ss = new StringSelection(content);
-		cb.setContents(ss, ss);
-	}
-	
-	public static TextBox get(Widget w) {
-		return w.getComponent("TextBox");
-	}
+    
+    private String getClipboardContent() {
+        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+        if(cb.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
+            try {
+                return (String) cb.getData(DataFlavor.stringFlavor);
+            } catch (UnsupportedFlavorException|IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+    
+    private void saveClipboardContent() {
+        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+        StringSelection ss = new StringSelection(content);
+        cb.setContents(ss, ss);
+    }
+    
+    public static TextBox get(Widget w) {
+        return w.getComponent("TextBox");
+    }
 
 }

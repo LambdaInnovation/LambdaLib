@@ -33,35 +33,35 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 public class ProxyHelper {
-	
-	static {
-		try {
-			if (isClient()) {
-				proxy = (ServerProxy) Class.forName("cn.lambdalib.annoreg.mc.impl.proxy.ClientProxy").newInstance();
-			} else {
-				proxy = (ServerProxy) Class.forName("cn.lambdalib.annoreg.mc.impl.proxy.ServerProxy").newInstance();
-			}
-		} catch (Exception e) {
-			LLModContainer.log.fatal("Can not create proxy.");
-			throw new RuntimeException(e);
-		}
-	}
-	
-	private static ServerProxy proxy;
-	
-	public static boolean isClient() {
-		return FMLCommonHandler.instance().getSide() == Side.CLIENT;
-	}
-	
-	public static void regEntityRender(Class<? extends Entity> clazz, Object obj) {
-		proxy.regEntityRender(clazz, obj);
-	}
-	
-	public static void regTileEntityRender(Class<? extends TileEntity> clazz, Object obj) {
-		proxy.regTileEntityRender(clazz, obj);
-	}
-	
-	public static void regItemRender(Item item, Object obj) {
-		proxy.regItemRender(item, obj);
-	}
+    
+    static {
+        try {
+            if (isClient()) {
+                proxy = (ServerProxy) Class.forName("cn.lambdalib.annoreg.mc.impl.proxy.ClientProxy").newInstance();
+            } else {
+                proxy = (ServerProxy) Class.forName("cn.lambdalib.annoreg.mc.impl.proxy.ServerProxy").newInstance();
+            }
+        } catch (Exception e) {
+            LLModContainer.log.fatal("Can not create proxy.");
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static ServerProxy proxy;
+    
+    public static boolean isClient() {
+        return FMLCommonHandler.instance().getSide() == Side.CLIENT;
+    }
+    
+    public static void regEntityRender(Class<? extends Entity> clazz, Object obj) {
+        proxy.regEntityRender(clazz, obj);
+    }
+    
+    public static void regTileEntityRender(Class<? extends TileEntity> clazz, Object obj) {
+        proxy.regTileEntityRender(clazz, obj);
+    }
+    
+    public static void regItemRender(Item item, Object obj) {
+        proxy.regItemRender(item, obj);
+    }
 }

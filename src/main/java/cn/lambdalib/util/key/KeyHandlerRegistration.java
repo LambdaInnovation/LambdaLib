@@ -27,25 +27,25 @@ import cn.lambdalib.util.key.KeyHandlerRegistration.RegKeyHandler;
  */
 @RegistryTypeDecl
 public class KeyHandlerRegistration extends RegistrationFieldSimple<RegKeyHandler, KeyHandler> {
-	
-	@Target(ElementType.FIELD)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface RegKeyHandler {
-		String name();
-		int keyID();
-	}
+    
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface RegKeyHandler {
+        String name();
+        int keyID();
+    }
 
-	public KeyHandlerRegistration() {
-		super(RegKeyHandler.class, "KeyHandler");
-		setLoadStage(LoadStage.INIT);
-	}
+    public KeyHandlerRegistration() {
+        super(RegKeyHandler.class, "KeyHandler");
+        setLoadStage(LoadStage.INIT);
+    }
 
-	@Override
-	protected void register(KeyHandler value, RegKeyHandler anno, String field)
-			throws Exception {
-		KeyManager.dynamic.addKeyHandler(anno.name(), anno.keyID(), value);
-	}
-	
-	
-	
+    @Override
+    protected void register(KeyHandler value, RegKeyHandler anno, String field)
+            throws Exception {
+        KeyManager.dynamic.addKeyHandler(anno.name(), anno.keyID(), value);
+    }
+    
+    
+    
 }

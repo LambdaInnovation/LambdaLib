@@ -23,17 +23,17 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
  */
 @RegistryTypeDecl
 public class BlockRendererRegistration extends
-		RegistrationInstance<RegBlockRenderer, ISimpleBlockRenderingHandler> {
+        RegistrationInstance<RegBlockRenderer, ISimpleBlockRenderingHandler> {
 
-	public BlockRendererRegistration() {
-		super(RegBlockRenderer.class, "BlockRenderer");
-		this.setLoadStage(LoadStage.INIT);
-	}
+    public BlockRendererRegistration() {
+        super(RegBlockRenderer.class, "BlockRenderer");
+        this.setLoadStage(LoadStage.INIT);
+    }
 
-	@Override
-	protected void register(ISimpleBlockRenderingHandler obj,
-			RegBlockRenderer anno) throws Exception {
-		RenderingRegistry.registerBlockHandler(obj);
-	}
+    @Override
+    protected void register(ISimpleBlockRenderingHandler obj,
+            RegBlockRenderer anno) throws Exception {
+        RenderingRegistry.registerBlockHandler(obj);
+    }
 
 }

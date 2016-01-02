@@ -23,26 +23,26 @@ import cn.lambdalib.annoreg.core.RegistryType;
  */
 public abstract class RegistrationMethodSimple<ANNO extends Annotation> extends RegistryType {
 
-	public RegistrationMethodSimple(Class<? extends ANNO> annoClass, String name) {
-		super(annoClass, name);
-	}
-	
-	protected abstract void register(Method method, ANNO value) throws Exception;
-	
-	@Override
-	public boolean registerMethod(AnnotationData data) throws Exception {
-		register(data.getTheMethod(), data.getAnnotation());
-		return true;
-	}
+    public RegistrationMethodSimple(Class<? extends ANNO> annoClass, String name) {
+        super(annoClass, name);
+    }
+    
+    protected abstract void register(Method method, ANNO value) throws Exception;
+    
+    @Override
+    public boolean registerMethod(AnnotationData data) throws Exception {
+        register(data.getTheMethod(), data.getAnnotation());
+        return true;
+    }
 
-	@Override
-	public boolean registerClass(AnnotationData data) throws Exception {
-		throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on class.");
-	}
+    @Override
+    public boolean registerClass(AnnotationData data) throws Exception {
+        throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on class.");
+    }
 
-	@Override
-	public boolean registerField(AnnotationData data) throws Exception {
-		throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on field.");
-	}
+    @Override
+    public boolean registerField(AnnotationData data) throws Exception {
+        throw new RuntimeException("Invalid use of annotation " + this.annoClass.getSimpleName() + ": Can not use on field.");
+    }
 
 }

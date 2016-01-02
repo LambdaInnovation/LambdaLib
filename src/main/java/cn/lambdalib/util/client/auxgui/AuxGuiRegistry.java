@@ -31,20 +31,20 @@ import cpw.mods.fml.relauncher.SideOnly;
 @RegistryTypeDecl
 @SideOnly(Side.CLIENT)
 public class AuxGuiRegistry extends RegistrationInstance<AuxGuiRegistry.RegAuxGui, AuxGui> {
-	
-	@Target({ElementType.TYPE, ElementType.FIELD})
-	@Retention(RetentionPolicy.RUNTIME)
-	@SideOnly(Side.CLIENT)
-	public @interface RegAuxGui {}
+    
+    @Target({ElementType.TYPE, ElementType.FIELD})
+    @Retention(RetentionPolicy.RUNTIME)
+    @SideOnly(Side.CLIENT)
+    public @interface RegAuxGui {}
 
-	public AuxGuiRegistry() {
-		super(RegAuxGui.class, "AuxGui");
-		this.setLoadStage(LoadStage.INIT);
-	}
+    public AuxGuiRegistry() {
+        super(RegAuxGui.class, "AuxGui");
+        this.setLoadStage(LoadStage.INIT);
+    }
 
-	@Override
-	protected void register(AuxGui obj, RegAuxGui anno) throws Exception {
-		AuxGui.register(obj);
-	}
+    @Override
+    protected void register(AuxGui obj, RegAuxGui anno) throws Exception {
+        AuxGui.register(obj);
+    }
 
 }

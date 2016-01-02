@@ -16,5 +16,5 @@ package cn.lambdalib.vis.model;
  * @author WeAthFolD
  */
 public interface IModel {
-	void draw();
+    void draw();
 }

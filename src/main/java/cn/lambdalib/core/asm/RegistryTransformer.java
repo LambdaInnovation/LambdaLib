@@ -36,39 +36,39 @@ import net.minecraft.launchwrapper.IClassTransformer;
  */
 public class RegistryTransformer implements IClassTransformer {
 
-	@Override
-	public byte[] transform(String arg0, String arg1, byte[] data) {
-	    if (data == null) return data;
-	    try {
-    		if (arg0.startsWith("cn.lambdalib.annoreg.") || arg0.startsWith("cn.lambdalib.networkcall.")) {
-    			return data;
-    		}
-    		ClassReader cr = new ClassReader(data);
-    		
-    		//Get inner class list for each class
-    		{
-    	        InnerClassVisitor cv = new InnerClassVisitor(Opcodes.ASM5);
-    	        cr.accept(cv, 0);
-    	        List<String> inner = cv.getInnerClassList();
-    	        if (inner != null) {
-    	            RegistrationManager.INSTANCE.addInnerClassList(arg0, inner);
-    	        }
-    		}
-    		//Transform network-calls for each class
-    		{
-    		    NetworkCallVisitor cv = new NetworkCallVisitor(Opcodes.ASM5, arg0);
-    		    cr.accept(cv, 0);
-    	        if (cv.needTransform()) {
-    	            ClassWriter cw = new ClassWriter(Opcodes.ASM5);
-    	            cr.accept(cv.getTransformer(cw), 0);
-    	            data = cw.toByteArray();
-    	        }
-    		}
-	    } catch (Throwable t) {
-	        t.printStackTrace();
-	        throw new RuntimeException(t);
-	    }
-		return data;
-	}
+    @Override
+    public byte[] transform(String arg0, String arg1, byte[] data) {
+        if (data == null) return data;
+        try {
+            if (arg0.startsWith("cn.lambdalib.annoreg.") || arg0.startsWith("cn.lambdalib.networkcall.")) {
+                return data;
+            }
+            ClassReader cr = new ClassReader(data);
+            
+            //Get inner class list for each class
+            {
+                InnerClassVisitor cv = new InnerClassVisitor(Opcodes.ASM5);
+                cr.accept(cv, 0);
+                List<String> inner = cv.getInnerClassList();
+                if (inner != null) {
+                    RegistrationManager.INSTANCE.addInnerClassList(arg0, inner);
+                }
+            }
+            //Transform network-calls for each class
+            {
+                NetworkCallVisitor cv = new NetworkCallVisitor(Opcodes.ASM5, arg0);
+                cr.accept(cv, 0);
+                if (cv.needTransform()) {
+                    ClassWriter cw = new ClassWriter(Opcodes.ASM5);
+                    cr.accept(cv.getTransformer(cw), 0);
+                    data = cw.toByteArray();
+                }
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new RuntimeException(t);
+        }
+        return data;
+    }
 
 }
