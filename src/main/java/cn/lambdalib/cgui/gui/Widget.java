@@ -250,6 +250,10 @@ public class Widget extends WidgetContainer {
 	}
 	
 	//Event dispatch
+
+    public GuiEventBus eventBus() {
+        return eventBus;
+    }
 	
 	public <T extends GuiEvent> void listen(Class<? extends T> clazz, IGuiEventHandler<T> handler) {
 		listen(clazz, handler, 0);

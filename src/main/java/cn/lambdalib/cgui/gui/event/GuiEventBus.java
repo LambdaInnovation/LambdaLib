@@ -157,6 +157,6 @@ public final class GuiEventBus {
 	}
 
 	static final Comparator<GuiHandlerNode> priorityCmp = (n1, n2) ->
-			-Integer.valueOf(n1.priority).compareTo(n2.priority);
+			Integer.valueOf(n1.priority).compareTo(n2.priority);
 	
 }

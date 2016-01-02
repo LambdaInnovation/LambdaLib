@@ -10,7 +10,7 @@ import cn.lambdalib.util.client.font.TrueTypeFont
 import cn.lambdalib.util.markdown.{GLMarkdownRenderer, MarkdownParser}
 import net.minecraft.client.gui.ScaledResolution
 
-@Registrant
+// @Registrant
 @RegAuxGui
 class MarkdownRendererTest extends AuxGui {
 

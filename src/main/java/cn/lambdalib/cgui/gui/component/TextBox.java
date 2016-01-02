@@ -122,11 +122,17 @@ public class TextBox extends Component {
             }
 
             final String display = processed.substring(0, i);
+
+            GL11.glPushMatrix();
+            GL11.glTranslated(0, 0, zLevel);
+
             font.draw(display, origin.x, origin.y, option);
 
             if (w.isFocused() && allowEdit && GameTimer.getAbsTime() % 2000 < 1000) {
                 font.draw("|", origin.x + sumLength(display, 0, localCaret), origin.y - 1, option);
             }
+
+            GL11.glPopMatrix();
         });
 
         // Handles input

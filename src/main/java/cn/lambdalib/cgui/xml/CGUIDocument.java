@@ -195,12 +195,11 @@ public enum CGUIDocument {
 		Document doc = dst.getOwnerDocument();
 		dst.setAttribute("name", name);
 		w.getComponentList().forEach(c -> dst.appendChild(writeComponent(c, doc)));
-		w.getEntries()
-				.forEach(entry -> {
-					Element elem = doc.createElement(TAG_WIDGET);
-					writeWidget(entry.getKey(), entry.getValue(), elem);
-					dst.appendChild(elem);
-				});
+        w.getDrawList().forEach(child -> {
+            Element elem = doc.createElement(TAG_WIDGET);
+            writeWidget(child.getName(), child, elem);
+            dst.appendChild(elem);
+        });
 	}
 
 	private Node writeComponent(Component component, Document doc) {

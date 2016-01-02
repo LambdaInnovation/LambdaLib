@@ -141,45 +141,38 @@ public class CGui extends WidgetContainer {
     	}
     	return false;
     }
+
+    private void postMouseEv(Widget target, GuiEventBus bus, int mx, int my, int bid, boolean local) {
+        double x = mx, y = my;
+        if (local) {
+            x = (mx - target.x) / target.scale;
+            y = (my - target.y) / target.scale;
+        }
+
+        bus.postEvent(target, new MouseClickEvent(x, y, bid));
+        if (bid == 0)
+            bus.postEvent(target, new LeftClickEvent(x, y));
+        if (bid == 1)
+            bus.postEvent(target, new RightClickEvent(x, y));
+    }
     
     /**
 	 * Standard GuiScreen mouseClicked callback.
-	 * @param mx
-	 * @param my
 	 * @return if any action was performed on a widget.
 	 */
 	public boolean mouseClicked(int mx, int my, int bid) {
 		updateMouse(mx, my);
-		
+
+        postMouseEv(null, eventBus, mx, my, bid, false);
+
 		Widget top = getTopWidget(mx, my);
-		
-		GuiEvent event = null, guievent;
-		if(bid == 0) {
-			guievent = new LeftClickEvent(mx, my);
-			if(top != null) {
-				event = new LeftClickEvent((mx - top.x) / top.scale, (my - top.y) / top.scale);
-			}
-		} else if(bid == 1) {
-			guievent = new RightClickEvent(mx, my);
-			if(top != null) {
-				event = new RightClickEvent((mx - top.x) / top.scale, (my - top.y) / top.scale);
-			}
-		} else {
-			guievent = new MouseClickEvent(mx, my, bid);
-			if(top != null) {
-				event = new MouseClickEvent((mx - top.x) / top.scale, (my - top.y) / top.scale, bid);
-			}
-		}
-		
-		eventBus.postEvent(null, guievent);
-		
 		if(top != null) {
 			if(bid == 0) {
 				gainFocus(top);
 			} else {
 				removeFocus();
 			}
-			top.post(event);
+			postMouseEv(top, top.eventBus(), mx, my, bid, true);
 			return true;
 		}
 		return false;

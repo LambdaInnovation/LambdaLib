@@ -43,6 +43,8 @@ public class ElementList extends Component {
 
 	@Override
 	public void onAdded() {
+        super.onAdded();
+
 		loaded = true;
 		for(Widget ww : subWidgets) {
 			widget.addWidget(ww);
