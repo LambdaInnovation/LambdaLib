@@ -53,13 +53,11 @@ public class RegistrationManager {
 		for (String name : unloadedClass) {
 			try {
 				prepareClass(Class.forName(name));
-			} catch (Exception e) {
-				LLModContainer.log.warn("Can not load class {}, maybe a SideOnly class.", name);
-				e.printStackTrace();
-				//TODO check whether it's really caused by sideonly
-			} catch (Throwable e) {
+			} catch (ClassNotFoundException e) {
+                LLModContainer.log.debug("Can not load class {}, maybe a SideOnly class.", name);
+            } catch (Throwable e) {
 				LLModContainer.log.fatal("Error on loading class {}. Please check the implementation.", name);
-				e.printStackTrace();
+                LLModContainer.log.fatal(e);
 			}
 		}
 		unloadedClass.clear();
