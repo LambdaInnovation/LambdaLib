@@ -58,7 +58,6 @@ public class Fragmentor {
 
                         builder.append(content.substring(0, i));
                         String add = builder.toString();
-                        System.out.println(add);
                         ret.add(add);
 
                         builder.setLength(0);
@@ -119,7 +118,6 @@ public class Fragmentor {
                 if(init != TokenType.CJKV && init != type && type != TokenType.PUNCT)
                     break;
             }
-            System.out.println("F::" + str.substring(lindex, index));
             return Pair.of(init, str.substring(lindex, index));
         }
     }

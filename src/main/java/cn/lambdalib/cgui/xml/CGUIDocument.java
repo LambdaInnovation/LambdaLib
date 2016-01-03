@@ -124,16 +124,12 @@ public enum CGUIDocument {
 
     private WidgetContainer readInternal(Document doc) throws IOException {
         WidgetContainer ret = new WidgetContainer();
-        log.info("ReadInternal");
         Node root = doc.getFirstChild();
         if (root == null || !root.getNodeName().equals("Root"))
             throw new IOException("Root widget invalid");
         toStdList(root.getChildNodes())
                 .stream()
-                .filter(n -> {
-                    log.info(n.getNodeName());
-                    return n.getNodeName().equalsIgnoreCase(TAG_WIDGET);
-                })
+                .filter(n -> n.getNodeName().equalsIgnoreCase(TAG_WIDGET))
                 .forEach(n -> readWidget(ret, (Element) n));
         return ret;
     }
@@ -144,7 +140,6 @@ public enum CGUIDocument {
     private void readWidget(WidgetContainer container, Element node) {
         Widget w = new Widget();
         String name = node.getAttribute("name");
-        log.info("ReadWidget " + name);
         toStdList(node.getChildNodes()).stream()
                 .forEach(n ->
                 {

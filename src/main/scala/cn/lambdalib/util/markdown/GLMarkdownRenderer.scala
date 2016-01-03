@@ -127,7 +127,9 @@ class GLMarkdownRenderer extends MarkdownRenderer {
 
       val width = usedFont.getTextWidth(ln, option)
 
-      if (i != 0) {
+      // Note: widthLimit * 1.2 is a magic number and this is a temporary hack.
+      // should find a better way to handle line seperation.
+      if (i != 0 || width + rc.x > widthLimit * 1.2) {
         newline(true)
       }
 
@@ -155,7 +157,6 @@ class GLMarkdownRenderer extends MarkdownRenderer {
   override def onTag(name: String, attr: Map[String, String]) = {
     name match {
       case "img" =>
-        println(attr)
 
         val src = new ResourceLocation(attr("src"))
         val hover = attr.get("hover")

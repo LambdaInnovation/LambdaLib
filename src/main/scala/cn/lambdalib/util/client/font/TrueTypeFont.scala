@@ -226,7 +226,6 @@ object TrueTypeFont {
   def withFallback(style: Int, size: Int, fallbackNames: String*) = {
     val allfonts = GraphicsEnvironment.getLocalGraphicsEnvironment.getAllFonts
     val used = fallbackNames.filter(n => allfonts.exists(_.getName.equalsIgnoreCase(n))).take(1)
-    print(s"used: ${Option(used.head)}")
     if (used.isEmpty) TrueTypeFont(new Font(null, style, size))
     else TrueTypeFont(new Font(used.head, style, size))
   }

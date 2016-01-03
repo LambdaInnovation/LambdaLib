@@ -10,6 +10,7 @@ import cn.lambdalib.cgui.gui.{CGuiScreen, Widget}
 import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event._
+import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
 import cn.lambdalib.util.client.font.TrueTypeFont
 import cn.lambdalib.util.helper.Color
@@ -707,6 +708,8 @@ class ExecutionKey extends KeyHandler {
 object EditorRegistration {
   @RegInitCallback
   def init() = {
-    KeyManager.dynamic.addKeyHandler("wtf", Keyboard.KEY_L, new ExecutionKey)
+    if (LambdaLib.DEBUG) {
+      KeyManager.dynamic.addKeyHandler("wtf", Keyboard.KEY_L, new ExecutionKey)
+    }
   }
 }
