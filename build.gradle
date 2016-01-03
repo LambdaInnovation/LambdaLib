@@ -12,7 +12,6 @@ buildscript {
 	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-		classpath 'me.tatarka:gradle-retrolambda:3.1.0'
 	}
 }
 
@@ -28,7 +27,7 @@ configurations {
 	deployerJars
 }
 
-apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'scala'
 apply plugin: 'forge'
 
 
@@ -53,6 +52,17 @@ dependencies {
 	deployerJars "org.apache.maven.wagon:wagon-ftp:2.2"
 }
 
+sourceSets.main {
+    java.srcDirs = []
+    scala.srcDirs =  ['src/main/java', 'src/main/scala']
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.java
+    from sourceSets.main.scala
+    classifier = 'sources'
+}
+
 processResources
 {
 	from(sourceSets.main.resources.srcDirs) {
@@ -65,14 +75,13 @@ processResources
 	}
 }
 
-tasks.withType(JavaCompile) {
-	options.encoding = "UTF-8"
-}
+compileJava.options.encoding = "UTF-8"
+compileScala.options.encoding = "UTF-8"
 
 jar {
 	manifest {
 		attributes 'FMLCorePluginContainsFMLMod' : 'true'
-		attributes 'FMLCorePlugin' : 'cn.annoreg.AnnoRegCorePlugin'
+		attributes 'FMLCorePlugin' : 'cn.lambdalib.core.LLCorePlugin'
 	}
 }
 
