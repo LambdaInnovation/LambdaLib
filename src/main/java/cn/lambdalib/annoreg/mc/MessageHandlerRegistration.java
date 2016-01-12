@@ -49,13 +49,15 @@ public class MessageHandlerRegistration extends RegistrationClassSimple<RegMessa
     @Override
     protected void register(Class theClass, RegMessageHandler anno) throws Exception {
         Class<? extends IMessage> msg = (Class<? extends IMessage>) anno.msg();
-        switch (anno.side()) {
-        case CLIENT:
-            register(theClass, msg, Side.CLIENT);
-            break;
-        case SERVER:
-            register(theClass, msg, Side.SERVER);
-            break;
+        for (RegMessageHandler.Side side : anno.side()) {
+            switch (side) {
+            case CLIENT:
+                register(theClass, msg, Side.CLIENT);
+                break;
+            case SERVER:
+                register(theClass, msg, Side.SERVER);
+                break;
+            }
         }
     }
 

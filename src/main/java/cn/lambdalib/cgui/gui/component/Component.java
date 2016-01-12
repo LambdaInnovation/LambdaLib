@@ -24,10 +24,9 @@ import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.annotations.CopyIgnore;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
-import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.deprecated.TypeHelper;
-import cn.lambdalib.util.serialization.CopyHelper;
-import cn.lambdalib.util.serialization.SerializeExcluded;
+import cn.lambdalib.s11n.CopyHelper;
+import cn.lambdalib.s11n.SerializeExcluded;
 import cn.lambdalib.vis.editor.VisExcluded;
 
 /**

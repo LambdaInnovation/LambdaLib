@@ -48,7 +48,7 @@ public class LambdaLib {
     private static Configuration config;
 
     @RegMessageHandler.WrapperInstance
-    public static SimpleNetworkWrapper netHandler = NetworkRegistry.INSTANCE.newSimpleChannel("LambdaLib");
+    public static final SimpleNetworkWrapper channel = NetworkRegistry.INSTANCE.newSimpleChannel("LambdaLib");
 
     public static Configuration getConfig() {
         return config;

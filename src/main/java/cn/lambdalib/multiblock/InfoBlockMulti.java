@@ -60,7 +60,7 @@ public class InfoBlockMulti {
         if (te.getWorldObj().isRemote) {
             if (!loaded) {
                 if (syncCD == 0) {
-                    LambdaLib.netHandler.sendToServer(new MsgBlockMulti.Req(this));
+                    LambdaLib.channel.sendToServer(new MsgBlockMulti.Req(this));
                     syncCD = 10;
                 } else {
                     --syncCD;

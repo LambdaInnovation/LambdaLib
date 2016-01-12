@@ -15,7 +15,6 @@ package cn.lambdalib.networkcall;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.lambdalib.util.generic.DebugUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
