@@ -27,6 +27,8 @@ public class CopyHelper {
     }
 
     {
+        direct(char.class);
+        direct(Character.class);
         direct(float.class);
         direct(Float.class);
         direct(double.class);

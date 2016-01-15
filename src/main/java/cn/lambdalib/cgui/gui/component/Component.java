@@ -57,6 +57,7 @@ public class Component {
      *  public field, but DONT assign it, else it yields undefined behaviour.
      */
     @VisExcluded
+    @SerializeExcluded
     public Widget widget;
     
     public Component(String _name) {

@@ -6,22 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation alternates the serialization strategy of recursive type.
+ * This annotation marks a type as serializable. Only fields with type marked as serializable and types as stated in
+ *  {@link SerializationHelper} will be automatically serialized in recursive serialization.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SerializeType {
-
-    enum ExposeStrategy {
-        /** Just public fields */
-        PUBLIC,
-        /** Includes private fields */
-        ALL
-    }
-
-    /**
-     * @return How fields of this recursive type are exposed.
-     */
-    ExposeStrategy stragety() default ExposeStrategy.PUBLIC;
-
 }

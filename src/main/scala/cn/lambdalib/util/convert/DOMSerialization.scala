@@ -97,6 +97,7 @@ class DOMSerialization {
 
     // Primitive types
     addForwardType((obj, node) => addText(node, obj.toString),
+      classOf[Char], classOf[Character],
       classOf[Int], classOf[Integer],
       classOf[Float], classOf[java.lang.Float],
       classOf[Double], classOf[java.lang.Double],
@@ -108,6 +109,7 @@ class DOMSerialization {
       addBackward[T]((_, n) => parseMethod(n.getTextContent))
 
     // Literal value parsings
+    bw(s => s.charAt(0))
     bw(Integer.parseInt)
     bw(Integer.valueOf)
     bw(java.lang.Float.parseFloat)
