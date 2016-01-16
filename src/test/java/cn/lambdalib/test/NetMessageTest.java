@@ -8,9 +8,9 @@ import cn.lambdalib.s11n.network.NetworkMessage.INetworkListener;
 import cn.lambdalib.s11n.network.NetworkMessage.NetworkListener;
 import cn.lambdalib.s11n.network.NetworkS11n;
 import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
-import cn.lambdalib.util.generic.DebugUtils;
 import cn.lambdalib.util.key.KeyHandler;
 import cn.lambdalib.util.key.KeyManager;
+import com.google.common.base.Joiner;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
@@ -96,7 +96,7 @@ public class NetMessageTest {
         NetworkMessage.registerExtListener(TestEnvironment.class, "alpha", Side.SERVER, new INetworkListener() {
             @Override
             public void invoke(Object instance, Object... args) throws Exception {
-                debug("Invoked ext listener! args: " + DebugUtils.formatArray(args));
+                debug("Invoked ext listener! args: " + Joiner.on(',').join(args));
             }
         });
 

@@ -13,7 +13,6 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.io.IOUtils;
 
 import cn.lambdalib.core.LambdaLib;
-import cn.lambdalib.util.generic.DebugUtils;
 import cn.lambdalib.util.generic.RegistryUtils;
 
 /**

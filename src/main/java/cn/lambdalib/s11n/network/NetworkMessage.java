@@ -91,6 +91,13 @@ public class NetworkMessage {
         network.sendTo(new Message(instance, channel, params), player);
     }
 
+    public static void sendToPlayers(EntityPlayerMP[] players, Object instance, String channel, Object ...params) {
+        Message msg = new Message(instance, channel, params);
+        for (EntityPlayerMP player : players) {
+            network.sendTo(msg, player);
+        }
+    }
+
     public static void sendToAll(Object instance, String channel, Object ...params) {
         network.sendToAll(new Message(instance, channel, params));
     }
