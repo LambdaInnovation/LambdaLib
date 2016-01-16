@@ -18,7 +18,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import cn.lambdalib.util.client.ClientUtils;
-import cn.lambdalib.util.generic.DebugUtils;
 import cn.lambdalib.util.mc.WorldUtils;
 
 import cn.lambdalib.annoreg.core.Registrant;
