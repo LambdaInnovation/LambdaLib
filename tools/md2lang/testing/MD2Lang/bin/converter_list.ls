@@ -1,4 +1,0 @@
-gisdyt.liu.md2lang.converters.EscapedCharsConverter
-gisdyt.liu.md2lang.converters.HeadingConverter
-gisdyt.liu.md2lang.converters.ImageLinkinConverter
-gisdyt.liu.md2lang.converters.WrapingConverter
