@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  *
  * Use <code>NetworkMessage.sendXXX</code> to send a message to some object.
  * The object is then retrieved using deserialization in receiver side, and all event
- * listeners (methods decorated with {@link NetworkListener} within the object
+ * listeners (methods decorated with {@link Listener} within the object
  * is invoked with given parameters supplied. This could be really useful
  * in small synchronizations of objects that can be retrieved in both sides,
  * e.g. TileEntities, Entities and many else. <br>
@@ -46,11 +46,11 @@ public class NetworkMessage {
      */
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface NetworkListener {
+    public @interface Listener {
         /**
          * @return The channel that this method listens
          */
-        String value();
+        String channel();
 
         /**
          * @return The side(s) that this listener receives event
@@ -77,7 +77,7 @@ public class NetworkMessage {
     }
 
     /**
-     * Send the message to the object itself.
+     * Send the message to the object itself on the fly.
      */
     public static void sendToSelf(Object instance, String channel, Object ...params) {
         processMessage(instance, channel, params);
@@ -178,7 +178,7 @@ public class NetworkMessage {
         Side side = FMLCommonHandler.instance().getEffectiveSide();
         List<INetworkListener> listeners = getListeners(instance, channel, side);
         if (listeners.isEmpty()) {
-            LambdaLib.log.warn("Orphant event " + eventSignature(instance, channel));
+            // LambdaLib.log.warn("Orphant event " + eventSignature(instance, channel));
         } else {
             for (INetworkListener m : listeners) {
                 // Check parameter size
@@ -261,9 +261,9 @@ public class NetworkMessage {
         out.addAll(ReflectionUtils.getAllAccessibleMethods(type)
                 .stream()
                 .filter(m -> {
-                    NetworkListener anno = m.getAnnotation(NetworkListener.class);
+                    Listener anno = m.getAnnotation(Listener.class);
 
-                    if (anno == null || !anno.value().equals(channel)) {
+                    if (anno == null || !anno.channel().equals(channel)) {
                         return false;
                     } else {
                         for (Side s : anno.side()) {

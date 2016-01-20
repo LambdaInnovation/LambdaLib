@@ -5,7 +5,7 @@ import cn.lambdalib.annoreg.mc.RegInitCallback;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.network.NetworkMessage;
 import cn.lambdalib.s11n.network.NetworkMessage.INetworkListener;
-import cn.lambdalib.s11n.network.NetworkMessage.NetworkListener;
+import cn.lambdalib.s11n.network.NetworkMessage.Listener;
 import cn.lambdalib.s11n.network.NetworkS11n;
 import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
 import cn.lambdalib.util.key.KeyHandler;
@@ -22,7 +22,7 @@ public class NetMessageTest {
 
     static class BaseTestEnvironment {
 
-        @NetworkListener("alpha")
+        @Listener(channel = "alpha")
         private void alpha() {
             debug("alpha BASE");
         }
@@ -31,22 +31,22 @@ public class NetMessageTest {
 
     static class TestEnvironment extends BaseTestEnvironment {
 
-        @NetworkListener("alpha")
+        @Listener(channel = "alpha")
         public void alpha1() {
             debug("alpha1");
         }
 
-        @NetworkListener(value="alpha", side = Side.SERVER)
+        @Listener(channel ="alpha", side = Side.SERVER)
         void alpha2(int par1, double par2) {
             debug("alpha2 " + par1 + " " + par2);
         }
 
-        @NetworkListener("alpha")
+        @Listener(channel = "alpha")
         private void alpha3(int par1) {
             debug("alpha3 " + par1);
         }
 
-        @NetworkListener("beta")
+        @Listener(channel = "beta")
         public void beta(String what) {
             debug("beta " + what);
         }
@@ -59,7 +59,7 @@ public class NetMessageTest {
             System.out.println("testExt constructed: " + env);
         }
 
-        @NetworkListener("beta")
+        @Listener(channel = "beta")
         public void beta() {
             debug("Hey I've hacked in!");
         }
