@@ -1,6 +1,6 @@
 package cn.lambdalib.vis.editor
 
-import java.io.{FileInputStream, IOException}
+import java.io.{FileOutputStream, File, FileInputStream, IOException}
 import javax.vecmath.Vector2d
 
 import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent
@@ -41,6 +41,11 @@ object CGUIEditor {
 class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
   import CGUIEditor._
   import scala.collection.JavaConversions._
+
+  /**
+    * The file that currently opened path correspond to.
+    */
+  var path: Option[File] = None
 
   // Type alias & basic utils
   type Vec2D = Vector2d
@@ -103,6 +108,7 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
       var successful: Boolean = false
       try {
         CGUIDocument.write(canvas, file)
+        path = Some(file)
         successful = true
       } catch {
         case e: IOException =>
@@ -214,6 +220,20 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
   //
 
   // Misc Init
+  private val menubar = editor.getMenuBar
+
+  {
+    lazy val option = new FontOption(10, new Color(0xdddddd))
+    val widget = new Widget().pos(3, 10).listens[FrameEvent](() => {
+      val text = path match {
+        case Some(file) => "File: " + file.getName
+        case None       => "No file opened"
+      }
+      Styles.font.draw(text, 0, 0, option)
+    })
+    root :+ widget
+  }
+
   editor.getMenuBar.addMenu("View", ret => {
     ret.addItem("Hierarchy", () => hierarchy.transform.doesDraw = true)
     ret.addItem("Inspector", () => inspector.transform.doesDraw = true)
@@ -243,6 +263,7 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
         canvas.clear()
         canvas.addAll(container)
         onCanvasUpdated()
+        path = Some(file)
         successful = true
       } catch {
         case e @ (_:IOException | _:SAXException) =>
@@ -250,7 +271,22 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
       }
       successful
     }))
-    menu.addItem("Save", () => startSaving())
+    menu.addItem("Save", () => path match {
+      case Some(file) =>
+        var stream: FileOutputStream = null
+        try {
+          stream = new FileOutputStream(file)
+          CGUIDocument.write(canvas, stream)
+        } catch {
+          case e: Exception =>
+            editor.addPopup("Error", "Save failed: " + e.getClass.getSimpleName, ("OK", () => {}))
+        } finally {
+          if (stream != null)
+            stream.close()
+        }
+      case None => startSaving()
+    })
+    menu.addItem("Save As", () => startSaving())
   })
 
 
@@ -418,6 +454,21 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
         cover :+ tab
         root :+ cover
       case None =>
+    })
+
+    this.initButton("Duplicate", "duplicate", button => getSelectedWidget match {
+      case Some(widget) =>
+        val parent = widget.getAbstractParent
+        val name = widget.getName
+        val dup = widget.copy()
+        var idx = 0
+        while (parent.hasWidget(name + idx)) {
+          idx += 1
+        }
+
+        parent.addWidget(name + idx, dup)
+        onCanvasUpdated()
+      case _ =>
     })
 
     this.initButton("Move up", "up", _ => getSelectedWidget match {

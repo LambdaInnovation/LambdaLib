@@ -79,7 +79,7 @@ class Editor extends CGuiScreen {
     dt.color = pure(0.1)
     addComponent(dt)
 
-    addComponent(newText(new FontOption(9, FontAlign.RIGHT, pure(0.4))).setContent("VisEditor 0.0 dev   "))
+    addComponent(newText(new FontOption(9, FontAlign.RIGHT, pure(0.4))).setContent("VisEditor 0.1 dev   "))
 
     def addButton(name: String, func: (Widget) => Unit) = {
       val button = new Widget
@@ -697,7 +697,6 @@ object Window {
 class ExecutionKey extends KeyHandler {
 
   override def onKeyDown() = {
-    println("Pressed")
     Minecraft.getMinecraft.displayGuiScreen(new Editor)
   }
 
@@ -708,8 +707,6 @@ class ExecutionKey extends KeyHandler {
 object EditorRegistration {
   @RegInitCallback
   def init() = {
-    if (LambdaLib.DEBUG) {
-      KeyManager.dynamic.addKeyHandler("wtf", Keyboard.KEY_L, new ExecutionKey)
-    }
+    KeyManager.dynamic.addKeyHandler("wtf", Keyboard.KEY_L, new ExecutionKey)
   }
 }
