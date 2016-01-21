@@ -118,12 +118,12 @@ public class ShaderProgram {
     }
     
     /**
-     * Get the src of a shader in liutils namespace.
+     * Get the src of a shader in lambdalib namespace.
      * @param name
      * @return
      */
     public static ResourceLocation getShader(String name) {
-        return new ResourceLocation("liutils:shaders/" + name);
+        return new ResourceLocation("lambdalib:shaders/" + name);
     }
     
 }
