@@ -14,26 +14,28 @@ import java.util.stream.Collectors;
 
 public class SerializationHelper {
 
-    private static Set<Class> serializeTypes = new HashSet<>();
+    private Set<Class> serializeTypes = new HashSet<>();
 
-    public static void regS11nType(Class type) {
+    public void regS11nType(Class type) {
         serializeTypes.add(type);
     }
 
-    public static boolean isS11nType(Class type) {
+    public boolean isS11nType(Class type) {
         return type.isEnum() ||
                 type.isAnnotationPresent(SerializeType.class) ||
                 serializeTypes.contains(type);
     }
 
-    private static void reg(Class... type) {
+    private void reg(Class... type) {
         for(Class c : type) {
             regS11nType(c);
         }
     }
 
-    static {
+    {
         reg(char.class, Character.class,
+                byte.class, Byte.class,
+                short.class, Short.class,
                 int.class, Integer.class,
                 float.class, Float.class,
                 double.class, Double.class,
@@ -46,7 +48,7 @@ public class SerializationHelper {
     /**
      * Get the fields exposed in recursive serialization for the given type.
      */
-    public static List<Field> getExposedFields(Class<?> type) {
+    public List<Field> getExposedFields(Class<?> type) {
         return FieldUtils.getAllFieldsList(type)
                 .stream()
                 .filter(f -> {
@@ -82,6 +84,6 @@ public class SerializationHelper {
                 .collect(Collectors.toList());
     }
 
-    private SerializationHelper() {}
+    public SerializationHelper() {}
 
 }

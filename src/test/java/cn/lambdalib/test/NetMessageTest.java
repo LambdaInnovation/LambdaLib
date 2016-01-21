@@ -17,12 +17,12 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 import org.lwjgl.input.Keyboard;
 
-@Registrant
+// @Registrant
 public class NetMessageTest {
 
     static class BaseTestEnvironment {
 
-        @Listener(channel = "alpha")
+        @Listener(channel = "alpha", side={Side.CLIENT, Side.SERVER})
         private void alpha() {
             debug("alpha BASE");
         }
@@ -31,7 +31,7 @@ public class NetMessageTest {
 
     static class TestEnvironment extends BaseTestEnvironment {
 
-        @Listener(channel = "alpha")
+        @Listener(channel = "alpha", side={Side.CLIENT, Side.SERVER})
         public void alpha1() {
             debug("alpha1");
         }
@@ -41,12 +41,12 @@ public class NetMessageTest {
             debug("alpha2 " + par1 + " " + par2);
         }
 
-        @Listener(channel = "alpha")
+        @Listener(channel = "alpha", side={Side.CLIENT, Side.SERVER})
         private void alpha3(int par1) {
             debug("alpha3 " + par1);
         }
 
-        @Listener(channel = "beta")
+        @Listener(channel = "beta", side={Side.CLIENT, Side.SERVER})
         public void beta(String what) {
             debug("beta " + what);
         }
@@ -59,7 +59,7 @@ public class NetMessageTest {
             System.out.println("testExt constructed: " + env);
         }
 
-        @Listener(channel = "beta")
+        @Listener(channel = "beta", side={Side.CLIENT, Side.SERVER})
         public void beta() {
             debug("Hey I've hacked in!");
         }

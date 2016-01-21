@@ -12,6 +12,7 @@ import java.util.Map;
 public class CopyHelper {
 
     public static final CopyHelper instance = new CopyHelper();
+    private static final SerializationHelper serHelper = new SerializationHelper();
 
     private interface ICopyFactory<T> {
         T copy(T origin);
@@ -53,7 +54,7 @@ public class CopyHelper {
         try {
             T ret = (T) object.getClass().newInstance();
 
-            for (Field f : SerializationHelper.getExposedFields(object.getClass())) {
+            for (Field f : serHelper.getExposedFields(object.getClass())) {
                 f.set(ret, copy(f.get(object)));
             }
 

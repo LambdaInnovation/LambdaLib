@@ -18,6 +18,7 @@ class DOMSerialization {
 
   private var forwarders = List[(AnyRef => Boolean, Forwarder)]()
   private var backwarders = Map[Class[_], Backwarder[_]]()
+  private val serHelper = new SerializationHelper
 
   def addForward(cond: AnyRef => Boolean, forwarder: Forwarder) = forwarders = (cond, forwarder) :: forwarders
   def addForwardType(forwarder:Forwarder, classes: Class[_]*) = {
@@ -52,7 +53,7 @@ class DOMSerialization {
 
   def forwardDefault(obj: AnyRef, name: String)(implicit document: Document): Node = {
     val ret: DOMElement = document.createElement(name)
-    val fields = SerializationHelper.getExposedFields(obj.getClass).toList
+    val fields = serHelper.getExposedFields(obj.getClass).toList
     for (f <- fields) {
       Option(f.get(obj)) match {
         case Some(x) =>
@@ -75,7 +76,7 @@ class DOMSerialization {
       }
     } else {
       val ret = klass.newInstance
-      val fields = SerializationHelper.getExposedFields(klass).toList
+      val fields = serHelper.getExposedFields(klass).toList
       val childs = src.getChildNodes
       // Loop through all the fields and fetch corresponding elements from document
       (0 until childs.getLength).map(childs.item)

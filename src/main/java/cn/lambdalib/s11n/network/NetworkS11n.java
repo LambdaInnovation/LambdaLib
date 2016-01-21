@@ -76,12 +76,13 @@ public class NetworkS11n {
     public @interface SerializeDynamic {}
 
     public static class InterruptException extends RuntimeException {
-        private InterruptException(String msg) {
+        public InterruptException(String msg) {
             super(msg);
         }
     }
 
     // ---
+    private static final SerializationHelper serHelper = new SerializationHelper();
 
     private static final short IDX_NULL = -1;
 
@@ -93,6 +94,7 @@ public class NetworkS11n {
     public static <T> void addDirect(Class<T> type, NetS11nAdaptor<? super T> adaptor) {
         register(type);
         adaptors.put(type, adaptor);
+        serHelper.regS11nType(type);
     }
 
     /**
@@ -104,6 +106,7 @@ public class NetworkS11n {
         if (!serTypes.contains(type)) {
             serTypes.add(type);
             serTypes.sort((lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
+            serHelper.regS11nType(type);
         }
 
         if (serTypes.size() > Short.MAX_VALUE) {
@@ -256,7 +259,7 @@ public class NetworkS11n {
     }
 
     private static List<Field> _sortedFields(Class<?> type) {
-        List<Field> fields = SerializationHelper.getExposedFields(type);
+        List<Field> fields = serHelper.getExposedFields(type);
         // Sort to preserve s11n order
         Collections.sort(fields, (lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
         return fields;

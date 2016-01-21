@@ -20,7 +20,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.input.Keyboard;
 
-@Registrant
+// @Registrant
 public class NetEventTest {
 
     @NetworkS11nType

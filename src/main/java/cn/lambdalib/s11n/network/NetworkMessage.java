@@ -55,7 +55,7 @@ public class NetworkMessage {
         /**
          * @return The side(s) that this listener receives event
          */
-        Side[] side() default { Side.CLIENT, Side.SERVER };
+        Side[] side();
     }
 
     /**
