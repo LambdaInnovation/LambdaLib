@@ -172,7 +172,7 @@ public class KeyManager {
         }
     }
     
-    private boolean getKeyDown(int keyID) {
+    public static boolean getKeyDown(int keyID) {
         if(keyID > 0) {
             return Keyboard.isKeyDown(keyID);
         }

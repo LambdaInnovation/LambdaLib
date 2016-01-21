@@ -1,4 +1,4 @@
-package cn.lambdalib.util.serialization;
+package cn.lambdalib.s11n;
 
 import net.minecraft.util.ResourceLocation;
 
@@ -12,6 +12,7 @@ import java.util.Map;
 public class CopyHelper {
 
     public static final CopyHelper instance = new CopyHelper();
+    private static final SerializationHelper serHelper = new SerializationHelper();
 
     private interface ICopyFactory<T> {
         T copy(T origin);
@@ -27,6 +28,8 @@ public class CopyHelper {
     }
 
     {
+        direct(char.class);
+        direct(Character.class);
         direct(float.class);
         direct(Float.class);
         direct(double.class);
@@ -51,7 +54,7 @@ public class CopyHelper {
         try {
             T ret = (T) object.getClass().newInstance();
 
-            for (Field f : SerializationHelper.instance.getExposedFields(object.getClass())) {
+            for (Field f : serHelper.getExposedFields(object.getClass())) {
                 f.set(ret, copy(f.get(object)));
             }
 

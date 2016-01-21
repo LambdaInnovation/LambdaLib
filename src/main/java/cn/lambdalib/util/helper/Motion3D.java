@@ -14,7 +14,7 @@ package cn.lambdalib.util.helper;
 
 import java.util.Random;
 
-import cn.lambdalib.util.generic.DebugUtils;
+import com.google.common.base.Objects;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
@@ -72,7 +72,6 @@ public class Motion3D {
     }
 
     /**
-     * @see cn.liutils.api.util.Motion3D(Entity, int, boolean)
      * @param ent entity
      * @param dirFlag false:use moving direction; true:use head-looking direction
      */
@@ -256,7 +255,10 @@ public class Motion3D {
     
     @Override
     public String toString() {
-        return "[ Motion3D POS" + DebugUtils.formatArray(px, py, pz) + "MOTION" + DebugUtils.formatArray(vx, vy, vz) + " ]";
+        return Objects.toStringHelper(this)
+                .add("pos: ", getPosVec())
+                .add("vel: ", getMotionVec())
+                .toString();
     }
 
 }

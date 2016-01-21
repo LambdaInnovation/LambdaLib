@@ -1,4 +1,4 @@
-package cn.lambdalib.util.serialization;
+package cn.lambdalib.s11n;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark a type to be able to be auto-serialized. When serializing an object, only all fields of serializable types
- *     within the object class can be serialized.
+ * This annotation marks a type as serializable. Only fields with type marked as serializable and types as stated in
+ *  {@link SerializationHelper} will be automatically serialized in recursive serialization.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -41,14 +41,14 @@ public class LambdaLib {
     /**
      * Does open debug mode. turn to false when compiling.
      */
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     public static Logger log = FMLLog.getLogger();
 
     private static Configuration config;
 
     @RegMessageHandler.WrapperInstance
-    public static SimpleNetworkWrapper netHandler = NetworkRegistry.INSTANCE.newSimpleChannel("LambdaLib");
+    public static final SimpleNetworkWrapper channel = NetworkRegistry.INSTANCE.newSimpleChannel("LambdaLib");
 
     public static Configuration getConfig() {
         return config;

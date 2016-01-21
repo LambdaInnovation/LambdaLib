@@ -33,7 +33,7 @@ public @interface RegMessageHandler {
     }
     
     Class<?> msg();
-    Side side();
+    Side[] side();
 
     /**
      * Populate this on a public static SimpleNetworkWrapper instance in your mod class,

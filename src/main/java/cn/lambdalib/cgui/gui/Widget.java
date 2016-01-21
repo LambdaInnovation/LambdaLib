@@ -46,7 +46,7 @@ public class Widget extends WidgetContainer {
      * Whether this widget can be copied when going down copy recursion process.
      */
     public boolean needCopy = true;
-    
+
     public Transform transform;
     
     //Transform is always present.

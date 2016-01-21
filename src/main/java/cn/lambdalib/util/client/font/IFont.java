@@ -1,10 +1,8 @@
 package cn.lambdalib.util.client.font;
 
 import cn.lambdalib.util.client.font.Fragmentor.IFontSizeProvider;
-import cn.lambdalib.util.client.font.Fragmentor.TokenType;
 import cn.lambdalib.util.helper.Color;
-import cn.lambdalib.util.serialization.SerializeType;
-import org.apache.commons.lang3.tuple.Pair;
+import cn.lambdalib.s11n.SerializeType;
 
 import java.util.List;
 
