@@ -12,7 +12,6 @@
  */
 package cn.lambdalib.core;
 
-import com.typesafe.config.Config;
 import cpw.mods.fml.common.event.*;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +25,6 @@ import cn.lambdalib.util.reschk.ResourceCheck;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraft.command.CommandHandler;
@@ -36,7 +34,7 @@ import net.minecraft.command.CommandHandler;
 @RegistrationMod(pkg = "cn.lambdalib.", res = "lambdalib", prefix = "ll_")
 public class LambdaLib {
 
-    public static final String VERSION = "1.1.0";
+    public static final String VERSION = "1.1.1_alpha";
 
     /**
      * Does open debug mode. turn to false when compiling.
