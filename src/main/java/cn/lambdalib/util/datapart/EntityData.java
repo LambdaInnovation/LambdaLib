@@ -17,6 +17,13 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import cn.lambdalib.s11n.network.NetS11nAdapterRegistry.RegNetS11nAdapter;
+import cn.lambdalib.s11n.network.NetworkMessage;
+import cn.lambdalib.s11n.network.NetworkMessage.Listener;
+import cn.lambdalib.s11n.network.NetworkS11n;
+import cn.lambdalib.s11n.network.NetworkS11n.InterruptException;
+import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
+import cn.lambdalib.s11n.network.NetworkS11n.NetworkS11nType;
 import cn.lambdalib.util.client.ClientUtils;
 import cn.lambdalib.util.mc.WorldUtils;
 
@@ -36,9 +43,12 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
@@ -59,7 +69,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
  * @author WeAthFolD
  */
 @Registrant
-@RegSerializable(instance = EntityData.Serializer.class)
+@NetworkS11nType
+@RegSerializable(instance = EntityData.Serializer.class) // For legacy compat
 public abstract class EntityData<Ent extends Entity> implements IExtendedEntityProperties {
 
     // Static registry
@@ -98,7 +109,6 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
      */
     public static <T extends Entity>
     void register(String name, Class<? extends DataPart<T>> partType, Class<? extends T> entityType) {
-        // TODO Check whether lambda exprs can be used on MC types.
         register(name, partType, entityType::isAssignableFrom);
     }
 
@@ -244,14 +254,15 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
             super(player);
         }
 
+        @SideOnly(Side.CLIENT)
         @Override
         protected void tick() {
             for(DataPart<? extends Ent> p : constructed.values()) {
                 if(p.dirty) {
                     if(p.tickUntilQuery-- == 0) {
                         p.tickUntilQuery = 20;
-                        query(getName(p));
-                    }                    
+                        NetworkMessage.sendToServer(this, NET_QUERY, Minecraft.getMinecraft().thePlayer, getName(p));
+                    }
                 }
             }
             
@@ -288,20 +299,29 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
         }
         
     }
-    
-    @RegNetworkCall(side = Side.SERVER, thisStorage = StorageOption.Option.INSTANCE)
-    protected void query(@Data String pname) {
+
+    private static final String NET_QUERY = "query", NET_SYNC = "sync", NET_NEXIST = "nexist";
+
+    @Listener(channel=NET_QUERY, side=Side.SERVER)
+    private void nQuery(EntityPlayerMP sender, String pname) {
         DataPart part = getPart(pname);
-        if(part != null) // FIX for client-only DataParts.
-            syncedSingle(entity, pname, getPart(pname).toNBT());
+        if (part != null) {
+            NetworkMessage.sendTo(sender, this, NET_SYNC, pname, part.toNBTSync());
+        } else {
+            NetworkMessage.sendTo(sender, this, NET_NEXIST, pname);
+        }
     }
-    
-    @RegNetworkCall(side = Side.CLIENT, thisStorage = StorageOption.Option.INSTANCE)
-    protected void syncedSingle(
-            @RangedTarget(range = 10) Ent player, @Data String pname, @Data NBTTagCompound tag) {
+
+    @Listener(channel=NET_SYNC, side=Side.CLIENT)
+    private void nSync(String pname, NBTTagCompound tag) {
         DataPart part = getPart(pname);
         part.fromNBT(tag);
         part.dirty = false;
+    }
+
+    @Listener(channel=NET_NEXIST, side=Side.CLIENT)
+    private void nNexist(String pname) {
+        getPart(pname).dirty = false;
     }
     
     @RegEventHandler
@@ -398,7 +418,7 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
         }
         
     }
-    
+
     public static class Serializer implements InstanceSerializer<EntityData> {
 
         @Override
@@ -419,8 +439,23 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
             Entity ent = obj.entity;
             return new NBTTagIntArray(new int[] { ent.dimension, ent.getEntityId() });
         }
-        
+
     }
+
+    @RegNetS11nAdapter(EntityData.class)
+    public static final NetS11nAdaptor<EntityData> adapter = new NetS11nAdaptor<EntityData>() {
+        @Override
+        public void write(ByteBuf buf, EntityData obj) {
+            NetworkS11n.serializeWithHint(buf, obj.entity, Entity.class);
+        }
+
+        @Override
+        public EntityData read(ByteBuf buf) {
+            Entity ret = NetworkS11n.deserializeWithHint(buf, Entity.class);
+            if (ret == null) throw new InterruptException("Null entity while getting EntityData");
+            else             return EntityData.get(ret);
+        }
+    };
 
     private static void debug(Object msg) {
         LambdaLib.log.info("[EntityData] " + msg);

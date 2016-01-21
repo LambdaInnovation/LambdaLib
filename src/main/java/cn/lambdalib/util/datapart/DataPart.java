@@ -72,6 +72,13 @@ public abstract class DataPart<Ent extends Entity> {
     }
 
     /**
+     * Invoke in ctor to indicate this DataPart is client local. It will not receive any sync update.
+     */
+    public final void setClientLocal() {
+        dirty = false;
+    }
+
+    /**
      * Set this DataPart to be reset when entity is dead. Effective for EntityPlayer only. Called in ctor.
      * (Other entities don't revive)
      */
@@ -82,12 +89,15 @@ public abstract class DataPart<Ent extends Entity> {
     /**
      * Restore data of this DataPart from the NBT. Will be called externally only for world saving
      */
-    public abstract void fromNBT(NBTTagCompound tag);
+    public void fromNBT(NBTTagCompound tag) {}
 
     /**
      * Convert data of this DataPart to a NBT. Will be called externally only for world saving
+     * @return Serialized data, can be null
      */
-    public abstract NBTTagCompound toNBT();
+    public NBTTagCompound toNBT() {
+        return null;
+    }
 
     /**
      * Same as fromNBT, but only get called when synchronizing across network.
