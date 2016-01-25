@@ -3,7 +3,7 @@ package cn.lambdalib.networkcall;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import cn.lambdalib.annoreg.mc.SideHelper;
+import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.core.LLModContainer;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;

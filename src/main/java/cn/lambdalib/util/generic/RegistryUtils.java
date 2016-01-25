@@ -18,8 +18,7 @@ public class RegistryUtils {
             String domain = res.getResourceDomain(), path = res.getResourcePath();
             return RegistryUtils.class.getResourceAsStream("/assets/" + domain + "/" + path);
         } catch(Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("Invalid resource " + res, e);
         }
     }
     

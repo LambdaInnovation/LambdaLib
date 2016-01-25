@@ -22,7 +22,7 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 @Registrant
 @RegDataPart("DataTag")
-public class PlayerDataTag extends DataPart {
+public class PlayerDataTag extends DataPart<EntityPlayer> {
     
     public static PlayerDataTag get(EntityPlayer player) {
         return EntityData.get(player).getPart(PlayerDataTag.class);

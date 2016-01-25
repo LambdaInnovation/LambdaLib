@@ -121,7 +121,7 @@ public class EntitySelectors {
     
     public static class Exclusion implements IEntitySelector {
         
-        final Set<Entity> exclusions = new HashSet();
+        final Set<Entity> exclusions = new HashSet<>();
         
         public Exclusion(Entity ...excls) {
             for(Entity e : excls)
@@ -142,7 +142,7 @@ public class EntitySelectors {
     
     public static class SelectorList implements IEntitySelector {
         
-        List<IEntitySelector> list = new ArrayList();
+        List<IEntitySelector> list = new ArrayList<>();
         
         public SelectorList(IEntitySelector ...sels) {
             for(IEntitySelector i : sels)

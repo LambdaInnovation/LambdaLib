@@ -1,10 +1,8 @@
 package cn.lambdalib.s11n.network;
 
-import cn.lambdalib.annoreg.mc.SideHelper;
+import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.s11n.SerializationHelper;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;

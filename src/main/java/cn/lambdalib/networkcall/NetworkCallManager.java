@@ -17,7 +17,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.lambdalib.annoreg.mc.SideHelper;
+import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.core.LLModContainer;
 import cn.lambdalib.networkcall.s11n.NullInstanceException;
 import cn.lambdalib.networkcall.s11n.SerializationManager;

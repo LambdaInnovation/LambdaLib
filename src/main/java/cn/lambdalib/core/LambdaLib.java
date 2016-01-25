@@ -67,7 +67,7 @@ public class LambdaLib {
     }
 
     @EventHandler()
-    public void init(FMLInitializationEvent Init) {
+    public void init(FMLInitializationEvent event) {
         RegistrationManager.INSTANCE.registerAll(this, "Init");
     }
 

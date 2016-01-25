@@ -19,8 +19,8 @@ import java.util.Map;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
-import cn.lambdalib.annoreg.mc.RegInit;
 import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
+import cn.lambdalib.annoreg.mc.RegInitCallback;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.generic.RegistryUtils;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -40,7 +40,6 @@ import net.minecraft.util.IntHashMap;
  */
 @SideOnly(Side.CLIENT)
 @Registrant
-@RegInit
 @RegEventHandler(Bus.Forge)
 public class ControlOverrider {
     
@@ -48,10 +47,11 @@ public class ControlOverrider {
     private static Field pressedField;
     private static Field kbMapField;
     
-    private static Map<Integer, Override> activeOverrides = new HashMap();
+    private static Map<Integer, Override> activeOverrides = new HashMap<>();
     
     private static boolean completeOverriding;
-    
+
+    @RegInitCallback
     public static void init() {
         try {
             kbMapField = RegistryUtils.getObfField(KeyBinding.class, "hash", "field_74514_b");
@@ -62,8 +62,7 @@ public class ControlOverrider {
             modifiersField.setAccessible(true);
             modifiersField.setInt(kbMapField, kbMapField.getModifiers() & (~Modifier.FINAL));
         } catch(Exception e) {
-            error("init", e);
-            e.printStackTrace();
+            throw error("init", e);
         }
     }
     
@@ -82,9 +81,7 @@ public class ControlOverrider {
         try {
             return (IntHashMap) kbMapField.get(null);
         } catch (Exception e) {
-            error("getOriginalKbMap", e);
-            e.printStackTrace();
-            return null;
+            throw error("getOriginalKbMap", e);
         }
     }
     
@@ -106,7 +103,7 @@ public class ControlOverrider {
             createCopy(kbMap, getOriginalKbMap());
             kbMap = getOriginalKbMap();
         } else {
-            error("Try to stop complete override while not overriding at all", new RuntimeException());
+            throw error("Try to stop complete override while not overriding at all");
         }
     }
     // SUPERHACKTECH Ends
@@ -189,9 +186,13 @@ public class ControlOverrider {
         if(LambdaLib.DEBUG)
             LambdaLib.log.info(s);
     }
+
+    private static RuntimeException error(String s) {
+        return new RuntimeException("ControlOverrider error: " + s);
+    }
     
-    private static void error(String s, Exception e) {
-        LambdaLib.log.error("ControlOverrider error: " + s, e);
+    private static RuntimeException error(String s, Exception e) {
+        return new RuntimeException("ControlOverrider error: " + s, e);
     }
     
     private static class Override {

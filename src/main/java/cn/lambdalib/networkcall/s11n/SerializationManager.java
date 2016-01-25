@@ -41,7 +41,7 @@ import net.minecraft.world.World;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import cn.lambdalib.annoreg.mc.SideHelper;
+import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.core.LLModContainer;
 import cn.lambdalib.networkcall.Future;
 import cn.lambdalib.networkcall.NetworkTerminal;
