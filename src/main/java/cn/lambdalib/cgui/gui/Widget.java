@@ -36,6 +36,7 @@ public class Widget extends WidgetContainer {
 
     CGui gui;
     Widget parent;
+    WidgetContainer abstractParent;
     
     // Calculated absolute widget position and scale
     // Will only be updated if widget.dirty = true each frame
@@ -332,7 +333,7 @@ public class Widget extends WidgetContainer {
     }
     
     public WidgetContainer getAbstractParent() {
-        return isWidgetParent() ? parent : gui;
+        return abstractParent;
     }
     
     public boolean rename(String newName) {

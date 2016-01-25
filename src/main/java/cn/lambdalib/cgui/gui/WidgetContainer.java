@@ -33,11 +33,11 @@ public class WidgetContainer implements Iterable<Widget> {
     private static final String UNNAMED_PRE = "Unnamed ";
     
     /**
-     * Light copy.
+     * Deep copy.
      */
     public void addAll(WidgetContainer container) {
-        for(Map.Entry<String, Widget> entry : container.getEntries()) {
-            addWidget(entry.getKey(), entry.getValue());
+        for (Widget w : container.getDrawList()) {
+            addWidget(w.getName(), w.copy());
         }
     }
     
@@ -155,6 +155,7 @@ public class WidgetContainer implements Iterable<Widget> {
     
     private void checkAdded(String name, Widget add) {
         onWidgetAdded(name, add);
+        add.abstractParent = this;
         add.onAdded();
     }
     
