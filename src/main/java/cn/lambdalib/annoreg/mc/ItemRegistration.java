@@ -12,15 +12,16 @@
  */
 package cn.lambdalib.annoreg.mc;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-
 import cn.lambdalib.annoreg.base.RegistrationFieldSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
-import cn.lambdalib.annoreg.core.RegModInformation;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
+import cn.lambdalib.util.mc.SideHelper;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.item.Item;
+import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.oredict.OreDictionary;
 
 @RegistryTypeDecl
@@ -44,15 +45,17 @@ public class ItemRegistration extends RegistrationFieldSimple<RegItem, Item> {
                 obj.setTextureName(getCurrentMod().getRes(anno.value()));
             }
         });
-        
-        this.addWork(RegItem.HasRender.class, new PostWork<RegItem.HasRender, Item>() {
-            @Override
-            public void invoke(RegItem.HasRender anno, Item obj) throws Exception {
-                if (ProxyHelper.isClient()) {
-                    ProxyHelper.regItemRender(obj, helper.getFieldFromObject(obj, RegItem.Render.class));
+
+        if (SideHelper.isClient()) {
+            this.addWork(RegItem.HasRender.class, new PostWork<RegItem.HasRender, Item>() {
+                @Override
+                @SideOnly(Side.CLIENT)
+                public void invoke(RegItem.HasRender anno, Item obj) throws Exception {
+                    MinecraftForgeClient.registerItemRenderer(obj,
+                            (IItemRenderer) helper.getFieldFromObject(obj, RegItem.Render.class));
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override

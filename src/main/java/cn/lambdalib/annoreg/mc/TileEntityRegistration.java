@@ -12,12 +12,15 @@
  */
 package cn.lambdalib.annoreg.mc;
 
+import cn.lambdalib.util.mc.SideHelper;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import cn.lambdalib.annoreg.base.RegistrationClassSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 import cn.lambdalib.annoreg.mc.RegTileEntity.HasRender;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 
@@ -28,13 +31,16 @@ public class TileEntityRegistration extends RegistrationClassSimple<RegTileEntit
         super(RegTileEntity.class, "TileEntity");
         this.setLoadStage(LoadStage.INIT);
         
-        if(FMLCommonHandler.instance().getSide() == Side.CLIENT)
-        this.addWork(HasRender.class, new PostWork<HasRender, Class<? extends TileEntity>>() {
-            @Override
-            public void invoke(HasRender anno, Class<? extends TileEntity> obj) throws Exception {
-                ProxyHelper.regTileEntityRender(obj, helper.getFieldFromClass(obj, RegTileEntity.Render.class));
-            }
-        });
+        if(SideHelper.isClient()) {
+            this.addWork(HasRender.class, new PostWork<HasRender, Class<? extends TileEntity>>() {
+                @Override
+                @SideOnly(Side.CLIENT)
+                public void invoke(HasRender anno, Class<? extends TileEntity> obj) throws Exception {
+                    ClientRegistry.bindTileEntitySpecialRenderer(obj,
+                            (TileEntitySpecialRenderer) helper.getFieldFromClass(obj, RegTileEntity.Render.class));
+                }
+            });
+        }
     }
 
     @Override

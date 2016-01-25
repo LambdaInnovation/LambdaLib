@@ -16,8 +16,12 @@ import cn.lambdalib.annoreg.base.RegistrationClassSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 import cn.lambdalib.annoreg.mc.RegEntity.HasRender;
-import cn.lambdalib.core.LLModContainer;
+import cn.lambdalib.util.mc.SideHelper;
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 
 @RegistryTypeDecl
@@ -26,16 +30,17 @@ public class EntityRegistration extends RegistrationClassSimple<RegEntity, Entit
     public EntityRegistration() {
         super(RegEntity.class, "Entity");
         this.setLoadStage(LoadStage.INIT);
-        
-        this.addWork(RegEntity.HasRender.class, new PostWork<RegEntity.HasRender, Class<? extends Entity>>() {
-            @Override
-            public void invoke(HasRender anno, Class<? extends Entity> obj) throws Exception {
-                if (ProxyHelper.isClient()) {
-                    ProxyHelper.regEntityRender(obj, helper.getFieldFromClass(obj, RegEntity.Render.class));
-                    //System.out.println("[AR]Registered render " + helper.getFieldFromClass(obj, RegEntity.Render.class) + "for " + obj);
+
+        if (SideHelper.isClient()) {
+            this.addWork(RegEntity.HasRender.class, new PostWork<RegEntity.HasRender, Class<? extends Entity>>() {
+                @SideOnly(Side.CLIENT)
+                @Override
+                public void invoke(HasRender anno, Class<? extends Entity> obj) throws Exception {
+                    RenderingRegistry.registerEntityRenderingHandler(obj,
+                            (Render) helper.getFieldFromClass(obj, RegEntity.Render.class));
                 }
-            }
-        });
+            });
+        }
     }
     
     @Override
