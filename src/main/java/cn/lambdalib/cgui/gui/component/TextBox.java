@@ -20,6 +20,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
 import cn.lambdalib.cgui.gui.*;
+import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.client.font.TrueTypeFont;
@@ -245,19 +246,18 @@ public class TextBox extends Component {
     private void checkCaretRegion() {
         final double widthLimit = widthLimit();
         final String local = processedContent().substring(displayOffset);
-
-        int localCaret = caretPos - displayOffset;
-        if (sumLength(local, 0, localCaret) > widthLimit) {
+        final int localCaret = caretPos - displayOffset;
+        final double distance = sumLength(local, 0, localCaret);
+        if (distance > widthLimit) {
             double acc = 0.0;
-            int mini = local.length() - 1;
-            for (; mini > 0 && acc < widthLimit; --mini) {
+            int mini = 0;
+            for (; mini < localCaret && distance - acc > widthLimit; ++mini) {
                 acc += font.getCharWidth(local.codePointAt(mini), option);
             }
-
-            mini = Math.min(local.length() - 1, mini + 1);
-
             displayOffset += mini;
         }
+
+        assert displayOffset < caretPos;
     }
 
     private double widthLimit() {
