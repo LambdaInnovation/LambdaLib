@@ -29,24 +29,20 @@ import cn.lambdalib.util.mc.WorldUtils;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
-import cn.lambdalib.annoreg.mc.SideHelper;
+import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.core.LambdaLib;
-import cn.lambdalib.networkcall.RegNetworkCall;
 import cn.lambdalib.networkcall.s11n.InstanceSerializer;
 import cn.lambdalib.networkcall.s11n.RegSerializable;
-import cn.lambdalib.networkcall.s11n.StorageOption;
-import cn.lambdalib.networkcall.s11n.StorageOption.Data;
-import cn.lambdalib.networkcall.s11n.StorageOption.RangedTarget;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
@@ -454,6 +450,24 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
             Entity ret = NetworkS11n.deserializeWithHint(buf, Entity.class);
             if (ret == null) throw new InterruptException("Null entity while getting EntityData");
             else             return EntityData.get(ret);
+        }
+    };
+
+    @RegNetS11nAdapter(DataPart.class)
+    public static final NetS11nAdaptor<DataPart> dataPartAdapter = new NetS11nAdaptor<DataPart>() {
+        @Override
+        public void write(ByteBuf buf, DataPart obj) {
+            NetworkS11n.serializeWithHint(buf, obj.data, EntityData.class);
+            ByteBufUtils.writeUTF8String(buf, obj.getName());
+        }
+
+        @Override
+        public DataPart read(ByteBuf buf) {
+            EntityData data = NetworkS11n.deserializeWithHint(buf, EntityData.class);
+            if (data == null) {
+                throw new InterruptException("No corresponding EntityData present");
+            }
+            return data.getPart(ByteBufUtils.readUTF8String(buf));
         }
     };
 
