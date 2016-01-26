@@ -15,8 +15,10 @@ import java.util.Map;
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
 import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
-import cn.lambdalib.annoreg.mc.RegInit;
+import cn.lambdalib.annoreg.mc.RegInitCallback;
+import cn.lambdalib.annoreg.mc.RegPostInitCallback;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.MinecraftForge;
@@ -33,7 +35,6 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 @Registrant
-@RegInit
 public class CheckManger
 {
 	/**
@@ -57,6 +58,7 @@ public class CheckManger
 	public void addMod(String modid,String[] pars)
 	{
 		this.modPool.put(modid, pars);
+		System.out.println(modid+pars);
 	} 
 	
 	public void addNewVersion(String modid,String newVersion)
@@ -65,9 +67,9 @@ public class CheckManger
 	}
 	
 	@SubscribeEvent
-	public void loadHandler(PlayerLoggedInEvent e)
+	public void enterWorldHandler(PlayerLoggedInEvent e)
 	{
-		if(!alerted&&e.player.isClientWorld())
+		if(!alerted)
 		{
 			 EntityPlayer player=e.player;
 			 String[] pars;
@@ -78,9 +80,16 @@ public class CheckManger
 				 player.addChatMessage(new ChatComponentTranslation("chat.newversion",pars[0],this.latestVersion.get(modid)));
 				 
 			 }
+//			 String s;
+//			 s=this.modPool.get("academy-craft")[0];
+//			 player.addChatMessage(new ChatComponentText(s));
+//			 s=this.modPool.get("academy-craft")[1];
+//			 player.addChatMessage(new ChatComponentText(s));
+//			 s=this.modPool.get("academy-craft")[2];
+//			 player.addChatMessage(new ChatComponentText(s));
 		}
 	}
-
+	@RegPostInitCallback
 	public static void init()
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
