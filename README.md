@@ -16,10 +16,16 @@ but will reach a stable state perhaps soon.
 Developement Setup
 =====
 
-A java8 developement environment with scala compatibility is required.
+A java8 developement environment with scala compatibility is required. Note that when you include source code, you must
+put [jars\LambdaLib-PluginLoader.jar](jars\LambdaLib-PluginLoader.jar) into the `eclipse\mods` folder.
 
 Project structure:
 
 * `src\main\`: Core features shipped with release
 * `src\editor\`: Features used only in dev environment
 * `src\test\`: Test codes
+
+Misc
+=====
+
+License: MIT
