@@ -35,7 +35,7 @@ public interface IFont {
 
     @SerializeType
     class FontOption {
-        public double fontSize = 10;
+        public double fontSize;
         public FontAlign align;
         public Color color;
 
@@ -51,6 +51,10 @@ public interface IFont {
             this(_fontsz, FontAlign.LEFT, _color);
         }
 
+        public FontOption(double _fontsz, int hex) {
+            this(_fontsz, new Color(hex));
+        }
+
         public FontOption(double _fontsz, FontAlign _align) {
             this(_fontsz, _align, Color.white());
         }
@@ -59,6 +63,10 @@ public interface IFont {
             fontSize = _fontsz;
             align = _align;
             color = _color;
+        }
+
+        public FontOption(double _fontsz, FontAlign _align, int hex) {
+            this(_fontsz, _align, new Color(hex));
         }
 
         @Override

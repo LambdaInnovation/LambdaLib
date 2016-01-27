@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.annoreg.core.Registrant;
@@ -55,6 +56,10 @@ public class AuxGuiHandler {
             doAdd(gui);
         else
             toAddList.add(gui);
+    }
+
+    public static List<AuxGui> active() {
+        return ImmutableList.copyOf(auxGuiList);
     }
     
     private static void doAdd(AuxGui gui) {
@@ -143,17 +148,7 @@ public class AuxGuiHandler {
     }
     
     public static boolean hasForegroundGui() {
-        boolean result = false;
-        
-        startIterating();
-        for(AuxGui ag : auxGuiList) {
-            if(!ag.isDisposed() && ag.isForeground()) {
-                result = true;
-                break;
-            }
-        }
-        endIterating();
-        return result;
+        return auxGuiList.stream().anyMatch(gui -> !gui.isDisposed() && gui.isForeground());
     }
     
 }
