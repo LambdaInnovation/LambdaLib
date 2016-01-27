@@ -9,8 +9,7 @@ package cn.lambdalib.s11n.network;
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegMessageHandler;
 import cn.lambdalib.core.LambdaLib;
-import cn.lambdalib.s11n.network.NetworkS11n.InterruptException;
-import cpw.mods.fml.common.network.NetworkRegistry;
+import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -109,7 +108,7 @@ public class NetworkEvent {
         public void fromBytes(ByteBuf buf) {
             try {
                 object = NetworkS11n.deserialize(buf);
-            } catch (InterruptException exc) {
+            } catch (ContextException exc) {
                 // omit
             }
         }

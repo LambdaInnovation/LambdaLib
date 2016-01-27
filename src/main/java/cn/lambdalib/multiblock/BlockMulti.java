@@ -281,6 +281,7 @@ public abstract class BlockMulti extends BlockContainer {
         return false;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public int getRenderType() {
         return RenderEmptyBlock.id;

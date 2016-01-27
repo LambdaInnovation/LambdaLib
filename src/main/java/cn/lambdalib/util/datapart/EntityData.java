@@ -15,7 +15,7 @@ import cn.lambdalib.s11n.network.NetS11nAdapterRegistry.RegNetS11nAdapter;
 import cn.lambdalib.s11n.network.NetworkMessage;
 import cn.lambdalib.s11n.network.NetworkMessage.Listener;
 import cn.lambdalib.s11n.network.NetworkS11n;
-import cn.lambdalib.s11n.network.NetworkS11n.InterruptException;
+import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
 import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
 import cn.lambdalib.s11n.network.NetworkS11n.NetworkS11nType;
 import cn.lambdalib.util.client.ClientUtils;
@@ -149,11 +149,20 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
         return nameRev.get(part.getClass());
     }
 
+    /**
+     * @return The part associated with given name, or {@link null} if no part with such name is present.
+     */
     public <T extends DataPart<?>> T getPart(String name) {
-        // debug(staticParts.get(name).type);
-        return (T) constructed.get(staticParts.get(name).type);
+        if (staticParts.containsKey(name)) {
+            return (T) constructed.get(staticParts.get(name).type);
+        } else {
+            return null;
+        }
     }
 
+    /**
+     * @return The part constructed with the given type, or {@link null} if no part with such type is present.
+     */
     public <T extends DataPart<?>> T getPart(Class<T> clazz) {
         return (T) constructed.get(clazz);
     }
@@ -442,7 +451,7 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
         @Override
         public EntityData read(ByteBuf buf) {
             Entity ret = NetworkS11n.deserializeWithHint(buf, Entity.class);
-            if (ret == null) throw new InterruptException("Null entity while getting EntityData");
+            if (ret == null) throw new ContextException("Null entity while getting EntityData");
             else             return EntityData.get(ret);
         }
     };
@@ -459,7 +468,7 @@ public abstract class EntityData<Ent extends Entity> implements IExtendedEntityP
         public DataPart read(ByteBuf buf) {
             EntityData data = NetworkS11n.deserializeWithHint(buf, EntityData.class);
             if (data == null) {
-                throw new InterruptException("No corresponding EntityData present");
+                throw new ContextException("No corresponding EntityData present");
             }
             return data.getPart(ByteBufUtils.readUTF8String(buf));
         }

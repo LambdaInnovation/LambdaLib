@@ -9,6 +9,7 @@ package cn.lambdalib.s11n.network;
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegMessageHandler;
 import cn.lambdalib.core.LambdaLib;
+import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
 import cn.lambdalib.util.generic.ReflectionUtils;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.ByteBufUtils;
@@ -334,6 +335,7 @@ public class NetworkMessage {
 
     public static class Message implements IMessage {
 
+        boolean valid;
         Object instance;
         String channel;
         Object[] params;
@@ -358,11 +360,16 @@ public class NetworkMessage {
 
         @Override
         public void fromBytes(ByteBuf buf) {
-            instance = NetworkS11n.deserialize(buf);
-            channel = ByteBufUtils.readUTF8String(buf);
-            params = new Object[buf.readByte()];
-            for (int i = 0; i < params.length; ++i) {
-                params[i] = NetworkS11n.deserialize(buf);
+            try {
+                instance = NetworkS11n.deserialize(buf);
+                channel = ByteBufUtils.readUTF8String(buf);
+                params = new Object[buf.readByte()];
+                for (int i = 0; i < params.length; ++i) {
+                    params[i] = NetworkS11n.deserialize(buf);
+                }
+                valid = true;
+            } catch (ContextException e) {
+                valid = false;
             }
         }
 
@@ -373,10 +380,12 @@ public class NetworkMessage {
 
         @Override
         public IMessage onMessage(Message message, MessageContext ctx) {
-            if (message.instance != null) {
+            if (message.valid) {
                 // LambdaLib.log.info("Received message " + message.channel + " on " + message.instance);
                 processMessage(message.instance, message.channel, message.params);
-            } // else { emit }
+            } else {
+                LambdaLib.log.info("Ignored some network message");
+            }
             return null;
         }
     }

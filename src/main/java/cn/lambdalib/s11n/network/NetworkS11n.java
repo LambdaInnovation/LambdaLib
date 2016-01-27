@@ -39,11 +39,12 @@ public class NetworkS11n {
         void write(ByteBuf buf, T obj);
 
         /**
-         * Read the object from given ByteBuf
+         * Read the object from given ByteBuf, MUST NOT BE NULL
+         * @throws ContextException if the object can't be recovered at this time
          * @param buf The buf to read object from
          * @return Deserialized object
          */
-        T read(ByteBuf buf);
+        T read(ByteBuf buf) throws ContextException;
 
     }
 
@@ -63,14 +64,6 @@ public class NetworkS11n {
     public @interface SerializeNullable {}
 
     /**
-     * Indicate that a field can be null while being deserialized into parent object. Violating
-     *  will serialize the object as null and stop the event from being triggered.
-     */
-    @Target(ElementType.FIELD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface DeserializeNonNull {}
-
-    /**
      * To optimize data usage, type info about the recursive object's fields are emitted. That will result in
      *  serialization with type defined in the class, rather than its runtime type. If you want normal dynamic type
      *  behaviour to be present, annotate this on the field.
@@ -79,8 +72,11 @@ public class NetworkS11n {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface SerializeDynamic {}
 
-    public static class InterruptException extends RuntimeException {
-        public InterruptException(String msg) {
+    /**
+     * Thrown when the object can't be retrieved, because it can't be found in that runtime(context).
+     */
+    public static class ContextException extends RuntimeException {
+        public ContextException(String msg) {
             super(msg);
         }
     }
@@ -186,7 +182,7 @@ public class NetworkS11n {
     /**
      * Deserializes a object from given buf.
      * @return The deserialized object. Could be null.
-     * @throws InterruptException if deserialization is interrupted.
+     * @throws ContextException if deserialization is interrupted.
      * @throws RuntimeException if deserialization failed non-trivially.
      */
     @SuppressWarnings("unchecked")
@@ -207,7 +203,8 @@ public class NetworkS11n {
     /**
      * Deserialize an object with given type hint.
      * @return The deserialized object of type T.
-     * @throws InterruptException if deserialization is interrupted.
+     * @throws ContextException if deserialization is interrupted. That is, the object can't be restored out of
+     *  contextual difference (e.g. Some entity exists on server, but not created in one client).
      * @throws RuntimeException if deserialization failed non-trivially.
      */
     public static <T, U extends T> T deserializeWithHint(ByteBuf buf, Class<U> type) {
@@ -228,11 +225,6 @@ public class NetworkS11n {
                         sub = deserialize(buf);
                     } else {
                         sub = deserializeWithHint(buf, f.getType());
-                    }
-
-                    // Required to deserialize non-null instance yet got null. Drop this deserialization progress.
-                    if (sub == null && f.isAnnotationPresent(DeserializeNonNull.class)) {
-                        throw new InterruptException("Unexpected null object");
                     }
 
                     try {
@@ -447,7 +439,16 @@ public class NetworkS11n {
             @Override
             public Entity read(ByteBuf buf) {
                 World wrld = SideHelper.getWorld(buf.readByte());
-                return wrld == null ? null : wrld.getEntityByID(buf.readInt());
+                if (wrld == null) {
+                    throw new ContextException("Invalid world");
+                } else {
+                    Entity ret = wrld.getEntityByID(buf.readInt());
+                    if (ret == null) {
+                        throw new ContextException("No entity with such ID");
+                    } else {
+                        return ret;
+                    }
+                }
             }
         });
     }
