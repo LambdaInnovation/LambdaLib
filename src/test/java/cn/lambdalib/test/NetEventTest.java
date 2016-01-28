@@ -11,7 +11,6 @@ import cn.lambdalib.annoreg.mc.RegCommand;
 import cn.lambdalib.annoreg.mc.RegInitCallback;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.network.NetworkEvent;
-import cn.lambdalib.s11n.network.NetworkS11n.DeserializeNonNull;
 import cn.lambdalib.s11n.network.NetworkS11n.NetworkS11nType;
 import cn.lambdalib.s11n.network.NetworkS11n.SerializeNullable;
 import cn.lambdalib.template.command.LICommandBase;

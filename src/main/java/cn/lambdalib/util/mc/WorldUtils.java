@@ -41,7 +41,7 @@ public class WorldUtils {
         if(world == null) {
             return false;
         }
-        if(world.isRemote) {
+        if(SideHelper.isClient()) {
             return worldValidC(world);
         } else {
             WorldServer[] wss = MinecraftServer.getServer().worldServers;

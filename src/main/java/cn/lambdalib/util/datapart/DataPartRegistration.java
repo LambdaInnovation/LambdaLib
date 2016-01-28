@@ -27,7 +27,7 @@ public class DataPartRegistration extends RegistryType {
     public boolean registerClass(AnnotationData data) throws Exception {
         Class c = data.getTheClass();
         RegDataPart anno = data.getAnnotation();
-        EntityData.register(anno.value(), c);
+        EntityData.register(anno.value(), c, anno.type());
         return true;
     }
 
