@@ -1,25 +1,16 @@
 /**
- * Copyright (c) Lambda Innovation, 2013-2015
- * 本作品版权由Lambda Innovation所有。
- * http://www.li-dev.cn/
- *
- * This project is open-source, and it is distributed under
- * the terms of GNU General Public License. You can modify
- * and distribute freely as long as you follow the license.
- * 本项目是一个开源项目，且遵循GNU通用公共授权协议。
- * 在遵照该协议的情况下，您可以自由传播和修改。
- * http://www.gnu.org/licenses/gpl.html
- */
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.crafting;
 
-import cn.lambdalib.core.LambdaLib;
-import cn.lambdalib.util.generic.DebugUtils;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 /**
  * @author WeAthFolD
@@ -28,39 +19,31 @@ public class SmeltingRegistry implements IRecipeRegistry {
 
     public static final SmeltingRegistry INSTANCE = new SmeltingRegistry();
 
-    private SmeltingRegistry() {
-    }
+    private SmeltingRegistry() { }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see cn.lambdalib.crafting.IRecipeRegistry#register(java.lang.String,
-     * net.minecraft.item.ItemStack, java.lang.Object[], int, int)
-     */
     @Override
     public void register(String type, ItemStack output, Object[] input, int width, int height, float experience) {
         if (width != 1 || height != 1) {
             throw new IllegalArgumentException("You can only specify 1 input for smelting!");
         }
 
-        Object in;
         if (input[0] instanceof String) {
-            in = OreDictionary.getOres((String) input[0]).get(0);
+            for (ItemStack stack : OreDictionary.getOres((String) input[0])) {
+                register(type, output, new ItemStack[] { stack }, width, height, experience);
+            }
         } else {
-            in = input[0];
+            Object in = input[0];
+
+            if (in instanceof ItemStack)
+                GameRegistry.addSmelting((ItemStack) in, output, experience);
+            else if (in instanceof Block)
+                GameRegistry.addSmelting((Block) in, output, experience);
+            else if (in instanceof Item)
+                GameRegistry.addSmelting((Item) in, output, experience);
+
+            debug("[Smelting] " +
+                    in + " => " + RecipeRegistry.reprStack(output));
         }
-
-        // 辣鸡java
-        if (in instanceof ItemStack)
-            GameRegistry.addSmelting((ItemStack) in, output, experience);
-        else if (in instanceof Block)
-            GameRegistry.addSmelting((Block) in, output, experience);
-        else if (in instanceof Item)
-            GameRegistry.addSmelting((Item) in, output, experience);
-
-        debug("[Smelting] " +
-                RecipeRegistry.reprStack(output) + " => " +
-                DebugUtils.formatArray(output));
     }
 
 }

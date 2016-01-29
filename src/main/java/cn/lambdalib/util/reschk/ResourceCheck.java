@@ -1,13 +1,16 @@
+/**
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.util.reschk;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
-import cn.lambdalib.annoreg.mc.SideHelper;
 import cn.lambdalib.networkcall.RegNetworkCall;
 import cn.lambdalib.networkcall.s11n.StorageOption.Data;
 import cn.lambdalib.networkcall.s11n.StorageOption.Instance;
@@ -15,10 +18,6 @@ import cn.lambdalib.networkcall.s11n.StorageOption.Target;
 import cn.lambdalib.util.generic.HashUtils;
 import cn.lambdalib.util.generic.RegistryUtils;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;

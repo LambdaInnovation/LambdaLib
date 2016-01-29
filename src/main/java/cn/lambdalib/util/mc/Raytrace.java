@@ -1,3 +1,9 @@
+/**
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.util.mc;
 
 import java.util.List;
@@ -25,7 +31,7 @@ public class Raytrace {
 
     /**
      * Perform a ray trace.
-     * @param world
+     * @param world The world to perform on
      * @param vec1 Start point
      * @param vec2 End point
      * @param entitySel The entity filter
@@ -60,11 +66,13 @@ public class Raytrace {
         return getLookingPos(living, dist, null, null);
     }
     
-    public static Pair<Vec3, MovingObjectPosition> getLookingPos(EntityLivingBase living, double dist, IEntitySelector esel) {
+    public static Pair<Vec3, MovingObjectPosition> getLookingPos(EntityLivingBase living, double dist,
+                                                                 IEntitySelector esel) {
         return getLookingPos(living, dist, esel, null);
     }
     
-    public static Pair<Vec3, MovingObjectPosition> getLookingPos(EntityLivingBase living, double dist, IEntitySelector esel, IBlockSelector bsel) {
+    public static Pair<Vec3, MovingObjectPosition> getLookingPos(EntityLivingBase living, double dist,
+                                                                 IEntitySelector esel, IBlockSelector bsel) {
         MovingObjectPosition pos = traceLiving(living, dist, esel, bsel);
         Vec3 end = null;
         if(pos != null) {
@@ -114,221 +122,143 @@ public class Raytrace {
     /**
      * Mojang code with minor changes to support block filtering.
      * @param world world
-     * @param vec1 startPoint
-     * @param vec2 endPoint
+     * @param start startPoint
+     * @param end endPoint
      * @param filter BlockFilter
      * @return MovingObjectPosition
      */
-    @SuppressWarnings("unused")
-    public static MovingObjectPosition rayTraceBlocks(World world, Vec3 vec1, Vec3 vec2, IBlockSelector filter) {
-        if(Double.isNaN(vec1.xCoord) || Double.isNaN(vec1.yCoord) || Double.isNaN(vec1.zCoord) ||
-                Double.isNaN(vec2.xCoord) || Double.isNaN(vec2.yCoord) || Double.isNaN(vec2.zCoord)) {
-            return null;
-        }
-        
-        //HACKHACK: copy the vec to prevent modifying the parameter
-        vec1 = VecUtils.copy(vec1);
+    public static MovingObjectPosition rayTraceBlocks(World world, Vec3 start, Vec3 end, IBlockSelector filter) {
         if(filter == null)
             filter = BlockSelectors.filNormal;
-        
-        int x2 = MathHelper.floor_double(vec2.xCoord);
-        int y2 = MathHelper.floor_double(vec2.yCoord);
-        int z2 = MathHelper.floor_double(vec2.zCoord);
-        int x1 = MathHelper.floor_double(vec1.xCoord);
-        int y1 = MathHelper.floor_double(vec1.yCoord);
-        int z1 = MathHelper.floor_double(vec1.zCoord);
-        Block block = world.getBlock(x1, y1, z1);
-        
-        int k1 = world.getBlockMetadata(x1, y1, z1);
 
-        if (filter.accepts(world, x1, y1, z1, block))
+        Vec3 current = VecUtils.copy(start);
+        
+        final int x2 = MathHelper.floor_double(end.xCoord);
+        final int y2 = MathHelper.floor_double(end.yCoord);
+        final int z2 = MathHelper.floor_double(end.zCoord);
+
+        int x1 = MathHelper.floor_double(current.xCoord);
+        int y1 = MathHelper.floor_double(current.yCoord);
+        int z1 = MathHelper.floor_double(current.zCoord);
         {
-            MovingObjectPosition movingobjectposition = block.collisionRayTrace(world, x1, y1, z1, vec1, vec2);
-
-            if (movingobjectposition != null)
-            {
-                return movingobjectposition;
+            Block block = world.getBlock(x1, y1, z1);
+            if (filter.accepts(world, x1, y1, z1, block)) {
+                MovingObjectPosition result = block.collisionRayTrace(world, x1, y1, z1, current, end);
+                if (result != null) {
+                    return result;
+                }
             }
         }
 
-        MovingObjectPosition movingobjectposition2 = null;
-        k1 = 200;
-
-        while (k1-- >= 0)
-        {
-            if (Double.isNaN(vec1.xCoord) || Double.isNaN(vec1.yCoord) || Double.isNaN(vec1.zCoord))
-            {
+        for (int i = 0; i < 200; ++i) {
+            if (x1 == x2 && y1 == y2 && z1 == z2) {
                 return null;
             }
 
-            if (x1 == x2 && y1 == y2 && z1 == z2)
-            {
-                return null;
+            boolean moveX = true;
+            boolean moveY = true;
+            boolean moveZ = true;
+            double nextX = 999.0D;
+            double nextY = 999.0D;
+            double nextZ = 999.0D;
+
+            if (x2 > x1) {
+                nextX = x1 + 1.0D;
+            } else if (x2 < x1) {
+                nextX = x1 + 0.0D;
+            } else {
+                moveX = false;
             }
 
-            boolean flag6 = true;
-            boolean flag3 = true;
-            boolean flag4 = true;
-            double d0 = 999.0D;
-            double d1 = 999.0D;
-            double d2 = 999.0D;
-
-            if (x2 > x1)
-            {
-                d0 = (double)x1 + 1.0D;
-            }
-            else if (x2 < x1)
-            {
-                d0 = (double)x1 + 0.0D;
-            }
-            else
-            {
-                flag6 = false;
+            if (y2 > y1) {
+                nextY = y1 + 1.0D;
+            } else if (y2 < y1) {
+                nextY = y1 + 0.0D;
+            } else {
+                moveY = false;
             }
 
-            if (y2 > y1)
-            {
-                d1 = (double)y1 + 1.0D;
-            }
-            else if (y2 < y1)
-            {
-                d1 = (double)y1 + 0.0D;
-            }
-            else
-            {
-                flag3 = false;
+            if (z2 > z1) {
+                nextZ = z1 + 1.0D;
+            } else if (z2 < z1) {
+                nextZ = z1 + 0.0D;
+            } else {
+                moveZ = false;
             }
 
-            if (z2 > z1)
-            {
-                d2 = (double)z1 + 1.0D;
-            }
-            else if (z2 < z1)
-            {
-                d2 = (double)z1 + 0.0D;
-            }
-            else
-            {
-                flag4 = false;
-            }
+            double xFactor = 999.0D;
+            double yFactor = 999.0D;
+            double zFactor = 999.0D;
+            double dx = end.xCoord - current.xCoord;
+            double dy = end.yCoord - current.yCoord;
+            double dz = end.zCoord - current.zCoord;
 
-            double d3 = 999.0D;
-            double d4 = 999.0D;
-            double d5 = 999.0D;
-            double d6 = vec2.xCoord - vec1.xCoord;
-            double d7 = vec2.yCoord - vec1.yCoord;
-            double d8 = vec2.zCoord - vec1.zCoord;
-
-            if (flag6)
-            {
-                d3 = (d0 - vec1.xCoord) / d6;
+            if (moveX) {
+                xFactor = (nextX - current.xCoord) / dx;
             }
-
-            if (flag3)
-            {
-                d4 = (d1 - vec1.yCoord) / d7;
+            if (moveY) {
+                yFactor = (nextY - current.yCoord) / dy;
             }
-
-            if (flag4)
-            {
-                d5 = (d2 - vec1.zCoord) / d8;
+            if (moveZ) {
+                zFactor = (nextZ - current.zCoord) / dz;
             }
+            byte side;
 
-            boolean flag5 = false;
-            byte b0;
-
-            if (d3 < d4 && d3 < d5)
-            {
-                if (x2 > x1)
-                {
-                    b0 = 4;
-                }
-                else
-                {
-                    b0 = 5;
+            if (xFactor < yFactor && xFactor < zFactor) {
+                if (x2 > x1) {
+                    side = 4;
+                } else {
+                    side = 5;
                 }
 
-                vec1.xCoord = d0;
-                vec1.yCoord += d7 * d3;
-                vec1.zCoord += d8 * d3;
-            }
-            else if (d4 < d5)
-            {
-                if (y2 > y1)
-                {
-                    b0 = 0;
-                }
-                else
-                {
-                    b0 = 1;
+                current.xCoord = nextX;
+                current.yCoord += dy * xFactor;
+                current.zCoord += dz * xFactor;
+            } else if (yFactor < zFactor) {
+                if (y2 > y1) {
+                    side = 0;
+                } else {
+                    side = 1;
                 }
 
-                vec1.xCoord += d6 * d4;
-                vec1.yCoord = d1;
-                vec1.zCoord += d8 * d4;
-            }
-            else
-            {
-                if (z2 > z1)
-                {
-                    b0 = 2;
-                }
-                else
-                {
-                    b0 = 3;
+                current.xCoord += dx * yFactor;
+                current.yCoord = nextY;
+                current.zCoord += dz * yFactor;
+            } else {
+                if (z2 > z1) {
+                    side = 2;
+                } else {
+                    side = 3;
                 }
 
-                vec1.xCoord += d6 * d5;
-                vec1.yCoord += d7 * d5;
-                vec1.zCoord = d2;
+                current.xCoord += dx * zFactor;
+                current.yCoord += dy * zFactor;
+                current.zCoord = nextZ;
             }
 
-            Vec3 vec32 = Vec3.createVectorHelper(vec1.xCoord, vec1.yCoord, vec1.zCoord);
-            x1 = (int)(vec32.xCoord = (double)MathHelper.floor_double(vec1.xCoord));
-
-            if (b0 == 5)
-            {
+            x1 = MathHelper.floor_double(current.xCoord);
+            if (side == 5) {
                 --x1;
-                ++vec32.xCoord;
             }
 
-            y1 = (int)(vec32.yCoord = (double)MathHelper.floor_double(vec1.yCoord));
-
-            if (b0 == 1)
-            {
+            y1 = MathHelper.floor_double(current.yCoord);
+            if (side == 1) {
                 --y1;
-                ++vec32.yCoord;
             }
 
-            z1 = (int)(vec32.zCoord = (double)MathHelper.floor_double(vec1.zCoord));
-
-            if (b0 == 3)
-            {
+            z1 = MathHelper.floor_double(current.zCoord);
+            if (side == 3) {
                 --z1;
-                ++vec32.zCoord;
             }
 
-            Block block1 = world.getBlock(x1, y1, z1);
-            int l1 = world.getBlockMetadata(x1, y1, z1);
-
-            if (filter.accepts(world, x1, y1, z1, block1))
-            {
-                if (true)
-                {
-                    MovingObjectPosition movingobjectposition1 = block1.collisionRayTrace(world, x1, y1, z1, vec1, vec2);
-
-                    if (movingobjectposition1 != null)
-                    {
-                        return movingobjectposition1;
-                    }
-                }
-                else
-                {
-                    movingobjectposition2 = new MovingObjectPosition(x1, y1, z1, b0, vec1, false);
+            Block block = world.getBlock(x1, y1, z1);
+            if (filter.accepts(world, x1, y1, z1, block)) {
+                MovingObjectPosition result = block.collisionRayTrace(world, x1, y1, z1, current, end);
+                if (result != null) {
+                    return result;
                 }
             }
         }
-
         return null;
     }
     

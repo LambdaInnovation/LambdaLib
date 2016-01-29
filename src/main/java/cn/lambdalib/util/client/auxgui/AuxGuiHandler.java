@@ -1,15 +1,9 @@
 /**
- * Copyright (c) Lambda Innovation, 2013-2015
- * 本作品版权由Lambda Innovation所有。
- * http://www.li-dev.cn/
- *
- * This project is open-source, and it is distributed under 
- * the terms of GNU General Public License. You can modify
- * and distribute freely as long as you follow the license.
- * 本项目是一个开源项目，且遵循GNU通用公共授权协议。
- * 在遵照该协议的情况下，您可以自由传播和修改。
- * http://www.gnu.org/licenses/gpl.html
- */
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.util.client.auxgui;
 
 import java.util.ArrayList;
@@ -17,6 +11,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.annoreg.core.Registrant;
@@ -55,6 +50,10 @@ public class AuxGuiHandler {
             doAdd(gui);
         else
             toAddList.add(gui);
+    }
+
+    public static List<AuxGui> active() {
+        return ImmutableList.copyOf(auxGuiList);
     }
     
     private static void doAdd(AuxGui gui) {
@@ -143,17 +142,7 @@ public class AuxGuiHandler {
     }
     
     public static boolean hasForegroundGui() {
-        boolean result = false;
-        
-        startIterating();
-        for(AuxGui ag : auxGuiList) {
-            if(!ag.isDisposed() && ag.isForeground()) {
-                result = true;
-                break;
-            }
-        }
-        endIterating();
-        return result;
+        return auxGuiList.stream().anyMatch(gui -> !gui.isDisposed() && gui.isForeground());
     }
     
 }

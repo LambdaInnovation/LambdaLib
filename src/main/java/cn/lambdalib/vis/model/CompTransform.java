@@ -1,13 +1,13 @@
+/**
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.vis.model;
 
-import java.io.IOException;
-
-import cn.lambdalib.util.serialization.SerializeType;
+import cn.lambdalib.s11n.SerializeType;
 import org.lwjgl.opengl.GL11;
-
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
 import cn.lambdalib.util.client.RenderUtils;
 import cn.lambdalib.util.generic.VecUtils;

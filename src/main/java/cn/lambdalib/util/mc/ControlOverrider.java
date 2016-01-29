@@ -1,30 +1,25 @@
 /**
- * Copyright (c) Lambda Innovation, 2013-2015
- * 本作品版权由Lambda Innovation所有。
- * http://www.li-dev.cn/
- *
- * This project is open-source, and it is distributed under 
- * the terms of GNU General Public License. You can modify
- * and distribute freely as long as you follow the license.
- * 本项目是一个开源项目，且遵循GNU通用公共授权协议。
- * 在遵照该协议的情况下，您可以自由传播和修改。
- * http://www.gnu.org/licenses/gpl.html
- */
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.util.mc;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
-import cn.lambdalib.annoreg.mc.RegInit;
 import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
+import cn.lambdalib.annoreg.mc.RegInitCallback;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.generic.RegistryUtils;
+import com.google.common.base.Throwables;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
@@ -33,14 +28,14 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.IntHashMap;
 
 /**
- * This class overrides(i.e.Disables) vanilla minecraft's control on a certain key. 
- * It is currently intented to be used DURING gameplay and will unlock all overrides when any GUI is present.
- * There are two ways to use ControlOverrider: activate/deactivate a key manually, or add key event filters into it.
+ * Overrides (disables) key in vanilla minecraft.
+ * Use {@link #override(String, int...)} to add an override group, and use
+ * {@link #endOverride(String)} to end one.
+ * Complete override (all keys) is also supported.
  * @author WeAthFolD
  */
 @SideOnly(Side.CLIENT)
 @Registrant
-@RegInit
 @RegEventHandler(Bus.Forge)
 public class ControlOverrider {
     
@@ -48,10 +43,12 @@ public class ControlOverrider {
     private static Field pressedField;
     private static Field kbMapField;
     
-    private static Map<Integer, Override> activeOverrides = new HashMap();
+    private static Map<Integer, Override> activeOverrides = new HashMap<>();
+    private static Map<String, OverrideGroup> overrideGroups = new HashMap<>();
     
     private static boolean completeOverriding;
-    
+
+    @RegInitCallback
     public static void init() {
         try {
             kbMapField = RegistryUtils.getObfField(KeyBinding.class, "hash", "field_74514_b");
@@ -62,8 +59,7 @@ public class ControlOverrider {
             modifiersField.setAccessible(true);
             modifiersField.setInt(kbMapField, kbMapField.getModifiers() & (~Modifier.FINAL));
         } catch(Exception e) {
-            error("init", e);
-            e.printStackTrace();
+            Throwables.propagate(e);
         }
     }
     
@@ -82,9 +78,7 @@ public class ControlOverrider {
         try {
             return (IntHashMap) kbMapField.get(null);
         } catch (Exception e) {
-            error("getOriginalKbMap", e);
-            e.printStackTrace();
-            return null;
+            throw Throwables.propagate(e);
         }
     }
     
@@ -106,53 +100,72 @@ public class ControlOverrider {
             createCopy(kbMap, getOriginalKbMap());
             kbMap = getOriginalKbMap();
         } else {
-            error("Try to stop complete override while not overriding at all", new RuntimeException());
+            throw error("Try to stop complete override while not overriding at all");
         }
     }
     // SUPERHACKTECH Ends
-    
-    public static void override(int keyID) {
-        if(activeOverrides.containsKey(keyID)) {
-            activeOverrides.get(keyID).count++;
-            if(activeOverrides.get(keyID).count > 100)
-                LambdaLib.log.warn("Over 100 override locks for " + 
-                        keyID + ". Might be a programming error?");
-            log("Override increment " + "[" + keyID + "]" + activeOverrides.get(keyID).count);
-            return;
-        }
-        
-        KeyBinding kb = (KeyBinding) kbMap.removeObject(keyID);
-        if(kb != null) {
-            try {
-                pressedField.set(kb, false);
-            } catch (Exception e) {
-                e.printStackTrace();
+
+    /**
+     * Activates an override group. The previous group with given name is ended.
+     */
+    public static void override(String name, int... keys) {
+        overrideGroups.put(name, new OverrideGroup(keys));
+        rebuild();
+    }
+
+    /**
+     * Ends an override group.
+     */
+    public static void endOverride(String name) {
+        Optional.of(overrideGroups.get(name)).ifPresent(OverrideGroup::end);
+    }
+
+    private static void rebuild() {
+        clearInternal();
+
+        Set<Integer> keys = new HashSet<>();
+
+        Collection<OverrideGroup> groups = overrideGroups.values();
+        Iterator<OverrideGroup> iter = groups.iterator();
+        while (iter.hasNext()) {
+            OverrideGroup group = iter.next();
+            if (group.ended) {
+                iter.remove();
+            } else {
+                for (int i : group.keys) {
+                    keys.add(i);
+                }
             }
-            //kb.setKeyCode(-1);
-            activeOverrides.put(keyID, new Override(kb));
-            log("Override new [" + keyID + "]");
-        } else {
-            log("Override ignored [" + keyID + "]");
+        }
+
+        for (int keyid : keys) {
+            KeyBinding kb = (KeyBinding) kbMap.removeObject(keyid);
+            if(kb != null) {
+                try {
+                    pressedField.set(kb, false);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //kb.setKeyCode(-1);
+                activeOverrides.put(keyid, new Override(kb));
+                log("Override new [" + keyid + "]");
+            } else {
+                log("Override ignored [" + keyid + "]");
+            }
         }
     }
-    
-    public static void removeOverride(int keyID) {
-        Override ovr = activeOverrides.get(keyID);
-        if(ovr == null)
-            return;
-        
-        if(ovr.count > 1) {
-            ovr.count--;
-            
-            log("Override decrement [" + keyID + "]" + ovr.count);
-        } else {
-            activeOverrides.remove(keyID);
-            
-            ovr.kb.setKeyCode(keyID);
-            kbMap.addKey(keyID, ovr.kb);
-            
-            log("Override remove [" + keyID + "]");
-        }
+
+    private static void clearInternal() {
+        activeOverrides.entrySet().forEach(entry -> {
+            Override ovr = entry.getValue();
+            int keyid = entry.getKey();
+
+            ovr.kb.setKeyCode(keyid);
+            kbMap.addKey(keyid, ovr.kb);
+            log("Override remove [" + keyid + "]");
+        });
+
+        activeOverrides.clear();
     }
     
     private static void releaseLocks() {
@@ -166,7 +179,7 @@ public class ControlOverrider {
             try {
                 pressedField.set(ao.getValue().kb, false);
             } catch (Exception e) {
-                e.printStackTrace();
+                Throwables.propagate(e);
             }
             kbMap.removeObject(ao.getKey());
         }
@@ -184,23 +197,47 @@ public class ControlOverrider {
         }
         lastTickGui = cgs;
     }
+
+    @SubscribeEvent
+    public void onDisconnect(ClientDisconnectionFromServerEvent evt) {
+        if (SideHelper.isClient()) {
+            clearInternal();
+            endCompleteOverride();
+            overrideGroups.clear();
+        }
+    }
     
     private static void log(String s) {
         if(LambdaLib.DEBUG)
             LambdaLib.log.info(s);
     }
-    
-    private static void error(String s, Exception e) {
-        LambdaLib.log.error("ControlOverrider error: " + s, e);
+
+    private static RuntimeException error(String s) {
+        return new RuntimeException("ControlOverrider error: " + s);
     }
     
     private static class Override {
         final KeyBinding kb;
-        int count;
         
         public Override(KeyBinding _kb) {
             kb = _kb;
-            count = 1;
+        }
+    }
+
+    /**
+     * A group of key overrides with lifetime.
+     */
+    private static final class OverrideGroup {
+        private final int[] keys;
+        private boolean ended = false;
+
+        public OverrideGroup(int... _keys) {
+            keys = _keys;
+        }
+
+        public void end() {
+            ended = true;
+            ControlOverrider.rebuild();
         }
     }
 }

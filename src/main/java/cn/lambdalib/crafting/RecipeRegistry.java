@@ -1,3 +1,9 @@
+/**
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.crafting;
 
 import java.io.File;
@@ -13,7 +19,6 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.io.IOUtils;
 
 import cn.lambdalib.core.LambdaLib;
-import cn.lambdalib.util.generic.DebugUtils;
 import cn.lambdalib.util.generic.RegistryUtils;
 
 /**

@@ -1,11 +1,13 @@
+/**
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.crafting;
 
-import java.lang.reflect.Constructor;
-
-import cn.lambdalib.core.LambdaLib;
-import cn.lambdalib.util.generic.DebugUtils;
+import com.google.common.base.Joiner;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.common.registry.GameRegistry;
 
@@ -22,7 +24,7 @@ public class ShapelessOreRegistry implements IRecipeRegistry {
 
         debug("[ShapelessOre] " +
                 RecipeRegistry.reprStack(output) + " => " +
-                DebugUtils.formatArray(input));
+                Joiner.on(',').join(input));
     }
 
     private ShapelessOreRegistry() {}

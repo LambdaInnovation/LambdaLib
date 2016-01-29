@@ -1,15 +1,9 @@
 /**
- * Copyright (c) Lambda Innovation, 2013-2015
- * 本作品版权由Lambda Innovation所有。
- * http://www.li-dev.cn/
- *
- * This project is open-source, and it is distributed under  
- * the terms of GNU General Public License. You can modify
- * and distribute freely as long as you follow the license.
- * 本项目是一个开源项目，且遵循GNU通用公共授权协议。
- * 在遵照该协议的情况下，您可以自由传播和修改。
- * http://www.gnu.org/licenses/gpl.html
- */
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.cgui.gui.component;
 
 import java.lang.reflect.Field;
@@ -24,10 +18,9 @@ import cn.lambdalib.cgui.gui.Widget;
 import cn.lambdalib.cgui.gui.annotations.CopyIgnore;
 import cn.lambdalib.cgui.gui.event.GuiEvent;
 import cn.lambdalib.cgui.gui.event.IGuiEventHandler;
-import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.deprecated.TypeHelper;
-import cn.lambdalib.util.serialization.CopyHelper;
-import cn.lambdalib.util.serialization.SerializeExcluded;
+import cn.lambdalib.s11n.CopyHelper;
+import cn.lambdalib.s11n.SerializeExcluded;
 import cn.lambdalib.vis.editor.VisExcluded;
 
 /**
@@ -58,6 +51,7 @@ public class Component {
      *  public field, but DONT assign it, else it yields undefined behaviour.
      */
     @VisExcluded
+    @SerializeExcluded
     public Widget widget;
     
     public Component(String _name) {

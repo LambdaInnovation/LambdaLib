@@ -1,15 +1,9 @@
 /**
- * Copyright (c) Lambda Innovation, 2013-2015
- * 本作品版权由Lambda Innovation所有。
- * http://www.li-dev.cn/
- *
- * This project is open-source, and it is distributed under  
- * the terms of GNU General Public License. You can modify
- * and distribute freely as long as you follow the license.
- * 本项目是一个开源项目，且遵循GNU通用公共授权协议。
- * 在遵照该协议的情况下，您可以自由传播和修改。
- * http://www.gnu.org/licenses/gpl.html
- */
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.cgui.gui.component;
 
 import java.awt.*;
@@ -20,6 +14,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
 import cn.lambdalib.cgui.gui.*;
+import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.client.font.TrueTypeFont;
@@ -245,19 +240,18 @@ public class TextBox extends Component {
     private void checkCaretRegion() {
         final double widthLimit = widthLimit();
         final String local = processedContent().substring(displayOffset);
-
-        int localCaret = caretPos - displayOffset;
-        if (sumLength(local, 0, localCaret) > widthLimit) {
+        final int localCaret = caretPos - displayOffset;
+        final double distance = sumLength(local, 0, localCaret);
+        if (distance > widthLimit) {
             double acc = 0.0;
-            int mini = local.length() - 1;
-            for (; mini > 0 && acc < widthLimit; --mini) {
+            int mini = 0;
+            for (; mini < localCaret && distance - acc > widthLimit; ++mini) {
                 acc += font.getCharWidth(local.codePointAt(mini), option);
             }
-
-            mini = Math.min(local.length() - 1, mini + 1);
-
             displayOffset += mini;
         }
+
+        assert displayOffset < caretPos;
     }
 
     private double widthLimit() {

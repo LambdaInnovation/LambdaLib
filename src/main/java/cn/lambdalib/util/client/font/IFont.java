@@ -1,10 +1,14 @@
+/**
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.util.client.font;
 
 import cn.lambdalib.util.client.font.Fragmentor.IFontSizeProvider;
-import cn.lambdalib.util.client.font.Fragmentor.TokenType;
 import cn.lambdalib.util.helper.Color;
-import cn.lambdalib.util.serialization.SerializeType;
-import org.apache.commons.lang3.tuple.Pair;
+import cn.lambdalib.s11n.SerializeType;
 
 import java.util.List;
 
@@ -37,7 +41,7 @@ public interface IFont {
 
     @SerializeType
     class FontOption {
-        public double fontSize = 10;
+        public double fontSize;
         public FontAlign align;
         public Color color;
 
@@ -53,6 +57,10 @@ public interface IFont {
             this(_fontsz, FontAlign.LEFT, _color);
         }
 
+        public FontOption(double _fontsz, int hex) {
+            this(_fontsz, new Color(hex));
+        }
+
         public FontOption(double _fontsz, FontAlign _align) {
             this(_fontsz, _align, Color.white());
         }
@@ -61,6 +69,10 @@ public interface IFont {
             fontSize = _fontsz;
             align = _align;
             color = _color;
+        }
+
+        public FontOption(double _fontsz, FontAlign _align, int hex) {
+            this(_fontsz, _align, new Color(hex));
         }
 
         @Override

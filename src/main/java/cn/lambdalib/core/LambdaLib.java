@@ -1,18 +1,11 @@
 /**
- * Copyright (c) Lambda Innovation, 2013-2015
- * 本作品版权由Lambda Innovation所有。
- * http://www.li-dev.cn/
- *
- * This project is open-source, and it is distributed under 
- * the terms of GNU General Public License. You can modify
- * and distribute freely as long as you follow the license.
- * 本项目是一个开源项目，且遵循GNU通用公共授权协议。
- * 在遵照该协议的情况下，您可以自由传播和修改。
- * http://www.gnu.org/licenses/gpl.html
- */
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.core;
 
-import com.typesafe.config.Config;
 import cpw.mods.fml.common.event.*;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +19,6 @@ import cn.lambdalib.util.reschk.ResourceCheck;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraft.command.CommandHandler;
@@ -36,7 +28,7 @@ import net.minecraft.command.CommandHandler;
 @RegistrationMod(pkg = "cn.lambdalib.", res = "lambdalib", prefix = "ll_")
 public class LambdaLib {
 
-    public static final String VERSION = "1.1.0";
+    public static final String VERSION = "1.1.1";
 
     /**
      * Does open debug mode. turn to false when compiling.
@@ -48,7 +40,7 @@ public class LambdaLib {
     private static Configuration config;
 
     @RegMessageHandler.WrapperInstance
-    public static SimpleNetworkWrapper netHandler = NetworkRegistry.INSTANCE.newSimpleChannel("LambdaLib");
+    public static final SimpleNetworkWrapper channel = NetworkRegistry.INSTANCE.newSimpleChannel("LambdaLib");
 
     public static Configuration getConfig() {
         return config;
@@ -69,7 +61,7 @@ public class LambdaLib {
     }
 
     @EventHandler()
-    public void init(FMLInitializationEvent Init) {
+    public void init(FMLInitializationEvent event) {
         RegistrationManager.INSTANCE.registerAll(this, "Init");
     }
 

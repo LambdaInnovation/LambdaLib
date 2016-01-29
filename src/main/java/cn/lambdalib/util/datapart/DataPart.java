@@ -1,15 +1,9 @@
 /**
- * Copyright (c) Lambda Innovation, 2013-2015
- * 本作品版权由Lambda Innovation所有。
- * http://www.li-dev.cn/
- *
- * This project is open-source, and it is distributed under  
- * the terms of GNU General Public License. You can modify
- * and distribute freely as long as you follow the license.
- * 本项目是一个开源项目，且遵循GNU通用公共授权协议。
- * 在遵照该协议的情况下，您可以自由传播和修改。
- * http://www.gnu.org/licenses/gpl.html
- */
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.util.datapart;
 
 import cn.lambdalib.networkcall.s11n.StorageOption.Option;
@@ -72,6 +66,13 @@ public abstract class DataPart<Ent extends Entity> {
     }
 
     /**
+     * Invoke in ctor to indicate this DataPart is client local. It will not receive any sync update.
+     */
+    public final void setClientLocal() {
+        dirty = false;
+    }
+
+    /**
      * Set this DataPart to be reset when entity is dead. Effective for EntityPlayer only. Called in ctor.
      * (Other entities don't revive)
      */
@@ -82,12 +83,15 @@ public abstract class DataPart<Ent extends Entity> {
     /**
      * Restore data of this DataPart from the NBT. Will be called externally only for world saving
      */
-    public abstract void fromNBT(NBTTagCompound tag);
+    public void fromNBT(NBTTagCompound tag) {}
 
     /**
      * Convert data of this DataPart to a NBT. Will be called externally only for world saving
+     * @return Serialized data, can be null
      */
-    public abstract NBTTagCompound toNBT();
+    public NBTTagCompound toNBT() {
+        return null;
+    }
 
     /**
      * Same as fromNBT, but only get called when synchronizing across network.
@@ -184,9 +188,10 @@ public abstract class DataPart<Ent extends Entity> {
             NBTBase entityTag = tag.getTag("e");
             if(entityTag != null) {
                 Entity e = (Entity) entitySer.readInstance(entityTag);
-                EntityData data = EntityData.get(e);
-                if(data != null) {
-                    return data.getPart(tag.getString("n"));
+                if (e == null) { // evil null
+                    return null;
+                } else {
+                    return EntityData.get(e).getPart(tag.getString("n"));
                 }
             }
             

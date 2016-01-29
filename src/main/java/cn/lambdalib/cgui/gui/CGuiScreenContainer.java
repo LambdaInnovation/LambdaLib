@@ -1,17 +1,12 @@
 /**
- * Copyright (c) Lambda Innovation, 2013-2015
- * 本作品版权由Lambda Innovation所有。
- * http://www.li-dev.cn/
- *
- * This project is open-source, and it is distributed under 
- * the terms of GNU General Public License. You can modify
- * and distribute freely as long as you follow the license.
- * 本项目是一个开源项目，且遵循GNU通用公共授权协议。
- * 在遵照该协议的情况下，您可以自由传播和修改。
- * http://www.gnu.org/licenses/gpl.html
- */
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.cgui.gui;
 
+import cn.lambdalib.cgui.gui.component.TextBox;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 
@@ -95,7 +90,11 @@ public class CGuiScreenContainer extends GuiContainer {
      * @return Whether the inventory itself receives key input. (This should be disabled when you are handling some user input)
      */
     protected boolean containerAcceptsKey(int key) {
-        return true;
+        // Don't delegate key event if current editing TextBox. Surely dirty hack, find a better route later
+        TextBox temp;
+        return (gui.focus == null ||
+                (temp = TextBox.get(gui.focus)) == null ||
+                !temp.canEdit);
     }
     
     /**

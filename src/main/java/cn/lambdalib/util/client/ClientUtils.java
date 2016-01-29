@@ -1,3 +1,9 @@
+/**
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.util.client;
 
 import cn.lambdalib.util.client.auxgui.AuxGuiHandler;
@@ -22,6 +28,10 @@ public class ClientUtils {
     public static boolean isPlayerInGame() {
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
         return player != null && Minecraft.getMinecraft().currentScreen == null && !AuxGuiHandler.hasForegroundGui();
+    }
+
+    public static boolean isInWorld() {
+        return Minecraft.getMinecraft().thePlayer != null;
     }
     
     public static boolean isPlayerPlaying() {

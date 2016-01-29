@@ -1,3 +1,9 @@
+/**
+* Copyright (c) Lambda Innovation, 2013-2016
+* This file is part of LambdaLib modding library.
+* https://github.com/LambdaInnovation/LambdaLib
+* Licensed under MIT, see project root for more information.
+*/
 package cn.lambdalib.util.generic;
 
 import java.io.InputStream;
@@ -18,8 +24,7 @@ public class RegistryUtils {
             String domain = res.getResourceDomain(), path = res.getResourcePath();
             return RegistryUtils.class.getResourceAsStream("/assets/" + domain + "/" + path);
         } catch(Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("Invalid resource " + res, e);
         }
     }
     
