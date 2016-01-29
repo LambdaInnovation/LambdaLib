@@ -188,9 +188,10 @@ public abstract class DataPart<Ent extends Entity> {
             NBTBase entityTag = tag.getTag("e");
             if(entityTag != null) {
                 Entity e = (Entity) entitySer.readInstance(entityTag);
-                EntityData data = EntityData.get(e);
-                if(data != null) {
-                    return data.getPart(tag.getString("n"));
+                if (e == null) { // evil null
+                    return null;
+                } else {
+                    return EntityData.get(e).getPart(tag.getString("n"));
                 }
             }
             

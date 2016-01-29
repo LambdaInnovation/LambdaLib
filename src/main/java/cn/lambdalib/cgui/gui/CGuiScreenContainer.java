@@ -6,6 +6,7 @@
 */
 package cn.lambdalib.cgui.gui;
 
+import cn.lambdalib.cgui.gui.component.TextBox;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 
@@ -89,7 +90,11 @@ public class CGuiScreenContainer extends GuiContainer {
      * @return Whether the inventory itself receives key input. (This should be disabled when you are handling some user input)
      */
     protected boolean containerAcceptsKey(int key) {
-        return true;
+        // Don't delegate key event if current editing TextBox. Surely dirty hack, find a better route later
+        TextBox temp;
+        return (gui.focus == null ||
+                (temp = TextBox.get(gui.focus)) == null ||
+                !temp.canEdit);
     }
     
     /**
