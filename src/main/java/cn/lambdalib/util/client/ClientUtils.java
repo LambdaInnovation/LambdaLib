@@ -29,6 +29,10 @@ public class ClientUtils {
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
         return player != null && Minecraft.getMinecraft().currentScreen == null && !AuxGuiHandler.hasForegroundGui();
     }
+
+    public static boolean isInWorld() {
+        return Minecraft.getMinecraft().thePlayer != null;
+    }
     
     public static boolean isPlayerPlaying() {
         Minecraft mc = Minecraft.getMinecraft();
