@@ -95,7 +95,7 @@ public class CheckManger
 //			 player.addChatMessage(new ChatComponentText(s));
 		}
 	}
-	// @RegPostInitCallback
+	@RegPostInitCallback
 	public static void init()
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
@@ -103,7 +103,7 @@ public class CheckManger
 		//run threads
 		for(String modid:instance.modPool.keySet())
 		{
-			Fetcher fetcher=new Fetcher(instance.modPool.get(modid)[2]);
+			Fetcher fetcher=new Fetcher(modid);
 			Thread thread=new Thread(fetcher);
 			thread.start();
 		}
@@ -121,10 +121,10 @@ class Fetcher implements Runnable
 		this.modid=modid;
 		/**modname,localVersion,apiurl*/
 		String[] pars=CheckManger.instance().modPool.get(modid);
-		this.localVersion=pars[2];
+		this.localVersion=pars[1];
 		URL url;
 		try {
-			url=new URL(pars[3]);
+			url=new URL(pars[2]);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			url=null;
@@ -141,7 +141,7 @@ class Fetcher implements Runnable
 		List<Map<String,Object>> releases = null;
 		try {
 			releases=gson.fromJson(new BufferedReader(new InputStreamReader(this.api_url.openStream())),dict);
-		} catch (JsonIOException | JsonSyntaxException | IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		HashMap<String,Integer> versions=new HashMap<>(releases.size());

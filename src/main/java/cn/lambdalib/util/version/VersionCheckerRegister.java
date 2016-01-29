@@ -32,7 +32,7 @@ public class VersionCheckerRegister extends RegistrationClassSimple<VersionUpdat
 		String modid=mod.modid();
 		String modname=mod.name();
 		String repourl=anno.repoUrl();
-		String release_api="api.github.com/repos/"+repourl.substring(repourl.indexOf("github.com/")+11)+"/releases";
+		String release_api="https://api.github.com/repos/"+repourl.substring(repourl.indexOf("github.com/")+11)+"/releases";
 		CheckManger.instance().addMod(modid,new String[]{modname,localVersion,release_api});
     }
 }
