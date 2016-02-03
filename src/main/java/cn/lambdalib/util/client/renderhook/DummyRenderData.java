@@ -25,11 +25,11 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 @SideOnly(Side.CLIENT)
 @Registrant
-@RegDataPart("DummyRender")
+@RegDataPart(EntityPlayer.class)
 public class DummyRenderData extends DataPart<EntityPlayer> {
 
     public DummyRenderData() {
-        setTick();
+        setTick(true);
     }
     
     public static DummyRenderData get(EntityPlayer p) {
@@ -78,8 +78,7 @@ public class DummyRenderData extends DataPart<EntityPlayer> {
     }
 
     @Override
-    public NBTTagCompound toNBT() {
-        return new NBTTagCompound();
+    public void toNBT(NBTTagCompound tag) {
     }
 
 }

@@ -2,6 +2,7 @@ package cn.lambdalib.s11n.nbt;
 
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.SerializationHelper;
+import cn.lambdalib.util.generic.RegistryUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import net.minecraft.nbt.*;
@@ -314,6 +315,37 @@ public class NBTS11n {
                 }
             };
             addBase(String.class, ser);
+        }
+        {
+            CompoundSerializer<NBTTagCompound> ser = new CompoundSerializer<NBTTagCompound>() {
+                Field tagMapField;
+                {
+                    tagMapField = RegistryUtils.getObfField(NBTTagCompound.class, "tagMap", "field_74784_a");
+                    tagMapField.setAccessible(true);
+                }
+
+                @Override
+                public void write(NBTTagCompound tag, NBTTagCompound value) {
+                    move(value, tag);
+                }
+                @Override
+                public void read(NBTTagCompound tag, NBTTagCompound value) {
+                    move(tag, value);
+                }
+
+                @SuppressWarnings("unchecked")
+                private void move(NBTTagCompound from, NBTTagCompound to) {
+                    try {
+                        Map<String, NBTBase> map = (Map) tagMapField.get(from);
+                        for (String id : map.keySet()) {
+                            to.setTag(id, from.getTag(id));
+                        }
+                    } catch (IllegalAccessException e) {
+                        Throwables.propagate(e);
+                    }
+                }
+            };
+            addCompound(NBTTagCompound.class, ser);
         }
     }
 

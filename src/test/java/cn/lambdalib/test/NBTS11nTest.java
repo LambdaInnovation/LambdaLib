@@ -67,6 +67,9 @@ public class NBTS11nTest {
         NBTS11n.read(tag, readed);
 
         System.out.println("Input: " + data);
+
+        System.out.println("Tag: " + tag);
+
         System.out.println("Output: " + readed);
     }
 

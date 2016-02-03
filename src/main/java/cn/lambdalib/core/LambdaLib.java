@@ -35,7 +35,7 @@ public class LambdaLib {
      */
     public static final boolean DEBUG = false;
 
-    public static Logger log = FMLLog.getLogger();
+    public static final Logger log = FMLLog.getLogger();
 
     private static Configuration config;
 

@@ -1,215 +1,188 @@
-/**
-* Copyright (c) Lambda Innovation, 2013-2016
-* This file is part of LambdaLib modding library.
-* https://github.com/LambdaInnovation/LambdaLib
-* Licensed under MIT, see project root for more information.
-*/
 package cn.lambdalib.util.datapart;
 
-import cn.lambdalib.networkcall.s11n.StorageOption.Option;
-import cn.lambdalib.networkcall.s11n.StorageOption.RangedTarget;
-import cpw.mods.fml.common.FMLCommonHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import cn.lambdalib.annoreg.core.Registrant;
-import cn.lambdalib.networkcall.RegNetworkCall;
-import cn.lambdalib.networkcall.s11n.InstanceSerializer;
-import cn.lambdalib.networkcall.s11n.RegSerializable;
-import cn.lambdalib.networkcall.s11n.SerializationManager;
-import cn.lambdalib.networkcall.s11n.StorageOption.Data;
+import cn.lambdalib.networkcall.TargetPointHelper;
+import cn.lambdalib.s11n.network.NetworkMessage;
+import cn.lambdalib.s11n.network.NetworkMessage.Listener;
+import cn.lambdalib.util.mc.SideHelper;
 import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+import static cn.lambdalib.core.LLCommons.*;
 
 /**
- * DataPart represents a single tickable data-storage object attached on an Entity.
- *  It is driven by the {@link EntityData} of this entity. <br>
- *  
- * The DataPart is attached statically via {@link EntityData#register}
- *  method or @RegDataPart  annotation (This should be done at init stages), and is automatically constructed
- *  on <em>first time querying</em>. At server, the {@link DataPart#fromNBT(NBTTagCompound)}
- *  method will be called right away, and the NBT will be sync to client ASAP. <br>
- *
- *  Also when the world is being saved, the {@link DataPart#toNBT()} will be called to save stuffs
- *   in server. <br>
- *
- * A simple sync helper is provided. You can use sync() in both CLIENT and SERVER side to make a new NBT
- *  synchronization. However, for complex syncs you might want to consider using NetworkCall. <br>
- *  
- * DataPart supports ticking by nature. Use setTick() to enable it. <br>
- *
- * For DataPart of EntityPlayer, all DataParts are kept except for those who called {@link DataPart#clearOnDeath()}
- *     in their ctor when player is respawned.
- *
+ * A tickable data-storage entity attached to EntityLivingBase.
+ * see {@link EntityData} for access methods.
  * @author WeAthFolD
  */
-@Registrant
-@RegSerializable(instance = DataPart.Serializer.class)
-public abstract class DataPart<Ent extends Entity> {
+public abstract class DataPart<T extends EntityLivingBase> {
 
-    // API
+    EntityData<T> entityData;
+    private boolean syncInit = false;
+
+    boolean needNBTStorage = false;
+    boolean needTick = false;
+    boolean clientNeedSync = false;
+    double serverSyncRange = 10.0;
+
+    // Behaviour
 
     /**
-     * The default constructor must be kept for subclasses, for using reflections to create instance.
+     * Make this DataPart's tick() method be called every tick. Can be called during runtime or construction.
      */
-    public DataPart() {}
+    protected final void setTick(boolean state) {
+        needTick = true;
+    }
 
     /**
-     * Invoked every tick if setTick() is called
+     * Make this DataPart to be saved or loaded via NBT when constructed in SERVER.
+     */
+    protected final void setNBTStorage() {
+        needNBTStorage = true;
+    }
+
+    /**
+     * Make this DataPart to automatically retrieve sync from server when constructed in client.
+     */
+    protected final void setClientNeedSync() {
+        clientNeedSync = true;
+    }
+
+    /**
+     * @param range The range for other clients to receive sync (if called sync() in server). Can
+     *  be called during runtime or construction. Defaults to 10.
+     */
+    protected final void setServerSyncRange(double range) {
+        serverSyncRange = range;
+    }
+
+    //
+
+    /**
+     * Sync this DataPart's data. If in client, data will be synced to server. Otherwise, data will be synced to any
+     *  clients within the range specified by {@link #setServerSyncRange(double)}.
+     * @throws IllegalStateException if this DataPart is registered to be client-only or server-only
+     */
+    public final void sync() {
+        if (isClient()) {
+            __syncClient();
+        } else {
+            NetworkMessage.sendToAllAround(TargetPointHelper.convert(getEntity(), serverSyncRange), this, "itn_sync", __genSyncTag());
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void __syncClient() {
+        T ent = getEntity();
+        if (!(ent instanceof EntityPlayer)) {
+            log.warn("Trying to call sync() in client for non-EntityPlayers in" + this +
+                    ". This usually doesn't make sense.");
+        } else if (!(ent.equals(Minecraft.getMinecraft().thePlayer))) {
+            log.warn("Trying to sync non-local player data to server DataPart in " + this +
+                    ". This usually doesn't make sense.");
+        }
+
+        NetworkMessage.sendToServer(this, "itn_sync", __genSyncTag());
+    }
+
+    private NBTTagCompound __genSyncTag() {
+        NBTTagCompound tag = new NBTTagCompound();
+        toNBTSync(tag);
+        return tag;
+    }
+
+    /**
+     * Invoked every tick if {@link #setTick(boolean)} has been invoked with argument true.
      */
     public void tick() {}
 
     /**
-     * Set this DataPart to need ticking. Called in ctor.
+     * Stores this DataPart. Called during {@link #sync()} if {@link #toNBTSync(NBTTagCompound)} is not overriden,
+     *  or when the DataPart is being stored at SERVER.
      */
-    public final void setTick() {
-        tick = true;
-    }
+    public void toNBT(NBTTagCompound tag) {}
 
     /**
-     * Invoke in ctor to indicate this DataPart is client local. It will not receive any sync update.
-     */
-    public final void setClientLocal() {
-        dirty = false;
-    }
-
-    /**
-     * Set this DataPart to be reset when entity is dead. Effective for EntityPlayer only. Called in ctor.
-     * (Other entities don't revive)
-     */
-    public final void clearOnDeath() {
-        keepOnDeath = false;
-    }
-
-    /**
-     * Restore data of this DataPart from the NBT. Will be called externally only for world saving
+     * Loads the DataPart. Called during {@link #sync()} if {@link #fromNBTSync(NBTTagCompound)} is not overridden,
+     *  or when the DataPart is being loaded at SERVER.
      */
     public void fromNBT(NBTTagCompound tag) {}
 
     /**
-     * Convert data of this DataPart to a NBT. Will be called externally only for world saving
-     * @return Serialized data, can be null
+     * Loads the DataPart when synchronizing. ({@link #sync()})
      */
-    public NBTTagCompound toNBT() {
-        return null;
+    public void fromNBTSync(NBTTagCompound tag) {
+        fromNBT(tag);
     }
 
     /**
-     * Same as fromNBT, but only get called when synchronizing across network.
+     * Stores this DataPart when synchorinizing. ({@link #sync()})
      */
-    public void fromNBTSync(NBTTagCompound tag) { fromNBT(tag); }
-
-    /**
-     * Same as toNBT, but only get called when synchronizing across network.
-     */
-    public NBTTagCompound toNBTSync() { return toNBT(); }
-
-    public Ent getEntity() {
-        return data.entity;
+    public void toNBTSync(NBTTagCompound tag) {
+        toNBT(tag);
     }
 
-    public boolean isRemote() {
+    //
+
+    // Utils
+    /**
+     * @return Whether we are in client.
+     */
+    protected boolean isClient() {
         return getEntity().worldObj.isRemote;
     }
 
-    public <T extends DataPart> T getPart(String name) {
-        return data.getPart(name);
+    /**
+     * @return The entity that this DataPart is attached to.
+     */
+    public T getEntity() {
+        return entityData.getEntity();
     }
 
-    public <T extends DataPart> T getPart(Class<T> type) {
-        return data.getPart(type);
+    /**
+     * @return The {@link EntityData} that handles this entity.
+     */
+    public EntityData<T> getData() {
+        return entityData;
     }
 
-    public String getName() {
-        return data.getName(this);
-    }
-
-    // Utils
-    protected void assertSide(Side side) {
-        if (FMLCommonHandler.instance().getEffectiveSide() != side) {
-            throw new RuntimeException("Invalid side, should be " + side);
+    /**
+     * Assert that side is same to parameter and crashes the game if not.
+     */
+    protected void checkSide(boolean requiredRemoteness) {
+        if (isClient() != requiredRemoteness) {
+            throw new IllegalStateException("Invalid side, expected " + (requiredRemoteness ? "client" : "server"));
         }
     }
 
     // Internal
 
-    /**
-     * Internal sync flag, used to determine whether this part is init in client.
-     */
-    boolean dirty = true;
-    
-    int tickUntilQuery = 0;
-    
-    /**
-     * The player instance when this data is available. Do NOT modify this field!
-     */
-    EntityData<Ent> data;
-
-    boolean tick = false, keepOnDeath = true;
-    
-    /**
-     * Return true if this data has received the initial sync.
-     * ALWAYS true in server.
-     */
-    protected boolean isSynced() {
-        return !dirty;
-    }
-    
-    protected void sync() {
-        if(isRemote()) {
-            syncFromClient(toNBTSync());
-        } else {
-            syncFromServer(getEntity(), toNBTSync());
+    void callTick() {
+        if (isClient() && clientNeedSync && !syncInit) {
+            syncInit = true;
+            NetworkMessage.sendToServer(this, "itn_query_init", SideHelper.getThePlayer());
+        }
+        if (needTick) {
+            tick();
         }
     }
-    
-    @RegNetworkCall(side = Side.SERVER, thisStorage = Option.INSTANCE)
-    private void syncFromClient(@Data NBTTagCompound tag) {
+
+    @Listener(channel="itn_query_init", side={Side.SERVER})
+    private void onQuerySync(EntityPlayerMP client) {
+        NetworkMessage.sendTo(client, this, "itn_sync_init", __genSyncTag());
+    }
+
+    @Listener(channel="itn_sync_init", side={Side.CLIENT})
+    private void onInitSync(NBTTagCompound tag) {
         fromNBTSync(tag);
     }
-    
-    @RegNetworkCall(side = Side.CLIENT, thisStorage = Option.INSTANCE)
-    private void syncFromServer(@RangedTarget(range = 10) Entity player, @Data NBTTagCompound tag) {
+
+    @Listener(channel="itn_sync", side={Side.CLIENT, Side.SERVER})
+    private void onSync(NBTTagCompound tag) {
         fromNBTSync(tag);
     }
-    
-    protected void checkSide(boolean isRemote) {
-        if(isRemote ^ isRemote()) {
-            throw new IllegalStateException("Wrong side: " + isRemote());
-        }
-    }
-    
-    public static class Serializer implements InstanceSerializer<DataPart> {
-        
-        InstanceSerializer entitySer = SerializationManager.INSTANCE.getInstanceSerializer(Entity.class);
 
-        @Override
-        public DataPart readInstance(NBTBase nbt) throws Exception {
-            NBTTagCompound tag = (NBTTagCompound) nbt;
-            NBTBase entityTag = tag.getTag("e");
-            if(entityTag != null) {
-                Entity e = (Entity) entitySer.readInstance(entityTag);
-                if (e == null) { // evil null
-                    return null;
-                } else {
-                    return EntityData.get(e).getPart(tag.getString("n"));
-                }
-            }
-            
-            return null;
-        }
-
-        @Override
-        public NBTBase writeInstance(DataPart obj) throws Exception {
-            NBTTagCompound ret = new NBTTagCompound();
-            
-            NBTBase entityTag = entitySer.writeInstance(obj.getEntity());
-            
-            ret.setTag("e", entityTag);
-            ret.setString("n", obj.getName());
-            
-            return ret;
-        }
-        
-    }
-    
 }

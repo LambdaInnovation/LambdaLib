@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import cn.lambdalib.util.deprecated.TypeHelper;
+import com.google.common.base.Throwables;
 import net.minecraft.util.ResourceLocation;
 
 public class RegistryUtils {
@@ -54,7 +55,7 @@ public class RegistryUtils {
             f.setAccessible(true);
             return f;
         } catch(Exception e) {
-            return null;
+            throw Throwables.propagate(e);
         }
     }
     

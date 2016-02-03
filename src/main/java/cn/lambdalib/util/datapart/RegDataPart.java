@@ -6,6 +6,7 @@
 */
 package cn.lambdalib.util.datapart;
 
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.lang.annotation.ElementType;
@@ -13,21 +14,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * @author WeAthFolD
- */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RegDataPart {
 
     /**
-     * @return The type that this DataPart applies on.
+     * @return The type that this DataPart applies on. Also applies for all subclasses.
      */
-    Class type() default EntityPlayer.class;
+    Class value();
 
     /**
-     * @return The key for this DataPart.
+     * @return At what sides this DataPart should be constructed
      */
-    String value();
+    Side[] side() default { Side.CLIENT, Side.SERVER };
+
+    /**
+     * @return Whether this DataPart should be lazily constructed.
+     */
+    boolean lazy() default false;
     
 }

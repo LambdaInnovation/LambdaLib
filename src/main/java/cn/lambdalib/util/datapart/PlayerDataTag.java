@@ -1,12 +1,13 @@
 /**
-* Copyright (c) Lambda Innovation, 2013-2016
-* This file is part of LambdaLib modding library.
-* https://github.com/LambdaInnovation/LambdaLib
-* Licensed under MIT, see project root for more information.
-*/
+ * Copyright (c) Lambda Innovation, 2013-2016
+ * This file is part of LambdaLib modding library.
+ * https://github.com/LambdaInnovation/LambdaLib
+ * Licensed under MIT, see project root for more information.
+ */
 package cn.lambdalib.util.datapart;
 
 import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.s11n.nbt.NBTS11n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -15,13 +16,13 @@ import net.minecraft.nbt.NBTTagCompound;
  * @author WeAthFolD
  */
 @Registrant
-@RegDataPart("DataTag")
+@RegDataPart(EntityPlayer.class)
 public class PlayerDataTag extends DataPart<EntityPlayer> {
-    
+
     public static PlayerDataTag get(EntityPlayer player) {
         return EntityData.get(player).getPart(PlayerDataTag.class);
     }
-    
+
     private NBTTagCompound theTag;
 
     @Override
@@ -30,10 +31,10 @@ public class PlayerDataTag extends DataPart<EntityPlayer> {
     }
 
     @Override
-    public NBTTagCompound toNBT() {
-        return theTag;
+    public void toNBT(NBTTagCompound tag) {
+        NBTS11n.write(tag, theTag);
     }
-    
+
     public NBTTagCompound getTag() {
         if(theTag == null)
             theTag = new NBTTagCompound();

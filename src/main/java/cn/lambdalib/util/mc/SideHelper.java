@@ -49,6 +49,10 @@ public class SideHelper {
     public static Container getPlayerContainer(EntityPlayer player, int windowId) {
         return threadProxy.get().proxy.getPlayerContainer(player, windowId);
     }
+
+    public static Side getRuntimeSide() {
+        return FMLCommonHandler.instance().getEffectiveSide();
+    }
     
     public static EntityPlayer getThePlayer() {
         return threadProxy.get().proxy.getThePlayer();
@@ -63,7 +67,7 @@ public class SideHelper {
     }
     
     public static boolean isClient() {
-        return FMLCommonHandler.instance().getEffectiveSide().isClient();
+        return getRuntimeSide().isClient();
     }
 
     private static class ServerProxy {
