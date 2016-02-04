@@ -89,9 +89,14 @@ public class NBTS11nTest {
         TestOuter readed = new TestOuter();
         NBTS11n.read(tag, readed);
 
+<<<<<<< HEAD
         System.out.println("Tag: " + tag);
 
         System.out.println("Output: " + readed);
+=======
+        System.out.println("Input: " + data);
+        System.out.println("Output: " + data);
+>>>>>>> parent of dc3e82b... oops
     }
 
 }
