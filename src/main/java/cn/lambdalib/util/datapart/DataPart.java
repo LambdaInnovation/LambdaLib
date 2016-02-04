@@ -3,9 +3,12 @@ package cn.lambdalib.util.datapart;
 import cn.lambdalib.networkcall.TargetPointHelper;
 import cn.lambdalib.s11n.network.NetworkMessage;
 import cn.lambdalib.s11n.network.NetworkMessage.Listener;
+import cn.lambdalib.s11n.network.NetworkS11n;
 import cn.lambdalib.util.mc.SideHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,6 +29,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
     boolean needNBTStorage = false;
     boolean needTick = false;
     boolean clientNeedSync = false;
+    boolean clearOnDeath = false;
     double serverSyncRange = 10.0;
 
     // Behaviour
@@ -59,18 +63,25 @@ public abstract class DataPart<T extends EntityLivingBase> {
         serverSyncRange = range;
     }
 
+    /**
+     * Make this DataPart to be disposed when entity is dead. Useful for EntityPlayer only (others don't revive!)
+     */
+    protected final void setClearOnDeath() {
+        clearOnDeath = true;
+    }
+
     //
 
     /**
-     * Sync this DataPart's data. If in client, data will be synced to server. Otherwise, data will be synced to any
-     *  clients within the range specified by {@link #setServerSyncRange(double)}.
-     * @throws IllegalStateException if this DataPart is registered to be client-only or server-only
+     * Sync this DataPart's data (fields). If in client, data will be synced to server. Otherwise, data will be synced to any
+     *  clients within the range specified by {@link #setServerSyncRange(double)}. The field synchronized follows the
+     *  rule of NetworkS11n API.
      */
     public final void sync() {
         if (isClient()) {
             __syncClient();
         } else {
-            NetworkMessage.sendToAllAround(TargetPointHelper.convert(getEntity(), serverSyncRange), this, "itn_sync", __genSyncTag());
+            sendMessage("itn_sync", __genSyncBuffer());
         }
     }
 
@@ -85,13 +96,13 @@ public abstract class DataPart<T extends EntityLivingBase> {
                     ". This usually doesn't make sense.");
         }
 
-        NetworkMessage.sendToServer(this, "itn_sync", __genSyncTag());
+        NetworkMessage.sendToServer(this, "itn_sync", __genSyncBuffer());
     }
 
-    private NBTTagCompound __genSyncTag() {
-        NBTTagCompound tag = new NBTTagCompound();
-        toNBTSync(tag);
-        return tag;
+    private ByteBuf __genSyncBuffer() {
+        ByteBuf buf = Unpooled.buffer();
+        NetworkS11n.serializeRecursively(buf, this, (Class) getClass());
+        return buf;
     }
 
     /**
@@ -100,30 +111,14 @@ public abstract class DataPart<T extends EntityLivingBase> {
     public void tick() {}
 
     /**
-     * Stores this DataPart. Called during {@link #sync()} if {@link #toNBTSync(NBTTagCompound)} is not overriden,
-     *  or when the DataPart is being stored at SERVER.
+     * Stores this DataPart. Called when the DataPart is being stored at SERVER.
      */
     public void toNBT(NBTTagCompound tag) {}
 
     /**
-     * Loads the DataPart. Called during {@link #sync()} if {@link #fromNBTSync(NBTTagCompound)} is not overridden,
-     *  or when the DataPart is being loaded at SERVER.
+     * Loads the DataPart. Called when the DataPart is being loaded at SERVER.
      */
     public void fromNBT(NBTTagCompound tag) {}
-
-    /**
-     * Loads the DataPart when synchronizing. ({@link #sync()})
-     */
-    public void fromNBTSync(NBTTagCompound tag) {
-        fromNBT(tag);
-    }
-
-    /**
-     * Stores this DataPart when synchorinizing. ({@link #sync()})
-     */
-    public void toNBTSync(NBTTagCompound tag) {
-        toNBT(tag);
-    }
 
     //
 
@@ -162,6 +157,27 @@ public abstract class DataPart<T extends EntityLivingBase> {
         }
     }
 
+    /**
+     * Sends a network message to DataPart instances of other side(s). In server, send to all in range specified
+     *  by {@link #setServerSyncRange(double)}.
+     */
+    protected void sendMessage(String channel, Object ...params) {
+        T ent = getEntity();
+        if (isClient()) {
+            if (!(ent instanceof EntityPlayer)) {
+                log.warn("Trying to send message in client for non-EntityPlayers in" + this +
+                        ". This usually doesn't make sense.");
+            } else if (!(ent.equals(Minecraft.getMinecraft().thePlayer))) {
+                log.warn("Trying to send message from non-local player data to server DataPart in " + this +
+                        ". This usually doesn't make sense.");
+            }
+
+            NetworkMessage.sendToServer(this, channel, params);
+        } else {
+            NetworkMessage.sendToAllAround(TargetPointHelper.convert(ent, serverSyncRange), this, channel, params);
+        }
+    }
+
     // Internal
 
     void callTick() {
@@ -176,17 +192,12 @@ public abstract class DataPart<T extends EntityLivingBase> {
 
     @Listener(channel="itn_query_init", side={Side.SERVER})
     private void onQuerySync(EntityPlayerMP client) {
-        NetworkMessage.sendTo(client, this, "itn_sync_init", __genSyncTag());
-    }
-
-    @Listener(channel="itn_sync_init", side={Side.CLIENT})
-    private void onInitSync(NBTTagCompound tag) {
-        fromNBTSync(tag);
+        NetworkMessage.sendTo(client, this, "itn_sync", __genSyncBuffer());
     }
 
     @Listener(channel="itn_sync", side={Side.CLIENT, Side.SERVER})
-    private void onSync(NBTTagCompound tag) {
-        fromNBTSync(tag);
+    private void onSync(ByteBuf buf) {
+        NetworkS11n.deserializeRecursivelyInto(buf, this, getClass());
     }
 
 }

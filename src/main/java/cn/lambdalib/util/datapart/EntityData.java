@@ -15,9 +15,11 @@ import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 
 import java.util.*;
@@ -202,6 +204,20 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
             EntityData<EntityLivingBase> data = EntityData.getNonCreate(evt.entityLiving);
             if (data != null) {
                 data.tick();
+            }
+        }
+
+        @SubscribeEvent
+        public void onLivingDeath(LivingDeathEvent evt) {
+            if (evt.entityLiving instanceof EntityPlayer) {
+                EntityData<EntityPlayer> playerData = EntityData.get((EntityPlayer) evt.entityLiving);
+                Iterator<DataPart> iter = playerData.constructed.values().iterator();
+                while (iter.hasNext()) {
+                    DataPart dp = iter.next();
+                    if (dp.clearOnDeath) {
+                        iter.remove();
+                    }
+                }
             }
         }
     }

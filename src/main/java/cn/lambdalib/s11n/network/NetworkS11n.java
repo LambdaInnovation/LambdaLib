@@ -12,6 +12,7 @@ import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.s11n.SerializationHelper;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -147,21 +148,25 @@ public class NetworkS11n {
         } else if (type.isEnum()) { // Serialize enum
             buf.writeByte(((Enum) obj).ordinal());
         } else { // Serialize recursive types
-            final List<Field> fields = _sortedFields(type);
+            serializeRecursively(buf, obj, type);
+        }
+    }
 
-            try {
-                for(Field f : fields) {
-                    Object sub = f.get(obj);
-                    if (_isHintted(f)) {
-                        boolean subNullable = f.isAnnotationPresent(SerializeNullable.class);
-                        serialize(buf, sub, subNullable);
-                    } else {
-                        serializeWithHint(buf, sub, (Class) f.getType());
-                    }
+    public static <T> void serializeRecursively(ByteBuf buf, T obj, Class<? super T> type) {
+        final List<Field> fields = _sortedFields(type);
+        System.out.println(fields);
+        try {
+            for(Field f : fields) {
+                Object sub = f.get(obj);
+                if (_isHintted(f)) {
+                    boolean subNullable = f.isAnnotationPresent(SerializeNullable.class);
+                    serialize(buf, sub, subNullable);
+                } else {
+                    serializeWithHint(buf, sub, (Class) f.getType());
                 }
-            } catch (IllegalArgumentException|IllegalAccessException e) {
-                throw new RuntimeException("Error serializing object " + obj, e);
             }
+        } catch (IllegalArgumentException|IllegalAccessException e) {
+            throw new RuntimeException("Error serializing object " + obj, e);
         }
     }
 
@@ -202,28 +207,35 @@ public class NetworkS11n {
         } else if (type.isEnum()) { // Deserialize enum
             return type.getEnumConstants()[buf.readByte()];
         } else { // Recursive deserialization
+            return deserializeRecursively(buf, type);
+        }
+    }
+
+    public static <T, U extends T> T deserializeRecursively(ByteBuf buf, Class<U> type) {
+        try {
+            T instance = type.newInstance();
+            deserializeRecursivelyInto(buf, instance, type);
+            return instance;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("Error deserializing type " + type, e);
+        }
+    }
+
+    public static <T, U extends T> void deserializeRecursivelyInto(ByteBuf buf, T instance, Class<U> type) {
+        for (Field f : _sortedFields(type)) {
+            // Both nullable and porlymorphic s11n needs type index.
+            Object sub;
+            if (_isHintted(f)) {
+                sub = deserialize(buf);
+            } else {
+                sub = deserializeWithHint(buf, f.getType());
+            }
+
             try {
-                T instance = type.newInstance();
-                for (Field f : _sortedFields(type)) {
-                    // Both nullable and porlymorphic s11n needs type index.
-                    Object sub;
-                    if (_isHintted(f)) {
-                        sub = deserialize(buf);
-                    } else {
-                        sub = deserializeWithHint(buf, f.getType());
-                    }
-
-                    try {
-                        f.set(instance, sub);
-                    } catch (IllegalArgumentException exc) {
-                        throw new RuntimeException("Type mismatch in net s11n: expecting " +
-                                f.getType() + ", found " + (sub != null ? sub.getClass() : "NULL"));
-                    }
-                }
-
-                return instance;
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException("Error deserializing type " + type, e);
+                f.set(instance, sub);
+            } catch (IllegalArgumentException|IllegalAccessException exc) {
+                throw new RuntimeException("Type mismatch in net s11n: expecting " +
+                        f.getType() + ", found " + (sub != null ? sub.getClass() : "NULL"));
             }
         }
     }
@@ -342,6 +354,20 @@ public class NetworkS11n {
             @Override
             public String read(ByteBuf buf) {
                 return ByteBufUtils.readUTF8String(buf);
+            }
+        });
+
+        addDirect(ByteBuf.class, new NetS11nAdaptor<ByteBuf>() {
+            @Override
+            public void write(ByteBuf buf, ByteBuf obj) {
+                obj.readBytes(buf, obj.readableBytes());
+            }
+            @Override
+            public ByteBuf read(ByteBuf buf) throws ContextException {
+                ByteBuf buf_ = buf.duplicate();
+                ByteBuf buf2 = Unpooled.buffer();
+                buf_.readBytes(buf2, buf_.readableBytes());
+                return buf2;
             }
         });
 

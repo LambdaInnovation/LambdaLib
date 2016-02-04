@@ -376,7 +376,6 @@ public class NetworkMessage {
 
     }
 
-    @RegMessageHandler(msg = Message.class, side = {RegMessageHandler.Side.CLIENT, RegMessageHandler.Side.SERVER})
     public static class Handler implements IMessageHandler<Message, IMessage> {
 
         @Override
