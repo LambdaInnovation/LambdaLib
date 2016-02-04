@@ -29,7 +29,8 @@ public class SerializationHelper {
     public boolean isS11nType(Class type) {
         return type.isEnum() ||
                 type.isAnnotationPresent(SerializeType.class) ||
-                serializeTypes.contains(type);
+                serializeTypes.contains(type) ||
+                serializeTypes.stream().anyMatch(c -> c.isAssignableFrom(type));
     }
 
     private void reg(Class... type) {

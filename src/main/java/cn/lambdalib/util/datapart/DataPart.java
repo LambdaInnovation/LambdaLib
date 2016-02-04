@@ -81,7 +81,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
             log.warn("Trying to call sync() in client for non-EntityPlayers in" + this +
                     ". This usually doesn't make sense.");
         } else if (!(ent.equals(Minecraft.getMinecraft().thePlayer))) {
-            log.warn("Trying to sync non-local player data to server DataPart in " + this +
+            log.warn("Trying to sync non-local player data to server D  ataPart in " + this +
                     ". This usually doesn't make sense.");
         }
 
@@ -135,6 +135,10 @@ public abstract class DataPart<T extends EntityLivingBase> {
         return getEntity().worldObj.isRemote;
     }
 
+    protected Side getSide() {
+        return isClient() ? Side.CLIENT : Side.SERVER;
+    }
+
     /**
      * @return The entity that this DataPart is attached to.
      */
@@ -152,9 +156,9 @@ public abstract class DataPart<T extends EntityLivingBase> {
     /**
      * Assert that side is same to parameter and crashes the game if not.
      */
-    protected void checkSide(boolean requiredRemoteness) {
-        if (isClient() != requiredRemoteness) {
-            throw new IllegalStateException("Invalid side, expected " + (requiredRemoteness ? "client" : "server"));
+    protected void checkSide(Side side) {
+        if (isClient() != side.isClient()) {
+            throw new IllegalStateException("Invalid side, expected " + side);
         }
     }
 

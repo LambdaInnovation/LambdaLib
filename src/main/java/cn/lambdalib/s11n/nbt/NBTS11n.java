@@ -2,6 +2,7 @@ package cn.lambdalib.s11n.nbt;
 
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.SerializationHelper;
+import cn.lambdalib.s11n.SerializeDynamic;
 import cn.lambdalib.util.generic.RegistryUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -10,9 +11,9 @@ import net.minecraft.nbt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 /**
  * Handles NBT (Notch Bull**** Tag) serialization.
@@ -35,6 +36,8 @@ public class NBTS11n {
     private static Map<Class, BaseSerializer> baseSerializerMap = new HashMap<>();
     private static Map<Class, CompoundSerializer> compoundSerializerMap = new HashMap<>();
 
+    private static Map<Class, Supplier<?>> supplierMap = new HashMap<>();
+
     /**
      * Writes the object to given {@link NBTTagCompound}.
      * If the object is recursive (no custom helper that handles obj has been added via
@@ -56,7 +59,11 @@ public class NBTS11n {
                     String fieldName = f.getName();
                     Object value = f.get(obj);
                     if (value != null) {
-                        tag.setTag(fieldName, writeBase(value));
+                        if (f.isAnnotationPresent(SerializeDynamic.class)) {
+                            tag.setTag(fieldName, writeDynamic(value));
+                        } else {
+                            tag.setTag(fieldName, writeBase(value));
+                        }
                     }
                 } catch (IllegalAccessException | IllegalArgumentException ex) {
                     LambdaLib.log.error("Error writing field " + f + " in object " + obj);
@@ -86,10 +93,16 @@ public class NBTS11n {
                     String fieldName = f.getName();
                     NBTBase base = tag.getTag(fieldName);
                     if (base != null) {
-                        f.set(obj, readBase(base, f.getType()));
+                        if (f.isAnnotationPresent(SerializeDynamic.class)) {
+                            f.set(obj, readDynamic((NBTTagCompound) base));
+                        } else {
+                            f.set(obj, readBase(base, f.getType()));
+                        }
                     }
-                } catch (IllegalAccessException ex) {
-                    LambdaLib.log.error("Error reading field " + f + " in object " + obj);
+                } catch (IllegalAccessException|
+                        RuntimeException ex) {
+                    ex.printStackTrace();
+                    // LambdaLib.log.error("Error reading field " + f + " in object " + obj, ex);
                 }
             }
         }
@@ -105,10 +118,10 @@ public class NBTS11n {
             return enumSer.write((Enum) obj);
         }
 
-        BaseSerializer base = _base(type);
+        BaseSerializer serializer = _base(type);
 
-        if (base != null) {
-            return base.write(obj);
+        if (serializer != null) {
+            return serializer.write(obj);
         } else {
             NBTTagCompound tag = new NBTTagCompound();
             write(tag, obj);
@@ -128,30 +141,58 @@ public class NBTS11n {
         if (serializer != null) {
             return (T) serializer.read(base, type);
         } else if (base instanceof NBTTagCompound) {
-            try {
-                NBTTagCompound tag = (NBTTagCompound) base;
-                Constructor<T> ctor = type.getConstructor();
-                ctor.setAccessible(true);
-                T instance = ctor.newInstance();
+            NBTTagCompound tag = (NBTTagCompound) base;
+            T instance = instantiate(type);
 
-                read(tag, instance);
+            read(tag, instance);
 
-                return instance;
-            } catch (NoSuchMethodException|
-                    InstantiationException|
-                    IllegalAccessException|
-                    InvocationTargetException ex) {
-                throw Throwables.propagate(ex);
-            }
+            return instance;
         } else throw new RuntimeException("Doesn't support tag type " + base);
     }
 
     public static <T> void addBase(Class<T> type, BaseSerializer<?, T> serializer) {
         baseSerializerMap.put(type, serializer);
+        helper.regS11nType(type);
     }
 
     public static <T> void addCompound(Class<T> type, CompoundSerializer<? super T> serializer) {
         compoundSerializerMap.put(type, serializer);
+        helper.regS11nType(type);
+    }
+
+    public static <T> void addSupplier(Class<T> type, Supplier<? extends T> supplier) {
+        supplierMap.put(type, supplier);
+    }
+
+    public static NBTTagCompound writeDynamic(Object obj) {
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setString("t", obj.getClass().getCanonicalName());
+        tag.setTag("d", writeBase(obj));
+
+        return tag;
+    }
+
+    public static Object readDynamic(NBTTagCompound tag) {
+        try {
+            String klass = tag.getString("t");
+            Class type = Class.forName(klass);
+            return readBase(tag.getTag("d"), type);
+        } catch (ClassNotFoundException ex) {
+            throw Throwables.propagate(ex);
+        }
+    }
+
+    private static <T> T instantiate(Class<T> type)  {
+        if (supplierMap.containsKey(type)) {
+            return (T) supplierMap.get(type).get();
+        }
+        try {
+            Constructor<T> ctor = type.getConstructor();
+            ctor.setAccessible(true);
+            return ctor.newInstance();
+        } catch (Exception ex) {
+            throw Throwables.propagate(ex);
+        }
     }
 
     /**
@@ -170,10 +211,17 @@ public class NBTS11n {
     private static <T> CompoundSerializer<? super T> _compound(Class<T> type) {
         Class<? super T> cur = type;
         while (cur != null) {
-            if (compoundSerializerMap.containsKey(type)) {
-                return compoundSerializerMap.get(type);
+            if (compoundSerializerMap.containsKey(cur)) {
+                return compoundSerializerMap.get(cur);
             }
             cur = cur.getSuperclass();
+        }
+        // Interfaces
+        for (Class c : type.getInterfaces()) {
+            CompoundSerializer<? super T> test = _compound(c);
+            if (test != null) {
+                return test;
+            }
         }
         return null;
     }
@@ -346,6 +394,69 @@ public class NBTS11n {
                 }
             };
             addCompound(NBTTagCompound.class, ser);
+        }
+        { // Collection
+            addSupplier(Collection.class, ArrayList::new);
+            addSupplier(List.class, ArrayList::new);
+            CompoundSerializer<Collection> ser = new CompoundSerializer<Collection>() {
+                @Override
+                public void write(NBTTagCompound tag, Collection value) {
+                    NBTTagList ret = new NBTTagList();
+
+                    for (Object obj : value) {
+                        ret.appendTag(writeDynamic(obj));
+                    }
+
+                    tag.setTag("l", ret);
+                }
+
+                @Override
+                public void read(NBTTagCompound tag_, Collection value) {
+                    value.clear();
+
+                    NBTTagList tag = (NBTTagList) tag_.getTag("l");
+                    for (int i = 0; i < tag.tagCount(); ++i) {
+                        value.add(readDynamic(tag.getCompoundTagAt(i)));
+                    }
+                }
+            };
+            addCompound(Collection.class, ser);
+        }
+        { // Map
+            addSupplier(Map.class, HashMap::new);
+            CompoundSerializer<Map<?, ?>> ser = new CompoundSerializer<Map<?, ?>>() {
+                @Override
+                public void write(NBTTagCompound tag, Map<?, ?> value) {
+                    NBTTagList ret = new NBTTagList();
+
+                    for (Entry ent : value.entrySet()) {
+                        NBTTagCompound kvpair = new NBTTagCompound();
+                        kvpair.setTag("k", writeDynamic(ent.getKey()));
+                        kvpair.setTag("v", writeDynamic(ent.getValue()));
+
+                        ret.appendTag(kvpair);
+                    }
+
+                    tag.setTag("l", ret);
+                }
+                @Override
+                public void read(NBTTagCompound tag_, Map<?, ?> map) {
+                    map.clear();
+
+                    Map erasedMap = (Map) map;
+                    NBTTagList tag = (NBTTagList) tag_.getTag("l");
+
+                    for (int i = 0; i < tag.tagCount(); ++i) {
+                        NBTTagCompound tag2 = tag.getCompoundTagAt(i);
+
+                        Object key = readDynamic(tag2.getCompoundTag("k"));
+                        Object value = readDynamic(tag2.getCompoundTag("v"));
+
+                        erasedMap.put(key, value);
+                    }
+                }
+            };
+            addCompound(Map.class, (CompoundSerializer) ser);
         }
     }
 

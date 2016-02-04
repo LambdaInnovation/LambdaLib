@@ -6,6 +6,8 @@
 */
 package cn.lambdalib.s11n.network;
 
+import cn.lambdalib.s11n.SerializeDynamic;
+import cn.lambdalib.s11n.SerializeNullable;
 import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.s11n.SerializationHelper;
 import cpw.mods.fml.common.network.ByteBufUtils;
@@ -55,22 +57,6 @@ public class NetworkS11n {
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface NetworkS11nType {}
-
-    /**
-     * Indicate that a field can be null while being serialized in parent object.
-     */
-    @Target(ElementType.FIELD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface SerializeNullable {}
-
-    /**
-     * To optimize data usage, type info about the recursive object's fields are emitted. That will result in
-     *  serialization with type defined in the class, rather than its runtime type. If you want normal dynamic type
-     *  behaviour to be present, annotate this on the field.
-     */
-    @Target(ElementType.FIELD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface SerializeDynamic {}
 
     /**
      * Thrown when the object can't be retrieved, because it can't be found in that runtime(context).

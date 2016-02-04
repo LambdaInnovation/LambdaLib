@@ -20,6 +20,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.lang.annotation.ElementType;
@@ -94,8 +95,8 @@ public class NetworkMessage {
         network.sendToServer(new Message(instance, channel, params));
     }
 
-    public static void sendTo(EntityPlayerMP player, Object instance, String channel, Object ...params) {
-        network.sendTo(new Message(instance, channel, params), player);
+    public static void sendTo(EntityPlayer player, Object instance, String channel, Object ...params) {
+        network.sendTo(new Message(instance, channel, params), (EntityPlayerMP) player);
     }
 
     public static void sendToPlayers(EntityPlayerMP[] players, Object instance, String channel, Object ...params) {
