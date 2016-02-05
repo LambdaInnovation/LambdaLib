@@ -1,5 +1,6 @@
 package cn.lambdalib.util.datapart;
 
+import cn.lambdalib.core.LLCommons;
 import cn.lambdalib.networkcall.TargetPointHelper;
 import cn.lambdalib.s11n.network.NetworkMessage;
 import cn.lambdalib.s11n.network.NetworkMessage.Listener;
@@ -155,6 +156,14 @@ public abstract class DataPart<T extends EntityLivingBase> {
         if (isClient() != side.isClient()) {
             throw new IllegalStateException("Invalid side, expected " + side);
         }
+    }
+
+    protected boolean checkSideSoft(Side side) {
+        return isClient() == side.isClient();
+    }
+
+    protected void debug(Object message) {
+        LLCommons.debug(message);
     }
 
     /**

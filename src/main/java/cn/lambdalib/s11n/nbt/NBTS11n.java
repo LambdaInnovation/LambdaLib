@@ -8,6 +8,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import net.minecraft.nbt.*;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -108,11 +109,13 @@ public class NBTS11n {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static NBTBase writeBase(Object obj) {
-        Preconditions.checkNotNull(obj);
+        return writeBase(obj, obj.getClass());
+    }
 
-        final Class<?> type = obj.getClass();
+    @SuppressWarnings("unchecked")
+    public static NBTBase writeBase(Object obj, Class<?> type) {
+        Preconditions.checkNotNull(obj);
 
         if (type.isEnum()) {
             return enumSer.write((Enum) obj);
@@ -122,6 +125,18 @@ public class NBTS11n {
 
         if (serializer != null) {
             return serializer.write(obj);
+        } else if (type.isArray()) {
+            Class baseType = type.getComponentType();
+
+            NBTTagCompound tag = new NBTTagCompound();
+
+            int length = Array.getLength(obj);
+            tag.setInteger("size", length);
+            for (int i = 0; i < length; ++i) {
+                tag.setTag(String.valueOf(i), writeBase(Array.get(obj, i), baseType));
+            }
+
+            return tag;
         } else {
             NBTTagCompound tag = new NBTTagCompound();
             write(tag, obj);
@@ -140,6 +155,16 @@ public class NBTS11n {
         BaseSerializer serializer = _base(type);
         if (serializer != null) {
             return (T) serializer.read(base, type);
+        } else if (type.isArray()) {
+            NBTTagCompound tag = (NBTTagCompound) base;
+            Class baseType = type.getComponentType();
+            int size = tag.getInteger("size");
+            Object array = Array.newInstance(baseType, size);
+
+            for (int i = 0; i < size; ++i) {
+                Array.set(array, i, readBase(tag.getTag(String.valueOf(i)), baseType));
+            }
+            return (T) array;
         } else if (base instanceof NBTTagCompound) {
             NBTTagCompound tag = (NBTTagCompound) base;
             T instance = instantiate(type);
@@ -398,6 +423,7 @@ public class NBTS11n {
         { // Collection
             addSupplier(Collection.class, ArrayList::new);
             addSupplier(List.class, ArrayList::new);
+            addSupplier(Set.class, HashSet::new);
             CompoundSerializer<Collection> ser = new CompoundSerializer<Collection>() {
                 @Override
                 public void write(NBTTagCompound tag, Collection value) {
@@ -458,6 +484,19 @@ public class NBTS11n {
             };
             addCompound(Map.class, (CompoundSerializer) ser);
         }
+        {
+            addBase(BitSet.class, new BaseSerializer<NBTBase, BitSet>() {
+                @Override
+                public NBTBase write(BitSet value) {
+                    return new NBTTagByteArray(value.toByteArray());
+                }
+                @Override
+                public BitSet read(NBTBase tag, Class<? extends BitSet> type) {
+                    return BitSet.valueOf(((NBTTagByteArray) tag).func_150292_c());
+                }
+            });
+        }
+
     }
 
     private static final BaseSerializer<NBTTagByte, Enum> enumSer = new BaseSerializer<NBTTagByte, Enum>() {

@@ -177,7 +177,8 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
 
     private static Stream<RegData> _allApplicable(Entity ent) {
         Class<? extends Entity> type = ent.getClass();
-        return regList.stream().filter(data -> data.pred.test(type));
+        final Side runtimeSide = SideHelper.getRuntimeSide();
+        return regList.stream().filter(data -> data.sides.contains(runtimeSide) && data.pred.test(type));
     }
 
     private static byte getNetworkID(Class<? extends DataPart> type) {
