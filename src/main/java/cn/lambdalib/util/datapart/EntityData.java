@@ -15,9 +15,11 @@ import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 
 import java.util.*;
@@ -175,7 +177,8 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
 
     private static Stream<RegData> _allApplicable(Entity ent) {
         Class<? extends Entity> type = ent.getClass();
-        return regList.stream().filter(data -> data.pred.test(type));
+        final Side runtimeSide = SideHelper.getRuntimeSide();
+        return regList.stream().filter(data -> data.sides.contains(runtimeSide) && data.pred.test(type));
     }
 
     private static byte getNetworkID(Class<? extends DataPart> type) {
@@ -202,6 +205,20 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
             EntityData<EntityLivingBase> data = EntityData.getNonCreate(evt.entityLiving);
             if (data != null) {
                 data.tick();
+            }
+        }
+
+        @SubscribeEvent
+        public void onLivingDeath(LivingDeathEvent evt) {
+            if (evt.entityLiving instanceof EntityPlayer) {
+                EntityData<EntityPlayer> playerData = EntityData.get((EntityPlayer) evt.entityLiving);
+                Iterator<DataPart> iter = playerData.constructed.values().iterator();
+                while (iter.hasNext()) {
+                    DataPart dp = iter.next();
+                    if (dp.clearOnDeath) {
+                        iter.remove();
+                    }
+                }
             }
         }
     }

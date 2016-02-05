@@ -6,7 +6,11 @@
 */
 package cn.lambdalib.core;
 
+import cn.lambdalib.multiblock.MsgBlockMulti;
+import cn.lambdalib.s11n.network.NetworkEvent;
+import cn.lambdalib.s11n.network.NetworkMessage;
 import cpw.mods.fml.common.event.*;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Logger;
 
@@ -33,13 +37,13 @@ public class LambdaLib {
     /**
      * Does open debug mode. turn to false when compiling.
      */
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     public static final Logger log = FMLLog.getLogger();
 
     private static Configuration config;
 
-    @RegMessageHandler.WrapperInstance
+    // @RegMessageHandler.WrapperInstance
     public static final SimpleNetworkWrapper channel = NetworkRegistry.INSTANCE.newSimpleChannel("LambdaLib");
 
     public static Configuration getConfig() {
@@ -56,6 +60,15 @@ public class LambdaLib {
         LIFMLGameEventDispatcher.init();
 
         config = new Configuration(event.getSuggestedConfigurationFile());
+
+        // WrapperInstance causes bug, manual registering now
+        channel.registerMessage(MsgBlockMulti.ReqHandler.class, MsgBlockMulti.Req.class, 0, Side.SERVER);
+        channel.registerMessage(MsgBlockMulti.Handler.class, MsgBlockMulti.class, 1, Side.CLIENT);
+        channel.registerMessage(NetworkEvent.MessageHandler.class, NetworkEvent.Message.class, 2, Side.CLIENT);
+        channel.registerMessage(NetworkEvent.MessageHandler.class, NetworkEvent.Message.class, 3, Side.SERVER);
+        channel.registerMessage(NetworkMessage.Handler.class, NetworkMessage.Message.class, 4, Side.CLIENT);
+        channel.registerMessage(NetworkMessage.Handler.class, NetworkMessage.Message.class, 5, Side.SERVER);
+        //
 
         RegistrationManager.INSTANCE.registerAll(this, "PreInit");
     }

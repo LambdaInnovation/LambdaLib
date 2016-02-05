@@ -193,7 +193,7 @@ public class NetworkMessage {
                 final int paramc = m.getParameterCount();
                 if (paramc > params.length) {
                     throw new RuntimeException("Too few arguments in event " + eventSignature(instance, channel)
-                     + " for event listener [" + m + "]. Expected at least " + params.length + " arguments");
+                     + " for event listener [" + m + "]. Expected at least " + paramc + " arguments");
                 } else {
                     Object[] paramsArg;
                     if (paramc == params.length || paramc == -1) {
@@ -376,7 +376,6 @@ public class NetworkMessage {
 
     }
 
-    @RegMessageHandler(msg = Message.class, side = {RegMessageHandler.Side.CLIENT, RegMessageHandler.Side.SERVER})
     public static class Handler implements IMessageHandler<Message, IMessage> {
 
         @Override

@@ -23,7 +23,11 @@ public class PlayerDataTag extends DataPart<EntityPlayer> {
         return EntityData.get(player).getPart(PlayerDataTag.class);
     }
 
-    private NBTTagCompound theTag;
+    private NBTTagCompound theTag = new NBTTagCompound();
+
+    {
+        setNBTStorage();
+    }
 
     @Override
     public void fromNBT(NBTTagCompound tag) {
