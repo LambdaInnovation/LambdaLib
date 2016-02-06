@@ -39,7 +39,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
      * Make this DataPart's tick() method be called every tick. Can be called during runtime or construction.
      */
     protected final void setTick(boolean state) {
-        needTick = true;
+        needTick = state;
     }
 
     /**

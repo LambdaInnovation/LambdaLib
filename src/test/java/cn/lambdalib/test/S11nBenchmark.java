@@ -2,7 +2,10 @@ package cn.lambdalib.test;
 
 import cn.lambdalib.s11n.SerializeType;
 import cn.lambdalib.s11n.nbt.NBTS11n;
+import cn.lambdalib.s11n.network.NetworkS11n;
 import com.google.common.base.Objects;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.ArrayList;
@@ -12,7 +15,10 @@ import java.util.Map;
 
 import static cn.lambdalib.util.generic.RandUtils.*;
 
-public class NBTS11nTest {
+/**
+ * A test benchmark for serialization methods.
+ */
+public class S11nBenchmark {
 
     public enum TestEnum {
         FAT, THIN, DIRTY
@@ -45,7 +51,7 @@ public class NBTS11nTest {
 
     static class TestOuter {
         public float x, y, z;
-        // public TestInner inner = new TestInner();
+        public TestInner inner = new TestInner();
         public Map map = new HashMap<>();
         public int[] array = new int[] { 1, 2, 3 };
         public List<Object> objects = new ArrayList<>();
@@ -68,7 +74,7 @@ public class NBTS11nTest {
 
         public String toString() {
             return Objects.toStringHelper(this)
-                    // .add("inner", inner)
+                    .add("inner", inner)
                     .add("x", x)
                     .add("y", y)
                     .add("z", z)
@@ -79,24 +85,44 @@ public class NBTS11nTest {
     }
 
     public static void main(String[] args) {
-        TestOuter data = new TestOuter();
+        benchmark();
+    }
+
+    private static void benchmark() {
+        for (int i = 0; i < 100000; ++i) { //Let code JIT Compile
+            testBytebuf();
+        }
+        System.out.println("Warm complete");
+
+        int objects = 1000000;
+        long cur = System.currentTimeMillis();
+
+        for (int i = 0; i < objects; ++i) {
+            testBytebuf();
+        }
+
+        long dt = System.currentTimeMillis() - cur;
+
+        System.out.println("Spent " + dt + " ms serializing " + objects + " objects");
+    }
+
+    // Allocation should be no part of serialization, so src and target are created in advance
+    private static TestOuter sample = new TestOuter();
+    private static TestOuter target = new TestOuter();
+
+    private static void testNBT() {
         NBTTagCompound tag = new NBTTagCompound();
+        NBTS11n.write(tag, sample);
+        NBTS11n.read(tag, target);
 
-        System.out.println("Input: " + data);
+        // System.out.println("In: " + data);
+        // System.out.println("Out: " + readed);
+    }
 
-        NBTS11n.write(tag, data);
-
-        TestOuter readed = new TestOuter();
-        NBTS11n.read(tag, readed);
-
-<<<<<<< HEAD
-        System.out.println("Tag: " + tag);
-
-        System.out.println("Output: " + readed);
-=======
-        System.out.println("Input: " + data);
-        System.out.println("Output: " + data);
->>>>>>> parent of dc3e82b... oops
+    private static void testBytebuf() {
+        ByteBuf buffer = Unpooled.buffer();
+        NetworkS11n.serializeWithHint(buffer, sample, TestOuter.class);
+        NetworkS11n.deserializeRecursivelyInto(buffer, target, TestOuter.class);
     }
 
 }
