@@ -128,15 +128,6 @@ public class NetworkMessage {
         list.add(listener);
     }
 
-    public static <T> void registerExtension(Class<T> type, Function<T, Object> extType) {
-        List<Function> list = regExtensions.get(type);
-        if (list == null) {
-            list = new ArrayList<>();
-            regExtensions.put(type, list);
-        }
-        list.add(extType);
-    }
-
     // ---
 
     private static class ChannelID {
@@ -174,11 +165,6 @@ public class NetworkMessage {
     private static Map<ChannelID, List<INetworkListener>> extListeners = new HashMap<>();
     private static Map<ChannelID, List<INetworkListener>> cachedListeners = new HashMap<>();
 
-    private static Map<Class, List<Function>> regExtensions = new HashMap<>();
-    private static Map<Class, List<Function>> cachedExtensions = new HashMap<>();
-
-    private static Map<Object, List<Object>> aliveExtensions = new WeakHashMap<>();
-
     /**
      * Invoked at callee side. Send the message to the instance.
      */
@@ -212,17 +198,6 @@ public class NetworkMessage {
                 }
             }
         }
-
-        if (!aliveExtensions.containsKey(instance)) {
-            List<Function> suppliers = getExtSuppliers(instance.getClass());
-            if (!suppliers.isEmpty()) {
-                aliveExtensions.put(instance, suppliers.stream().map(x -> x.apply(instance)).collect(Collectors.toList()));
-            } else {
-                aliveExtensions.put(instance, Collections.emptyList());
-            }
-        }
-
-        aliveExtensions.get(instance).forEach(x -> processMessage(x, channel, params));
     }
 
     private static String eventSignature(Object instance, String channel) {
@@ -241,28 +216,6 @@ public class NetworkMessage {
             cachedListeners.put(cid, result);
         }
         return result;
-    }
-
-    private static List<Function> getExtSuppliers(Class type) {
-        if (cachedExtensions.containsKey(type)) {
-            return cachedExtensions.get(type);
-        } else {
-            List<Function> ret = new ArrayList<>();
-            cachedExtensions.put(type, ret);
-            buildExtCache(type, ret);
-            return ret;
-        }
-    }
-
-    private static void buildExtCache(Class type, List<Function> out) {
-        Class cur = type;
-        while (cur != null) {
-            List<Function> s = regExtensions.get(cur);
-            if (s != null) {
-                out.addAll(s);
-            }
-            cur = cur.getSuperclass();
-        }
     }
 
     private static void buildCache(Class type, String channel, Side side, List<INetworkListener> out) {
