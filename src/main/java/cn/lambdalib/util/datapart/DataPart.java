@@ -107,6 +107,13 @@ public abstract class DataPart<T extends EntityLivingBase> {
     }
 
     /**
+     * Invoked when this DataPart is made alive.
+     */
+    public void wake() {
+
+    }
+
+    /**
      * Invoked every tick if {@link #setTick(boolean)} has been invoked with argument true.
      */
     public void tick() {}

@@ -162,6 +162,8 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
             instance.entityData = (EntityData) this;
             constructed.put(data.type, instance);
 
+            instance.wake();
+
             if (!SideHelper.isClient() && instance.needNBTStorage) {
                 NBTTagCompound forgeTag = getEntity().getEntityData();
                 String id = _partNBTID(instance);

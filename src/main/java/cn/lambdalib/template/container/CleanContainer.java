@@ -1,12 +1,15 @@
 package cn.lambdalib.template.container;
 
+import com.google.common.primitives.Ints;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -19,33 +22,29 @@ public abstract class CleanContainer extends Container {
     /**
      * @return A slot group containing specified slots
      */
-    static SlotGroup gSlots(int ...slots) {
+    public static SlotGroup gSlots(int ...slots) {
         return new SlotGroup(slots);
     }
 
     /**
      * @return A slot group containing specified range of slots
      */
-    static SlotGroup gRange(int from, int toExclusive) {
+    public static SlotGroup gRange(int from, int toExclusive) {
         return new SlotGroup(from, toExclusive);
     }
 
     /**
      * @return A slot group that is the combination of given groups
      */
-    static SlotGroup gCombine(SlotGroup ... groups) {
-        List<Integer> collector = new ArrayList<>();
+    public static SlotGroup gCombine(SlotGroup ... groups) {
+        Set<Integer> collector = new HashSet<>();
         for (SlotGroup g : groups) {
             for (int i : g.slots) {
                 collector.add(i);
             }
         }
 
-        int[] ret = new int[collector.size()];
-        for (int i = 0; i < collector.size(); ++i) {
-            ret[i] = collector.get(i);
-        }
-        return new SlotGroup(ret);
+        return new SlotGroup(Ints.toArray(collector));
     }
 
     private List<Rule> rules = new ArrayList<>();
@@ -62,6 +61,10 @@ public abstract class CleanContainer extends Container {
         rule.pred = inPredicate;
         rule.to = toSlots;
         rules.add(rule);
+    }
+
+    public void addTransferRule(SlotGroup from, SlotGroup to) {
+        addTransferRule(from, s -> true, to);
     }
 
     @Override
