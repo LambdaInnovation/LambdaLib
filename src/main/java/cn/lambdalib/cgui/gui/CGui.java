@@ -356,8 +356,6 @@ public class CGui extends WidgetContainer {
                 GL11.glPushMatrix();
                 GL11.glTranslated(cur.x, cur.y, 0);
                 
-                double px = cur.transform.pivotX * cur.scale, py = cur.transform.pivotY * cur.scale;
-                
                 GL11.glDepthFunc(GL11.GL_LEQUAL);
                 GL11.glScaled(cur.scale, cur.scale, 1);
                 GL11.glTranslated(-cur.transform.pivotX, -cur.transform.pivotY, 0);
@@ -382,8 +380,8 @@ public class CGui extends WidgetContainer {
     
     protected Widget gtnTraverse(double x, double y, Widget node, WidgetContainer set) {
         Widget res = null;
-        boolean checkSub = node == null || node.transform.doesDraw;
-        if(node != null && node.transform.doesDraw
+        boolean checkSub = node == null || node.isVisible();
+        if(node != null && node.isVisible()
             && node.transform.doesListenKey 
             && node.isPointWithin(x, y)) {
             res = node;

@@ -42,6 +42,12 @@ public class Widget extends WidgetContainer {
      */
     public boolean needCopy = true;
 
+    /**
+     * TEMP SOLUTION DONT TOUCH
+     * Whether this widget is hidden in the CGui editor canvas.
+     */
+    public boolean hidden = false;
+
     public Transform transform;
     
     //Transform is always present.
@@ -108,7 +114,7 @@ public class Widget extends WidgetContainer {
      * @return Whether the widget is visible (and called each draw frame).
      */
     public boolean isVisible() {
-        return transform.doesDraw && !dirty;
+        return transform.doesDraw && !hidden;
     }
         
     /**

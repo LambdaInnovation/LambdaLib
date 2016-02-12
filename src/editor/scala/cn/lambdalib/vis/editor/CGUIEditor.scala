@@ -96,13 +96,16 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
     * @param t The IHierarchy for the elements to be added into
     * @return A list of WidgetElement, retaining old ones if the corresponding widget is still there.
     */
-  private def newElements(w: WidgetContainer, old: List[WidgetElement], t: IHierarchy): List[WidgetElement] = {
+  private def newElements(w: WidgetContainer,
+                          old: List[WidgetElement],
+                          t: IHierarchy,
+                          supplier: Widget => WidgetElement = w => new WidgetElement(w)): List[WidgetElement] = {
     w.getDrawList.filter(!_.disposed).map(w => {
       val res = old.find(_.w == w)
       res match {
         case Some(x) => x
         case None =>
-          val ret =new WidgetElement(w)
+          val ret = supplier(w)
           ret.addedInto(t)
           ret
       }
@@ -306,7 +309,9 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
   //
 
   // Subclasses
-  class WidgetElement(val w: Widget) extends Element(w.getName, Styles.elemTexture("widget")) {
+  case class WidgetElement(val w: Widget,
+                           elementSupplier: Widget => WidgetElement = w => new WidgetElement(w))
+    extends Element(w.getName, Styles.elemTexture("widget")) {
 
     this.listens[LeftClickEvent](() => {
       if (Option(w) == getSelectedWidget) {
@@ -355,7 +360,7 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
     }
 
     override def onRebuild(list: ElementList): Unit = {
-      elements = newElements(w, elements.asInstanceOf[List[WidgetElement]], this)
+      elements = newElements(w, elements.asInstanceOf[List[WidgetElement]], this, elementSupplier)
       super.onRebuild(list)
     }
 
@@ -506,8 +511,20 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
       }
     })
 
+    private def supply(w: Widget): WidgetElement = {
+      new WidgetElement(w, supply) {
+        def updateAlpha() = DrawTexture.get(this.iconArea).color.a = if (w.hidden) 0.1 else 1.0
+        this.iconArea.listens[LeftClickEvent](() => {
+          w.hidden = !w.hidden
+          updateAlpha()
+        })
+        updateAlpha()
+      }
+    }
+
     override def rebuild() = {
-      elements = newElements(canvas, elements.asInstanceOf[List[WidgetElement]], this)
+      elements = newElements(canvas, elements.asInstanceOf[List[WidgetElement]], this, supply)
+
       super.rebuild()
     }
 
