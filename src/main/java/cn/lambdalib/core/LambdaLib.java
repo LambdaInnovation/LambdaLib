@@ -53,7 +53,7 @@ public class LambdaLib {
     @EventHandler()
     public void preInit(FMLPreInitializationEvent event) {
         log.info("Starting LambdaLib");
-        log.info("Copyright (c) Lambda Innovation, 2013-2015");
+        log.info("Copyright (c) Lambda Innovation, 2013-2016");
         log.info("http://www.li-dev.cn/");
 
         ResourceCheck.init();
