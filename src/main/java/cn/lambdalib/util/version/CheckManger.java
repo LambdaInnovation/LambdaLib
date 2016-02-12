@@ -86,13 +86,6 @@ public class CheckManger
 				 player.addChatMessage(new ChatComponentTranslation("chat.newversion",pars[0],this.latestVersion.get(modid)));
 				 
 			 }
-//			 String s;
-//			 s=this.modPool.get("academy-craft")[0];
-//			 player.addChatMessage(new ChatComponentText(s));
-//			 s=this.modPool.get("academy-craft")[1];
-//			 player.addChatMessage(new ChatComponentText(s));
-//			 s=this.modPool.get("academy-craft")[2];
-//			 player.addChatMessage(new ChatComponentText(s));
 		}
 	}
 	@RegPostInitCallback
@@ -152,6 +145,8 @@ class Fetcher implements Runnable
 		if(!versions.keySet().contains(this.localVersion))
 			return;
 		String latestVersion=(String) releases.get(0).get("tag_name");
+        if(latestVersion==null||latestVersion.equals(this.localVersion))
+            return;
 		CheckManger.instance().addNewVersion(this.modid, latestVersion);
 	}
 	
