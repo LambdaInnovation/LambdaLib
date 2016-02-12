@@ -142,7 +142,7 @@ public abstract class CleanContainer extends Container {
         private SlotGroup(int from, int toExclusive) {
             this.slots = new int[toExclusive - from];
             for (int i = from; i < toExclusive; ++i) {
-                slots[i] = from + i;
+                slots[i - from] = i;
             }
         }
 
