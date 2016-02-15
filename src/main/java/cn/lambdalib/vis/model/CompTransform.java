@@ -15,7 +15,9 @@ import net.minecraft.util.Vec3;
 
 @SerializeType
 public class CompTransform {
-    
+
+    public static final CompTransform identity = new CompTransform();
+
     public Vec3 transform = Vec3.createVectorHelper(0, 0, 0);
     
     public Vec3 pivotPt = Vec3.createVectorHelper(0, 0, 0);
@@ -52,10 +54,10 @@ public class CompTransform {
     
     public void doTransform() {
         RenderUtils.glTranslate(VecUtils.add(transform, pivotPt));
-        
-        GL11.glRotated(rotation.zCoord, 0, 0, 1);
-        GL11.glRotated(rotation.yCoord, 0, 1, 0);
+
         GL11.glRotated(rotation.xCoord, 1, 0, 0);
+        GL11.glRotated(rotation.yCoord, 0, 1, 0);
+        GL11.glRotated(rotation.zCoord, 0, 0, 1);
         
         GL11.glScaled(scale, scale, scale);
         

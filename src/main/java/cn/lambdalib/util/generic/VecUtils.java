@@ -35,20 +35,11 @@ public class VecUtils {
      * @return the looking direction vec, normalized
      */
     public static Vec3 toDirVector(float yaw, float pitch) {
-        float var3 = 1.0f;
-        float vx, vy, vz;
-        vx = MathHelper.sin(yaw / 180.0F
-                * (float) Math.PI)
-                * MathHelper.cos(yaw / 180.0F
-                        * (float) Math.PI) * var3;
-        vz = MathHelper.cos(yaw / 180.0F
-                * (float) Math.PI)
-                * MathHelper.cos(pitch / 180.0F
-                        * (float) Math.PI) * var3;
-        vy = -MathHelper.sin((pitch)
-                / 180.0F * (float) Math.PI)
-                * var3;
-        return vec(vx, vy, vz);
+        float f1 = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
+        float f2 = MathHelper.sin(-yaw * 0.017453292F - (float)Math.PI);
+        float f3 = -MathHelper.cos(-pitch * 0.017453292F);
+        float f4 = MathHelper.sin(-pitch * 0.017453292F);
+        return Vec3.createVectorHelper((double)(f2 * f3), (double)f4, (double)(f1 * f3));
     }
     
     /**

@@ -83,6 +83,7 @@ public class RegistryHelper {
                     throw new RuntimeException("The field must be static.");
                 }
                 try {
+                    field.setAccessible(true);
                     Object ret = field.get(null);//TODO should not use null
                     if (ret == null) {
                         ret = field.getType().newInstance();
@@ -94,7 +95,7 @@ public class RegistryHelper {
                 }
             }
         }
-        throw new RuntimeException("Can not get field from mod " + clazz + ": field not found.");
+        throw new RuntimeException("No field with required annotation " + anno + " exists in " + clazz);
     }
     
     public final Object getFieldFromObject(Object obj, Class<? extends Annotation> anno) {

@@ -18,6 +18,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import java.lang.annotation.ElementType;
@@ -580,6 +581,18 @@ public class NetworkS11n {
                 } else {
                     return tileEntity;
                 }
+            }
+        });
+        addDirect(Vec3.class, new NetS11nAdaptor<Vec3>() {
+            @Override
+            public void write(ByteBuf buf, Vec3 obj) {
+                buf.writeDouble(obj.xCoord);
+                buf.writeDouble(obj.yCoord);
+                buf.writeDouble(obj.zCoord);
+            }
+            @Override
+            public Vec3 read(ByteBuf buf) throws ContextException {
+                return Vec3.createVectorHelper(buf.readDouble(), buf.readDouble(), buf.readDouble());
             }
         });
     }

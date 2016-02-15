@@ -72,7 +72,7 @@ public class RegistryUtils {
             m.setAccessible(true);
             return m;
         } catch(Exception e) {
-            return null;
+            throw Throwables.propagate(e);
         }
     }
     

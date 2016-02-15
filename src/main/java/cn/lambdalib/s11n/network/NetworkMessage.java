@@ -337,7 +337,7 @@ public class NetworkMessage {
                 // LambdaLib.log.info("Received message " + message.channel + " on " + message.instance);
                 processMessage(message.instance, message.channel, message.params);
             } else {
-                LambdaLib.log.info("Ignored some network message");
+                LambdaLib.log.info("Ignored network message " + message.instance + ", " + message.channel);
             }
             return null;
         }

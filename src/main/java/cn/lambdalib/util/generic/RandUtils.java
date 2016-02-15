@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class RandUtils {
 
-    static final Random RNG = new Random();
+    public static final Random RNG = new Random();
     
     public static double ranged(double from, double to) {
         return from + RNG.nextDouble() * (to - from);
