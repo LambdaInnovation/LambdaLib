@@ -1,7 +1,21 @@
 package cn.lambdalib.util.mc
 
 import net.minecraft.entity.Entity
+import net.minecraft.util.MovingObjectPosition
+import net.minecraft.util.MovingObjectPosition.MovingObjectType
 import net.minecraft.world.World
+
+object TraceResult {
+  def apply(mop: MovingObjectPosition) = {
+    if (mop == null || mop.typeOfHit == MovingObjectType.MISS) {
+      EmptyResult()
+    } else if (mop.typeOfHit == MovingObjectType.BLOCK) {
+      BlockResult((mop.blockX, mop.blockY, mop.blockZ), mop.sideHit)
+    } else { // Entity
+      EntityResult(mop.entityHit)
+    }
+  }
+}
 
 trait TraceResult
 

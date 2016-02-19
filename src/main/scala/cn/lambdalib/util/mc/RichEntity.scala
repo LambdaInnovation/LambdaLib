@@ -30,6 +30,16 @@ class RichEntity(val entity: Entity) extends AnyVal {
     entity.motionZ = p.zCoord
   }
 
+  def setLook(look: EntityLook) = {
+    entity.rotationYaw = look.yaw
+    entity.rotationPitch = look.pitch
+  }
+
+  def setLookHead(look: EntityLook) = {
+    entity.setRotationYawHead(look.yaw)
+    entity.rotationPitch = look.pitch
+  }
+
   private def isThePlayer = SideHelper.getThePlayer == entity
 
 }
