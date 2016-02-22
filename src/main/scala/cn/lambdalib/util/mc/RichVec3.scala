@@ -24,7 +24,7 @@ class EntityLook(val yaw: Float, val pitch: Float) {
 }
 
 class RichVec3(val self: Vec3) extends AnyVal {
-  implicit def cvt(v: Vec3): RichVec3 = new RichVec3(v)
+  private implicit def cvt(v: Vec3): RichVec3 = new RichVec3(v)
 
   def set(x: Double, y: Double, z: Double) = {
     self.xCoord = x
@@ -37,9 +37,9 @@ class RichVec3(val self: Vec3) extends AnyVal {
     self.zCoord = vec.zCoord
   }
 
-  def x = self.xCoord
-  def y = self.yCoord
-  def z = self.zCoord
+  @inline def x = self.xCoord
+  @inline def y = self.yCoord
+  @inline def z = self.zCoord
 
   def +(other: Vec3) = Vec3(self.xCoord + other.xCoord, self.yCoord + other.yCoord, self.zCoord + other.zCoord)
   def unary_-() = Vec3(-self.xCoord, -self.yCoord, -self.zCoord)
@@ -73,8 +73,13 @@ class RichVec3(val self: Vec3) extends AnyVal {
     self
   }
 
+  /**
+    * @return The yaw-pitch representation of this vector.
+    */
   def toLook: EntityLook = new EntityLook(
     -toDegrees(Math.atan2(self.xCoord, self.zCoord)).toFloat,
     -toDegrees(Math.atan2(self.yCoord, Math.sqrt(self.xCoord * self.xCoord + self.zCoord * self.zCoord))).toFloat)
+
+  def copy(): Vec3 = Vec3(self)
 
 }

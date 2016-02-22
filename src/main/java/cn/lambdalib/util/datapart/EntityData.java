@@ -3,6 +3,7 @@ package cn.lambdalib.util.datapart;
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
 import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
+import cn.lambdalib.core.LLCommons;
 import cn.lambdalib.s11n.network.NetS11nAdapterRegistry.RegNetS11nAdapter;
 import cn.lambdalib.s11n.network.NetworkS11n;
 import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
@@ -21,6 +22,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -87,7 +89,6 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
     }
 
     private Map<Class, DataPart> constructed = new HashMap<>();
-
 
     private Ent entity;
 
@@ -221,6 +222,15 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
                         iter.remove();
                     }
                 }
+            }
+        }
+
+        @SubscribeEvent
+        public void onPlayerClone(PlayerEvent.Clone evt) {
+            EntityData<EntityPlayer> data = EntityData.getNonCreate(evt.original);
+            if (data != null) {
+                data.entity = evt.entityPlayer;
+                evt.entityPlayer.registerExtendedProperties(ID, data);
             }
         }
     }
