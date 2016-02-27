@@ -68,9 +68,19 @@ class __HREvents {
   def onRenderHand(evt: RenderHandEvent) = {
     val player = Minecraft.getMinecraft.thePlayer
     val data = HandRenderInterrupter(player)
+    val mc = Minecraft.getMinecraft
+
     if (data.isPresent) {
       evt.setCanceled(true)
-      data.get.render(evt.partialTicks)
+
+      if (mc.gameSettings.thirdPersonView == 0 &&
+        !mc.renderViewEntity.isPlayerSleeping &&
+        !mc.gameSettings.hideGUI &&
+        !mc.playerController.enableEverythingIsScrewedUpMode) {
+        mc.entityRenderer.enableLightmap(evt.partialTicks)
+        data.get.render(evt.partialTicks)
+        mc.entityRenderer.disableLightmap(evt.partialTicks)
+      }
     }
   }
 }

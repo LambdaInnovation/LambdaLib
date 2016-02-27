@@ -71,11 +71,10 @@ public class VecUtils {
     }
     
     public static Vec3 lerp(Vec3 a, Vec3 b, double lambda) {
-        double ml = 1 - lambda;
         return Vec3.createVectorHelper(
-            a.xCoord * ml + b.xCoord * lambda, 
-            a.yCoord * ml + b.yCoord * lambda, 
-            a.zCoord * ml + b.zCoord * lambda);
+                MathUtils.lerp(a.xCoord, b.xCoord, lambda),
+                MathUtils.lerp(a.yCoord, b.yCoord, lambda),
+                MathUtils.lerp(a.zCoord, b.zCoord, lambda));
     }
     
     public static Vec3 neg(Vec3 v) {

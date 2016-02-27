@@ -119,6 +119,11 @@ public abstract class DataPart<T extends EntityLivingBase> {
     public void tick() {}
 
     /**
+     * Invoked at the synchronized side after one sync process has completed.
+     */
+    protected void onSynchronized() {}
+
+    /**
      * Stores this DataPart. Called when the DataPart is being stored at SERVER.
      */
     public void toNBT(NBTTagCompound tag) {}
@@ -213,6 +218,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
 
     @Listener(channel="itn_sync", side={Side.CLIENT, Side.SERVER})
     private void onSync(ByteBuf buf) {
+        onSynchronized();
         NetworkS11n.deserializeRecursivelyInto(buf, this, getClass());
     }
 

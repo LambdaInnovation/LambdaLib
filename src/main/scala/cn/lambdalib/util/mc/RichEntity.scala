@@ -13,15 +13,15 @@ class RichEntity(val entity: Entity) extends AnyVal {
   }
   def velocity: Vec3 = Vec3(entity.motionX, entity.motionY, entity.motionZ)
   def lookVector: Vec3 = VecUtils.toDirVector(entity.getRotationYawHead, entity.rotationPitch)
+  def headPosition = {
+    val ret = position
+    ret.yCoord += entity.getEyeHeight
+    ret
+  }
 
   def setPos(p: Vec3) = {
-    if (isThePlayer) {
-      entity.posY = p.yCoord + 1.6
-    } else {
-      entity.posY = p.yCoord
-    }
-    entity.posX = p.xCoord
-    entity.posZ = p.zCoord
+    val y = if (isThePlayer) p.yCoord + 1.6 else p.yCoord
+    entity.setPosition(p.xCoord, y, p.zCoord)
   }
 
   def setVel(p: Vec3) = {

@@ -17,8 +17,8 @@ class EntityLook(val yaw: Float, val pitch: Float) {
     val pitchRad = toRadians(pitch)
     Vec3(
       -MathHelper.sin(yawRad) * MathHelper.cos(pitchRad),
-      MathHelper.cos(yawRad) * MathHelper.cos(pitchRad),
-      -MathHelper.sin(pitchRad))
+      -MathHelper.sin(pitchRad),
+      MathHelper.cos(yawRad) * MathHelper.cos(pitchRad))
   }
 
 }
