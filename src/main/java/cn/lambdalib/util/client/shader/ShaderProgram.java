@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Throwables;
 import org.apache.commons.io.IOUtils;
 
 import cn.lambdalib.core.LambdaLib;
@@ -30,13 +31,6 @@ import org.lwjgl.opengl.GL11;
 @SideOnly(Side.CLIENT)
 public class ShaderProgram {
     
-    static Map<ResourceLocation, Integer> loadedShaders = new HashMap<>();
-    public static void releaseResources() {
-        for(Integer e : loadedShaders.values())
-            glDeleteShader(e);
-        loadedShaders.clear();
-    }
-    
     private boolean compiled = false;
     private boolean valid = false;
     private int programID;
@@ -51,26 +45,19 @@ public class ShaderProgram {
             return;
 
         try {
-            int shaderID;
-
             boolean loaded;
-            if(loadedShaders.containsKey(location)) {
-                shaderID = loadedShaders.get(location);
-                loaded = true;
+            String str = IOUtils.toString(RegistryUtils.getResourceStream(location));
+            int shaderID = glCreateShader(type);
+            glShaderSource(shaderID, str);
+            glCompileShader(shaderID);
+
+            int successful = glGetShaderi(shaderID, GL_COMPILE_STATUS);
+            if(successful == GL_FALSE) {
+                String log = glGetShaderInfoLog(shaderID, glGetShaderi(shaderID, GL_INFO_LOG_LENGTH));
+                LambdaLib.log.error("Error when linking shader '" + location + "'. code: " + successful + ", Error string: \n" + log);
+                loaded = false;
             } else {
-                String str = IOUtils.toString(RegistryUtils.getResourceStream(location));
-                shaderID = glCreateShader(type);
-                glShaderSource(shaderID, str);
-                glCompileShader(shaderID);
-                
-                int successful = glGetShaderi(shaderID, GL_COMPILE_STATUS);
-                if(successful == GL_FALSE) {
-                    String log = glGetShaderInfoLog(shaderID, glGetShaderi(shaderID, GL_INFO_LOG_LENGTH));
-                    LambdaLib.log.error("Error when linking shader '" + location + "'. code: " + successful + ", Error string: \n" + log);
-                    loaded = false;
-                } else {
-                    loaded = true;
-                }
+                loaded = true;
             }
 
             if (loaded) {
@@ -79,7 +66,7 @@ public class ShaderProgram {
             }
         } catch (IOException e) {
             LambdaLib.log.error("Didn't find shader " + location, e);
-            throw new RuntimeException();
+            Throwables.propagate(e);
         }
     }
     

@@ -199,6 +199,14 @@ public abstract class DataPart<T extends EntityLivingBase> {
         }
     }
 
+    protected void sendToLocal(String channel, Object ...params) {
+        if (getEntity() instanceof EntityPlayer) {
+            NetworkMessage.sendTo((EntityPlayer) getEntity(), this, channel, params);
+        } else {
+            throw new IllegalStateException("Not a DataPart of EntityPlayer");
+        }
+    }
+
     // Internal
 
     void callTick() {
@@ -218,8 +226,8 @@ public abstract class DataPart<T extends EntityLivingBase> {
 
     @Listener(channel="itn_sync", side={Side.CLIENT, Side.SERVER})
     private void onSync(ByteBuf buf) {
-        onSynchronized();
         NetworkS11n.deserializeRecursivelyInto(buf, this, getClass());
+        onSynchronized();
     }
 
 }
