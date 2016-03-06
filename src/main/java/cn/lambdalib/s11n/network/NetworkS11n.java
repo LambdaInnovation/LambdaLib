@@ -431,6 +431,22 @@ public class NetworkS11n {
             }
         });
 
+        // Meta: Class
+        addDirect(Class.class, new NetS11nAdaptor<Class>() {
+            @Override
+            public void write(ByteBuf buf, Class obj) {
+                int idx = serTypes.indexOf(obj);
+                if (idx == -1) throw new IllegalArgumentException(obj + " is not a network s11n type");
+
+                buf.writeInt(idx);
+            }
+
+            @Override
+            public Class read(ByteBuf buf) throws ContextException {
+                return serTypes.get(buf.readInt());
+            }
+        });
+
         // Basic collection types
         addDirect(List.class, new NetS11nAdaptor<List>() {
             @Override
