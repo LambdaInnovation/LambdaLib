@@ -71,7 +71,7 @@ public class Raytrace {
         return getLookingPos(living, dist, esel, null);
     }
     
-    public static Pair<Vec3, MovingObjectPosition> getLookingPos(EntityLivingBase living, double dist,
+    public static Pair<Vec3, MovingObjectPosition> getLookingPos(Entity living, double dist,
                                                                  IEntitySelector esel, IBlockSelector bsel) {
         MovingObjectPosition pos = traceLiving(living, dist, esel, bsel);
         Vec3 end = null;
@@ -262,11 +262,11 @@ public class Raytrace {
         return null;
     }
     
-    public static MovingObjectPosition traceLiving(EntityLivingBase entity, double dist) {
+    public static MovingObjectPosition traceLiving(Entity entity, double dist) {
         return traceLiving(entity, dist, null, null);
     }
     
-    public static MovingObjectPosition traceLiving(EntityLivingBase entity, double dist, IEntitySelector entitySel) {
+    public static MovingObjectPosition traceLiving(Entity entity, double dist, IEntitySelector entitySel) {
         return traceLiving(entity, dist, entitySel, null);
     }
     
@@ -274,7 +274,7 @@ public class Raytrace {
      * Performs a RayTrace starting from the target entity's eye towards its looking direction.
      * The trace will automatically ignore the target entity.
      */
-    public static MovingObjectPosition traceLiving(EntityLivingBase entity, double dist, IEntitySelector entitySel, IBlockSelector blockSel) {
+    public static MovingObjectPosition traceLiving(Entity entity, double dist, IEntitySelector entitySel, IBlockSelector blockSel) {
         Motion3D mo = new Motion3D(entity, true);
         Vec3 v1 = mo.getPosVec(), v2 = mo.move(dist).getPosVec();
         

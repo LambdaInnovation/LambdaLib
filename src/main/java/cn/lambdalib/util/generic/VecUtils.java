@@ -8,6 +8,8 @@ package cn.lambdalib.util.generic;
 
 import java.util.Random;
 
+import cn.lambdalib.util.mc.SideHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -172,7 +174,23 @@ public class VecUtils {
     }
     
     public static Vec3 entityPos(Entity e) {
-        return vec(e.posX, e.posY, e.posZ);
+        return vec(e.posX, e.posY + (isThePlayer(e) ? -1.6 : 0.0), e.posZ);
+    }
+
+    public static Vec3 entityHeadPos(Entity e) {
+        return vec(e.posX, e.posY + (isThePlayer(e) ? 0 : e.getEyeHeight()), e.posZ);
+    }
+
+    private static boolean isThePlayer(Entity e) {
+        if (SideHelper.isClient()) {
+            return isThePlayer_c(e);
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean isThePlayer_c(Entity e) {
+        return Minecraft.getMinecraft().thePlayer.equals(e);
     }
     
     public static Vec3 entityMotion(Entity e) {
