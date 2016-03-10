@@ -59,7 +59,7 @@ public class Widget extends WidgetContainer {
 
     // Ctors to aid syntax simplicity
     public Widget(double width, double height) {
-        transform.setPos(width, height);
+        transform.setSize(width, height);
     }
 
     public Widget(double x, double y, double width, double height) {

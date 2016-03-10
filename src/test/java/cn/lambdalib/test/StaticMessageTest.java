@@ -12,7 +12,7 @@ import org.lwjgl.input.Keyboard;
 
 import static java.lang.System.*;
 
-@Registrant
+// @Registrant
 @NetworkS11nType
 public class StaticMessageTest {
 
