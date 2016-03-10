@@ -14,6 +14,8 @@ import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
+import scala.Function0;
+import scala.Function1;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +43,15 @@ public class Future<T> {
 
     public static <T> Future<T> create(Consumer<T> callback) {
         return FutureManager.instance.create(callback);
+    }
+
+    public static <T> Future<T> create(Function1<T, ?> callback) {
+        return create(new Consumer<T>() {
+            @Override
+            public void accept(T t) {
+                callback.apply(t);
+            }
+        });
     }
 
     int increm;
