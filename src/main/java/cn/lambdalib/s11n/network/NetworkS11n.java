@@ -93,6 +93,17 @@ public class NetworkS11n {
         serHelper.regS11nType(type);
     }
 
+    public static <T> void addDirectInstance(T instance) {
+        addDirect((Class<T>) instance.getClass(), new NetS11nAdaptor<T>() {
+            @Override
+            public void write(ByteBuf buf, T obj) {}
+            @Override
+            public T read(ByteBuf buf) throws ContextException {
+                return instance;
+            }
+        });
+    }
+
     public static <T> void addSupplier(Class<T> type, Supplier<? extends T> supplier) {
         suppliers.put(type, supplier);
     }
