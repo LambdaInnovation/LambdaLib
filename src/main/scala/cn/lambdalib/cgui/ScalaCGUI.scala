@@ -39,6 +39,10 @@ class RichWidget(val w: Widget) extends AnyVal {
 
   def :+(c: Component): Unit = w.addComponent(c)
 
+  def component[T <: Component](implicit evidence: ClassTag[T]) = {
+    w.getComponent(evidence.runtimeClass.asInstanceOf[Class[T]])
+  }
+
 }
 
 class RichComponent(val c: Component) extends AnyVal {

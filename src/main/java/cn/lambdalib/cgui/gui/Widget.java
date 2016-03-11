@@ -308,6 +308,13 @@ public class Widget extends WidgetContainer {
         WidgetContainer parent = getAbstractParent();
         return parent == null ? "null" : parent.getWidgetName(this);
     }
+
+    public String getFullName() {
+        Widget parent = getWidgetParent();
+        String thisName = getName();
+
+        return parent == null ? thisName : parent.getFullName() + "/" + thisName;
+    }
     
     public boolean isPointWithin(double tx, double ty) {
         double w = transform.width, h = transform.height;

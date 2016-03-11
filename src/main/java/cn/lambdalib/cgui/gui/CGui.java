@@ -8,6 +8,10 @@ package cn.lambdalib.cgui.gui;
 
 import java.util.Iterator;
 
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.client.font.IFont;
+import cn.lambdalib.util.client.font.IFont.FontOption;
+import cn.lambdalib.util.client.font.TrueTypeFont;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.cgui.gui.component.Transform;
@@ -46,6 +50,8 @@ public class CGui extends WidgetContainer {
     Widget draggingNode;
     double xOffset, yOffset;
 
+    boolean debug;
+
     public CGui() {}
     
     public CGui(double width, double height) {
@@ -73,6 +79,10 @@ public class CGui extends WidgetContainer {
             }
         }
     }
+
+    public void setDebug() {
+        debug = true;
+    }
     
     //---Event callback---
     
@@ -95,6 +105,19 @@ public class CGui extends WidgetContainer {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         
         drawTraverse(mx, my, null, this, getTopWidget(mx, my));
+
+        if (debug) {
+            Widget hovering = getHoveringWidget();
+            if (hovering != null) {
+                GL11.glColor4f(1, .5f, .5f, .8f);
+                HudUtils.drawRectOutline(hovering.x, hovering.y,
+                        hovering.transform.width * hovering.scale,
+                        hovering.transform.height * hovering.scale, 3);
+                IFont font = TrueTypeFont.defaultFont();
+                font.draw(hovering.getFullName(), hovering.x, hovering.y - 10, new FontOption(10));
+            }
+
+        }
         
         GL11.glEnable(GL11.GL_ALPHA_TEST);
     }
