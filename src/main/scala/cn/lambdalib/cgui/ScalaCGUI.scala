@@ -43,6 +43,10 @@ class RichWidget(val w: Widget) extends AnyVal {
     w.getComponent(evidence.runtimeClass.asInstanceOf[Class[T]])
   }
 
+  def child(name: String) = w.getWidget(name)
+
+  def child(idx: Int) = w.getWidget(idx)
+
 }
 
 class RichComponent(val c: Component) extends AnyVal {

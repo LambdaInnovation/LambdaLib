@@ -175,6 +175,7 @@ public class TextBox extends Component {
             } else if (ChatAllowedCharacters.isAllowedCharacter(input)) {
                 content = content.substring(0, caretPos) + input + content.substring(caretPos);
                 caretPos = Math.min(content.length(), caretPos + 1);
+                widget.post(new ChangeContentEvent());
 
                 checkCaretRegion();
             }
