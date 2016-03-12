@@ -85,6 +85,8 @@ public class NetworkS11n {
 
     private static Map<Class, Supplier> suppliers = new HashMap<>();
 
+    private static Map<Class, List<Field>> fieldCache = new HashMap<>();
+
     private NetworkS11n() {}
 
     public static <T> void addDirect(Class<T> type, NetS11nAdaptor<? super T> adaptor) {
@@ -297,10 +299,15 @@ public class NetworkS11n {
     }
 
     private static List<Field> _sortedFields(Class<?> type) {
-        List<Field> fields = serHelper.getExposedFields(type);
-        // Sort to preserve s11n order
-        Collections.sort(fields, (lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
-        return fields;
+        List<Field> ret = fieldCache.get(type);
+        if (ret == null) {
+            ret = serHelper.getExposedFields(type);
+            // Sort to preserve s11n order
+            Collections.sort(ret, (lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
+            fieldCache.put(type, ret);
+        }
+
+        return ret;
     }
 
     private static boolean _needsTypeIndex(Field f) {
