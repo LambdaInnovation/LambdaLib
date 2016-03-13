@@ -174,14 +174,12 @@ public class NetworkS11n {
         } else if (type.isEnum()) { // Serialize enum
             buf.writeByte(((Enum) obj).ordinal());
         } else if (type.isArray()) { // Serialize array
-            Class componentType = type.getComponentType();
-
             int length = Array.getLength(obj);
             Preconditions.checkArgument(length < Short.MAX_VALUE, "Array too large");
 
             buf.writeShort(length);
             for (int i = 0; i < length; ++i) {
-                serializeWithHint(buf, Array.get(obj, i), componentType);
+                serialize(buf, Array.get(obj, i), true);
             }
         } else { // Serialize recursive types
             serializeRecursively(buf, obj, type);
@@ -246,7 +244,7 @@ public class NetworkS11n {
 
             Object ret = Array.newInstance(componentType, size);
             for (int i = 0; i < size; ++i) {
-                Array.set(ret, i, deserializeWithHint(buf, componentType));
+                Array.set(ret, i, deserialize(buf));
             }
 
             return (T) ret;
