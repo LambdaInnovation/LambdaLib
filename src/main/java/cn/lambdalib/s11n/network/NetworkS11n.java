@@ -78,7 +78,7 @@ public class NetworkS11n {
     // ---
     private static final SerializationHelper serHelper = new SerializationHelper();
 
-    private static final short IDX_NULL = -1;
+    private static final short IDX_NULL = -1, IDX_ARRAY = -2;
 
     private static List<Class<?>> serTypes = new ArrayList<>();
     private static Map<Class<?>, NetS11nAdaptor> adaptors = new HashMap<>();
@@ -127,6 +127,38 @@ public class NetworkS11n {
         }
     }
 
+    private static void writeTypeIndex(ByteBuf buf, Class type) {
+        if (type.isArray()) {
+            buf.writeShort(IDX_ARRAY);
+            writeTypeIndex(buf, type.getComponentType());
+        } else {
+            short idx = (short) typeIndex(type);
+            if (idx == -1) {
+                throw new RuntimeException("Type " + type + " not registered for net serialization");
+            }
+            buf.writeShort(idx);
+        }
+    }
+
+    private static Class readTypeIndex(ByteBuf buf) {
+        short idx = buf.readShort();
+        if (idx == IDX_NULL) {
+            return null;
+        } else if (idx == IDX_ARRAY) {
+            return getArrayClass(readTypeIndex(buf));
+        } else {
+            return serTypes.get(idx);
+        }
+    }
+
+    private static <T> Class getArrayClass(Class<T> component) {
+        try {
+            return Class.forName("[L" + component.getName() + ";");
+        } catch(ClassNotFoundException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
     /**
      * Serializes a object.
      * @param buf The buffer to serialize the object into
@@ -143,14 +175,8 @@ public class NetworkS11n {
                 throw new NullPointerException("Trying to serialize a null object where it's not accepted");
             }
         } else {
-            final Class type = obj.getClass();
-            final short typeIndex = (short) typeIndex(type);
-
-            if (typeIndex == -1) {
-                throw new RuntimeException("Type " + type + " not registered for net serialization");
-            }
-
-            buf.writeShort(typeIndex);
+            Class type = obj.getClass();
+            writeTypeIndex(buf, type);
             serializeWithHint(buf, obj, type);
         }
     }
@@ -211,16 +237,13 @@ public class NetworkS11n {
      */
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(ByteBuf buf) {
-        final short typeIndex = buf.readShort();
-        if (typeIndex == IDX_NULL) {
+        Class type = readTypeIndex(buf);
+
+        if (type == null) {
             return null;
         } else {
-            if (typeIndex >= serTypes.size()) {
-                throw new RuntimeException("Invalid type index.");
-            }
-
-            final Class<T> type = (Class<T>) serTypes.get(typeIndex);
-            return deserializeWithHint(buf, type);
+            Class<T> type2 = (Class<T>) type;
+            return deserializeWithHint(buf, type2);
         }
     }
 
