@@ -161,6 +161,7 @@ public class TextBox extends Component {
                     if (displayOffset != 0) {
                         --displayOffset;
                     }
+                    widget.post(new ChangeContentEvent());
 
                     checkCaretRegion();
                     validate();

@@ -42,8 +42,7 @@ public class ProgressBar extends Component {
             
             {
                 double disp = MathUtils.clampd(0, 1, progress);
-                
-                //System.out.println(progressDisplay + " " + curFluct + " " + disp);
+
                 double x, y, u = 0, v = 0, w, h, tw, th;
                 double width = wi.transform.width, height = wi.transform.height;
                 switch(dir) {
@@ -102,10 +101,6 @@ public class ProgressBar extends Component {
             }
         });
     }
-    
-    long lastDrawTime;
-    
-    private static final Random rand = new Random();
     
     public ProgressBar setDirection(Direction dir) {
         this.dir = dir;
