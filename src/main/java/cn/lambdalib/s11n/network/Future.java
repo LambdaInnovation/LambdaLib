@@ -3,6 +3,7 @@ package cn.lambdalib.s11n.network;
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegInitCallback;
 import cn.lambdalib.s11n.network.NetworkMessage.Listener;
+import cn.lambdalib.s11n.network.NetworkMessage.NullablePar;
 import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
 import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
 import cn.lambdalib.s11n.network.NetworkS11n.NetworkS11nType;
@@ -14,7 +15,6 @@ import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
-import scala.Function0;
 import scala.Function1;
 
 import java.util.HashMap;
@@ -136,7 +136,7 @@ enum FutureManager {
     }
 
     @Listener(channel=MSG_RESULT, side={Side.CLIENT, Side.SERVER})
-    private <T> void hReceiveResult(int increm, T value) {
+    private <T> void hReceiveResult(int increm, @NullablePar T value) {
         Context ctx = threadContext.get();
 
         Future future = ctx.waitingFutures.get(increm);
