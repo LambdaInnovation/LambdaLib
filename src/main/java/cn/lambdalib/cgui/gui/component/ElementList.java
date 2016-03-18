@@ -58,19 +58,17 @@ public class ElementList extends Component {
         double sum = 0.0;
 
         int i = subWidgets.size() - 1;
-        while (i > 0) {
+        while (i >= 0) {
             sum += subWidgets.get(i).transform.height + spacing;
 
             if (sum >= widget.transform.height) {
-                ++i;
-                if (i == subWidgets.size()) i -= 1;
-                break;
+                return i == subWidgets.size() - 1 ? i : i + 1;
             }
 
             --i;
         }
 
-        return i;
+        return 0;
     }
     
     public void progressNext() {
