@@ -152,11 +152,7 @@ public class NetworkS11n {
     }
 
     private static <T> Class getArrayClass(Class<T> component) {
-        try {
-            return Class.forName("[L" + component.getName() + ";");
-        } catch(ClassNotFoundException e) {
-            throw Throwables.propagate(e);
-        }
+        return Array.newInstance(component, 0).getClass();
     }
 
     /**

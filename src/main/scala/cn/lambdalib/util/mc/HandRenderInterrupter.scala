@@ -96,13 +96,11 @@ class HandRenderInterrupter extends DataPart[EntityPlayer] {
   private var current: Option[HandRenderer] = None
 
   def addInterrupt(renderer: HandRenderer) = {
-    println("AddInterrupt")
     current = Some(renderer)
   }
 
   def stopInterrupt(renderer: HandRenderer) = {
     if (Option(renderer) == current) {
-      println("StopInterrupt")
       current = None
     }
   }
