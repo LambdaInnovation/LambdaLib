@@ -105,25 +105,29 @@ public abstract class CleanContainer extends Container {
         Slot slot = (Slot)this.inventorySlots.get(idx);
         ItemStack stack = slot.getStack();
 
-        if (stack == null) {
-            slot.putStack(stackToMerge.copy());
+        if (stack == null && slot.isItemValid(stackToMerge)) {
+            stack = stackToMerge.copy();
+            stack.stackSize = 0;
+
+            slot.putStack(stack);
             slot.onSlotChanged();
-            stackToMerge.stackSize = 0;
-            return true;
-        } else if (
+        }
+
+        if (stack != null &&
                 stack.getItem() == stackToMerge.getItem() &&
                 (!stackToMerge.getHasSubtypes() ||
                         stackToMerge.getItemDamage() == stack.getItemDamage()) &&
                 ItemStack.areItemStackTagsEqual(stackToMerge, stack)) {
             int ideal = stack.stackSize + stackToMerge.stackSize;
-            if(ideal <= stackToMerge.getMaxStackSize()) {
+            int max = Math.min(stackToMerge.getMaxStackSize(), slot.getSlotStackLimit());
+            if(ideal <= max) {
                 stackToMerge.stackSize = 0;
                 stack.stackSize = ideal;
                 slot.onSlotChanged();
                 return true;
-            } else if(stack.stackSize < stackToMerge.getMaxStackSize()) {
-                stackToMerge.stackSize -= stackToMerge.getMaxStackSize() - stack.stackSize;
-                stack.stackSize = stackToMerge.getMaxStackSize();
+            } else if(stack.stackSize < max) {
+                stackToMerge.stackSize -= max - stack.stackSize;
+                stack.stackSize = max;
                 slot.onSlotChanged();
                 return true;
             }
