@@ -224,7 +224,10 @@ class TrueTypeFont(val font: Font) extends IFont {
 
 object TrueTypeFont {
 
-  val defaultFont = withFallback(Font.PLAIN, 32, "Microsoft YaHei", "Adobe Heiti Std R", "STHeiti", "Consolas", "Monospace", "Arial")
+  val defaultFont = withFallback(Font.PLAIN, 32,
+    "Microsoft YaHei", "Adobe Heiti Std R", "STHeiti",
+    "SimHei", "微软雅黑", "黑体",
+    "Consolas", "Monospace", "Arial")
 
   def withFallback2(style: Int, size: Int, fallbackNames: Array[String]) =
     withFallback(style, size, fallbackNames.toSeq: _*)

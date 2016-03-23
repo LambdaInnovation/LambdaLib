@@ -41,6 +41,7 @@ public interface IFont {
 
     @SerializeType
     class FontOption {
+
         public double fontSize;
         public FontAlign align;
         public Color color;

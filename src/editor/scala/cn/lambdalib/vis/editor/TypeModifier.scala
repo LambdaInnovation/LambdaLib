@@ -10,16 +10,15 @@ import java.lang.reflect.Field
 
 import cn.lambdalib.cgui.ScalaCGUI
 import cn.lambdalib.cgui.gui.Widget
-import cn.lambdalib.cgui.gui.component.TextBox.{ConfirmInputEvent, ChangeContentEvent}
+import cn.lambdalib.cgui.gui.component.TextBox.{ChangeContentEvent, ConfirmInputEvent}
 import cn.lambdalib.cgui.gui.component.Transform.HeightAlign
-import cn.lambdalib.cgui.gui.component.{Tint, TextBox, DrawTexture}
+import cn.lambdalib.cgui.gui.component.{DrawTexture, TextBox, Tint}
 import cn.lambdalib.cgui.gui.event.{GuiEvent, LeftClickEvent, LostFocusEvent}
 import cn.lambdalib.core.LambdaLib
 import cn.lambdalib.util.client.font.IFont.FontOption
-
 import ScalaCGUI._
-
 import Styles._
+import cn.lambdalib.util.client.font.{Fonts, IFont}
 import net.minecraft.util.ResourceLocation
 
 object TypeModifier {
@@ -45,9 +44,10 @@ object TypeModifier {
   addSupport(new RealModifier(_, _), classOf[Float], classOf[java.lang.Float],
     classOf[Double], classOf[java.lang.Double])
   addSupport(new StringModifier(_, _), classOf[String])
-  addSupportPred(new EnumModifier(_, _), _.isEnum)
+  addSupportPred(EnumModifier(_, _), _.isEnum)
   addSupport(new BooleanModifier(_, _), classOf[Boolean], classOf[java.lang.Boolean])
   addSupport(new ResLocModifier(_, _), classOf[ResourceLocation])
+  addSupport(FontModifier(_, _), classOf[IFont])
 
 }
 
@@ -175,13 +175,32 @@ class BooleanModifier(field: Field, instance: AnyRef) extends Widget with IModif
 
 }
 
-class EnumModifier(field: Field, instance: AnyRef) extends Widget with IModifier {
+private object EnumModifier {
+
+  def apply(field: Field, instance: AnyRef): ListModifier[Enum[_]] = {
+    new ListModifier[Enum[_]](field, instance).setValues(field.getType.getEnumConstants.asInstanceOf[Array[Enum[_]]])
+  }
+
+}
+
+private object FontModifier {
+  import scala.collection.JavaConversions._
+
+  def apply(field: Field, instance: AnyRef): ListModifier[IFont] = {
+    new ListModifier[IFont](field, instance) {
+      setValues(Fonts.getFonts.toList)
+
+      override def repr(font: IFont) = Fonts.getName(font)
+    }
+  }
+
+}
+
+private class ListModifier[T](field: Field, instance: AnyRef) extends Widget with IModifier {
+
+  class EditEvent(val value: T) extends GuiEvent
+
   transform.setSize(35, 10)
-
-  val enumType = field.getType
-  require(enumType.isEnum)
-
-  val constants = enumType.getEnumConstants.toList
 
   val tint = new Tint
   tint.idleColor = pure(0.2)
@@ -193,15 +212,17 @@ class EnumModifier(field: Field, instance: AnyRef) extends Widget with IModifier
   text.setContent(field.get(instance).toString)
   this :+ text
 
+  private var values: Seq[T] = Nil
+
   this.listens((e: LeftClickEvent) => {
     // Show the hover list
     val menu = new SubMenu
-    val current = field.get(instance)
-    constants filter (_ != current) foreach (elem => {
-      menu.addItem(elem.toString, () => {
-        field.set(instance, elem)
-        text.setContent(elem.toString)
-        this.post(new EditEvent)
+    val current = currentValue
+
+    values filter (_ != current) foreach (elem => {
+      menu.addItem(repr(elem), () => {
+        this.post(new EditEvent(elem))
+        text.setContent(repr(elem))
         menu.dispose()
       })
     })
@@ -211,9 +232,20 @@ class EnumModifier(field: Field, instance: AnyRef) extends Widget with IModifier
     gui.addWidget(menu)
   })
 
-  override def updateRepr() = {
-    text.setContent(field.get(instance).toString)
+  this.listens((e: EditEvent) => {
+    field.set(instance, e.value)
+  })
+
+  def setValues(e: Seq[T]) = {
+    values = e
+    this
   }
+
+  def repr(value: T) = value.toString
+
+  def currentValue: T = field.get(instance).asInstanceOf[T]
+
+  override def updateRepr() = text.setContent(repr(currentValue))
 
 }
 

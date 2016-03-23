@@ -15,6 +15,8 @@ import java.io.IOException;
 
 import cn.lambdalib.cgui.gui.*;
 import cn.lambdalib.core.LambdaLib;
+import cn.lambdalib.s11n.SerializeIncluded;
+import cn.lambdalib.util.client.font.Fonts;
 import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.client.font.TrueTypeFont;
@@ -54,7 +56,8 @@ public class TextBox extends Component {
     
     public String content = "";
 
-    public IFont font = TrueTypeFont.defaultFont();
+    @SerializeIncluded
+    public IFont font = Fonts.getDefault();
 
     public FontOption option;
 
