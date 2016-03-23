@@ -46,19 +46,23 @@ public class RegistrationManager {
     private void loadClasses() {
         loadRegistryTypes();
         for (String name : unloadedClass) {
-            // TODO More elegant way to handle SideOnly, ClassNotFound might mean other error
-            try {
-                prepareClass(Class.forName(name));
-            } catch (ClassNotFoundException e) {
-                LLModContainer.log.debug("Can not load class {}, maybe a SideOnly class.", name);
-            } catch (Throwable e) {
-                LLModContainer.log.fatal("Error on loading class {}. Please check the implementation.", name);
-                LLModContainer.log.fatal(e);
-
-                Throwables.propagate(e);
-            }
+            tryPrepareClass(name);
         }
         unloadedClass.clear();
+    }
+
+    private void tryPrepareClass(String name) {
+        // TODO More elegant way to handle SideOnly, ClassNotFound might mean other error
+        try {
+            prepareClass(Class.forName(name));
+        } catch (ClassNotFoundException e) {
+            LLModContainer.log.debug("Can not load class {}, maybe a SideOnly class.", name);
+        } catch (Throwable e) {
+            LLModContainer.log.fatal("Error on loading class {}. Please check the implementation.", name);
+            LLModContainer.log.fatal(e);
+
+            Throwables.propagate(e);
+        }
     }
     
     private void prepareClass(Class<?> clazz) {
@@ -100,14 +104,7 @@ public class RegistrationManager {
         //Inner classes
         if (innerClassList.containsKey(clazz.getName())) {
             for (String inner : innerClassList.get(clazz.getName())) {
-                try {
-                    prepareClass(Class.forName(inner));
-                } catch (Exception e) {
-                    LLModContainer.log.warn("Can not load class {}, maybe a SideOnly class.", inner);
-                } catch (Throwable e) {
-                    LLModContainer.log.fatal("Error on loading class {}. Please check the implementation.", inner);
-                    LLModContainer.log.fatal(e);
-                }
+                tryPrepareClass(inner);
             }
         }
         
