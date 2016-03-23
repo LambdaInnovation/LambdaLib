@@ -3,11 +3,11 @@ package cn.lambdalib.util.mc
 import cn.lambdalib.annoreg.core.Registrant
 import cn.lambdalib.annoreg.mc.RegEventHandler
 import cn.lambdalib.annoreg.mc.RegEventHandler.Bus
-import cn.lambdalib.util.datapart.{EntityData, RegDataPart, DataPart}
+import cn.lambdalib.util.datapart.{DataPart, EntityData, RegDataPart}
 import cn.lambdalib.util.generic.RegistryUtils
 import cn.lambdalib.vis.model.CompTransform
 import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.relauncher.Side
+import cpw.mods.fml.relauncher.{Side, SideOnly}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.{EntityRenderer, ItemRenderer}
 import net.minecraft.entity.player.EntityPlayer
@@ -15,6 +15,7 @@ import net.minecraftforge.client.event.{RenderHandEvent, RenderWorldLastEvent}
 import org.lwjgl.opengl.GL11
 import org.lwjgl.util.glu.Project
 
+@SideOnly(Side.CLIENT)
 object HandRenderer {
   private val _fFarPlaneDistance = RegistryUtils.getObfField(classOf[EntityRenderer], "farPlaneDistance", "field_78530_s")
   private val _mGetFOVModifier = RegistryUtils.getMethod(classOf[EntityRenderer], "getFOVModifier", "func_78481_a",
@@ -62,6 +63,7 @@ trait HandRenderer {
 
 @Registrant
 @RegEventHandler(Array(Bus.Forge))
+@SideOnly(Side.CLIENT)
 class __HREvents {
 
   @SubscribeEvent
