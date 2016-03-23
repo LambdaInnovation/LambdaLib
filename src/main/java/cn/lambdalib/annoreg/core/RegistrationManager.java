@@ -18,6 +18,7 @@ import java.util.Set;
 import cn.lambdalib.annoreg.base.RegistrationEmpty;
 import cn.lambdalib.core.LLModContainer;
 import cn.lambdalib.core.LambdaLib;
+import com.google.common.base.Throwables;
 import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
 
 public class RegistrationManager {
@@ -45,6 +46,7 @@ public class RegistrationManager {
     private void loadClasses() {
         loadRegistryTypes();
         for (String name : unloadedClass) {
+            // TODO More elegant way to handle SideOnly, ClassNotFound might mean other error
             try {
                 prepareClass(Class.forName(name));
             } catch (ClassNotFoundException e) {
@@ -52,6 +54,8 @@ public class RegistrationManager {
             } catch (Throwable e) {
                 LLModContainer.log.fatal("Error on loading class {}. Please check the implementation.", name);
                 LLModContainer.log.fatal(e);
+
+                Throwables.propagate(e);
             }
         }
         unloadedClass.clear();
