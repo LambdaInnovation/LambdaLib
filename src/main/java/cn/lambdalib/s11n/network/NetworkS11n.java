@@ -6,12 +6,15 @@
 */
 package cn.lambdalib.s11n.network;
 
+import cn.lambdalib.core.LLCommons;
+import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.SerializeDynamic;
 import cn.lambdalib.s11n.SerializeNullable;
 import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.s11n.SerializationHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -33,8 +36,7 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 
 /**
- * This class handles recursive s11n on netty {@link ByteBuf}. <br>
- * TODO add hash validation in debug mode to help error detection (optional) <br>
+ * This class handles recursive s11n on netty {@link ByteBuf}.
  * @author WeAthFolD
  */
 public class NetworkS11n {
@@ -190,7 +192,7 @@ public class NetworkS11n {
     public static <T> void serializeWithHint(ByteBuf buf, T obj, Class<? super T> type) {
         _check(obj != null, "Hintted serialization doesn't take null");
 
-        NetS11nAdaptor<? super T> adaptor = _adaptor(type);
+        NetS11nAdaptor<? super T> adaptor = (NetS11nAdaptor) _adaptor(type);
         if (adaptor != null) { // Serialize direct types
             adaptor.write(buf, obj);
         } else if (type.isEnum()) { // Serialize enum
@@ -251,7 +253,7 @@ public class NetworkS11n {
      * @throws RuntimeException if deserialization failed non-trivially.
      */
     public static <T, U extends T> T deserializeWithHint(ByteBuf buf, Class<U> type) {
-        NetS11nAdaptor<? super U> adaptor = _adaptor(type);
+        NetS11nAdaptor<? super U> adaptor = (NetS11nAdaptor) _adaptor(type);
         // System.out.println("adaptor " + type + " is " + adaptor);
         if (adaptor != null) {
             // Note that if adaptor's real type doesn't extend T there will be a cast exception.
@@ -318,7 +320,7 @@ public class NetworkS11n {
     private static List<Field> _sortedFields(Class<?> type) {
         List<Field> ret = fieldCache.get(type);
         if (ret == null) {
-            ret = serHelper.getExposedFields(type);
+            ret = Lists.newArrayList(serHelper.getExposedFields(type));
             // Sort to preserve s11n order
             Collections.sort(ret, (lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
             fieldCache.put(type, ret);

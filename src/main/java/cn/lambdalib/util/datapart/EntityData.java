@@ -26,6 +26,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -35,6 +36,7 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
     private static final String ID = "LL_EntityData";
 
     private static final List<RegData> regList = new ArrayList<>();
+    private static final List<RegData> bothSideList = new ArrayList<>();
     private static boolean init = false;
 
     @SuppressWarnings("unchecked")
@@ -50,6 +52,9 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
         add.lazy = lazy;
 
         regList.add(add);
+        if (sides.contains(Side.CLIENT) && sides.contains(Side.SERVER)) {
+            bothSideList.add(add);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -83,9 +88,12 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
     }
 
     private static void init() {
-        regList.sort((lhs, rhs) -> lhs.type.getName().compareTo(rhs.type.getName()));
-        Preconditions.checkState(regList.size() < Byte.MAX_VALUE);
-        IntStream.range(0, regList.size()).forEach(i -> regList.get(i).networkID = (byte) i);
+        bothSideList.sort((lhs, rhs) -> lhs.type.getName().compareTo(rhs.type.getName()));
+        Preconditions.checkState(bothSideList.size() < Byte.MAX_VALUE);
+        IntStream.range(0, bothSideList.size()).forEach(i -> bothSideList.get(i).networkID = (byte) i);
+
+        LLCommons.debug("EntityData initialized. Network participants: " +
+                bothSideList.stream().map(x -> x.type).collect(Collectors.toList()));
     }
 
     private Map<Class, DataPart> constructed = new HashMap<>();
@@ -185,14 +193,16 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
     }
 
     private static byte getNetworkID(Class<? extends DataPart> type) {
-        return regList.stream()
-                .filter(data -> data.type.equals(type))
-                .findAny().get()
-                .networkID;
+        for (RegData data : bothSideList) {
+            if (data.type == type) {
+                return data.networkID;
+            }
+        }
+        throw new IllegalStateException(type + " isn't registered as both side");
     }
 
     private static Class<? extends DataPart> getTypeFromID(byte id) {
-        return regList.get(id).type;
+        return bothSideList.get(id).type;
     }
 
     private void tick() {

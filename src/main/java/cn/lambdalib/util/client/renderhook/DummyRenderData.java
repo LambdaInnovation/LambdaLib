@@ -25,7 +25,7 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 @SideOnly(Side.CLIENT)
 @Registrant
-@RegDataPart(EntityPlayer.class)
+@RegDataPart(value=EntityPlayer.class, side=Side.CLIENT)
 public class DummyRenderData extends DataPart<EntityPlayer> {
 
     public DummyRenderData() {
