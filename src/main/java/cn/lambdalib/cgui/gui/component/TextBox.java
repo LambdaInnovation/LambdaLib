@@ -220,6 +220,11 @@ public class TextBox extends Component {
         return this;
     }
 
+    public TextBox setFont(IFont font) {
+        this.font = font;
+        return this;
+    }
+
     private void validate() {
         if (!allowEdit) {
             displayOffset = caretPos = 0;
