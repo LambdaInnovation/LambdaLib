@@ -19,6 +19,7 @@ import cpw.mods.fml.common.network.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Vec3;
@@ -646,6 +647,19 @@ public class NetworkS11n {
             @Override
             public Vec3 read(ByteBuf buf) throws ContextException {
                 return Vec3.createVectorHelper(buf.readDouble(), buf.readDouble(), buf.readDouble());
+            }
+        });
+        addDirect(ItemStack.class, new NetS11nAdaptor<ItemStack>() {
+            @Override
+            public void write(ByteBuf buf, ItemStack obj) {
+                NBTTagCompound tag = new NBTTagCompound();
+                obj.writeToNBT(tag);
+                serializeWithHint(buf, tag, NBTTagCompound.class);
+            }
+            @Override
+            public ItemStack read(ByteBuf buf) throws ContextException {
+                NBTTagCompound tag = deserializeWithHint(buf, NBTTagCompound.class);
+                return ItemStack.loadItemStackFromNBT(tag);
             }
         });
     }
