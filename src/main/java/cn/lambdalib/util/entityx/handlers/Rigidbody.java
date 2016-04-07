@@ -17,6 +17,8 @@ import cn.lambdalib.util.mc.BlockSelectors;
 import cn.lambdalib.util.mc.IBlockSelector;
 import cn.lambdalib.util.mc.Raytrace;
 
+import java.util.function.Predicate;
+
 /**
  * Rigidbody will update velocity and apply gravity and do simple collision.
  * @author WeAthFolD
@@ -26,7 +28,7 @@ public class Rigidbody extends MotionHandler {
     public double gravity = 0.00; //block/tick^2
     public double linearDrag = 1.0;
     
-    public IEntitySelector entitySel;
+    public Predicate<Entity> entitySel;
     public IBlockSelector blockFil = BlockSelectors.filNormal;
     
     public boolean accurateCollision = false;

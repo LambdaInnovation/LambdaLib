@@ -7,13 +7,13 @@
 package cn.lambdalib.util.mc;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import cn.lambdalib.util.generic.VecUtils;
 import cn.lambdalib.util.helper.Motion3D;
 import net.minecraft.block.Block;
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.AxisAlignedBB;
@@ -34,13 +34,13 @@ public class Raytrace {
      * @param world The world to perform on
      * @param vec1 Start point
      * @param vec2 End point
-     * @param entitySel The entity filter
-     * @param blockSel The block filter
+     * @param entityPred The entity predicate
+     * @param blockSel The block predicate
      * @return The trace result, might be null
      */
-    public static MovingObjectPosition perform(World world, Vec3 vec1, Vec3 vec2, IEntitySelector entitySel, IBlockSelector blockSel) {
+    public static MovingObjectPosition perform(World world, Vec3 vec1, Vec3 vec2, Predicate<Entity> entityPred, IBlockSelector blockSel) {
         MovingObjectPosition 
-            mop1 = rayTraceEntities(world, vec1, vec2, entitySel),
+            mop1 = rayTraceEntities(world, vec1, vec2, entityPred),
             mop2 = rayTraceBlocks(world, vec1, vec2, blockSel);
 
         if(mop1 != null && mop2 != null) {
@@ -54,8 +54,8 @@ public class Raytrace {
         return mop2;
     }
     
-    public static MovingObjectPosition perform(World world, Vec3 vec1, Vec3 vec2, IEntitySelector entitySel) {
-        return perform(world, vec1, vec2, entitySel, null);
+    public static MovingObjectPosition perform(World world, Vec3 vec1, Vec3 vec2, Predicate<Entity> entityPred) {
+        return perform(world, vec1, vec2, entityPred, null);
     }
     
     public static MovingObjectPosition perform(World world, Vec3 vec1, Vec3 vec2) {
@@ -67,12 +67,12 @@ public class Raytrace {
     }
     
     public static Pair<Vec3, MovingObjectPosition> getLookingPos(EntityLivingBase living, double dist,
-                                                                 IEntitySelector esel) {
-        return getLookingPos(living, dist, esel, null);
+                                                                 Predicate<Entity> pred) {
+        return getLookingPos(living, dist, pred, null);
     }
     
     public static Pair<Vec3, MovingObjectPosition> getLookingPos(Entity living, double dist,
-                                                                 IEntitySelector esel, IBlockSelector bsel) {
+                                                                 Predicate<Entity> esel, IBlockSelector bsel) {
         MovingObjectPosition pos = traceLiving(living, dist, esel, bsel);
         Vec3 end = null;
         if(pos != null) {
@@ -86,16 +86,17 @@ public class Raytrace {
         return Pair.of(end, pos);
     }
     
-    public static MovingObjectPosition rayTraceEntities(World world, Vec3 vec1, Vec3 vec2, IEntitySelector selector) {
+    public static MovingObjectPosition rayTraceEntities(World world, Vec3 vec1, Vec3 vec2, Predicate<Entity> selector) {
         Entity entity = null;
         AxisAlignedBB boundingBox = WorldUtils.getBoundingBox(vec1, vec2);
-        List list = world.getEntitiesWithinAABBExcludingEntity(null, boundingBox.expand(1.0D, 1.0D, 1.0D), selector);
+        List list = world.getEntitiesWithinAABBExcludingEntity(null, boundingBox.expand(1.0D, 1.0D, 1.0D),
+                EntitySelectors.toEntitySelector(selector));
         double d0 = 0.0D;
 
         for (int j = 0; j < list.size(); ++j) {
             Entity entity1 = (Entity)list.get(j);
 
-            if(!entity1.canBeCollidedWith() || (selector != null && !selector.isEntityApplicable(entity1)))
+            if(!entity1.canBeCollidedWith() || (selector != null && !selector.test(entity1)))
                 continue;
             
             float f = 0.3F;
@@ -266,21 +267,21 @@ public class Raytrace {
         return traceLiving(entity, dist, null, null);
     }
     
-    public static MovingObjectPosition traceLiving(Entity entity, double dist, IEntitySelector entitySel) {
-        return traceLiving(entity, dist, entitySel, null);
+    public static MovingObjectPosition traceLiving(Entity entity, double dist, Predicate<Entity> pred) {
+        return traceLiving(entity, dist, pred, null);
     }
     
     /**
      * Performs a RayTrace starting from the target entity's eye towards its looking direction.
      * The trace will automatically ignore the target entity.
      */
-    public static MovingObjectPosition traceLiving(Entity entity, double dist, IEntitySelector entitySel, IBlockSelector blockSel) {
+    public static MovingObjectPosition traceLiving(Entity entity, double dist, Predicate<Entity> pred, IBlockSelector blockSel) {
         Motion3D mo = new Motion3D(entity, true);
         Vec3 v1 = mo.getPosVec(), v2 = mo.move(dist).getPosVec();
         
-        IEntitySelector exclude = EntitySelectors.excludeOf(entity);
+        Predicate<Entity> exclude = EntitySelectors.exclude(entity);
         
-        return perform(entity.worldObj, v1, v2, entitySel == null ? exclude : EntitySelectors.and(exclude, entitySel), blockSel);
+        return perform(entity.worldObj, v1, v2, pred == null ? exclude : exclude.or(pred), blockSel);
     }
     
 

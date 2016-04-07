@@ -6,10 +6,8 @@
 */
 package cn.lambdalib.util.mc;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Predicate;
 
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
@@ -23,176 +21,61 @@ import net.minecraft.entity.player.EntityPlayer;
  */
 public class EntitySelectors {
 
-    public static IEntitySelector living = or(
-        new SelectorOfType(EntityLivingBase.class),
-        new SelectorOfType(EntityDragonPart.class) // Workaround to let it be applicable for dragon
-    );
-    
-    public static IEntitySelector player = new SelectorOfType(EntityPlayer.class);
-    
-    public static IEntitySelector survivalPlayer = new IEntitySelector() {
-
-        @Override
-        public boolean isEntityApplicable(Entity e) {
-            return (e instanceof EntityPlayer && !((EntityPlayer)e).capabilities.isCreativeMode);
-        }
-        
-    };
-    
-    public static IEntitySelector nothing = new IEntitySelector() {
-
-        @Override
-        public boolean isEntityApplicable(Entity p_82704_1_) {
-            return false;
-        }
-        
-    };
-    
-    public static IEntitySelector everything = new IEntitySelector() {
-
-        @Override
-        public boolean isEntityApplicable(Entity p_82704_1_) {
-            return true;
-        }
-        
-    };
-    
-    public static class SelectorOfType implements IEntitySelector {
-        
-        final Class<? extends Entity> klass;
-        
-        public SelectorOfType(Class<? extends Entity> _klass) {
-            klass = _klass;
-        }
-
-        @Override
-        public boolean isEntityApplicable(Entity entity) {
-            return klass.isInstance(entity);
-        }
-        
+    public static Predicate<Entity> of(Class<? extends Entity> type) {
+        return entity -> type.isInstance(type);
     }
-    
-    public static class ExcludeType implements IEntitySelector {
-        
-        final Class<? extends Entity> klass;
 
-        public ExcludeType(Class<? extends Entity> _klass) {
-            klass = _klass;
-        }
-        
-        @Override
-        public boolean isEntityApplicable(Entity entity) {
-            return !klass.isInstance(entity);
-        }
-        
-    }
-    
-    public static class RestrictRange implements IEntitySelector {
-        
-        final double x, y, z;
-        final double rangeSq;
-        
-        public RestrictRange(Entity e, double range) {
-            this(e.posX, e.posY, e.posZ, range);
-        }
-        
-        public RestrictRange(double _x, double _y, double _z, double _range) {
-            x = _x;
-            y = _y;
-            z = _z;
-            rangeSq = _range * _range;
-        }
+    public static Predicate<Entity> everything() { return e -> true; }
 
-        @Override
-        public boolean isEntityApplicable(Entity entity) {
-            double dx = entity.posX - x,
-                    dy = entity.posY - y,
-                    dz = entity.posZ - z;
-            return dx * dx + dy * dy + dz * dz <= rangeSq;
-        }
-        
-    }
-    
-    public static class Exclusion implements IEntitySelector {
-        
-        final Set<Entity> exclusions = new HashSet<>();
-        
-        public Exclusion(Entity ...excls) {
-            for(Entity e : excls)
-                exclusions.add(e);
-        }
-        
-        public Exclusion add(Entity e) {
-            exclusions.add(e);
-            return this;
-        }
+    public static Predicate<Entity> nothing() { return e -> false; }
 
-        @Override
-        public boolean isEntityApplicable(Entity entity) {
-            return !exclusions.contains(entity);
-        }
-        
+    public static Predicate<Entity> survivalPlayer() {
+        return entity -> entity instanceof EntityPlayer && !((EntityPlayer) entity).capabilities.isCreativeMode;
     }
-    
-    public static class SelectorList implements IEntitySelector {
-        
-        List<IEntitySelector> list = new ArrayList<>();
-        
-        public SelectorList(IEntitySelector ...sels) {
-            for(IEntitySelector i : sels)
-                list.add(i);
-        }
-        
-        public SelectorList append(IEntitySelector selector) {
-            list.add(selector);
-            return this;
-        }
 
-        @Override
-        public boolean isEntityApplicable(Entity entity) {
-            
-            for(IEntitySelector i : list)
-                if(!i.isEntityApplicable(entity))
-                    return false;
-            return true;
-        }
-        
+    public static Predicate<Entity> exclude(Entity ...exclusions) {
+        Set<Entity> set = new HashSet<>();
+        Collections.addAll(set, exclusions);
+        return entity -> !set.contains(entity);
     }
-    
+
+    public static Predicate<Entity> within(Entity entity, double range) {
+        double sq = range * range;
+        return e -> e.getDistanceSqToEntity(entity) <= sq;
+    }
+
+    public static Predicate<Entity> within(double x, double y, double z, double range) {
+        double sq = range * range;
+        return e -> e.getDistanceSq(x, y, z) <= sq;
+    }
+
+    public static Predicate<Entity> player() {
+        return entity -> entity instanceof EntityPlayer;
+    }
+
     /**
-     * Combine a set of EntitySelectors (logical AND) to create a new EntitySelector.
+     * @return The selector that returns living things. WARNING: Doesn't select only EntityLivingBase. Some special
+     *  living types such as boss parts are taken into consideration.
      */
-    public static IEntitySelector and(IEntitySelector ...sels) {
-        return new SelectorList(sels);
+    public static Predicate<Entity> living() {
+        return entity -> entity instanceof EntityLivingBase || entity instanceof EntityDragonPart;
     }
-    
-    /**
-     * Combine a set of EntitySelectors (logical OR) to create a new EntitySelector.
-     */
-    public static IEntitySelector or(IEntitySelector ...sels) {
-        return new IEntitySelector() {
+
+    public static IEntitySelector toEntitySelector(Predicate<Entity> pred) {
+        if (pred == null) return TRUE;
+        else              return new IEntitySelector() {
             @Override
             public boolean isEntityApplicable(Entity entity) {
-                if(sels.length == 0)
-                    return true;
-                for(IEntitySelector s : sels)
-                    if(s.isEntityApplicable(entity))
-                        return true;
-                return false;
+                return pred.test(entity);
             }
-            
         };
     }
-    
-    /**
-     * Create an EntitySelector that excludes the passed in entities.
-     */
-    public static IEntitySelector excludeOf(Entity ...ents) {
-        return new Exclusion(ents);
-    }
-    
-    public static IEntitySelector excludeType(Class<? extends Entity> klass) {
-        return new ExcludeType(klass);
-    }
+
+    private static IEntitySelector TRUE = new IEntitySelector() {
+        @Override
+        public boolean isEntityApplicable(Entity p_82704_1_) {
+            return true;
+        }
+    };
     
 }
