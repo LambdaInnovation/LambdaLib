@@ -14,8 +14,13 @@ import java.lang.annotation.Target;
 import cn.lambdalib.networkcall.s11n.StorageOption;
 import cpw.mods.fml.relauncher.Side;
 
+/**
+ * @deprecated NetworkCall is deprecated due to performance and flexibility issues.
+ * Consider using {@link cn.lambdalib.s11n.network.NetworkMessage} instead!
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Deprecated
 public @interface RegNetworkCall {
     // WARNING: Don't modify this class!
     // This annotation is used with ASM library.
