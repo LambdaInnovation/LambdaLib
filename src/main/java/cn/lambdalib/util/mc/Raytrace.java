@@ -281,7 +281,7 @@ public class Raytrace {
         
         Predicate<Entity> exclude = EntitySelectors.exclude(entity);
         
-        return perform(entity.worldObj, v1, v2, pred == null ? exclude : exclude.or(pred), blockSel);
+        return perform(entity.worldObj, v1, v2, pred == null ? exclude : exclude.and(pred), blockSel);
     }
     
 
