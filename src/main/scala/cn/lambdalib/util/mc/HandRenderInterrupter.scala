@@ -41,7 +41,6 @@ object HandRenderer {
 
     GL11.glMatrixMode(GL11.GL_MODELVIEW)
     GL11.glLoadIdentity()
-    GL11.glDisable(GL11.GL_DEPTH_TEST)
 
     transform.doTransform()
 
@@ -51,7 +50,6 @@ object HandRenderer {
 
     renderer.itemRenderer.renderItemInFirstPerson(partialTicks)
 
-    GL11.glEnable(GL11.GL_DEPTH_TEST)
   }
 }
 
