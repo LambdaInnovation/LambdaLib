@@ -68,42 +68,41 @@ public class EntitySyncer {
         boolean allowNull() default false;
         
     }
+
+    private boolean firstUpdate;
     
-    boolean firstUpdate;
-    
-    final Entity entity;
-    final DataWatcher dataWatcher;
-    final HashMap<Integer, WatchableObject> watchedObjects;
-    
-    final List<SyncInstance> watched;
-    
-    static final Map<Class<?>, Type> typeMap = new HashMap();
-    static final Map<Class<?>, Integer> idMap = new HashMap();
-    
-    static final Method mGetWatchedObject = RegistryUtils.getMethod(DataWatcher.class, "getWatchedObject", "func_75691_i", int.class);
+    private final Entity entity;
+    private final DataWatcher dataWatcher;
+    private final HashMap<Integer, WatchableObject> watchedObjects;
+
+    private final List<SyncInstance> watched;
+
+    private static final Map<Class<?>, Type> typeMap = new HashMap<>();
+    private static final Map<Class<?>, Integer> idMap = new HashMap<>();
+
+    private static final Method mGetWatchedObject = RegistryUtils.getMethod(DataWatcher.class, "getWatchedObject", "func_75691_i", int.class);
     
     
-    static final Fetcher 
+    private static final Fetcher
         defaultFetcher = (EntitySyncer d, int id) -> (getWatchableObject(d, id).getObject()),
         entityFetcher = (EntitySyncer d, int id) -> { 
             Integer i = (Integer) defaultFetcher.supply(d, id);
             if(i == null) return null;
             
-            Entity e = 
-                d.entity.worldObj.getEntityByID(i); 
+            Entity e = d.entity.worldObj.getEntityByID(i);
             return e;
         };
     
-    static void put(Creator c, Fetcher f, Object d, Class... classes) {
+    private static void put(Creator c, Fetcher f, Object d, Class... classes) {
         for(Class cc : classes)
             typeMap.put(cc, new Type(c, f, d));
     }
 
-    static void put(Creator c, Object d, Class ...classes) {
+    private static void put(Creator c, Object d, Class ...classes) {
         put(c, defaultFetcher, d, classes);
     }
     
-    static final Creator
+    private static final Creator
         byteCreator = (Object b) -> (byte) b,
         shortCreator = (Object b) -> (short) b,
         intCreator = (Object b) -> (int) b,
@@ -115,14 +114,14 @@ public class EntitySyncer {
         
         
     static {
-        put(byteCreator, Byte.valueOf((byte) 0), Byte.class, byte.class);
-        put(shortCreator, Short.valueOf((short)0), Short.class, short.class);
-        put(intCreator, Integer.valueOf(0), Integer.class, int.class);
-        put(floatCreator, Float.valueOf(0), Float.class, float.class);
+        put(byteCreator, (byte) 0, Byte.class, byte.class);
+        put(shortCreator, (short)0, Short.class, short.class);
+        put(intCreator, 0, Integer.class, int.class);
+        put(floatCreator, 0.0f, Float.class, float.class);
         put(stringCreator, (String)null, String.class);
         put(itemStackCreator, (ItemStack)null, ItemStack.class);
         put(ccCreator, (ChunkCoordinates)null, ChunkCoordinates.class);
-        put(entityCreator, entityFetcher, Integer.valueOf(-1), Entity.class);
+        put(entityCreator, entityFetcher, -1, Entity.class);
         
         idMap.put(Byte.class, 0);
         idMap.put(byte.class, 0);
@@ -146,7 +145,7 @@ public class EntitySyncer {
         dataWatcher = RegistryUtils.getFieldInstance(Entity.class, ent, "dataWatcher", "field_70180_af");
         watchedObjects = RegistryUtils.getFieldInstance(DataWatcher.class, dataWatcher, 
                 "watchedObjects", "field_75695_b");
-        watched = new ArrayList();
+        watched = new ArrayList<>();
     }
     
     private static WatchableObject getWatchableObject(EntitySyncer w, int id) {
