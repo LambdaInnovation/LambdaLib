@@ -63,4 +63,9 @@ public class Tint extends Component {
             }
         });
     }
+
+    public Tint setAffectTexture() {
+        affectTexture = true;
+        return this;
+    }
 }

@@ -15,6 +15,8 @@ import java.io.IOException;
 
 import cn.lambdalib.cgui.gui.*;
 import cn.lambdalib.core.LambdaLib;
+import cn.lambdalib.s11n.SerializeIncluded;
+import cn.lambdalib.util.client.font.Fonts;
 import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.client.font.TrueTypeFont;
@@ -54,7 +56,8 @@ public class TextBox extends Component {
     
     public String content = "";
 
-    public IFont font = TrueTypeFont.defaultFont();
+    @SerializeIncluded
+    public IFont font = Fonts.getDefault();
 
     public FontOption option;
 
@@ -161,6 +164,7 @@ public class TextBox extends Component {
                     if (displayOffset != 0) {
                         --displayOffset;
                     }
+                    widget.post(new ChangeContentEvent());
 
                     checkCaretRegion();
                     validate();
@@ -175,6 +179,7 @@ public class TextBox extends Component {
             } else if (ChatAllowedCharacters.isAllowedCharacter(input)) {
                 content = content.substring(0, caretPos) + input + content.substring(caretPos);
                 caretPos = Math.min(content.length(), caretPos + 1);
+                widget.post(new ChangeContentEvent());
 
                 checkCaretRegion();
             }
@@ -212,6 +217,11 @@ public class TextBox extends Component {
     
     public TextBox setContent(String str) {
         content = str;
+        return this;
+    }
+
+    public TextBox setFont(IFont font) {
+        this.font = font;
         return this;
     }
 

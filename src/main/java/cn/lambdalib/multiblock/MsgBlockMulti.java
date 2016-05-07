@@ -84,7 +84,6 @@ public class MsgBlockMulti implements IMessage {
 
     }
 
-    @RegMessageHandler(msg = Req.class, side = RegMessageHandler.Side.SERVER)
     public static class ReqHandler implements IMessageHandler<Req, MsgBlockMulti> {
 
         @Override
@@ -101,7 +100,6 @@ public class MsgBlockMulti implements IMessage {
 
     }
 
-    @RegMessageHandler(msg = MsgBlockMulti.class, side = RegMessageHandler.Side.CLIENT)
     public static class Handler implements IMessageHandler<MsgBlockMulti, IMessage> {
 
         @Override

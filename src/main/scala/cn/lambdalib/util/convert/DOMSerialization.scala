@@ -6,7 +6,9 @@
 */
 package cn.lambdalib.util.convert
 
+import cn.lambdalib.core.LLCommons
 import cn.lambdalib.s11n.SerializationHelper
+import cn.lambdalib.util.client.font.{Fonts, IFont}
 import net.minecraft.util.{ResourceLocation, Vec3}
 import org.w3c.dom.{Document, Node}
 
@@ -111,6 +113,10 @@ class DOMSerialization {
       classOf[Boolean], classOf[java.lang.Boolean],
       classOf[String], classOf[ResourceLocation])
     addForward(_.getClass.isEnum, (obj, node) => addText(node, obj.toString))
+    addForward(_.isInstanceOf[IFont], (obj, node) => obj match {
+      case fnt: IFont =>
+        addText(node, Fonts.getName(fnt))
+    })
 
     def bw[T](parseMethod: String => T)(implicit evidence: ClassTag[T]) =
       addBackward[T]((_, n) => parseMethod(n.getTextContent))
@@ -127,6 +133,14 @@ class DOMSerialization {
     bw(java.lang.Boolean.valueOf)
     bw(String.valueOf)
     bw(str => new ResourceLocation(str))
+    bw(str => {
+      if (Fonts.exists(str)) {
+        Fonts.get(str)
+      } else {
+        LLCommons.log.warn("Can't find font with name " + str + " while loading. Plase check your installed mods.")
+        Fonts.getDefault
+      }
+    })
   }
 
   init()

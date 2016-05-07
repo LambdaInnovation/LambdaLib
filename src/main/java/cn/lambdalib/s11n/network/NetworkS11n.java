@@ -6,25 +6,38 @@
 */
 package cn.lambdalib.s11n.network;
 
+import cn.lambdalib.core.LLCommons;
+import cn.lambdalib.core.LambdaLib;
+import cn.lambdalib.s11n.SerializeDynamic;
+import cn.lambdalib.s11n.SerializeNullable;
 import cn.lambdalib.util.mc.SideHelper;
 import cn.lambdalib.s11n.SerializationHelper;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 /**
- * This class handles recursive s11n on netty {@link ByteBuf}. <br>
- * TODO add hash validation in debug mode to help error detection (optional) <br>
+ * This class handles recursive s11n on netty {@link ByteBuf}.
  * @author WeAthFolD
  */
 public class NetworkS11n {
@@ -57,22 +70,6 @@ public class NetworkS11n {
     public @interface NetworkS11nType {}
 
     /**
-     * Indicate that a field can be null while being serialized in parent object.
-     */
-    @Target(ElementType.FIELD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface SerializeNullable {}
-
-    /**
-     * To optimize data usage, type info about the recursive object's fields are emitted. That will result in
-     *  serialization with type defined in the class, rather than its runtime type. If you want normal dynamic type
-     *  behaviour to be present, annotate this on the field.
-     */
-    @Target(ElementType.FIELD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface SerializeDynamic {}
-
-    /**
      * Thrown when the object can't be retrieved, because it can't be found in that runtime(context).
      */
     public static class ContextException extends RuntimeException {
@@ -84,10 +81,14 @@ public class NetworkS11n {
     // ---
     private static final SerializationHelper serHelper = new SerializationHelper();
 
-    private static final short IDX_NULL = -1;
+    private static final short IDX_NULL = -1, IDX_ARRAY = -2;
 
     private static List<Class<?>> serTypes = new ArrayList<>();
     private static Map<Class<?>, NetS11nAdaptor> adaptors = new HashMap<>();
+
+    private static Map<Class, Supplier> suppliers = new HashMap<>();
+
+    private static Map<Class, List<Field>> fieldCache = new HashMap<>();
 
     private NetworkS11n() {}
 
@@ -95,6 +96,21 @@ public class NetworkS11n {
         register(type);
         adaptors.put(type, adaptor);
         serHelper.regS11nType(type);
+    }
+
+    public static <T> void addDirectInstance(T instance) {
+        addDirect((Class<T>) instance.getClass(), new NetS11nAdaptor<T>() {
+            @Override
+            public void write(ByteBuf buf, T obj) {}
+            @Override
+            public T read(ByteBuf buf) throws ContextException {
+                return instance;
+            }
+        });
+    }
+
+    public static <T> void addSupplier(Class<T> type, Supplier<? extends T> supplier) {
+        suppliers.put(type, supplier);
     }
 
     /**
@@ -114,6 +130,34 @@ public class NetworkS11n {
         }
     }
 
+    private static void writeTypeIndex(ByteBuf buf, Class type) {
+        if (type.isArray()) {
+            buf.writeShort(IDX_ARRAY);
+            writeTypeIndex(buf, type.getComponentType());
+        } else {
+            short idx = (short) typeIndex(type);
+            if (idx == -1) {
+                throw new RuntimeException("Type " + type + " not registered for net serialization");
+            }
+            buf.writeShort(idx);
+        }
+    }
+
+    private static Class readTypeIndex(ByteBuf buf) {
+        short idx = buf.readShort();
+        if (idx == IDX_NULL) {
+            return null;
+        } else if (idx == IDX_ARRAY) {
+            return getArrayClass(readTypeIndex(buf));
+        } else {
+            return serTypes.get(idx);
+        }
+    }
+
+    private static <T> Class getArrayClass(Class<T> component) {
+        return Array.newInstance(component, 0).getClass();
+    }
+
     /**
      * Serializes a object.
      * @param buf The buffer to serialize the object into
@@ -130,14 +174,8 @@ public class NetworkS11n {
                 throw new NullPointerException("Trying to serialize a null object where it's not accepted");
             }
         } else {
-            final Class type = obj.getClass();
-            final short typeIndex = (short) typeIndex(type);
-
-            if (typeIndex == -1) {
-                throw new RuntimeException("Type " + type + " not registered for net serialization");
-            }
-
-            buf.writeShort(typeIndex);
+            Class type = obj.getClass();
+            writeTypeIndex(buf, type);
             serializeWithHint(buf, obj, type);
         }
     }
@@ -155,27 +193,38 @@ public class NetworkS11n {
     public static <T> void serializeWithHint(ByteBuf buf, T obj, Class<? super T> type) {
         _check(obj != null, "Hintted serialization doesn't take null");
 
-        NetS11nAdaptor<? super T> adaptor = _adaptor(type);
+        NetS11nAdaptor<? super T> adaptor = (NetS11nAdaptor) _adaptor(type);
         if (adaptor != null) { // Serialize direct types
             adaptor.write(buf, obj);
         } else if (type.isEnum()) { // Serialize enum
             buf.writeByte(((Enum) obj).ordinal());
-        } else { // Serialize recursive types
-            final List<Field> fields = _sortedFields(type);
+        } else if (type.isArray()) { // Serialize array
+            int length = Array.getLength(obj);
+            Preconditions.checkArgument(length < Short.MAX_VALUE, "Array too large");
 
-            try {
-                for(Field f : fields) {
-                    Object sub = f.get(obj);
-                    if (_isHintted(f)) {
-                        boolean subNullable = f.isAnnotationPresent(SerializeNullable.class);
-                        serialize(buf, sub, subNullable);
-                    } else {
-                        serializeWithHint(buf, sub, (Class) f.getType());
-                    }
-                }
-            } catch (IllegalArgumentException|IllegalAccessException e) {
-                throw new RuntimeException("Error serializing object " + obj, e);
+            buf.writeShort(length);
+            for (int i = 0; i < length; ++i) {
+                serialize(buf, Array.get(obj, i), true);
             }
+        } else { // Serialize recursive types
+            serializeRecursively(buf, obj, type);
+        }
+    }
+
+    public static <T> void serializeRecursively(ByteBuf buf, T obj, Class<? super T> type) {
+        final List<Field> fields = _sortedFields(type);
+        try {
+            for(Field f : fields) {
+                Object sub = f.get(obj);
+                if (_needsTypeIndex(f)) {
+                    boolean subNullable = f.isAnnotationPresent(SerializeNullable.class);
+                    serialize(buf, sub, subNullable);
+                } else {
+                    serializeWithHint(buf, sub, (Class) f.getType());
+                }
+            }
+        } catch (IllegalArgumentException|IllegalAccessException e) {
+            throw new RuntimeException("Error serializing object " + obj, e);
         }
     }
 
@@ -187,16 +236,13 @@ public class NetworkS11n {
      */
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(ByteBuf buf) {
-        final short typeIndex = buf.readShort();
-        if (typeIndex == IDX_NULL) {
+        Class type = readTypeIndex(buf);
+
+        if (type == null) {
             return null;
         } else {
-            if (typeIndex >= serTypes.size()) {
-                throw new RuntimeException("Invalid type index.");
-            }
-
-            final Class<T> type = (Class<T>) serTypes.get(typeIndex);
-            return deserializeWithHint(buf, type);
+            Class<T> type2 = (Class<T>) type;
+            return deserializeWithHint(buf, type2);
         }
     }
 
@@ -208,36 +254,54 @@ public class NetworkS11n {
      * @throws RuntimeException if deserialization failed non-trivially.
      */
     public static <T, U extends T> T deserializeWithHint(ByteBuf buf, Class<U> type) {
-        NetS11nAdaptor<? super U> adaptor = _adaptor(type);
+        NetS11nAdaptor<? super U> adaptor = (NetS11nAdaptor) _adaptor(type);
+        // System.out.println("adaptor " + type + " is " + adaptor);
         if (adaptor != null) {
             // Note that if adaptor's real type doesn't extend T there will be a cast exception.
             // With type erasure we can't do much about it.
             return (T) adaptor.read(buf);
+        } else if (type.isArray()) { // Deserialize array
+            int size = buf.readShort();
+            Class componentType = type.getComponentType();
+
+            Object ret = Array.newInstance(componentType, size);
+            for (int i = 0; i < size; ++i) {
+                Array.set(ret, i, deserialize(buf));
+            }
+
+            return (T) ret;
         } else if (type.isEnum()) { // Deserialize enum
             return type.getEnumConstants()[buf.readByte()];
         } else { // Recursive deserialization
+            return deserializeRecursively(buf, type);
+        }
+    }
+
+    public static <T, U extends T> T deserializeRecursively(ByteBuf buf, Class<U> type) {
+        try {
+            T instance = instantiate(type);
+            deserializeRecursivelyInto(buf, instance, type);
+            return instance;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error deserializing type " + type, e);
+        }
+    }
+
+    public static <T, U extends T> void deserializeRecursivelyInto(ByteBuf buf, T instance, Class<U> type) {
+        for (Field f : _sortedFields(type)) {
+            // Both nullable and porlymorphic s11n needs type index.
+            Object sub;
+            if (_needsTypeIndex(f)) {
+                sub = deserialize(buf);
+            } else {
+                sub = deserializeWithHint(buf, f.getType());
+            }
+
             try {
-                T instance = type.newInstance();
-                for (Field f : _sortedFields(type)) {
-                    // Both nullable and porlymorphic s11n needs type index.
-                    Object sub;
-                    if (_isHintted(f)) {
-                        sub = deserialize(buf);
-                    } else {
-                        sub = deserializeWithHint(buf, f.getType());
-                    }
-
-                    try {
-                        f.set(instance, sub);
-                    } catch (IllegalArgumentException exc) {
-                        throw new RuntimeException("Type mismatch in net s11n: expecting " +
-                                f.getType() + ", found " + (sub != null ? sub.getClass() : "NULL"));
-                    }
-                }
-
-                return instance;
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException("Error deserializing type " + type, e);
+                f.set(instance, sub);
+            } catch (IllegalArgumentException|IllegalAccessException exc) {
+                throw new RuntimeException("Type mismatch in net s11n: expecting " +
+                        f.getType() + ", found " + (sub != null ? sub.getClass() : "NULL"));
             }
         }
     }
@@ -255,13 +319,18 @@ public class NetworkS11n {
     }
 
     private static List<Field> _sortedFields(Class<?> type) {
-        List<Field> fields = serHelper.getExposedFields(type);
-        // Sort to preserve s11n order
-        Collections.sort(fields, (lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
-        return fields;
+        List<Field> ret = fieldCache.get(type);
+        if (ret == null) {
+            ret = Lists.newArrayList(serHelper.getExposedFields(type));
+            // Sort to preserve s11n order
+            Collections.sort(ret, (lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
+            fieldCache.put(type, ret);
+        }
+
+        return ret;
     }
 
-    private static boolean _isHintted(Field f) {
+    private static boolean _needsTypeIndex(Field f) {
         return  f.isAnnotationPresent(SerializeDynamic.class) ||
                 f.isAnnotationPresent(SerializeNullable.class);
     }
@@ -277,6 +346,19 @@ public class NetworkS11n {
             cur = cur.getSuperclass();
         }
         return ret;
+    }
+
+    private static <T> T instantiate(Class<T> type) {
+        if (suppliers.containsKey(type)) {
+            return (T) suppliers.get(type).get();
+        }
+        try {
+            Constructor<T> ctor = type.getConstructor();
+            ctor.setAccessible(true);
+            return ctor.newInstance();
+        } catch (Exception ex) {
+            throw Throwables.propagate(ex);
+        }
     }
 
     // default s11n types
@@ -347,6 +429,20 @@ public class NetworkS11n {
             addDirect(double.class, adp);
             addDirect(Double.class, adp);
         }
+        { // Boolean
+            NetS11nAdaptor<Boolean> adp = new NetS11nAdaptor<Boolean>() {
+                @Override
+                public void write(ByteBuf buf, Boolean obj) {
+                    buf.writeBoolean(obj);
+                }
+                @Override
+                public Boolean read(ByteBuf buf) throws ContextException {
+                    return buf.readBoolean();
+                }
+            };
+            addDirect(boolean.class, adp);
+            addDirect(Boolean.class, adp);
+        }
 
         addDirect(String.class, new NetS11nAdaptor<String>() {
             @Override
@@ -356,6 +452,36 @@ public class NetworkS11n {
             @Override
             public String read(ByteBuf buf) {
                 return ByteBufUtils.readUTF8String(buf);
+            }
+        });
+
+        addDirect(ByteBuf.class, new NetS11nAdaptor<ByteBuf>() {
+            @Override
+            public void write(ByteBuf buf, ByteBuf obj) {
+                obj.readBytes(buf, obj.readableBytes());
+            }
+            @Override
+            public ByteBuf read(ByteBuf buf) throws ContextException {
+                ByteBuf buf_ = buf.duplicate();
+                ByteBuf buf2 = Unpooled.buffer();
+                buf_.readBytes(buf2, buf_.readableBytes());
+                return buf2;
+            }
+        });
+
+        // Meta: Class
+        addDirect(Class.class, new NetS11nAdaptor<Class>() {
+            @Override
+            public void write(ByteBuf buf, Class obj) {
+                int idx = serTypes.indexOf(obj);
+                if (idx == -1) throw new IllegalArgumentException(obj + " is not a network s11n type");
+
+                buf.writeInt(idx);
+            }
+
+            @Override
+            public Class read(ByteBuf buf) throws ContextException {
+                return serTypes.get(buf.readInt());
             }
         });
 
@@ -399,6 +525,29 @@ public class NetworkS11n {
                 for (int i = 0; i < size; ++i) {
                    ret.put(deserialize(buf), deserialize(buf));
                 }
+                return ret;
+            }
+        });
+        addDirect(Set.class, new NetS11nAdaptor<Set>() {
+            @Override
+            public void write(ByteBuf buf, Set obj) {
+                Preconditions.checkArgument(obj.size() < Short.MAX_VALUE, "Too many objects to serialize");
+
+                buf.writeShort(obj.size());
+
+                for (Object o : obj) {
+                    serialize(buf, o, false);
+                }
+            }
+            @Override
+            public Set read(ByteBuf buf) throws ContextException {
+                int size = buf.readShort();
+                Set<Object> ret = new HashSet<>();
+
+                while (size-- > 0) {
+                    ret.add(deserialize(buf));
+                }
+
                 return ret;
             }
         });
@@ -449,6 +598,68 @@ public class NetworkS11n {
                         return ret;
                     }
                 }
+            }
+        });
+        addDirect(World.class, new NetS11nAdaptor<World>() {
+            @Override
+            public void write(ByteBuf buf, World obj) {
+                buf.writeByte(obj.provider.dimensionId);
+            }
+            @Override
+            public World read(ByteBuf buf) throws ContextException {
+                World wrld = SideHelper.getWorld(buf.readByte());
+                if (wrld == null) {
+                    throw new ContextException("invalid world");
+                } else {
+                    return wrld;
+                }
+            }
+        });
+        addDirect(TileEntity.class, new NetS11nAdaptor<TileEntity>() {
+            @Override
+            public void write(ByteBuf buf, TileEntity obj) {
+                serializeWithHint(buf, obj.getWorldObj(), World.class);
+
+                buf.writeInt(obj.xCoord);
+                buf.writeInt(obj.yCoord);
+                buf.writeInt(obj.zCoord);
+            }
+            @Override
+            public TileEntity read(ByteBuf buf) throws ContextException {
+                World world = deserializeWithHint(buf, World.class);
+
+                TileEntity tileEntity = world.getTileEntity(buf.readInt(), buf.readInt(), buf.readInt());
+
+                if (tileEntity == null) {
+                    throw new ContextException("No such TileEntity is present");
+                } else {
+                    return tileEntity;
+                }
+            }
+        });
+        addDirect(Vec3.class, new NetS11nAdaptor<Vec3>() {
+            @Override
+            public void write(ByteBuf buf, Vec3 obj) {
+                buf.writeDouble(obj.xCoord);
+                buf.writeDouble(obj.yCoord);
+                buf.writeDouble(obj.zCoord);
+            }
+            @Override
+            public Vec3 read(ByteBuf buf) throws ContextException {
+                return Vec3.createVectorHelper(buf.readDouble(), buf.readDouble(), buf.readDouble());
+            }
+        });
+        addDirect(ItemStack.class, new NetS11nAdaptor<ItemStack>() {
+            @Override
+            public void write(ByteBuf buf, ItemStack obj) {
+                NBTTagCompound tag = new NBTTagCompound();
+                obj.writeToNBT(tag);
+                serializeWithHint(buf, tag, NBTTagCompound.class);
+            }
+            @Override
+            public ItemStack read(ByteBuf buf) throws ContextException {
+                NBTTagCompound tag = deserializeWithHint(buf, NBTTagCompound.class);
+                return ItemStack.loadItemStackFromNBT(tag);
             }
         });
     }

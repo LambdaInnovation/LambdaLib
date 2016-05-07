@@ -25,6 +25,23 @@ Project structure:
 * `src\editor\`: Features used only in dev environment
 * `src\test\`: Test codes
 
+Use in gradle
+=====
+
+Add in your `build.gradle`:
+```gradle
+repositories {
+    ...
+    mavenLocal()
+}
+
+dependencies {
+    compile "cn.lambdalib:LambdaLib:{your wanted version}:dev"
+}
+```
+
+After then, build LambdaLib with the correct version using `gradle install` first, then build your project.
+
 Misc
 =====
 

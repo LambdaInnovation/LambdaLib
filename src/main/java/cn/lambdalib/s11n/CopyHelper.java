@@ -6,11 +6,13 @@
 */
 package cn.lambdalib.s11n;
 
+import cn.lambdalib.util.client.font.IFont;
 import net.minecraft.util.ResourceLocation;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Value-copy objects based on the rule of SerializationHelper.
@@ -46,6 +48,8 @@ public class CopyHelper {
         direct(boolean.class);
         direct(Boolean.class);
         direct(ResourceLocation.class);
+        direct(IFont.class);
+        direct(Enum.class);
     }
 
     /**
@@ -74,18 +78,17 @@ public class CopyHelper {
      * @return If the object's copying is directly supported (No recursive value copying)
      */
     public boolean isDirect(Object obj) {
-        if (obj == null || obj.getClass().isEnum()) {
-            return true;
-        }
+        if (obj == null) return true;
+        return copyFactory(obj) != null;
+    }
 
-        Class<?> type = obj.getClass();
-        while (type != null) {
-            if (primitiveHandlers.containsKey(type)) {
-                return true;
+    private <T> ICopyFactory<T> copyFactory(T obj) {
+        for (Entry<Class<?>, ICopyFactory<?>> ent : primitiveHandlers.entrySet()) {
+            if (ent.getKey().isInstance(obj)) {
+                return (ICopyFactory) ent.getValue();
             }
-            type = type.getSuperclass();
         }
-        return false;
+        return null;
     }
 
     /**
@@ -93,15 +96,11 @@ public class CopyHelper {
      * @throws RuntimeException if the object is not directly supported.
      */
     public <T> T copyDirect(T object) {
-        if (object == null || object.getClass().isEnum()) {
-            return object;
-        }
-        Class<?> type = object.getClass();
-        while (type != null) {
-            if (primitiveHandlers.containsKey(type)) {
-                return ((ICopyFactory<T>) primitiveHandlers.get(type)).copy(object);
-            }
-            type = type.getSuperclass();
+        if (object == null) return null;
+
+        ICopyFactory<T> factory = copyFactory(object);
+        if (factory != null) {
+            return factory.copy(object);
         }
 
         throw new RuntimeException("Can't find handler for primitive " + object + " of type " + object.getClass());

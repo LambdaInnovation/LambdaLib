@@ -6,42 +6,51 @@
 */
 package cn.lambdalib.vis.editor
 
-import java.io.{FileOutputStream, File, FileInputStream, IOException}
+import java.io.{File, FileInputStream, FileOutputStream, IOException}
 import javax.vecmath.Vector2d
 
 import cn.lambdalib.cgui.gui.component.TextBox.ConfirmInputEvent
-import cn.lambdalib.cgui.gui.component.Transform.{WidthAlign, HeightAlign}
+import cn.lambdalib.cgui.gui.component.Transform.{HeightAlign, WidthAlign}
 import cn.lambdalib.cgui.gui.{Widget, WidgetContainer}
 import cn.lambdalib.cgui.gui.component._
 import cn.lambdalib.cgui.gui.event._
 import cn.lambdalib.cgui.ScalaCGUI._
 import cn.lambdalib.cgui.loader.xml.CGUIDocLoader
 import cn.lambdalib.cgui.xml.CGUIDocument
-import cn.lambdalib.util.client.{RenderUtils, HudUtils}
+import cn.lambdalib.util.client.font.IFont
+import cn.lambdalib.util.client.{HudUtils, RenderUtils}
 import cn.lambdalib.util.client.font.IFont.{FontAlign, FontOption}
-import cn.lambdalib.util.helper.{GameTimer, Color}
+import cn.lambdalib.util.helper.{Color, GameTimer}
 import cn.lambdalib.vis.editor.ObjectEditor.ElementEditEvent
 import net.minecraft.util.ResourceLocation
 import org.apache.commons.io.IOUtils
 import org.lwjgl.opengl.GL11
 import org.xml.sax.SAXException
 
+import collection.mutable
+
 object CGUIEditor {
-  private val components: List[Component] = List(
+  private val components = mutable.ArrayBuffer[Component](
     new DrawTexture(),
     new Tint(),
-    new VerticalDragBar(),
     new ProgressBar(),
     new TextBox(),
     new Outline(),
     new DragBar()
   )
 
-  lazy val fo_createPosHint = new FontOption(9, FontAlign.CENTER)
-  lazy val fo_resizeHint = new FontOption(9, FontAlign.CENTER)
+  /**
+    * Adds a component template to be reused in CGUI Editor.
+    */
+  def addComponent(template: Component): Unit = {
+    components += template
+  }
 
-  lazy val icon_DragVT = Styles.buttonTexture("drag_vt")
-  lazy val icon_DragHR = Styles.buttonTexture("drag_hr")
+  private lazy val fo_createPosHint = new FontOption(9, FontAlign.CENTER)
+  private lazy val fo_resizeHint = new FontOption(9, FontAlign.CENTER)
+
+  private lazy val icon_DragVT = Styles.buttonTexture("drag_vt")
+  private lazy val icon_DragHR = Styles.buttonTexture("drag_hr")
 }
 
 class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
@@ -96,13 +105,16 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
     * @param t The IHierarchy for the elements to be added into
     * @return A list of WidgetElement, retaining old ones if the corresponding widget is still there.
     */
-  private def newElements(w: WidgetContainer, old: List[WidgetElement], t: IHierarchy): List[WidgetElement] = {
+  private def newElements(w: WidgetContainer,
+                          old: List[WidgetElement],
+                          t: IHierarchy,
+                          supplier: Widget => WidgetElement = w => new WidgetElement(w)): List[WidgetElement] = {
     w.getDrawList.filter(!_.disposed).map(w => {
       val res = old.find(_.w == w)
       res match {
         case Some(x) => x
         case None =>
-          val ret =new WidgetElement(w)
+          val ret = supplier(w)
           ret.addedInto(t)
           ret
       }
@@ -306,7 +318,9 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
   //
 
   // Subclasses
-  class WidgetElement(val w: Widget) extends Element(w.getName, Styles.elemTexture("widget")) {
+  case class WidgetElement(val w: Widget,
+                           elementSupplier: Widget => WidgetElement = w => new WidgetElement(w))
+    extends Element(w.getName, Styles.elemTexture("widget")) {
 
     this.listens[LeftClickEvent](() => {
       if (Option(w) == getSelectedWidget) {
@@ -355,7 +369,7 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
     }
 
     override def onRebuild(list: ElementList): Unit = {
-      elements = newElements(w, elements.asInstanceOf[List[WidgetElement]], this)
+      elements = newElements(w, elements.asInstanceOf[List[WidgetElement]], this, elementSupplier)
       super.onRebuild(list)
     }
 
@@ -506,8 +520,20 @@ class CGUIEditor(editor: Editor) extends VisPlugin(editor) {
       }
     })
 
+    private def supply(w: Widget): WidgetElement = {
+      new WidgetElement(w, supply) {
+        def updateAlpha() = DrawTexture.get(this.iconArea).color.a = if (w.hidden) 0.1 else 1.0
+        this.iconArea.listens[LeftClickEvent](() => {
+          w.hidden = !w.hidden
+          updateAlpha()
+        })
+        updateAlpha()
+      }
+    }
+
     override def rebuild() = {
-      elements = newElements(canvas, elements.asInstanceOf[List[WidgetElement]], this)
+      elements = newElements(canvas, elements.asInstanceOf[List[WidgetElement]], this, supply)
+
       super.rebuild()
     }
 

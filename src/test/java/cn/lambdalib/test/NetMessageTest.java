@@ -59,19 +59,6 @@ public class NetMessageTest {
 
     }
 
-    static class TestExtension {
-
-        public TestExtension(TestEnvironment env) {
-            System.out.println("testExt constructed: " + env);
-        }
-
-        @Listener(channel = "beta", side={Side.CLIENT, Side.SERVER})
-        public void beta() {
-            debug("Hey I've hacked in!");
-        }
-
-    }
-
     static final TestEnvironment env = new TestEnvironment();
 
     @SideOnly(Side.CLIENT)
@@ -99,15 +86,6 @@ public class NetMessageTest {
 
     @RegInitCallback
     public static void init() {
-        NetworkMessage.registerExtListener(TestEnvironment.class, "alpha", Side.SERVER, new INetworkListener() {
-            @Override
-            public void invoke(Object instance, Object... args) throws Exception {
-                debug("Invoked ext listener! args: " + Joiner.on(',').join(args));
-            }
-        });
-
-        NetworkMessage.registerExtension(TestEnvironment.class, env -> new TestExtension(env));
-
         NetworkS11n.addDirect(TestEnvironment.class, new NetS11nAdaptor<TestEnvironment>() {
             @Override
             public void write(ByteBuf buf, TestEnvironment obj) {}

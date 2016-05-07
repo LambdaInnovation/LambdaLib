@@ -119,7 +119,6 @@ public class NetworkEvent {
 
     }
 
-    @RegMessageHandler(msg = Message.class, side = {RegMessageHandler.Side.CLIENT, RegMessageHandler.Side.SERVER})
     public static final class MessageHandler implements IMessageHandler<Message, IMessage> {
 
         @SuppressWarnings("unchecked")

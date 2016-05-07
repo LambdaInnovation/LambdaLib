@@ -8,6 +8,7 @@ package cn.lambdalib.cgui.gui.component;
 
 import java.util.Random;
 
+import cn.lambdalib.util.generic.MathUtils;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.cgui.gui.Widget;
@@ -28,17 +29,9 @@ public class ProgressBar extends Component {
     
     public boolean illustrating = false;
     public ResourceLocation texture;
-    public double maxDelta = 0.5; //prog per sec
-    public double 
-        maxFluctSpeed = .8, //prog per sec
-        fluctRegion = 0.15; //fluct in (progress - 0.5*fluctRegion, progress + 0.5 * fluctRegion)
     public Direction dir = Direction.RIGHT;
     public double progress;
     public Color color = Color.white();
-    
-    double curFluct;
-    double curSpeed;
-    public double progressDisplay = -1; //cur display progress
 
     public ProgressBar() {
         super("ProgressBar");
@@ -48,43 +41,8 @@ public class ProgressBar extends Component {
             }
             
             {
-                long time = GameTimer.getAbsTime();
-                if(lastDrawTime == 0) lastDrawTime = time;
-                
-                double dt = Math.min((time - lastDrawTime) * 0.001, 10); //convert to seconds
-                
-                if(progressDisplay == -1) {
-                    progressDisplay = progress;
-                } else {
-                    //Buffering
-                    double delta = progress - progressDisplay;
-                    double sgn = Math.signum(delta);
-                    delta = Math.min(Math.abs(delta), dt * maxDelta);
-                    progressDisplay += sgn * delta;
-                }
-                
-                { //Fluctuation
-                    double accel = (rand.nextDouble() - 0.5) * maxFluctSpeed;
-                    curSpeed += accel;
-                    curSpeed = Math.max(-maxFluctSpeed, Math.min(curSpeed, maxFluctSpeed));
-                    curFluct += curSpeed * dt;
-                    curFluct = Math.max(-0.5 * fluctRegion, Math.min(curFluct, 0.5 * fluctRegion));
-                }
-                
-                lastDrawTime = time;
-            }
-            
-            {
-                double disp;
-                if(progressDisplay == 0) {
-                    disp = 0;
-                } else if(progressDisplay == 1) {
-                    disp = 1;
-                } else {
-                    disp = Math.max(0, Math.min(progressDisplay + curFluct, 1.0));
-                }
-                
-                //System.out.println(progressDisplay + " " + curFluct + " " + disp);
+                double disp = MathUtils.clampd(0, 1, progress);
+
                 double x, y, u = 0, v = 0, w, h, tw, th;
                 double width = wi.transform.width, height = wi.transform.height;
                 switch(dir) {
@@ -144,17 +102,8 @@ public class ProgressBar extends Component {
         });
     }
     
-    long lastDrawTime;
-    
-    private static final Random rand = new Random();
-    
     public ProgressBar setDirection(Direction dir) {
         this.dir = dir;
-        return this;
-    }
-    
-    public ProgressBar setFluctRegion(double r) {
-        fluctRegion = r;
         return this;
     }
     

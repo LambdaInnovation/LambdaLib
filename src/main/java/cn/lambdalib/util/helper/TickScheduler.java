@@ -8,6 +8,7 @@ package cn.lambdalib.util.helper;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
+import scala.Function0;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -83,6 +84,16 @@ public class TickScheduler {
             add.counter = tickIntv;
             schedules.add(add);
             return this;
+        }
+
+        // Scala support
+        public ScheduleCreator run(Function0<?> _task) {
+            return run(new Runnable() {
+                @Override
+                public void run() {
+                    _task.apply();
+                }
+            });
         }
 
         private boolean shouldIgnore() {

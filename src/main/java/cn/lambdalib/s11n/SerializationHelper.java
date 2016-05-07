@@ -7,6 +7,10 @@
 package cn.lambdalib.s11n;
 
 import cn.lambdalib.s11n.SerializeStrategy.ExposeStrategy;
+import com.google.common.base.Throwables;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -16,9 +20,20 @@ import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class SerializationHelper {
+
+    private LoadingCache<Class, List<Field>> fieldCache =
+            CacheBuilder.newBuilder()
+                .maximumSize(500)
+                .build(new CacheLoader<Class, List<Field>>() {
+                    @Override
+                    public List<Field> load(Class key) throws Exception {
+                        return buildExposedFields(key);
+                    }
+                });
 
     private Set<Class> serializeTypes = new HashSet<>();
 
@@ -29,7 +44,8 @@ public class SerializationHelper {
     public boolean isS11nType(Class type) {
         return type.isEnum() ||
                 type.isAnnotationPresent(SerializeType.class) ||
-                serializeTypes.contains(type);
+                serializeTypes.contains(type) ||
+                serializeTypes.stream().anyMatch(c -> c.isAssignableFrom(type));
     }
 
     private void reg(Class... type) {
@@ -55,6 +71,14 @@ public class SerializationHelper {
      * Get the fields exposed in recursive serialization for the given type.
      */
     public List<Field> getExposedFields(Class<?> type) {
+        try {
+            return fieldCache.get(type);
+        } catch (ExecutionException ex) {
+            throw Throwables.propagate(ex);
+        }
+    }
+
+    private List<Field> buildExposedFields(Class<?> type) {
         return FieldUtils.getAllFieldsList(type)
                 .stream()
                 .filter(f -> {

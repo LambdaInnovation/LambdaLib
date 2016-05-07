@@ -8,24 +8,20 @@ package cn.lambdalib.util.mc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import cn.lambdalib.util.helper.BlockPos;
-import cn.lambdalib.util.helper.Motion3D;
-import cn.lambdalib.util.mc.EntitySelectors.SelectorList;
 import net.minecraft.world.WorldServer;
 
 /**
@@ -185,33 +181,25 @@ public class WorldUtils {
         return ret;
     }
     
-    public static List<Entity> getEntities(TileEntity te, double range, IEntitySelector filter) {
-        return getEntities(te.getWorldObj(), te.xCoord + 0.5, te.yCoord + 0.5, te.zCoord + 0.5, range, filter);
+    public static List<Entity> getEntities(TileEntity te, double range, Predicate<Entity> predicate) {
+        return getEntities(te.getWorldObj(), te.xCoord + 0.5, te.yCoord + 0.5, te.zCoord + 0.5, range, predicate);
     }
     
-    public static List<Entity> getEntities(Entity ent, double range, IEntitySelector filter) {
-        return getEntities(ent.worldObj, ent.posX, ent.posY, ent.posZ, range, filter);
+    public static List<Entity> getEntities(Entity ent, double range, Predicate<Entity> predicate) {
+        return getEntities(ent.worldObj, ent.posX, ent.posY, ent.posZ, range, predicate);
     }
     
-    public static List<Entity> getEntities(World world, double x, double y, double z, double range, IEntitySelector filter) {
+    public static List<Entity> getEntities(World world, double x, double y, double z, double range,
+                                           Predicate<Entity> filter) {
         AxisAlignedBB box = AxisAlignedBB.getBoundingBox(
             x - range, y - range, z - range, 
             x + range, y + range, z + range);
-        SelectorList list = new SelectorList(filter, new EntitySelectors.RestrictRange(x, y, z, range));
-        return getEntities(world, box, list);
+        return getEntities(world, box, EntitySelectors.within(x, y, z, range).and(filter));
     }
-    
-    public static List<Entity> getEntities(World world, AxisAlignedBB box, IEntitySelector filter) {
-        return world.getEntitiesWithinAABBExcludingEntity(null, box, filter);
-    }
-    
-    /**
-     * Get the tile entity at the given position and check if it is the specified type.
-     * Return the tile entity if is of the type, null otherwise.
-     */
-    public static <T extends TileEntity> T getTileEntity(World world, int x, int y, int z, Class<T> type) {
-        TileEntity te = world.getTileEntity(x, y, z);
-        return type.isInstance(te) ? (T) te : null;
+
+    @SuppressWarnings("unchecked")
+    public static List<Entity> getEntities(World world, AxisAlignedBB box, Predicate<Entity> predicate) {
+        return world.getEntitiesWithinAABBExcludingEntity(null, box, EntitySelectors.toEntitySelector(predicate));
     }
     
 }

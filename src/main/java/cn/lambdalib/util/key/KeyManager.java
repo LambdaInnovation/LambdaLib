@@ -126,9 +126,7 @@ public class KeyManager {
     
     private void tick() {
         Iterator< Entry<String, KeyBinding> > iter = nameMap.entrySet().iterator();
-        boolean inGame = ClientUtils.isPlayerInGame();
-        if(!inGame)
-            return;
+        boolean shouldAbort = !ClientUtils.isPlayerInGame();
         
         while(iter.hasNext()) {
             Entry<String, KeyBinding> entry = iter.next();
@@ -137,27 +135,22 @@ public class KeyManager {
                 iter.remove();
             } else {
                 boolean down = getKeyDown(kb.keyID);
-                
-                if(down) {
-                    if(!kb.isGlobal && !inGame) {
-                        kb.keyAborted = true;
-                        if(kb.keyDown) {
-                            kb.handler.onKeyAbort();
-                        }
-                    } else if(!kb.keyAborted) {
-                        if(!kb.keyDown) {
-                            kb.handler.onKeyDown();
-                        } else {
-                            kb.handler.onKeyTick();
-                        }
-                    }
-                } else {
-                    if(kb.keyDown) {
-                        if(inGame) 
-                            kb.handler.onKeyUp();
-                        else 
-                            kb.handler.onKeyAbort();
-                    }
+
+                if (kb.keyDown && shouldAbort) {
+                    kb.keyDown = false;
+                    kb.keyAborted = true;
+                    kb.handler.onKeyAbort();
+                } else if (!kb.keyDown && down && !shouldAbort && !kb.keyAborted) {
+                    kb.keyDown = true;
+                    kb.handler.onKeyDown();
+                } else if (kb.keyDown && !down && !shouldAbort) {
+                    kb.keyDown = false;
+                    kb.handler.onKeyUp();
+                } else if (kb.keyDown && down && !shouldAbort) {
+                    kb.handler.onKeyTick();
+                }
+
+                if (!down) {
                     kb.keyAborted = false;
                 }
                 

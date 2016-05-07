@@ -29,11 +29,11 @@ public class MathUtils {
         return angle * PI_F / 180;
     }
     
-    public static double toAngle(double rad) {
+    public static double toDegrees(double rad) {
         return rad * 180 / Math.PI;
     }
     
-    public static float toAngle(float rad) {
+    public static float toDegrees(float rad) {
         return rad * 180 / PI_F;
     }
     
@@ -66,11 +66,11 @@ public class MathUtils {
      * @return The lerp value
      */
     public static double lerp(double a, double b, double lambda) {
-        return a * (1 - lambda) + b * lambda;
+        return a + lambda * (b - a);
     }
     
     public static float lerpf(float a, float b, float lambda) {
-        return a * (1 - lambda) + b * lambda;
+        return a + lambda * (b - a);
     }
     
     public static int clampi(int min, int max, int val) {

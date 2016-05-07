@@ -190,7 +190,7 @@ class Element(val name: String, val icon: ResourceLocation, implicit val height:
       transform.setSize(tab.transform.width, height)
 
       iconArea.transform.setPos(5 + indentOffset, 0).setSize(elemIconSz, elemIconSz)
-      iconArea.transform.doesListenKey = false
+      // iconArea.transform.doesListenKey = false
       iconArea.transform.alignHeight = HeightAlign.CENTER
       this :+ iconArea
 

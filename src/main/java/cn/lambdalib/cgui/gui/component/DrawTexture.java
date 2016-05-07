@@ -46,8 +46,8 @@ public class DrawTexture extends Component {
         this(texture, Color.white());
     }
 
-    public DrawTexture(ResourceLocation _texture, Color _color) {
-        super("DrawTexture");
+    public DrawTexture(String name, ResourceLocation _texture, Color _color) {
+        super(name);
         this.texture = _texture;
         this.color = _color;
 
@@ -71,6 +71,10 @@ public class DrawTexture extends Component {
             glUseProgram(0);
             glDepthMask(true);
         });
+    }
+
+    public DrawTexture(ResourceLocation _texture, Color _color) {
+        this("DrawTexture", _texture, _color);
     }
     
     public void setShaderId(int id) {

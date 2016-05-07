@@ -8,6 +8,10 @@ package cn.lambdalib.cgui.gui;
 
 import java.util.Iterator;
 
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.client.font.IFont;
+import cn.lambdalib.util.client.font.IFont.FontOption;
+import cn.lambdalib.util.client.font.TrueTypeFont;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.cgui.gui.component.Transform;
@@ -46,6 +50,8 @@ public class CGui extends WidgetContainer {
     Widget draggingNode;
     double xOffset, yOffset;
 
+    boolean debug;
+
     public CGui() {}
     
     public CGui(double width, double height) {
@@ -73,6 +79,13 @@ public class CGui extends WidgetContainer {
             }
         }
     }
+
+    public double getWidth() { return width; }
+    public double getHeight() { return height; }
+
+    public void setDebug() {
+        debug = true;
+    }
     
     //---Event callback---
     
@@ -95,6 +108,19 @@ public class CGui extends WidgetContainer {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         
         drawTraverse(mx, my, null, this, getTopWidget(mx, my));
+
+        if (debug) {
+            Widget hovering = getHoveringWidget();
+            if (hovering != null) {
+                GL11.glColor4f(1, .5f, .5f, .8f);
+                HudUtils.drawRectOutline(hovering.x, hovering.y,
+                        hovering.transform.width * hovering.scale,
+                        hovering.transform.height * hovering.scale, 3);
+                IFont font = TrueTypeFont.defaultFont();
+                font.draw(hovering.getFullName(), hovering.x, hovering.y - 10, new FontOption(10));
+            }
+
+        }
         
         GL11.glEnable(GL11.GL_ALPHA_TEST);
     }
@@ -356,8 +382,6 @@ public class CGui extends WidgetContainer {
                 GL11.glPushMatrix();
                 GL11.glTranslated(cur.x, cur.y, 0);
                 
-                double px = cur.transform.pivotX * cur.scale, py = cur.transform.pivotY * cur.scale;
-                
                 GL11.glDepthFunc(GL11.GL_LEQUAL);
                 GL11.glScaled(cur.scale, cur.scale, 1);
                 GL11.glTranslated(-cur.transform.pivotX, -cur.transform.pivotY, 0);
@@ -382,8 +406,8 @@ public class CGui extends WidgetContainer {
     
     protected Widget gtnTraverse(double x, double y, Widget node, WidgetContainer set) {
         Widget res = null;
-        boolean checkSub = node == null || node.transform.doesDraw;
-        if(node != null && node.transform.doesDraw
+        boolean checkSub = node == null || node.isVisible();
+        if(node != null && node.isVisible()
             && node.transform.doesListenKey 
             && node.isPointWithin(x, y)) {
             res = node;

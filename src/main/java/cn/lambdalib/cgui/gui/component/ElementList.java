@@ -55,7 +55,20 @@ public class ElementList extends Component {
     }
     
     public int getMaxProgress() {
-        return subWidgets.size() - 1;
+        double sum = 0.0;
+
+        int i = subWidgets.size() - 1;
+        while (i >= 0) {
+            sum += subWidgets.get(i).transform.height + spacing;
+
+            if (sum >= widget.transform.height) {
+                return i == subWidgets.size() - 1 ? i : i + 1;
+            }
+
+            --i;
+        }
+
+        return 0;
     }
     
     public void progressNext() {

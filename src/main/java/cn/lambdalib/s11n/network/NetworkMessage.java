@@ -10,7 +10,13 @@ import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegMessageHandler;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
+import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
+import cn.lambdalib.s11n.network.NetworkS11n.NetworkS11nType;
 import cn.lambdalib.util.generic.ReflectionUtils;
+import cn.lambdalib.util.mc.SideHelper;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
@@ -20,6 +26,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.lang.annotation.ElementType;
@@ -27,6 +34,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Function;
@@ -66,6 +74,16 @@ public class NetworkMessage {
     }
 
     /**
+     * Network handlers objects with this interface will have {@link #onMessage(String, Object...)} invoked every time
+     *  a message is handled.
+     */
+    public interface IMessageDelegate {
+
+        void onMessage(String channel, Object ...args);
+
+    }
+
+    /**
      * Indicate that this parameter can be transformed & deserialized as null.
      */
     @Target(ElementType.PARAMETER)
@@ -84,6 +102,19 @@ public class NetworkMessage {
     }
 
     /**
+     * Creates a delegate object that invokes static method listeners of the given class. It shall be used as
+     *  the instance of network message.
+     */
+    public static ClassDelegate staticCaller(Class<?> type) {
+        ClassDelegate ret = classDelegates.get(type);
+        if (ret == null) {
+            ret = new ClassDelegate(type);
+            classDelegates.put(type, ret);
+        }
+        return ret;
+    }
+
+    /**
      * Send the message to the object itself on the fly.
      */
     public static void sendToSelf(Object instance, String channel, Object ...params) {
@@ -94,8 +125,8 @@ public class NetworkMessage {
         network.sendToServer(new Message(instance, channel, params));
     }
 
-    public static void sendTo(EntityPlayerMP player, Object instance, String channel, Object ...params) {
-        network.sendTo(new Message(instance, channel, params), player);
+    public static void sendTo(EntityPlayer player, Object instance, String channel, Object ...params) {
+        network.sendTo(new Message(instance, channel, params), (EntityPlayerMP) player);
     }
 
     public static void sendToPlayers(EntityPlayerMP[] players, Object instance, String channel, Object ...params) {
@@ -115,25 +146,6 @@ public class NetworkMessage {
 
     public static void sendToDimension(int dimensionId, Object instance, String channel, Object ...params) {
         network.sendToDimension(new Message(instance, channel, params), dimensionId);
-    }
-
-    public static void registerExtListener(Class type, String channel, Side side, INetworkListener listener) {
-        ChannelID cid = id(type, channel, side);
-        List<INetworkListener> list = extListeners.get(cid);
-        if (list == null) {
-            list = new ArrayList<>();
-            extListeners.put(cid, list);
-        }
-        list.add(listener);
-    }
-
-    public static <T> void registerExtension(Class<T> type, Function<T, Object> extType) {
-        List<Function> list = regExtensions.get(type);
-        if (list == null) {
-            list = new ArrayList<>();
-            regExtensions.put(type, list);
-        }
-        list.add(extType);
     }
 
     // ---
@@ -170,58 +182,46 @@ public class NetworkMessage {
 
     static final SimpleNetworkWrapper network = LambdaLib.channel;
 
-    private static Map<ChannelID, List<INetworkListener>> extListeners = new HashMap<>();
     private static Map<ChannelID, List<INetworkListener>> cachedListeners = new HashMap<>();
-
-    private static Map<Class, List<Function>> regExtensions = new HashMap<>();
-    private static Map<Class, List<Function>> cachedExtensions = new HashMap<>();
-
-    private static Map<Object, List<Object>> aliveExtensions = new WeakHashMap<>();
+    private static Map<Class, ClassDelegate> classDelegates = new HashMap<>();
 
     /**
      * Invoked at callee side. Send the message to the instance.
      */
     private static void processMessage(Object instance, String channel, Object... params) {
+        if (instance instanceof IMessageDelegate) {
+            ((IMessageDelegate) instance).onMessage(channel, params);
+        }
+
         Side side = FMLCommonHandler.instance().getEffectiveSide();
         List<INetworkListener> listeners = getListeners(instance, channel, side);
-        if (listeners.isEmpty()) {
-            // LambdaLib.log.warn("Orphant event " + eventSignature(instance, channel));
+        for (INetworkListener m : listeners) {
+            invokeListener(m, channel, instance, params);
+        }
+    }
+
+    private static void invokeListener(INetworkListener m, String channel, Object instance, Object ...params) {
+        // Check parameter size
+        final int paramc = m.getParameterCount();
+        if (paramc > params.length) {
+            throw new RuntimeException("Too few arguments in event " + eventSignature(instance, channel)
+                    + " for event listener [" + m + "]. Expected at least " + paramc + " arguments");
         } else {
-            for (INetworkListener m : listeners) {
-                // Check parameter size
-                final int paramc = m.getParameterCount();
-                if (paramc > params.length) {
-                    throw new RuntimeException("Too few arguments in event " + eventSignature(instance, channel)
-                     + " for event listener [" + m + "]. Expected at least " + params.length + " arguments");
-                } else {
-                    Object[] paramsArg;
-                    if (paramc == params.length || paramc == -1) {
-                        paramsArg = params;
-                    } else {
-                        paramsArg = Arrays.copyOf(params, paramc);
-                    }
-
-                    try {
-                        m.invoke(instance, paramsArg);
-                    } catch (IllegalArgumentException e) {
-                        LambdaLib.log.error("Illegal argument for event listener " + m, e);
-                    } catch (Exception e) {
-                        LambdaLib.log.fatal("Error during network message.", e);
-                    }
-                }
-            }
-        }
-
-        if (!aliveExtensions.containsKey(instance)) {
-            List<Function> suppliers = getExtSuppliers(instance.getClass());
-            if (!suppliers.isEmpty()) {
-                aliveExtensions.put(instance, suppliers.stream().map(x -> x.apply(instance)).collect(Collectors.toList()));
+            Object[] paramsArg;
+            if (paramc == params.length || paramc == -1) {
+                paramsArg = params;
             } else {
-                aliveExtensions.put(instance, Collections.emptyList());
+                paramsArg = Arrays.copyOf(params, paramc);
+            }
+
+            try {
+                m.invoke(instance, paramsArg);
+            } catch (IllegalArgumentException e) {
+                LambdaLib.log.error("Illegal argument for event listener " + m, e);
+            } catch (Exception e) {
+                LambdaLib.log.fatal("Error during network message.", e);
             }
         }
-
-        aliveExtensions.get(instance).forEach(x -> processMessage(x, channel, params));
     }
 
     private static String eventSignature(Object instance, String channel) {
@@ -235,65 +235,34 @@ public class NetworkMessage {
         List<INetworkListener> result = cachedListeners.get(cid);
         if (result == null) {
             result = new ArrayList<>();
-            buildCache(type, channel, side, result);
+            buildCache(cid, result);
 
             cachedListeners.put(cid, result);
         }
         return result;
     }
 
-    private static List<Function> getExtSuppliers(Class type) {
-        if (cachedExtensions.containsKey(type)) {
-            return cachedExtensions.get(type);
+    private static boolean matches(ChannelID cid, Method m) {
+        Listener anno = m.getAnnotation(Listener.class);
+
+        if (anno == null || !anno.channel().equals(cid.channel)) {
+            return false;
         } else {
-            List<Function> ret = new ArrayList<>();
-            cachedExtensions.put(type, ret);
-            buildExtCache(type, ret);
-            return ret;
-        }
-    }
-
-    private static void buildExtCache(Class type, List<Function> out) {
-        Class cur = type;
-        while (cur != null) {
-            List<Function> s = regExtensions.get(cur);
-            if (s != null) {
-                out.addAll(s);
+            for (Side s : anno.side()) {
+                if (s == cid.side) {
+                    return true;
+                }
             }
-            cur = cur.getSuperclass();
+            return false;
         }
     }
 
-    private static void buildCache(Class type, String channel, Side side, List<INetworkListener> out) {
-        out.addAll(ReflectionUtils.getAllAccessibleMethods(type)
+    private static void buildCache(ChannelID cid, List<INetworkListener> out) {
+        out.addAll(ReflectionUtils.getAllAccessibleMethods(cid.c)
                 .stream()
-                .filter(m -> {
-                    Listener anno = m.getAnnotation(Listener.class);
-
-                    if (anno == null || !anno.channel().equals(channel)) {
-                        return false;
-                    } else {
-                        for (Side s : anno.side()) {
-                            if (s == side) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                })
+                .filter(m -> matches(cid, m))
                 .map(NetworkMessage::methodListener)
                 .collect(Collectors.toList()));
-
-        Class cur = type;
-        while (cur != null) {
-            ChannelID cid = id(cur, channel, side);
-            List<INetworkListener> exts = extListeners.get(cid);
-            if (exts != null) {
-                out.addAll(exts);
-            }
-
-            cur = cur.getSuperclass();
-        }
     }
 
     private static INetworkListener methodListener(Method m) {
@@ -350,8 +319,8 @@ public class NetworkMessage {
 
         @Override
         public void toBytes(ByteBuf buf) {
-            NetworkS11n.serialize(buf, instance, false);
             ByteBufUtils.writeUTF8String(buf, channel);
+            NetworkS11n.serialize(buf, instance, false);
             buf.writeByte(params.length);
             for (Object o : params) {
                 NetworkS11n.serialize(buf, o, true);
@@ -361,8 +330,8 @@ public class NetworkMessage {
         @Override
         public void fromBytes(ByteBuf buf) {
             try {
-                instance = NetworkS11n.deserialize(buf);
                 channel = ByteBufUtils.readUTF8String(buf);
+                instance = NetworkS11n.deserialize(buf);
                 params = new Object[buf.readByte()];
                 for (int i = 0; i < params.length; ++i) {
                     params[i] = NetworkS11n.deserialize(buf);
@@ -375,7 +344,6 @@ public class NetworkMessage {
 
     }
 
-    @RegMessageHandler(msg = Message.class, side = {RegMessageHandler.Side.CLIENT, RegMessageHandler.Side.SERVER})
     public static class Handler implements IMessageHandler<Message, IMessage> {
 
         @Override
@@ -384,10 +352,60 @@ public class NetworkMessage {
                 // LambdaLib.log.info("Received message " + message.channel + " on " + message.instance);
                 processMessage(message.instance, message.channel, message.params);
             } else {
-                LambdaLib.log.info("Ignored some network message");
+                LambdaLib.log.info("Ignored network message " + message.instance + ", " + message.channel);
             }
             return null;
         }
+    }
+
+    @NetworkS11nType
+    public static class ClassDelegate implements IMessageDelegate {
+
+        final Class type;
+        final LoadingCache<ChannelID, List<INetworkListener>> cache = CacheBuilder.newBuilder()
+                .build(new CacheLoader<ChannelID, List<INetworkListener>>() {
+                    @Override
+                    public List<INetworkListener> load(ChannelID key) throws Exception {
+                        ArrayList<INetworkListener> ret = new ArrayList<>();
+
+                        for (Method m : type.getDeclaredMethods()) {
+                            if (Modifier.isStatic(m.getModifiers()) && matches(key, m)) {
+                                m.setAccessible(true);
+                                ret.add(methodListener(m));
+                            }
+                        }
+
+                        return ret;
+                    }
+                });
+
+        ClassDelegate(Class<?> _type) {
+            type = _type;
+        }
+
+        @Override
+        public void onMessage(String channel, Object... params) {
+            Side side = SideHelper.getRuntimeSide();
+            ChannelID id = id(type, channel, side);
+
+            for (INetworkListener listener : cache.getUnchecked(id)) {
+                invokeListener(listener, id.channel, null, params);
+            }
+        }
+    }
+
+    static {
+        NetworkS11n.addDirect(ClassDelegate.class, new NetS11nAdaptor<ClassDelegate>() {
+            @Override
+            public void write(ByteBuf buf, ClassDelegate obj) {
+                NetworkS11n.serializeWithHint(buf, obj.type, Class.class);
+            }
+
+            @Override
+            public ClassDelegate read(ByteBuf buf) throws ContextException {
+                return staticCaller(NetworkS11n.deserializeWithHint(buf, Class.class));
+            }
+        });
     }
 
 }

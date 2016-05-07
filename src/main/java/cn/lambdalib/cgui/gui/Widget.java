@@ -42,6 +42,12 @@ public class Widget extends WidgetContainer {
      */
     public boolean needCopy = true;
 
+    /**
+     * TEMP SOLUTION DONT TOUCH
+     * Whether this widget is hidden in the CGui editor canvas.
+     */
+    public boolean hidden = false;
+
     public Transform transform;
     
     //Transform is always present.
@@ -53,7 +59,7 @@ public class Widget extends WidgetContainer {
 
     // Ctors to aid syntax simplicity
     public Widget(double width, double height) {
-        transform.setPos(width, height);
+        transform.setSize(width, height);
     }
 
     public Widget(double x, double y, double width, double height) {
@@ -108,7 +114,7 @@ public class Widget extends WidgetContainer {
      * @return Whether the widget is visible (and called each draw frame).
      */
     public boolean isVisible() {
-        return transform.doesDraw && !dirty;
+        return transform.doesDraw && !hidden;
     }
         
     /**
@@ -179,22 +185,22 @@ public class Widget extends WidgetContainer {
      * @return the component with the name specified, or null if no such component.
      */
     public <T extends Component> T getComponent(String name) {
-        for(Component c : components) {
-            if(c.name.equals(name))
+        for (Component c : components) {
+            if (c.name.equals(name))
                 return (T) c;
         }
         return null;
     }
 
     /**
-     * Find the first component that is of the given type.
-     * @throws NoSuchElementException if there is no value present
+     * @return The first component that is of the given type, or null if no such component.
      */
     public <T extends Component> T getComponent(Class<T> type) {
-        return (T) components.stream()
-                .filter(c -> !type.isAssignableFrom(c.getClass()))
-                .findFirst()
-                .get();
+        for (Component c : components) {
+            if (type.isInstance(c))
+                return (T) c;
+        }
+        return null;
     }
     
     public Widget addComponents(Component ...c) {
@@ -301,6 +307,13 @@ public class Widget extends WidgetContainer {
     public String getName() {
         WidgetContainer parent = getAbstractParent();
         return parent == null ? "null" : parent.getWidgetName(this);
+    }
+
+    public String getFullName() {
+        Widget parent = getWidgetParent();
+        String thisName = getName();
+
+        return parent == null ? thisName : parent.getFullName() + "/" + thisName;
     }
     
     public boolean isPointWithin(double tx, double ty) {

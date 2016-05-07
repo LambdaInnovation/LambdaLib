@@ -8,6 +8,8 @@ package cn.lambdalib.util.generic;
 
 import java.util.Random;
 
+import cn.lambdalib.util.mc.SideHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -35,20 +37,11 @@ public class VecUtils {
      * @return the looking direction vec, normalized
      */
     public static Vec3 toDirVector(float yaw, float pitch) {
-        float var3 = 1.0f;
-        float vx, vy, vz;
-        vx = MathHelper.sin(yaw / 180.0F
-                * (float) Math.PI)
-                * MathHelper.cos(yaw / 180.0F
-                        * (float) Math.PI) * var3;
-        vz = MathHelper.cos(yaw / 180.0F
-                * (float) Math.PI)
-                * MathHelper.cos(pitch / 180.0F
-                        * (float) Math.PI) * var3;
-        vy = -MathHelper.sin((pitch)
-                / 180.0F * (float) Math.PI)
-                * var3;
-        return vec(vx, vy, vz);
+        float f1 = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
+        float f2 = MathHelper.sin(-yaw * 0.017453292F - (float)Math.PI);
+        float f3 = -MathHelper.cos(-pitch * 0.017453292F);
+        float f4 = MathHelper.sin(-pitch * 0.017453292F);
+        return Vec3.createVectorHelper((double)(f2 * f3), (double)f4, (double)(f1 * f3));
     }
     
     /**
@@ -80,11 +73,10 @@ public class VecUtils {
     }
     
     public static Vec3 lerp(Vec3 a, Vec3 b, double lambda) {
-        double ml = 1 - lambda;
         return Vec3.createVectorHelper(
-            a.xCoord * ml + b.xCoord * lambda, 
-            a.yCoord * ml + b.yCoord * lambda, 
-            a.zCoord * ml + b.zCoord * lambda);
+                MathUtils.lerp(a.xCoord, b.xCoord, lambda),
+                MathUtils.lerp(a.yCoord, b.yCoord, lambda),
+                MathUtils.lerp(a.zCoord, b.zCoord, lambda));
     }
     
     public static Vec3 neg(Vec3 v) {
@@ -182,7 +174,23 @@ public class VecUtils {
     }
     
     public static Vec3 entityPos(Entity e) {
-        return vec(e.posX, e.posY, e.posZ);
+        return vec(e.posX, e.posY + (isThePlayer(e) ? -1.6 : 0.0), e.posZ);
+    }
+
+    public static Vec3 entityHeadPos(Entity e) {
+        return vec(e.posX, e.posY + (isThePlayer(e) ? 0 : e.getEyeHeight()), e.posZ);
+    }
+
+    private static boolean isThePlayer(Entity e) {
+        if (SideHelper.isClient()) {
+            return isThePlayer_c(e);
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean isThePlayer_c(Entity e) {
+        return Minecraft.getMinecraft().thePlayer.equals(e);
     }
     
     public static Vec3 entityMotion(Entity e) {
