@@ -1,5 +1,7 @@
 # LambdaLib
 
+[![Build Status](http://jenkins.mcbox.cc/job/LambdaInnovation/job/LambdaLib/badge/icon)](http://jenkins.mcbox.cc/job/LambdaInnovation/job/LambdaLib/)
+
 A modding library that aims at making modding fluent and enjoyable.
 
 LambdaLib contains many functionalities that is really helpful to Minecraft modding but isn't provided by Minecraft
