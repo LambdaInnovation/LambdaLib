@@ -283,7 +283,6 @@ public class WidgetContainer implements Iterable<Widget> {
     public void reorder(Widget target, int newIndex) {
         int prevIndex = widgetList.indexOf(target);
         widgetList.remove(prevIndex);
-        System.out.println("Reorder " + newIndex + "," + prevIndex);
         if (newIndex > prevIndex) {
             widgetList.add(newIndex - 1, target);
         } else {

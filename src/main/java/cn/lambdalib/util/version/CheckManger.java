@@ -64,7 +64,6 @@ public class CheckManger
 	public void addMod(String modid,String[] pars)
 	{
 		this.modPool.put(modid, pars);
-		System.out.println(modid+pars);
 	} 
 	
 	public void addNewVersion(String modid,String newVersion)
