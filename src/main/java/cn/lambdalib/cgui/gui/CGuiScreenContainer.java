@@ -1,16 +1,12 @@
 /**
-* Copyright (c) Lambda Innovation, 2013-2016
-* This file is part of LambdaLib modding library.
-* https://github.com/LambdaInnovation/LambdaLib
-* Licensed under MIT, see project root for more information.
-*/
+ * Copyright (c) Lambda Innovation, 2013-2016
+ * This file is part of LambdaLib modding library.
+ * https://github.com/LambdaInnovation/LambdaLib
+ * Licensed under MIT, see project root for more information.
+ */
 package cn.lambdalib.cgui.gui;
 
 import cn.lambdalib.cgui.gui.component.TextBox;
-import cn.lambdalib.util.client.HudUtils;
-import cn.lambdalib.util.client.font.Fonts;
-import cn.lambdalib.util.client.font.IFont;
-import cn.lambdalib.util.client.font.IFont.FontOption;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 
@@ -22,41 +18,32 @@ import org.lwjgl.opengl.GL11;
  * @author WeAthFolD
  */
 public class CGuiScreenContainer extends GuiContainer {
-    
+
     protected CGui gui;
-    
+
     public CGuiScreenContainer(Container c) {
         super(c);
         gui = new CGui();
     }
-    
+
     public CGuiScreenContainer(Container c, CGui _gui) {
         super(c);
         gui = _gui;
     }
-    
+
     public CGui getGui() {
         return gui;
     }
-    
+
     @Override
     protected void drawGuiContainerBackgroundLayer(float var1, int var2,
-            int var3) {
+                                                   int var3) {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        GL11.glColor4f(0, 1, 0, 0.2f);
-        HudUtils.colorRect(guiLeft, guiTop, xSize, ySize);
-
-        double relx = gui.mouseX - guiLeft, rely = gui.mouseY - guiTop;
-        IFont font = Fonts.getDefault();
-        font.draw(String.format("bounds: (%d,%d,%d,%d) mouse:(%.1f,%.1f)", guiLeft, guiTop, xSize, ySize, relx, rely),
-                2, 2, new FontOption(10));
-
         gui.resize(width, height);
         gui.draw(var2, var3);
     }
-    
+
     @Override
     public void drawScreen(int a, int b, float c) {
         if(isSlotActive()) {
@@ -73,32 +60,32 @@ public class CGuiScreenContainer extends GuiContainer {
         if(isSlotActive()) super.mouseClicked(par1, par2, par3);
         gui.mouseClicked(par1, par2, par3);
     }
-    
+
     @Override
     protected void mouseClickMove(int mx, int my, int btn, long time) {
         if(isSlotActive()) super.mouseClickMove(mx, my, btn, time);
         gui.mouseClickMove(mx, my, btn, time);
     }
-    
+
     @Override
     public void onGuiClosed() {
         gui.dispose();
     }
-    
+
     @Override
     protected void mouseMovedOrUp(int a, int b, int c) {
         if(isSlotActive()) {
             super.mouseMovedOrUp(a, b, c);
         }
     }
-    
+
     @Override
     public void keyTyped(char ch, int key) {
         gui.keyTyped(ch, key);
         if(containerAcceptsKey(key) || key == Keyboard.KEY_ESCAPE)
             super.keyTyped(ch, key);
     }
-    
+
     /**
      * @return Whether the inventory itself receives key input. (This should be disabled when you are handling some user input)
      */
@@ -109,7 +96,7 @@ public class CGuiScreenContainer extends GuiContainer {
                 (temp = TextBox.get(gui.focus)) == null ||
                 !temp.canEdit);
     }
-    
+
     /**
      * @return Whether inventory slots should be renderered this frame.
      */
