@@ -13,32 +13,19 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import cn.lambdalib.annoreg.core.Registrant;
-import cn.lambdalib.annoreg.mc.RegEventHandler;
-import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
-import cn.lambdalib.annoreg.mc.RegInitCallback;
 import cn.lambdalib.annoreg.mc.RegPostInitCallback;
+import cn.lambdalib.core.LambdaLib;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.event.world.WorldEvent.Load;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 @Registrant
 public class CheckManger
@@ -126,26 +113,57 @@ class Fetcher implements Runnable
 	@Override
 	public void run()
 	{
+		LambdaLib.log.debug("Version Checker fetching url:"+this.api_url==null?"null":this.api_url);
 		if(this.api_url==null)
 			return;
 		Gson gson=new Gson();
 		Type dict=new TypeToken<List<Map<String,Object>>>(){}.getType();
 		List<Map<String,Object>> releases = null;
+		String api_content="";
+		Scanner scan=null;
+		try {
+			scan = new Scanner(this.api_url.openStream());
+		}
+		catch (IOException e){
+			e.printStackTrace();
+		}
+		if(scan!=null)
+		{
+			while(scan.hasNext())
+            {
+                api_content+=scan.next();
+            }
+            LambdaLib.log.info(api_content);
+		}
+        scan.close();
 		try {
 			releases=gson.fromJson(new BufferedReader(new InputStreamReader(this.api_url.openStream())),dict);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		if(releases==null)
+		{
+			LambdaLib.log.info(String.format("The mod %s has no releases",this.modid));
+			return;
+		}
+		LambdaLib.log.info(String.format("The mod %s has %d releases",this.modid,releases.size()));
 		HashMap<String,Integer> versions=new HashMap<>(releases.size());
 		for(int i=0;i<releases.size();++i)
 		{
 			versions.put((String) releases.get(i).get("tag_name"),i);
 		}
 		if(!versions.keySet().contains(this.localVersion))
+		{
+			LambdaLib.log.info(String.format("The local version of mod %s is not a released version",this.modid));
 			return;
+		}
 		String latestVersion=(String) releases.get(0).get("tag_name");
         if(latestVersion==null||latestVersion.equals(this.localVersion))
-            return;
+		{
+			LambdaLib.log.info(String.format("The latest version of mod %s is not available or the mod is up to date",this.modid));
+			return;
+		}
+		LambdaLib.log.info(String.format("The mod %s has new version %s",this.modid,latestVersion));
 		CheckManger.instance().addNewVersion(this.modid, latestVersion);
 	}
 	
