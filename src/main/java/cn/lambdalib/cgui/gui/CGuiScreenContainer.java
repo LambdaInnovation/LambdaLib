@@ -7,6 +7,10 @@
 package cn.lambdalib.cgui.gui;
 
 import cn.lambdalib.cgui.gui.component.TextBox;
+import cn.lambdalib.util.client.HudUtils;
+import cn.lambdalib.util.client.font.Fonts;
+import cn.lambdalib.util.client.font.IFont;
+import cn.lambdalib.util.client.font.IFont.FontOption;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 
@@ -40,6 +44,15 @@ public class CGuiScreenContainer extends GuiContainer {
             int var3) {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        GL11.glColor4f(0, 1, 0, 0.2f);
+        HudUtils.colorRect(guiLeft, guiTop, xSize, ySize);
+
+        double relx = gui.mouseX - guiLeft, rely = gui.mouseY - guiTop;
+        IFont font = Fonts.getDefault();
+        font.draw(String.format("bounds: (%d,%d,%d,%d) mouse:(%.1f,%.1f)", guiLeft, guiTop, xSize, ySize, relx, rely),
+                2, 2, new FontOption(10));
+
         gui.resize(width, height);
         gui.draw(var2, var3);
     }
