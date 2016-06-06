@@ -6,15 +6,15 @@
 */
 package cn.lambdalib.util.client.font
 
-import java.awt.{GraphicsEnvironment, Color, RenderingHints, Font}
-import java.awt.image.{DataBufferByte, DataBufferInt, BufferedImage}
-import java.nio.{ByteOrder, ByteBuffer}
+import java.awt.{Color, Font, GraphicsEnvironment, RenderingHints}
+import java.awt.image.{BufferedImage, DataBufferByte, DataBufferInt}
+import java.nio.{ByteBuffer, ByteOrder}
 import java.util
 
 import cn.lambdalib.util.client.font.IFont.FontOption
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.util.MathHelper
-import org.lwjgl.opengl.{GL30, GL11}
+import org.lwjgl.opengl.{GL11, GL14, GL30}
 import org.lwjgl.opengl.GL11._
 
 /**
@@ -117,6 +117,7 @@ class TrueTypeFont(val font: Font) extends IFont {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
+    glTexParameterf(GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, -0.65f)
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
 
     glBindTexture(GL_TEXTURE_2D, 0)
