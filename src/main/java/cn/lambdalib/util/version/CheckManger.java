@@ -6,27 +6,28 @@
 */
 package cn.lambdalib.util.version;
 
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegPostInitCallback;
+import cn.lambdalib.core.LambdaLib;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraftforge.common.MinecraftForge;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
-
-import cn.lambdalib.annoreg.core.Registrant;
-import cn.lambdalib.annoreg.mc.RegPostInitCallback;
-import cn.lambdalib.core.LambdaLib;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraftforge.common.MinecraftForge;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 @Registrant
 public class CheckManger
 {
@@ -75,7 +76,7 @@ public class CheckManger
 		}
 	}
 	@RegPostInitCallback
-	public static void init()
+	private static void init()
 	{
 		MinecraftForge.EVENT_BUS.register(instance);
 		FMLCommonHandler.instance().bus().register(instance);

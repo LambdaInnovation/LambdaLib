@@ -6,46 +6,36 @@
 */
 package cn.lambdalib.annoreg.asm;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.core.LLModContainer;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Type;
 
-import cn.lambdalib.annoreg.core.Registrant;
-import cpw.mods.fml.relauncher.FMLLaunchHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InnerClassVisitor extends ClassVisitor {
     
-    List<String> innerClasses = new ArrayList();
-    boolean isReg = false;
-    boolean clientOnly = false;
+    private List<String> innerClasses = new ArrayList<>();
+    private boolean isReg = false;
 
     public InnerClassVisitor(int api) {
         super(api);
     }
     
     @Override
-    public void visitInnerClass(String name, String outerName, String innerName, int access) {
-        innerClasses.add(name.replace('/', '.'));
+    public void visitInnerClass(String slashedName, String outerName, String innerName, int access) {
+        if (isReg) {
+            String name = slashedName.replace('/', '.');
+            if (!LLModContainer.isClassRemoved(name)) {
+                innerClasses.add(name);
+            }
+        }
     }
     
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        if (desc.equals(Type.getDescriptor(SideOnly.class))) {
-            //We need to know if it's client only.
-            return new AnnotationVisitor(api) {
-                @Override
-                public void visitEnum(String name, String desc, String value) {
-                    if (value == Side.CLIENT.toString()) {
-                        InnerClassVisitor.this.clientOnly = true;
-                    }
-                }
-            };
-        }
         if (desc.equals(Type.getDescriptor(Registrant.class))) {
             isReg = true;
         }
@@ -53,11 +43,7 @@ public class InnerClassVisitor extends ClassVisitor {
     }
     
     public List<String> getInnerClassList() {
-        if (isReg && (FMLLaunchHandler.side() == Side.CLIENT || !clientOnly))
-            return innerClasses;
-        else {
-            innerClasses.clear();
-            return null;
-        }
+        return innerClasses;
     }
+
 }

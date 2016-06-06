@@ -6,11 +6,13 @@
 */
 package cn.lambdalib.annoreg.mc;
 
-import java.lang.reflect.Method;
-
 import cn.lambdalib.annoreg.base.RegistrationMethodSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
+import cn.lambdalib.core.LambdaLib;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * @author WeAthFolD
@@ -25,6 +27,9 @@ public class InitCallbackRegistration extends RegistrationMethodSimple<RegInitCa
 
     @Override
     protected void register(Method method, RegInitCallback value) throws Exception {
+        if (!Modifier.isPrivate(method.getModifiers())) {
+            LambdaLib.log.warn("Init method " + method + " is not private.");
+        }
         method.invoke(null);
     }
     

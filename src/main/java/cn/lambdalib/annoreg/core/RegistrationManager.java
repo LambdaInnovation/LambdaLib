@@ -6,41 +6,37 @@
 */
 package cn.lambdalib.annoreg.core;
 
+import cn.lambdalib.annoreg.base.RegistrationEmpty;
+import cn.lambdalib.core.LLModContainer;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import cn.lambdalib.annoreg.base.RegistrationEmpty;
-import cn.lambdalib.core.LLModContainer;
-import cn.lambdalib.core.LambdaLib;
-import com.google.common.base.Throwables;
-import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
+import java.util.*;
 
 public class RegistrationManager {
     
     public static final RegistrationManager INSTANCE = new RegistrationManager();
     
-    private Set<String> unloadedClass = new HashSet();
-    private Set<Class<?>> loadedClass = new HashSet();
+    private Set<String> unloadedClass = new HashSet<>();
+    private Set<Class<?>> loadedClass = new HashSet<>();
     
-    private Set<ASMData> unloadedRegType;
-    private Map<Class<? extends Annotation>, RegistryType> regByClass = new HashMap();
-    private Map<String, RegistryType> regByName = new HashMap();
+    private Set<String> unloadedRegType;
+    private Map<Class<? extends Annotation>, RegistryType> regByClass = new HashMap<>();
+    private Map<String, RegistryType> regByName = new HashMap<>();
     
-    private Map<String, RegModInformation> modMap = new HashMap();
-    private Set<RegModInformation> mods = new HashSet();
+    private Map<String, RegModInformation> modMap = new HashMap<>();
+    private Set<RegModInformation> mods = new HashSet<>();
     
-    private Map<String, List<String>> innerClassList = new HashMap();
+    private Multimap<String, String> innerClassList = HashMultimap.create();
     
-    public void annotationList(Set<ASMData> data) {
-        for (ASMData asm : data) {
-            unloadedClass.add(asm.getClassName());
-        }
+    public void annotationList(Set<String> data) {
+        unloadedClass.addAll(data);
     }
     
     private void loadClasses() {
@@ -52,15 +48,10 @@ public class RegistrationManager {
     }
 
     private void tryPrepareClass(String name) {
-        // TODO More elegant way to handle SideOnly, ClassNotFound might mean other error
         try {
             prepareClass(Class.forName(name));
-        } catch (ClassNotFoundException e) {
-            LLModContainer.log.debug("Can not load class {}, maybe a SideOnly class.", name);
         } catch (Throwable e) {
-            LLModContainer.log.fatal("Error on loading class {}. Please check the implementation.", name);
-            LLModContainer.log.fatal(e);
-
+            LLModContainer.log.fatal("Error on loading class {}.", name);
             Throwables.propagate(e);
         }
     }
@@ -85,6 +76,8 @@ public class RegistrationManager {
             for (Annotation anno : field.getAnnotations()) {
                 Class<? extends Annotation> annoclazz = anno.annotationType();
                 if (regByClass.containsKey(annoclazz)) {
+                    field.setAccessible(true);
+
                     regByClass.get(annoclazz).visitField(field);
                 }
             }
@@ -95,6 +88,8 @@ public class RegistrationManager {
             for (Annotation anno : method.getAnnotations()) {
                 Class<? extends Annotation> annoclazz = anno.annotationType();
                 if(regByClass.containsKey(annoclazz)) {
+                    method.setAccessible(true);
+
                     regByClass.get(annoclazz).visitMethod(method);
                 }
             }
@@ -153,21 +148,18 @@ public class RegistrationManager {
         return ret;
     }
 
-    public void addAnnotationMod(Set<ASMData> data) {
-        for (ASMData asm : data) {
-            mods.add(createModFromObj(asm.getClassName()));
+    public void addAnnotationMod(Set<String> data) {
+        for (String typeName : data) {
+            mods.add(createModFromObj(typeName));
         }
     }
     
     private void registerAll(RegModInformation mod, String type) {
         //First load all classes that have not been loaded.
         loadClasses();
-        RegistryType rt = regByName.get(type);
-        if (rt == null) {
-            LLModContainer.log.error("RegistryType {} not found.", type);
-            //TODO side only type go here.
-            return;
-        }
+
+        RegistryType rt = Preconditions.checkNotNull(regByName.get(type), "RegistryType " + type + " not found.");
+
         rt.registerAll(mod);
     }
     
@@ -175,20 +167,18 @@ public class RegistrationManager {
         registerAll(createModFromObj(mod.getClass().getName()), type);
     }
 
-    public void addRegistryTypes(Set<ASMData> data) {
+    public void addRegistryTypes(Set<String> data) {
         unloadedRegType = data;
     }
 
     private void loadRegistryTypes() {
-        for (ASMData asm : unloadedRegType) {
+        for (String typeName : unloadedRegType) {
             try {
-                Class<?> clazz = Class.forName(asm.getClassName());
+                Class<?> clazz = Class.forName(typeName);
                 RegistryType rt = (RegistryType) clazz.newInstance();
                 addRegType(rt);
             } catch (Exception e) {
-                if(LambdaLib.DEBUG) {
-                    LLModContainer.log.warn("No registry type {}. Might be a SideOnly regtype.", asm.getClassName()); //TODO side only type will go here
-                }
+                throw new RuntimeException("Error loading registry type " + typeName, e);
             }
         }
         unloadedRegType.clear();
@@ -219,11 +209,7 @@ public class RegistrationManager {
     }
     
     public void addInnerClassList(String outer, List<String> inner) {
-        if (innerClassList.containsKey(outer)) {
-            innerClassList.get(outer).addAll(inner);
-        } else {
-            innerClassList.put(outer, inner);
-        }
+        innerClassList.putAll(outer, inner);
     }
     
     static {

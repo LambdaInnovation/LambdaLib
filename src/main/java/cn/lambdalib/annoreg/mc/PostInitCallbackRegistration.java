@@ -9,8 +9,10 @@ package cn.lambdalib.annoreg.mc;
 import cn.lambdalib.annoreg.base.RegistrationMethodSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
+import cn.lambdalib.core.LambdaLib;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 @RegistryTypeDecl
 public class PostInitCallbackRegistration extends RegistrationMethodSimple<RegPostInitCallback> {
@@ -22,6 +24,9 @@ public class PostInitCallbackRegistration extends RegistrationMethodSimple<RegPo
 
     @Override
     protected void register(Method method, RegPostInitCallback value) throws Exception {
+        if (!Modifier.isPrivate(method.getModifiers())) {
+            LambdaLib.log.warn("PostInit method " + method + " is not private.");
+        }
         method.invoke(null);
     }
 

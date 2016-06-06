@@ -6,26 +6,24 @@
 */
 package cn.lambdalib.core;
 
+import cn.lambdalib.annoreg.core.RegistrationManager;
+import cn.lambdalib.annoreg.core.RegistrationMod;
+import cn.lambdalib.core.command.CmdMineStatistics;
 import cn.lambdalib.multiblock.MsgBlockMulti;
 import cn.lambdalib.s11n.network.NetworkEvent;
 import cn.lambdalib.s11n.network.NetworkMessage;
-import cpw.mods.fml.common.event.*;
-import cpw.mods.fml.relauncher.Side;
-import net.minecraftforge.common.config.Configuration;
-import org.apache.logging.log4j.Logger;
-
-import cn.lambdalib.annoreg.core.RegistrationManager;
-import cn.lambdalib.annoreg.core.RegistrationMod;
-import cn.lambdalib.annoreg.mc.RegMessageHandler;
-import cn.lambdalib.core.command.CmdMineStatistics;
 import cn.lambdalib.util.deprecated.LIFMLGameEventDispatcher;
 import cn.lambdalib.util.reschk.ResourceCheck;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.command.CommandHandler;
+import net.minecraftforge.common.config.Configuration;
+import org.apache.logging.log4j.Logger;
 
 @Mod(modid = "LambdaLib", name = "LambdaLib", version = LambdaLib.VERSION, dependencies = "required-after:"
         + LLModContainer.MODID)
@@ -37,7 +35,7 @@ public class LambdaLib {
     /**
      * Does open debug mode. turn to false when compiling.
      */
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     public static final Logger log = FMLLog.getLogger();
 

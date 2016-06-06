@@ -6,22 +6,14 @@
 */
 package cn.lambdalib.annoreg.core;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cn.lambdalib.annoreg.core.AnnotationData.Type;
 import cn.lambdalib.core.LLModContainer;
 import cn.lambdalib.core.LambdaLib;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public abstract class RegistryType {
     
@@ -102,7 +94,7 @@ public abstract class RegistryType {
             AnnotationData ad = itor.next();
             RegModInformation rm = RegistrationManager.INSTANCE.findMod(ad);
             if (rm != null) {
-                if (!data.containsKey(rm)) data.put(rm, new LinkedList());
+                if (!data.containsKey(rm)) data.put(rm, new LinkedList<>());
                 data.get(rm).add(ad);
                 itor.remove();
             }
@@ -165,7 +157,6 @@ public abstract class RegistryType {
                 }
                 break;
             case METHOD:
-                Method theMethod = ad.getTheMethod();
                 // METHOD doesn't need SuggestedName feature.
                 try {
                     if (registerMethod(ad))
