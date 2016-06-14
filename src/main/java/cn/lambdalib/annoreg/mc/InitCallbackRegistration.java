@@ -27,9 +27,6 @@ public class InitCallbackRegistration extends RegistrationMethodSimple<RegInitCa
 
     @Override
     protected void register(Method method, RegInitCallback value) throws Exception {
-        if (!Modifier.isPrivate(method.getModifiers())) {
-            LambdaLib.log.warn("Init method " + method + " is not private.");
-        }
         method.invoke(null);
     }
     

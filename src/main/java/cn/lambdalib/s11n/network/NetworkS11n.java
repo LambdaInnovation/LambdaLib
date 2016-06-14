@@ -6,8 +6,6 @@
 */
 package cn.lambdalib.s11n.network;
 
-import cn.lambdalib.core.LLCommons;
-import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.SerializeDynamic;
 import cn.lambdalib.s11n.SerializeNullable;
 import cn.lambdalib.util.mc.SideHelper;

@@ -13,7 +13,6 @@ import cn.lambdalib.multiblock.MsgBlockMulti;
 import cn.lambdalib.s11n.network.NetworkEvent;
 import cn.lambdalib.s11n.network.NetworkMessage;
 import cn.lambdalib.util.deprecated.LIFMLGameEventDispatcher;
-import cn.lambdalib.util.reschk.ResourceCheck;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -54,7 +53,6 @@ public class LambdaLib {
         log.info("Copyright (c) Lambda Innovation, 2013-2016");
         log.info("http://www.li-dev.cn/");
 
-        ResourceCheck.init();
         LIFMLGameEventDispatcher.init();
 
         config = new Configuration(event.getSuggestedConfigurationFile());

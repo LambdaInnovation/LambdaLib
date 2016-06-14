@@ -8,10 +8,9 @@ package cn.lambdalib.annoreg.core;
 
 import cn.lambdalib.annoreg.base.RegistrationEmpty;
 import cn.lambdalib.core.LLModContainer;
+import cn.lambdalib.core.Profiler;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
 
 import java.lang.annotation.Annotation;
@@ -20,11 +19,12 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class RegistrationManager {
-    
+
     public static final RegistrationManager INSTANCE = new RegistrationManager();
+
+    public final Profiler profiler = new Profiler();
     
     private Set<String> unloadedClass = new HashSet<>();
-    private Set<Class<?>> loadedClass = new HashSet<>();
     
     private Set<String> unloadedRegType;
     private Map<Class<? extends Annotation>, RegistryType> regByClass = new HashMap<>();
@@ -33,76 +33,59 @@ public class RegistrationManager {
     private Map<String, RegModInformation> modMap = new HashMap<>();
     private Set<RegModInformation> mods = new HashSet<>();
     
-    private Multimap<String, String> innerClassList = HashMultimap.create();
-    
     public void annotationList(Set<String> data) {
         unloadedClass.addAll(data);
     }
     
     private void loadClasses() {
+        profiler.begin("loadClasses");
         loadRegistryTypes();
         for (String name : unloadedClass) {
-            tryPrepareClass(name);
+            prepareClass(name);
         }
         unloadedClass.clear();
+        profiler.end("loadClasses");
     }
 
-    private void tryPrepareClass(String name) {
+    private void prepareClass(String name) {
         try {
-            prepareClass(Class.forName(name));
+            Class<?> clazz = Class.forName(name);
+
+            //Class annotations
+            for (Annotation anno : clazz.getAnnotations()) {
+                Class<? extends Annotation> annoclazz = anno.annotationType();
+                if (regByClass.containsKey(annoclazz)) {
+                    regByClass.get(annoclazz).visitClass(clazz);
+                }
+            }
+
+            //Field annotations
+            for (Field field : clazz.getDeclaredFields()) {
+                for (Annotation anno : field.getAnnotations()) {
+                    Class<? extends Annotation> annoclazz = anno.annotationType();
+                    if (regByClass.containsKey(annoclazz)) {
+                        field.setAccessible(true);
+
+                        regByClass.get(annoclazz).visitField(field);
+                    }
+                }
+            }
+
+            //Method annotations
+            for (Method method : clazz.getDeclaredMethods()) {
+                for (Annotation anno : method.getAnnotations()) {
+                    Class<? extends Annotation> annoclazz = anno.annotationType();
+                    if(regByClass.containsKey(annoclazz)) {
+                        method.setAccessible(true);
+
+                        regByClass.get(annoclazz).visitMethod(method);
+                    }
+                }
+            }
         } catch (Throwable e) {
             LLModContainer.log.fatal("Error on loading class {}.", name);
             Throwables.propagate(e);
         }
-    }
-    
-    private void prepareClass(Class<?> clazz) {
-        //First check loadedClass to avoid infinite recursion (when extending the enclosing class).
-        if (loadedClass.contains(clazz)) {
-            return;
-        }
-        loadedClass.add(clazz);
-        
-        //Class annotations
-        for (Annotation anno : clazz.getAnnotations()) {
-            Class<? extends Annotation> annoclazz = anno.annotationType();
-            if (regByClass.containsKey(annoclazz)) {
-                regByClass.get(annoclazz).visitClass(clazz);
-            }
-        }
-        
-        //Field annotations
-        for (Field field : clazz.getDeclaredFields()) {
-            for (Annotation anno : field.getAnnotations()) {
-                Class<? extends Annotation> annoclazz = anno.annotationType();
-                if (regByClass.containsKey(annoclazz)) {
-                    field.setAccessible(true);
-
-                    regByClass.get(annoclazz).visitField(field);
-                }
-            }
-        }
-        
-        //Method annotations
-        for (Method method : clazz.getDeclaredMethods()) {
-            for (Annotation anno : method.getAnnotations()) {
-                Class<? extends Annotation> annoclazz = anno.annotationType();
-                if(regByClass.containsKey(annoclazz)) {
-                    method.setAccessible(true);
-
-                    regByClass.get(annoclazz).visitMethod(method);
-                }
-            }
-        }
-        
-        
-        //Inner classes
-        if (innerClassList.containsKey(clazz.getName())) {
-            for (String inner : innerClassList.get(clazz.getName())) {
-                tryPrepareClass(inner);
-            }
-        }
-        
     }
     
     RegModInformation findMod(AnnotationData data) {
@@ -158,9 +141,14 @@ public class RegistrationManager {
         //First load all classes that have not been loaded.
         loadClasses();
 
+        final String id = String.format("task %s:%s", mod.getModID(), type);
+        profiler.begin(id);
+
         RegistryType rt = Preconditions.checkNotNull(regByName.get(type), "RegistryType " + type + " not found.");
 
         rt.registerAll(mod);
+
+        profiler.end(id);
     }
     
     public void registerAll(Object mod, String type) {
@@ -184,16 +172,6 @@ public class RegistrationManager {
         unloadedRegType.clear();
     }
     
-    public void addSideOnlyRegAnnotation(Set<ASMData> data) {
-        for (ASMData asm : data) {
-            try {
-                Class<?> clazz = Class.forName(asm.getClassName());
-            } catch (Exception e) {
-                LLModContainer.log.error("Error on adding registry annotation {}.", asm.getClassName());
-            }
-        }
-    }
-    
     public void checkLoadState() {
         for (RegistryType rt : regByName.values()) {
             rt.checkLoadState();
@@ -206,10 +184,6 @@ public class RegistrationManager {
     
     public void addDependencyFor(String type, String dep) {
         regByName.get(type).addDependency(dep);
-    }
-    
-    public void addInnerClassList(String outer, List<String> inner) {
-        innerClassList.putAll(outer, inner);
     }
     
     static {

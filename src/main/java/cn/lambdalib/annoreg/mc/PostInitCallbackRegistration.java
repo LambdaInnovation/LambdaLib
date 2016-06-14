@@ -24,9 +24,6 @@ public class PostInitCallbackRegistration extends RegistrationMethodSimple<RegPo
 
     @Override
     protected void register(Method method, RegPostInitCallback value) throws Exception {
-        if (!Modifier.isPrivate(method.getModifiers())) {
-            LambdaLib.log.warn("PostInit method " + method + " is not private.");
-        }
         method.invoke(null);
     }
 

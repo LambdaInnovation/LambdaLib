@@ -1,13 +1,11 @@
 package cn.lambdalib.test
 
-import cn.lambdalib.annoreg.core.Registrant
 import cn.lambdalib.annoreg.mc.{RegInitCallback, RegEventHandler}
-import cn.lambdalib.networkcall.s11n.RegSerializable.SerializeField
 import cn.lambdalib.s11n.SerializeIncluded
 import cn.lambdalib.util.datapart.{EntityData, RegDataPart, DataPart}
 import cn.lambdalib.util.key.{KeyHandler, KeyManager}
 import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.common.gameevent.TickEvent.{PlayerTickEvent, ClientTickEvent}
+import cpw.mods.fml.common.gameevent.TickEvent.{PlayerTickEvent}
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.nbt.NBTTagCompound
 import org.lwjgl.input.Keyboard

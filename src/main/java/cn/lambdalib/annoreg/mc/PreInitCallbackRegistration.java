@@ -24,9 +24,6 @@ public class PreInitCallbackRegistration extends RegistrationMethodSimple<RegPre
 
     @Override
     protected void register(Method method, RegPreInitCallback value) throws Exception {
-        if (!Modifier.isPrivate(method.getModifiers())) {
-            LambdaLib.log.warn("PreInit method " + method + " is not private.");
-        }
         method.invoke(null);
     }
 

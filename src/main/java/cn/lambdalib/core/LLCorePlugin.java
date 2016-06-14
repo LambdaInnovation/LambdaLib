@@ -22,7 +22,7 @@ public class LLCorePlugin implements IFMLLoadingPlugin {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[] { "cn.lambdalib.core.asm.RegistryTransformer" };
+        return new String[0];
     }
 
     @Override

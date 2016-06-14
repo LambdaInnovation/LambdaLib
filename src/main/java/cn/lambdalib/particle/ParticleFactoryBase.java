@@ -54,8 +54,11 @@ public abstract class ParticleFactoryBase {
         return ret;
     }
 
-    @RegEventHandler(Bus.FML)
-    public static class EventHandlers {
+    @Registrant
+    public enum EventHandlers {
+        @RegEventHandler(Bus.FML)
+        instance;
+
         static final int UPDATE_RATE = 40;
         int ticker;
 

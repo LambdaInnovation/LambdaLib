@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 public class Future<T> {
 
     @RegInitCallback
-    public static void __init() {
+    private static void init() {
         NetworkS11n.addDirect(Future.class, new S11nHandler());
         FutureManager.instance.init();
     }

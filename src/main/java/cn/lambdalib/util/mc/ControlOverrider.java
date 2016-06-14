@@ -36,7 +36,6 @@ import net.minecraft.util.IntHashMap;
  */
 @SideOnly(Side.CLIENT)
 @Registrant
-@RegEventHandler(Bus.Forge)
 public class ControlOverrider {
     
     private static IntHashMap kbMap;
@@ -49,7 +48,7 @@ public class ControlOverrider {
     private static boolean completeOverriding;
 
     @RegInitCallback
-    public static void init() {
+    private static void init() {
         try {
             kbMapField = RegistryUtils.getObfField(KeyBinding.class, "hash", "field_74514_b");
             kbMap = getOriginalKbMap();
@@ -185,27 +184,7 @@ public class ControlOverrider {
         }
     }
     
-    GuiScreen lastTickGui;
-    @SubscribeEvent
-    public void onClientTick(ClientTickEvent cte) {
-        GuiScreen cgs = Minecraft.getMinecraft().currentScreen;
-        if(lastTickGui == null && cgs != null) {
-            releaseLocks();
-        }
-        if(lastTickGui != null && cgs == null) {
-            restoreLocks();
-        }
-        lastTickGui = cgs;
-    }
-
-    @SubscribeEvent
-    public void onDisconnect(ClientDisconnectionFromServerEvent evt) {
-        if (SideHelper.isClient()) {
-            clearInternal();
-            endCompleteOverride();
-            overrideGroups.clear();
-        }
-    }
+    private static GuiScreen lastTickGui;
     
     private static void log(String s) {
         if(LambdaLib.DEBUG)
@@ -238,6 +217,33 @@ public class ControlOverrider {
         public void end() {
             ended = true;
             ControlOverrider.rebuild();
+        }
+    }
+
+    @Registrant
+    public enum Events {
+        @RegEventHandler(Bus.Forge)
+        instance_;
+
+        @SubscribeEvent
+        public void onClientTick(ClientTickEvent cte) {
+            GuiScreen cgs = Minecraft.getMinecraft().currentScreen;
+            if(lastTickGui == null && cgs != null) {
+                releaseLocks();
+            }
+            if(lastTickGui != null && cgs == null) {
+                restoreLocks();
+            }
+            lastTickGui = cgs;
+        }
+
+        @SubscribeEvent
+        public void onDisconnect(ClientDisconnectionFromServerEvent evt) {
+            if (SideHelper.isClient()) {
+                clearInternal();
+                endCompleteOverride();
+                overrideGroups.clear();
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
 * https://github.com/LambdaInnovation/LambdaLib
 * Licensed under MIT, see project root for more information.
 */
-package cn.lambdalib.networkcall;
+package cn.lambdalib.s11n.network;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,11 +14,11 @@ import net.minecraft.tileentity.TileEntity;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 
 /**
- * Helper to convert objects into TargetPoint and do further network sending.
+ * Helper to convert objects into {@link TargetPoint}.
  * 
  * @author WeAthFolD
  */
-public class TargetPointHelper {
+public class TargetPoints {
 
     public static final double DEFAULT_RANGE = 16;
 

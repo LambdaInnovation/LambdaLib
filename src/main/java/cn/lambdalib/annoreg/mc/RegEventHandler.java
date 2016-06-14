@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  * Registers the class as a listener into either FML or Forge bus.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE})
+@Target(ElementType.FIELD)
 public @interface RegEventHandler {
     
     public enum Bus {

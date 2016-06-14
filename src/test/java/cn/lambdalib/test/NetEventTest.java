@@ -6,6 +6,7 @@
 */
 package cn.lambdalib.test;
 
+import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegCommand;
 import cn.lambdalib.annoreg.mc.RegInitCallback;
 import cn.lambdalib.core.LambdaLib;
@@ -27,6 +28,7 @@ import org.lwjgl.input.Keyboard;
 // @Registrant
 public class NetEventTest {
 
+    @Registrant
     @NetworkS11nType
     public static class TestMessage {
 

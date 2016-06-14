@@ -339,6 +339,8 @@ public class NetworkMessage {
                 valid = true;
             } catch (ContextException e) {
                 valid = false;
+            } catch (Exception e) {
+                throw new RuntimeException("Error deserializing network message " + channel + "@" + instance, e);
             }
         }
 
@@ -358,6 +360,7 @@ public class NetworkMessage {
         }
     }
 
+    @Registrant
     @NetworkS11nType
     public static class ClassDelegate implements IMessageDelegate {
 

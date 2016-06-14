@@ -211,8 +211,11 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
         }
     }
 
-    @RegEventHandler(Bus.Forge)
-    public static class EventListener {
+    @Registrant
+    public enum EventListener {
+        @RegEventHandler(Bus.Forge)
+        instance;
+
         @SubscribeEvent
         public void onLivingUpdate(LivingUpdateEvent evt) {
             EntityData<EntityLivingBase> data = EntityData.getNonCreate(evt.entityLiving);

@@ -34,7 +34,7 @@ public interface IRecipeRegistry {
     void register(String type, ItemStack output, Object[] input, int width, int height, float experience);
 
     default void debug(Object msg) {
-        if(LambdaLib.DEBUG) {
+        if(LambdaLib.DEBUG && false) {
             LambdaLib.log.info(msg);
         }
     }

@@ -77,10 +77,6 @@ public abstract class RegistryType {
     }
     
     public void registerAll(RegModInformation mod) {
-        if(LambdaLib.DEBUG) {
-            LLModContainer.log.info("Reg " + this.name);
-        }
-        
         //Dependencies.
         for (String dep : dependencies) {
             RegistrationManager.INSTANCE.registerAll(mod.getModInstance(), dep);

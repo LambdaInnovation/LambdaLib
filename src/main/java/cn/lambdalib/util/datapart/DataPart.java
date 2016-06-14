@@ -1,7 +1,7 @@
 package cn.lambdalib.util.datapart;
 
 import cn.lambdalib.core.LLCommons;
-import cn.lambdalib.networkcall.TargetPointHelper;
+import cn.lambdalib.s11n.network.TargetPoints;
 import cn.lambdalib.s11n.network.NetworkMessage;
 import cn.lambdalib.s11n.network.NetworkMessage.Listener;
 import cn.lambdalib.s11n.network.NetworkS11n;
@@ -195,7 +195,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
 
             NetworkMessage.sendToServer(this, channel, params);
         } else {
-            NetworkMessage.sendToAllAround(TargetPointHelper.convert(ent, serverSyncRange), this, channel, params);
+            NetworkMessage.sendToAllAround(TargetPoints.convert(ent, serverSyncRange), this, channel, params);
         }
     }
 

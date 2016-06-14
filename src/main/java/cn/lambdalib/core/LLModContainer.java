@@ -7,7 +7,6 @@
 package cn.lambdalib.core;
 
 import cn.lambdalib.annoreg.core.RegistrationManager;
-import cn.lambdalib.networkcall.Future;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -101,14 +100,15 @@ public class LLModContainer extends DummyModContainer {
         Set<String> registryMods = mapToClass(data.getAll("cn.lambdalib.annoreg.core.RegistrationMod"));
         registryMods.removeAll(removedClasses);
         RegistrationManager.INSTANCE.addAnnotationMod(registryMods);
-
-        // Misc initialization
-        Future.init();
     }
 
     @Subscribe
     public void loadComplete(FMLLoadCompleteEvent event) {
         log.info("AnnotationRegistry is loaded. Checking states.");
+        if (LambdaLib.DEBUG) {
+            log.info(RegistrationManager.INSTANCE.profiler.toString());
+        }
+
         RegistrationManager.INSTANCE.checkLoadState();
     }
 
