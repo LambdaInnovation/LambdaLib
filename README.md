@@ -1,6 +1,6 @@
 # LambdaLib
 
-[![Build Status](http://jenkins.mcbox.cc/job/LambdaInnovation/job/LambdaLib/badge/icon)](http://jenkins.mcbox.cc/job/LambdaInnovation/job/LambdaLib/)
+[![Build Status](http://jenkins.mcbox.cc/job/LambdaLib/badge/icon)](http://jenkins.mcbox.cc/job/LambdaLib/)
 
 A modding library that aims at making modding fluent and enjoyable.
 
@@ -18,8 +18,7 @@ but will reach a stable state perhaps soon.
 Developement Setup
 =====
 
-A java8 developement environment with scala compatibility is required. Note that when you include source code, you must
-put [jars\LambdaLib-PluginLoader.jar](jars\LambdaLib-PluginLoader.jar) into the `eclipse\mods` folder.
+A java8 developement environment with scala compatibility is required. It is recommended to use `gradlew idea` or `gradlew eclipse` to generate a workspace.
 
 Project structure:
 

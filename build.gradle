@@ -49,6 +49,7 @@ repositories {
 }
 
 dependencies {
+	compile files('jars/LambdaLib-PluginLoader.jar') // Core plugin loader
 	deployerJars "org.apache.maven.wagon:wagon-ftp:2.2"
 }
 
