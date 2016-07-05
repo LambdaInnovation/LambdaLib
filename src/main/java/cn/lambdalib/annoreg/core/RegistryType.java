@@ -9,6 +9,7 @@ package cn.lambdalib.annoreg.core;
 import cn.lambdalib.annoreg.core.AnnotationData.Type;
 import cn.lambdalib.core.LLModContainer;
 import cn.lambdalib.core.LambdaLib;
+import com.google.common.base.Throwables;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -160,7 +161,7 @@ public abstract class RegistryType {
                 } catch (Exception e) {
                     LLModContainer.log.error("Error when registering {}.", ad.toString());
                     itor.remove();
-                    throw new RuntimeException(e);
+                    Throwables.propagate(e);
                 }
                 break;
             default:

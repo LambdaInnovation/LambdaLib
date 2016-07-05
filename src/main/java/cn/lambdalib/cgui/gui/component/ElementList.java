@@ -94,6 +94,10 @@ public class ElementList extends Component {
     public List<Widget> getSubWidgets() {
         return ImmutableList.copyOf(subWidgets);
     }
+
+    public int size() {
+        return subWidgets.size();
+    }
     
     private void updateList() {
         double sum = 0.0;

@@ -97,6 +97,7 @@ public class NetworkS11n {
     }
 
     public static <T> void addDirectInstance(T instance) {
+        register(instance.getClass());
         addDirect((Class<T>) instance.getClass(), new NetS11nAdaptor<T>() {
             @Override
             public void write(ByteBuf buf, T obj) {}
@@ -313,6 +314,7 @@ public class NetworkS11n {
             }
             cur = cur.getSuperclass();
         }
+
         return -1;
     }
 
@@ -343,6 +345,14 @@ public class NetworkS11n {
             }
             cur = cur.getSuperclass();
         }
+
+        for (Class<?> itf : topClass.getInterfaces()) {
+            ret = adaptors.get(itf);
+            if (ret != null) {
+                return ret;
+            }
+        }
+
         return ret;
     }
 
