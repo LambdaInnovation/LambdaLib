@@ -55,6 +55,7 @@ public abstract class ParticleFactoryBase {
     }
 
     @Registrant
+    @SideOnly(Side.CLIENT)
     public enum EventHandlers {
         @RegEventHandler(Bus.FML)
         instance;

@@ -221,6 +221,7 @@ public class ControlOverrider {
     }
 
     @Registrant
+    @SideOnly(Side.CLIENT)
     public enum Events {
         @RegEventHandler(Bus.Forge)
         instance_;
