@@ -69,10 +69,10 @@ public class CheckManger
 			 for(String modid:this.latestVersion.keySet())
 			 {
 				 pars=this.modPool.get(modid);
-				 //modname,latestestversion//
+				 //modname,latestestversion
 				 player.addChatMessage(new ChatComponentTranslation("chat.newversion",pars[0],this.latestVersion.get(modid)));
-				 
 			 }
+			alerted=true;
 		}
 	}
 	@RegPostInitCallback
@@ -123,7 +123,7 @@ class Fetcher implements Runnable
 		String api_content="";
 		Scanner scan=null;
 		try {
-			scan = new Scanner(this.api_url.openStream());
+			scan = new Scanner(this.api_url.openStream(),"UTF-8");
 		}
 		catch (IOException e){
 			e.printStackTrace();
