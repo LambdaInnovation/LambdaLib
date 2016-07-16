@@ -127,7 +127,7 @@ class Fetcher implements Runnable
 			scan = new Scanner(this.api_url.openStream(),"UTF-8");
 		}
 		catch (IOException e){
-			e.printStackTrace();
+			LambdaLib.log.error(e.getLocalizedMessage());
 		}
 
 		if(scan!=null)
