@@ -32,11 +32,12 @@ public class Color {
         fromHexColor(hex);
     }
     
-    public void from(Color c) {
+    public Color from(Color c) {
         this.r = c.r;
         this.g = c.g;
         this.b = c.b;
         this.a = c.a;
+        return this;
     }
     
     public Color setColor4i(int r, int g, int b, int a) {

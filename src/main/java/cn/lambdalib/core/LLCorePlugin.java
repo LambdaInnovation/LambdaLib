@@ -20,9 +20,15 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 public class LLCorePlugin implements IFMLLoadingPlugin {
 
+    private static boolean deobfEnabled;
+
+    public static boolean isDeobfEnabled() {
+        return deobfEnabled;
+    }
+
     @Override
     public String[] getASMTransformerClass() {
-        return new String[0];
+        return new String[] { "cn.lambdalib.pipeline.core.PipelineTransformer" };
     }
 
     @Override
@@ -37,6 +43,7 @@ public class LLCorePlugin implements IFMLLoadingPlugin {
 
     @Override
     public void injectData(Map<String, Object> data) {
+        deobfEnabled = (Boolean) data.get("runtimeDeobfuscationEnabled");
     }
 
     @Override
