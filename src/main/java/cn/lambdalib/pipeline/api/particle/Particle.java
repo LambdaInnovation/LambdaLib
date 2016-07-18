@@ -2,7 +2,6 @@ package cn.lambdalib.pipeline.api.particle;
 
 import cn.lambdalib.util.helper.Color;
 import org.lwjgl.util.vector.Vector3f;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +53,7 @@ public class Particle {
     /**
      * Gets an attribute of given type.
      * @return An instance of type T
-     * @throws InvalidStateException if no attribute of such type
+     * @throws IllegalStateException if no attribute of such type
      */
     public <T extends Attr> T getAttr(Class<T> type) {
         for (Attr a : attributes) {
@@ -64,7 +63,7 @@ public class Particle {
                 return ret;
             }
         }
-        throw new InvalidStateException("No attribute of " + type + " present");
+        throw new IllegalStateException("No attribute of " + type + " present");
     }
 
     /**

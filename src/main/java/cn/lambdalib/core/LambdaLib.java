@@ -29,12 +29,12 @@ import org.apache.logging.log4j.Logger;
 @RegistrationMod(pkg = "cn.lambdalib.", res = "lambdalib", prefix = "ll_")
 public class LambdaLib {
 
-    public static final String VERSION = "1.2.1";
+    public static final String VERSION = "@VERSION@";
 
     /**
-     * Does open debug mode. turn to false when compiling.
+     * Whether we are in development (debug) mode.
      */
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = VERSION.startsWith("@");
 
     public static final Logger log = FMLLog.getLogger();
 

@@ -41,6 +41,10 @@ targetCompatibility = 1.8
 minecraft {
 	version = "${config.mc_ver}-${config.forge_ver}"
 	runDir = "eclipse"
+
+	// Replace stuffs in the source
+    replace "@VERSION@", config.mod_ver
+    replace "@MC_VERSION@", config.mc_ver
 }
 
 repositories {
