@@ -69,10 +69,10 @@ public class CheckManger
 			 for(String modid:this.latestVersion.keySet())
 			 {
 				 pars=this.modPool.get(modid);
-				 //modname,latestestversion//
+				 //modname,latestestversion
 				 player.addChatMessage(new ChatComponentTranslation("chat.newversion",pars[0],this.latestVersion.get(modid)));
-				 
 			 }
+			alerted=true;
 		}
 	}
 	@RegPostInitCallback
@@ -121,13 +121,15 @@ class Fetcher implements Runnable
 		Type dict=new TypeToken<List<Map<String,Object>>>(){}.getType();
 		List<Map<String,Object>> releases = null;
 		String api_content="";
+
 		Scanner scan=null;
 		try {
-			scan = new Scanner(this.api_url.openStream());
+			scan = new Scanner(this.api_url.openStream(),"UTF-8");
 		}
 		catch (IOException e){
-			e.printStackTrace();
+			LambdaLib.log.error(e.getLocalizedMessage());
 		}
+
 		if(scan!=null)
 		{
 			while(scan.hasNext())
@@ -135,8 +137,14 @@ class Fetcher implements Runnable
                 api_content+=scan.next();
             }
             LambdaLib.log.info(api_content);
+			scan.close();
 		}
-        scan.close();
+		else
+        {
+            LambdaLib.log.info("Unable to connect to Github, please check your network");
+            return;
+        }
+
 		try {
 			releases=gson.fromJson(new BufferedReader(new InputStreamReader(this.api_url.openStream())),dict);
 		} catch (Exception e) {

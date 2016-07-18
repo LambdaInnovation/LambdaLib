@@ -1,5 +1,5 @@
 *.class
-*.bat
+# *.bat
 *.setting
 
 # Mobile Tools for Java (J2ME)
