@@ -285,6 +285,8 @@ public class Material {
 
         final Map<String, LayoutType> mappings = new HashMap<>();
 
+        // TODO: Improve creation syntax.
+
         public static LayoutMapping create(Pair<String, LayoutType>... input) {
             LayoutMapping ret = new LayoutMapping();
             for (Pair<String, LayoutType> p : input) {
