@@ -11,7 +11,7 @@ public class PipelineTransformer implements IClassTransformer {
     @Override
     public byte[] transform(String name, String transformedName, byte[] bytes) {
         if (transformedName.equals("net.minecraft.client.renderer.RenderGlobal")) {
-            ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+            ClassWriter cw = new ClassWriter(0);
             ClassVisitor cv = new EntityRendererVisitor(cw);
             ClassReader cr = new ClassReader(bytes);
 
