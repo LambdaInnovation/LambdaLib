@@ -1,9 +1,6 @@
 package cn.lambdalib.pipeline.api;
 
 
-import cn.lambdalib.pipeline.api.Material.Instance;
-import cn.lambdalib.pipeline.api.Material.Layout;
-import cn.lambdalib.pipeline.api.Material.Mesh;
 import cn.lambdalib.pipeline.api.state.StateContext;
 import cn.lambdalib.pipeline.core.GLBuffer;
 import cn.lambdalib.pipeline.core.VAO;
@@ -27,15 +24,15 @@ import static org.lwjgl.opengl.GL33.glVertexAttribDivisor;
 
 public class GraphicPipeline {
 
-    private Map<Material, Multimap<SubGroup, Instance>> drawCalls = new HashMap<>();
+    private Map<Material, Multimap<SubGroup, Material.Instance>> drawCalls = new HashMap<>();
 
     private final StateContext context = new StateContext();
 
-    public void draw(Material mat, Mesh mesh, Instance instance) {
+    public void draw(Material mat, Material.Mesh mesh, Material.Instance instance) {
         put(mat, new SubGroup(mesh, true, -1), instance);
     }
 
-    public void draw(Material mat, Mesh mesh, Instance instance, int subMeshIndex) {
+    public void draw(Material mat, Material.Mesh mesh, Material.Instance instance, int subMeshIndex) {
         put(mat, new SubGroup(mesh, false, subMeshIndex), instance);
     }
 
@@ -46,7 +43,7 @@ public class GraphicPipeline {
         return context;
     }
 
-    private void put(Material mat, SubGroup group, Instance instance) {
+    private void put(Material mat, SubGroup group, Material.Instance instance) {
         if (!drawCalls.containsKey(mat)) {
             drawCalls.put(mat, ArrayListMultimap.create());
         }
@@ -63,7 +60,7 @@ public class GraphicPipeline {
             mat.updateUniforms();
             // -------------------------------------------------
 
-            Multimap<SubGroup, Instance> thisMatDraws = drawCalls.get(mat);
+            Multimap<SubGroup, Material.Instance> thisMatDraws = drawCalls.get(mat);
 
             GLBuffer instanceVBO = GLBuffer.create();
             VAO vao = VAO.create();
@@ -72,7 +69,7 @@ public class GraphicPipeline {
             // Per-instance data pointer
             glBindBuffer(GL_ARRAY_BUFFER, instanceVBO.getID());
 
-            for (Layout layout : mat.instanceLayouts) {
+            for (Material.Layout layout : mat.instanceLayouts) {
                 glEnableVertexAttribArray(layout.location);
                 glVertexAttribPointer(layout.location, layout.attrType.dimension, GL_FLOAT, false,
                         mat.instanceFloats * 4,
@@ -83,12 +80,12 @@ public class GraphicPipeline {
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             for (SubGroup group : thisMatDraws.keySet()) {
-                Mesh mesh = group.mesh;
-                Collection<Instance> instances = thisMatDraws.get(group);
+                Material.Mesh mesh = group.mesh;
+                Collection<Material.Instance> instances = thisMatDraws.get(group);
 
                 // Per-vertex data pointer
                 glBindBuffer(GL_ARRAY_BUFFER, mesh.getVBO().getID());
-                for (Layout layout : mat.vertexLayouts) {
+                for (Material.Layout layout : mat.vertexLayouts) {
                     glEnableVertexAttribArray(layout.location);
                     glVertexAttribPointer(layout.location, layout.attrType.dimension, GL_FLOAT, false,
                             mat.vertexFloats * 4,
@@ -99,7 +96,7 @@ public class GraphicPipeline {
 
                 // Update instance bufffer
                 FloatBuffer buffer = BufferUtils.createFloatBuffer(mat.instanceFloats * instances.size());
-                for (Instance i : instances) {
+                for (Material.Instance i : instances) {
                     buffer.put(i.values);
                 }
                 buffer.flip();
@@ -125,11 +122,11 @@ public class GraphicPipeline {
 
     private class SubGroup {
 
-        final Mesh mesh;
+        final Material.Mesh mesh;
         final boolean all;
         final int iboID;
 
-        SubGroup(Mesh mesh, boolean all, int iboID) {
+        SubGroup(Material.Mesh mesh, boolean all, int iboID) {
             this.mesh = mesh;
             this.all = all;
             this.iboID = iboID;
