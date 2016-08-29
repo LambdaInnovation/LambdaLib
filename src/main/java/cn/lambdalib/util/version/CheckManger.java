@@ -136,7 +136,7 @@ class Fetcher implements Runnable
             {
                 api_content+=scan.next();
             }
-            LambdaLib.log.info(api_content);
+            if(LambdaLib.DEBUG) LambdaLib.log.info(api_content);
 			scan.close();
 		}
 		else
