@@ -102,7 +102,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
 
     private ByteBuf __genSyncBuffer() {
         ByteBuf buf = Unpooled.buffer();
-        NetworkS11n.serializeRecursively(buf, this, (Class) getClass());
+        toByteBuf(buf);
         return buf;
     }
 
@@ -132,6 +132,20 @@ public abstract class DataPart<T extends EntityLivingBase> {
      * Loads the DataPart. Called when the DataPart is being loaded at SERVER.
      */
     public void fromNBT(NBTTagCompound tag) {}
+
+    /**
+     * Writes this DataPart into {@link ByteBuf} for sync purpose.
+     */
+    public void toByteBuf(ByteBuf buf) {
+        NetworkS11n.serializeRecursively(buf, this, (Class) getClass());
+    }
+
+    /**
+     * Reads the data from given {@link ByteBuf}.
+     */
+    public void fromByteBuf(ByteBuf buf) {
+        NetworkS11n.deserializeRecursivelyInto(buf, this, getClass());
+    }
 
     //
 
@@ -226,7 +240,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
 
     @Listener(channel="itn_sync", side={Side.CLIENT, Side.SERVER})
     private void onSync(ByteBuf buf) {
-        NetworkS11n.deserializeRecursivelyInto(buf, this, getClass());
+        fromByteBuf(buf);
         onSynchronized();
     }
 
