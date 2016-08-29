@@ -261,7 +261,11 @@ public class TextBox extends Component {
             displayOffset += mini;
         }
 
-        assert displayOffset < caretPos;
+        if (displayOffset >= caretPos) {
+            displayOffset = Math.max(0, caretPos - 1);
+        }
+
+        assert caretPos == 0 || displayOffset < caretPos;
     }
 
     private double widthLimit() {
