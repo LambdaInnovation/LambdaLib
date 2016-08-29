@@ -590,12 +590,12 @@ public class NetworkS11n {
         addDirect(Entity.class, new NetS11nAdaptor<Entity>() {
             @Override
             public void write(ByteBuf buf, Entity obj) {
-                buf.writeByte(obj.dimension);
+                buf.writeShort(obj.dimension);
                 buf.writeInt(obj.getEntityId());
             }
             @Override
             public Entity read(ByteBuf buf) {
-                World wrld = SideHelper.getWorld(buf.readByte());
+                World wrld = SideHelper.getWorld(buf.readShort());
                 if (wrld == null) {
                     throw new ContextException("Invalid world");
                 } else {
@@ -611,11 +611,11 @@ public class NetworkS11n {
         addDirect(World.class, new NetS11nAdaptor<World>() {
             @Override
             public void write(ByteBuf buf, World obj) {
-                buf.writeByte(obj.provider.dimensionId);
+                buf.writeShort(obj.provider.dimensionId);
             }
             @Override
             public World read(ByteBuf buf) throws ContextException {
-                World wrld = SideHelper.getWorld(buf.readByte());
+                World wrld = SideHelper.getWorld(buf.readShort());
                 if (wrld == null) {
                     throw new ContextException("invalid world");
                 } else {
