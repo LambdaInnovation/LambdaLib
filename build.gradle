@@ -1,18 +1,18 @@
 buildscript {
 	repositories {
-		mavenCentral()
+        jcenter()
 		maven {
 			name = "forge"
 			url = "http://files.minecraftforge.net/maven"
 		}
-		maven {
-			name = "sonatype"
-			url = "https://oss.sonatype.org/content/repositories/snapshots/"
-		}
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.0-SNAPSHOT'
 	}
+}
+
+plugins {
+    id "net.minecraftforge.gradle.forge" version "2.0.2"
 }
 
 ext.configFile = file "build.properties"
@@ -23,28 +23,19 @@ configFile.withReader {
 	project.ext.config = new ConfigSlurper().parse prop
 }
 
-configurations {
-	deployerJars
-}
-
-apply plugin: 'scala'
-apply plugin: 'forge'
-
-
 version				= config.mod_ver
 group				= config.mod_group
 archivesBaseName	= config.mod_name
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
 minecraft {
 	version = "${config.mc_ver}-${config.forge_ver}"
-	runDir = "eclipse"
+	runDir = "run"
 
 	// Replace stuffs in the source
     replace "@VERSION@", config.mod_ver
     replace "@MC_VERSION@", config.mc_ver
+
+    mappings = "snapshot_20141130"
 }
 
 repositories {
@@ -52,10 +43,19 @@ repositories {
 	mavenLocal()
 }
 
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+
 dependencies {
 	compile files('jars/LambdaLib-PluginLoader.jar') // Core plugin loader
-	deployerJars "org.apache.maven.wagon:wagon-ftp:2.2"
+	//deployerJars "org.apache.maven.wagon:wagon-ftp:2.2"
 }
+
+apply plugin: 'scala'
 
 sourceSets.main {
     java.srcDirs = []
@@ -102,6 +102,4 @@ task deobfJar(type: Jar, dependsOn: 'jar') {
 artifacts {
 	archives deobfJar
 }
-
-install.dependsOn build
 
