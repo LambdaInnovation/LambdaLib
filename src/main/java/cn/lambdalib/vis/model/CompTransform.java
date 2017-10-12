@@ -18,11 +18,11 @@ public class CompTransform {
 
     public static final CompTransform identity = new CompTransform();
 
-    public Vec3 transform = Vec3.createVectorHelper(0, 0, 0);
+    public Vec3 transform = new Vec3(0, 0, 0);
     
-    public Vec3 pivotPt = Vec3.createVectorHelper(0, 0, 0);
+    public Vec3 pivotPt = new Vec3(0, 0, 0);
     
-    public Vec3 rotation = Vec3.createVectorHelper(0, 0, 0);
+    public Vec3 rotation = new Vec3(0, 0, 0);
     
     public double scale = 1.0;
     
@@ -47,9 +47,7 @@ public class CompTransform {
     }
     
     private void svec(Vec3 vec3, double x, double y, double z) {
-        vec3.xCoord = x;
-        vec3.yCoord = y;
-        vec3.zCoord = z;
+        vec3=new Vec3(x,y,z);
     }
     
     public void doTransform() {

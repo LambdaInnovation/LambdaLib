@@ -7,20 +7,19 @@
 package cn.lambdalib.s11n.network;
 
 import cn.lambdalib.annoreg.core.Registrant;
-import cn.lambdalib.annoreg.mc.RegMessageHandler;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
-import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
@@ -95,7 +94,8 @@ public class NetworkEvent {
         return ret == null ? Collections.emptyList() : ret;
     }
 
-    public static final class Message implements IMessage {
+    public static final class Message implements IMessage
+    {
 
         public Object object = null;
 
@@ -119,7 +119,8 @@ public class NetworkEvent {
 
     }
 
-    public static final class MessageHandler implements IMessageHandler<Message, IMessage> {
+    public static final class MessageHandler implements IMessageHandler<Message, IMessage>
+    {
 
         @SuppressWarnings("unchecked")
         public IMessage onMessage(Message msg, MessageContext ctx) {

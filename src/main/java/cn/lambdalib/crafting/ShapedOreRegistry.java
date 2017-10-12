@@ -8,8 +8,8 @@ package cn.lambdalib.crafting;
 
 import com.google.common.base.Joiner;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.ShapedOreRecipe;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 /**
  * @author EAirPeter

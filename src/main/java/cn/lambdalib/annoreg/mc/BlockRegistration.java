@@ -7,12 +7,11 @@
 package cn.lambdalib.annoreg.mc;
 
 import net.minecraft.block.Block;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import cn.lambdalib.annoreg.base.RegistrationFieldSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
-import cn.lambdalib.annoreg.core.RegModInformation;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 @RegistryTypeDecl
 public class BlockRegistration extends RegistrationFieldSimple<RegBlock, Block> {
@@ -31,7 +30,7 @@ public class BlockRegistration extends RegistrationFieldSimple<RegBlock, Block> 
         this.addWork(RegBlock.BTName.class, new PostWork<RegBlock.BTName, Block>() {
             @Override
             public void invoke(RegBlock.BTName anno, Block obj) throws Exception {
-                obj.setBlockName(getCurrentMod().getPrefix() + anno.value());
+                obj.setUnlocalizedName(getCurrentMod().getPrefix() + anno.value());
                 obj.setBlockTextureName(getCurrentMod().getRes(anno.value()));
             }
         });

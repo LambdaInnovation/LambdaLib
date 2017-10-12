@@ -6,7 +6,6 @@
 */
 package cn.lambdalib.vis.model;
 
-import net.minecraftforge.client.model.IModelCustom;
 
 /**
  * @author WeAthFolD

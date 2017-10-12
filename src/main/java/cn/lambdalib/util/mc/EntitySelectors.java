@@ -7,7 +7,7 @@
 package cn.lambdalib.util.mc;
 
 import java.util.*;
-import java.util.function.Predicate;
+import com.google.common.base.Predicate;
 
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
@@ -15,41 +15,40 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.player.EntityPlayer;
 
+
 /**
  * Some commonly used entity selectors.
  * @author WeAthFolD
  */
 public class EntitySelectors {
 
-    public static Predicate<Entity> of(Class<? extends Entity> type) {
+    public static Predicate of(Class<? extends Entity> type) {
         return entity -> type.isInstance(type);
     }
 
-    public static Predicate<Entity> everything() { return e -> true; }
+    public static Predicate everything = IEntitySelector.selectAnything;
 
-    public static Predicate<Entity> nothing() { return e -> false; }
+    public static Predicate nothing = input -> false;
 
-    public static Predicate<Entity> survivalPlayer() {
-        return entity -> entity instanceof EntityPlayer && !((EntityPlayer) entity).capabilities.isCreativeMode;
-    }
+    public static Predicate survivalPlayer = entity -> entity instanceof EntityPlayer && !((EntityPlayer) entity).capabilities.isCreativeMode;
 
-    public static Predicate<Entity> exclude(Entity ...exclusions) {
+    public static Predicate exclude(Entity ...exclusions) {
         Set<Entity> set = new HashSet<>();
         Collections.addAll(set, exclusions);
         return entity -> !set.contains(entity);
     }
 
-    public static Predicate<Entity> within(Entity entity, double range) {
+    public static Predicate within(Entity entity, double range) {
         double sq = range * range;
-        return e -> e.getDistanceSqToEntity(entity) <= sq;
+        return e -> e instanceof Entity && ((Entity)e).getDistanceSqToEntity(entity) <= sq;
     }
 
-    public static Predicate<Entity> within(double x, double y, double z, double range) {
+    public static Predicate within(double x, double y, double z, double range) {
         double sq = range * range;
-        return e -> e.getDistanceSq(x, y, z) <= sq;
+        return e->e instanceof Entity && ((Entity)e).getDistanceSq(x, y, z) <= sq;
     }
 
-    public static Predicate<Entity> player() {
+    public static Predicate player() {
         return entity -> entity instanceof EntityPlayer;
     }
 
@@ -57,10 +56,11 @@ public class EntitySelectors {
      * @return The selector that returns living things. WARNING: Doesn't select only EntityLivingBase. Some special
      *  living types such as boss parts are taken into consideration.
      */
-    public static Predicate<Entity> living() {
+    public static Predicate living() {
         return entity -> entity instanceof EntityLivingBase || entity instanceof EntityDragonPart;
     }
 
+    /*
     public static IEntitySelector toEntitySelector(Predicate<Entity> pred) {
         if (pred == null) return TRUE;
         else              return new IEntitySelector() {
@@ -76,6 +76,6 @@ public class EntitySelectors {
         public boolean isEntityApplicable(Entity p_82704_1_) {
             return true;
         }
-    };
+    };*/
     
 }

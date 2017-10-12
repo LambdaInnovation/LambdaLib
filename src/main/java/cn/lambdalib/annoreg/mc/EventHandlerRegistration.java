@@ -14,8 +14,7 @@ import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegModInformation;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 import net.minecraftforge.common.MinecraftForge;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.EventBus;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 @RegistryTypeDecl
 public class EventHandlerRegistration extends RegistrationInstance<RegEventHandler, Object> {

@@ -17,17 +17,17 @@ import cn.lambdalib.util.mc.SideHelper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -106,12 +106,7 @@ public class NetworkMessage {
      *  the instance of network message.
      */
     public static ClassDelegate staticCaller(Class<?> type) {
-        ClassDelegate ret = classDelegates.get(type);
-        if (ret == null) {
-            ret = new ClassDelegate(type);
-            classDelegates.put(type, ret);
-        }
-        return ret;
+        return classDelegates.computeIfAbsent(type, k -> new ClassDelegate(type));
     }
 
     /**
@@ -302,7 +297,8 @@ public class NetworkMessage {
         };
     }
 
-    public static class Message implements IMessage {
+    public static class Message implements IMessage
+    {
 
         boolean valid;
         Object instance;
@@ -346,8 +342,8 @@ public class NetworkMessage {
 
     }
 
-    public static class Handler implements IMessageHandler<Message, IMessage> {
-
+    public static class Handler implements IMessageHandler<Message, IMessage>
+    {
         @Override
         public IMessage onMessage(Message message, MessageContext ctx) {
             if (message.valid) {

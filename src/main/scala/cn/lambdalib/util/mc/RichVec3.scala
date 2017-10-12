@@ -1,21 +1,15 @@
 package cn.lambdalib.util.mc
 
-import cn.lambdalib.util.generic.{MathUtils, VecUtils}
+import cn.lambdalib.util.generic.MathUtils
 import net.minecraft.util.{MathHelper, Vec3}
 import MathUtils._
-
-object Vec3 {
-  def apply(x: Double, y: Double, z: Double): Vec3 = net.minecraft.util.Vec3.createVectorHelper(x, y, z)
-  def apply(other: Vec3): Vec3 = Vec3(other.xCoord, other.yCoord, other.zCoord)
-  def lerp(a: Vec3, b: Vec3, t: Double) = VecUtils.lerp(a, b, t)
-}
 
 class EntityLook(val yaw: Float, val pitch: Float) {
 
   def toVec3 = {
     val yawRad = toRadians(yaw)
     val pitchRad = toRadians(pitch)
-    Vec3(
+    new Vec3(
       -MathHelper.sin(yawRad) * MathHelper.cos(pitchRad),
       -MathHelper.sin(pitchRad),
       MathHelper.cos(yawRad) * MathHelper.cos(pitchRad))
@@ -23,53 +17,37 @@ class EntityLook(val yaw: Float, val pitch: Float) {
 
 }
 
-class RichVec3(val self: Vec3) extends AnyVal {
+class RichVec3(var self: Vec3) extends AnyRef {
   private implicit def cvt(v: Vec3): RichVec3 = new RichVec3(v)
 
   def set(x: Double, y: Double, z: Double) = {
-    self.xCoord = x
-    self.yCoord = y
-    self.zCoord = z
+    self=new Vec3(x,y,z)
   }
   def set(vec: Vec3) = {
-    self.xCoord = vec.xCoord
-    self.yCoord = vec.yCoord
-    self.zCoord = vec.zCoord
+    self=vec.copy()
   }
 
-  @inline def x = self.xCoord
-  @inline def y = self.yCoord
-  @inline def z = self.zCoord
+  @inline def x: Double = self.xCoord
+  @inline def y: Double = self.yCoord
+  @inline def z: Double = self.zCoord
 
-  def +(other: Vec3) = Vec3(self.xCoord + other.xCoord, self.yCoord + other.yCoord, self.zCoord + other.zCoord)
-  def unary_-() = Vec3(-self.xCoord, -self.yCoord, -self.zCoord)
-  def -(other: Vec3) = self + (-other)
-  def *(other: Vec3): Vec3 = Vec3(self.xCoord * other.xCoord, self.yCoord * other.yCoord, self.zCoord * other.zCoord)
+  def +(other: Vec3) = new Vec3(self.xCoord + other.xCoord, self.yCoord + other.yCoord, self.zCoord + other.zCoord)
+  def unary_-() = new Vec3(-self.xCoord, -self.yCoord, -self.zCoord)
+  def -(other: Vec3): Vec3 = self + (-other)
+  def *(other: Vec3): Vec3 = new Vec3(self.xCoord * other.xCoord, self.yCoord * other.yCoord, self.zCoord * other.zCoord)
 
-  def *(s: Double): Vec3 = Vec3(self.xCoord * s, self.yCoord * s, self.zCoord * s)
+  def *(s: Double): Vec3 = new Vec3(self.xCoord * s, self.yCoord * s, self.zCoord * s)
 
-  def +=(other: Vec3) = {
-    self.xCoord += other.xCoord
-    self.yCoord += other.yCoord
-    self.zCoord += other.zCoord
+  def +=(other: Vec3): Vec3 = {
+    self = self.add(other)
     self
   }
-  def -=(other: Vec3) = {
-    self.xCoord -= other.xCoord
-    self.yCoord -= other.yCoord
-    self.zCoord -= other.zCoord
-    self
-  }
-  def *=(other: Vec3): Vec3 = {
-    self.xCoord *= other.xCoord
-    self.yCoord *= other.yCoord
-    self.zCoord *= other.zCoord
+  def -=(other: Vec3): Vec3 = {
+    self=self.subtract(other)
     self
   }
   def *=(s: Double): Vec3 = {
-    self.xCoord *= s
-    self.yCoord *= s
-    self.zCoord *= s
+    self=new Vec3(self.xCoord * s, self.yCoord * s, self.zCoord * s)
     self
   }
 
@@ -80,6 +58,6 @@ class RichVec3(val self: Vec3) extends AnyVal {
     -toDegrees(Math.atan2(self.xCoord, self.zCoord)).toFloat,
     -toDegrees(Math.atan2(self.yCoord, Math.sqrt(self.xCoord * self.xCoord + self.zCoord * self.zCoord))).toFloat)
 
-  def copy(): Vec3 = Vec3(self)
+  def copy(): Vec3 = self.copy()
 
 }

@@ -8,10 +8,13 @@ package cn.lambdalib.util.mc;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.Objects;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import com.google.common.base.Predicate;
+
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -21,8 +24,9 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import cn.lambdalib.util.helper.BlockPos;
 import net.minecraft.world.WorldServer;
+
+import javax.annotation.Nullable;
 
 /**
  * Utils about block/entity lookup and interaction.
@@ -78,7 +82,7 @@ public class WorldUtils {
             minZ = vec2.zCoord;
             maxZ = vec1.zCoord;
         }
-        return AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+        return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
     }
     
     /**
@@ -88,28 +92,26 @@ public class WorldUtils {
         if(points.length == 0) {
             throw new RuntimeException("Invalid call: too few vectors");
         }
-        AxisAlignedBB ret = AxisAlignedBB.getBoundingBox(
-            points[0].xCoord, points[0].yCoord, points[0].zCoord, 
-            points[0].xCoord, points[0].yCoord, points[0].zCoord);
-        
+
+        double minX=points[0].xCoord,maxX=points[0].xCoord,minY=points[0].yCoord,maxY=points[0].yCoord,minZ=points[0].zCoord,maxZ=points[0].zCoord;
         for(int i = 1; i < points.length; ++i) {
-            if(ret.minX > points[i].xCoord)
-                ret.minX = points[i].xCoord;
-            if(ret.maxX < points[i].xCoord)
-                ret.maxX = points[i].xCoord;
+            if(minX > points[i].xCoord)
+                minX = points[i].xCoord;
+            if(maxX < points[i].xCoord)
+                maxX = points[i].xCoord;
             
-            if(ret.minY > points[i].yCoord)
-                ret.minY = points[i].yCoord;
-            if(ret.maxY < points[i].yCoord)
-                ret.maxY = points[i].yCoord;
+            if(minY > points[i].yCoord)
+                minY = points[i].yCoord;
+            if(maxY < points[i].yCoord)
+                maxY = points[i].yCoord;
             
-            if(ret.minZ > points[i].zCoord)
-                ret.minZ = points[i].zCoord;
-            if(ret.maxZ < points[i].zCoord)
-                ret.maxZ = points[i].zCoord;
+            if(minZ > points[i].zCoord)
+                minZ = points[i].zCoord;
+            if(maxZ < points[i].zCoord)
+                maxZ = points[i].zCoord;
         }
         
-        return ret;
+        return new AxisAlignedBB(minX, minY, minZ,maxX,maxY,maxZ);
     }
     
     public static List<BlockPos> getBlocksWithin(Entity entity, double range, int max, IBlockSelector ...filters) {
@@ -117,7 +119,7 @@ public class WorldUtils {
     }
     
     public static List<BlockPos> getBlocksWithin(TileEntity te, double range, int max, IBlockSelector ...filters) {
-        return getBlocksWithin(te.getWorldObj(), te.xCoord + 0.5, te.yCoord + 0.5, te.zCoord + 0.5, range, max, filters);
+        return getBlocksWithin(te.getWorld(), te.getPos().getX() + 0.5, te.getPos().getY() + 0.5, te.getPos().getZ() + 0.5, range, max, filters);
     }
     
     public static List<BlockPos> getBlocksWithin(
@@ -131,14 +133,10 @@ public class WorldUtils {
         
         final double rangeSq = range * range;
         
-        fs[filter.length] = new IBlockSelector() {
-
-            @Override
-            public boolean accepts(World world, int xx, int yy, int zz, Block block) {
-                double dx = xx - x, dy = yy - y, dz = zz - z;
-                return dx * dx + dy * dy + dz * dz <= rangeSq;
-            }
-            
+        fs[filter.length] = (world1, xx, yy, zz, block) ->
+        {
+            double dx = xx - x, dy = yy - y, dz = zz - z;
+            return dx * dx + dy * dy + dz * dz <= rangeSq;
         };
         
         int minX = MathHelper.floor_double(x - range),
@@ -164,13 +162,13 @@ public class WorldUtils {
                 for(int z = minZ; z <= maxZ; ++z) {
                     boolean match = true;
                     for(IBlockSelector f : filter) {
-                        if(!f.accepts(world, x, y, z, world.getBlock(x, y, z))) {
+                        if(!f.accepts(world, x, y, z, world.getBlockState(new BlockPos(x, y, z)).getBlock())) {
                             match = false;
                             break;
                         }
                     }
                     if(match) {
-                        ret.add(new BlockPos(world, x, y, z));
+                        ret.add(new BlockPos(x, y, z));
                         if(ret.size() == max)
                             return ret;
                     }
@@ -182,24 +180,28 @@ public class WorldUtils {
     }
     
     public static List<Entity> getEntities(TileEntity te, double range, Predicate<Entity> predicate) {
-        return getEntities(te.getWorldObj(), te.xCoord + 0.5, te.yCoord + 0.5, te.zCoord + 0.5, range, predicate);
+        return getEntities(te.getWorld(), te.getPos().getX() + 0.5, te.getPos().getY() + 0.5, te.getPos().getZ() + 0.5, range, predicate);
     }
     
-    public static List<Entity> getEntities(Entity ent, double range, Predicate<Entity> predicate) {
+    public static List<Entity> getEntities(Entity ent, double range, Predicate predicate) {
         return getEntities(ent.worldObj, ent.posX, ent.posY, ent.posZ, range, predicate);
     }
     
     public static List<Entity> getEntities(World world, double x, double y, double z, double range,
-                                           Predicate<Entity> filter) {
-        AxisAlignedBB box = AxisAlignedBB.getBoundingBox(
+                                           Predicate filter) {
+        AxisAlignedBB box = new AxisAlignedBB(
             x - range, y - range, z - range, 
             x + range, y + range, z + range);
-        return getEntities(world, box, EntitySelectors.within(x, y, z, range).and(filter));
+        return getEntities(world, box, input ->
+        {
+            Objects.requireNonNull(input);
+            return EntitySelectors.within(x, y, z, range).apply(input) && filter.apply(input);
+        });
     }
 
     @SuppressWarnings("unchecked")
-    public static List<Entity> getEntities(World world, AxisAlignedBB box, Predicate<Entity> predicate) {
-        return world.getEntitiesWithinAABBExcludingEntity(null, box, EntitySelectors.toEntitySelector(predicate));
+    public static List<Entity> getEntities(World world, AxisAlignedBB box, Predicate predicate) {
+        return world.func_175674_a(null, box, predicate);
     }
     
 }

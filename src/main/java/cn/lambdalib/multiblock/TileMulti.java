@@ -12,8 +12,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegTileEntity;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author WeathFolD
@@ -25,7 +25,7 @@ public class TileMulti extends TileEntity implements IMultiTile {
 
     InfoBlockMulti info = new InfoBlockMulti(this);
 
-    @Override
+
     public void updateEntity() {
         if (info != null)
             info.update();
@@ -58,7 +58,7 @@ public class TileMulti extends TileEntity implements IMultiTile {
     public AxisAlignedBB getRenderBoundingBox() {
         Block block = getBlockType();
         if (block instanceof BlockMulti) {
-            return ((BlockMulti) block).getRenderBB(xCoord, yCoord, zCoord, info.getDir());
+            return ((BlockMulti) block).getRenderBB(pos.getX(),pos.getY(),pos.getZ(), info.getDir());
         } else {
             return super.getRenderBoundingBox();
         }

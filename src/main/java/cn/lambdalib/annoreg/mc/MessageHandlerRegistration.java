@@ -14,15 +14,15 @@ import java.util.Map;
 
 import cn.lambdalib.annoreg.base.RegistrationClassSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
-import cn.lambdalib.annoreg.core.RegModInformation;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 @RegistryTypeDecl
-public class MessageHandlerRegistration extends RegistrationClassSimple<RegMessageHandler, IMessageHandler> {
+public class MessageHandlerRegistration extends RegistrationClassSimple<RegMessageHandler, IMessageHandler>
+{
     
     public MessageHandlerRegistration() {
         super(RegMessageHandler.class, "MessageHandler");

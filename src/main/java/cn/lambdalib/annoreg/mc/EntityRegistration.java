@@ -11,10 +11,10 @@ import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 import cn.lambdalib.annoreg.mc.RegEntity.HasRender;
 import cn.lambdalib.util.mc.SideHelper;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 
@@ -40,7 +40,7 @@ public class EntityRegistration extends RegistrationClassSimple<RegEntity, Entit
     @Override
     protected void register(Class<? extends Entity> theClass, RegEntity anno) throws Exception {
         if (!anno.clientOnly()) {
-            EntityRegistry.registerModEntity(theClass, getSuggestedName(), 
+            EntityRegistry.registerModEntity(theClass, getSuggestedName(),
                     helper.getNextIDForMod(), getCurrentMod().getModInstance(), 
                     anno.trackRange(), anno.freq(), anno.updateVel());
         }

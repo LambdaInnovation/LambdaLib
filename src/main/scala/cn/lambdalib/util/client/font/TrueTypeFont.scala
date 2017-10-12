@@ -60,7 +60,7 @@ class TrueTypeFont(val font: Font) extends IFont {
     dirty.clear()
 
     var x = px
-    val t = Tessellator.instance
+    val t = Tessellator.getInstance
     val sz = option.fontSize
     val scale = option.fontSize / charSize
 
@@ -79,11 +79,11 @@ class TrueTypeFont(val font: Font) extends IFont {
       val u = info.u
       val v = info.v
       glBindTexture(GL_TEXTURE_2D, generated.get(info.index))
-      t.startDrawingQuads()
-      t.addVertexWithUV(x,      y,      0, u,           v          )
-      t.addVertexWithUV(x,      y + sz, 0, u,           v + texStep)
-      t.addVertexWithUV(x + sz, y + sz, 0, u + texStep, v + texStep)
-      t.addVertexWithUV(x + sz, y,      0, u + texStep, v          )
+      t.getWorldRenderer.startDrawingQuads()
+      t.getWorldRenderer.addVertexWithUV(x,      y,      0, u,           v          )
+      t.getWorldRenderer.addVertexWithUV(x,      y + sz, 0, u,           v + texStep)
+      t.getWorldRenderer.addVertexWithUV(x + sz, y + sz, 0, u + texStep, v + texStep)
+      t.getWorldRenderer.addVertexWithUV(x + sz, y,      0, u + texStep, v          )
       t.draw()
 
       x += info.width * scale

@@ -14,9 +14,8 @@ import java.lang.annotation.Target;
 import cn.lambdalib.annoreg.base.RegistrationInstance;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
-import cn.lambdalib.core.LambdaLib;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * AuxGui register annotation.

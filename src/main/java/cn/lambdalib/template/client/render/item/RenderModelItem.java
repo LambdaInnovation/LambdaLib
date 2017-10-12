@@ -11,8 +11,8 @@ import java.util.Random;
 import javax.vecmath.Vector2d;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
@@ -26,8 +26,8 @@ import org.lwjgl.opengl.GL11;
 import cn.lambdalib.util.client.RenderUtils;
 import cn.lambdalib.util.deprecated.IItemModel;
 import cn.lambdalib.util.helper.GameTimer;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Item model render. Implemented lots of methods to adjust rendering and positioning.
@@ -38,7 +38,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderModelItem implements IItemRenderer {
 
-    protected Tessellator t = Tessellator.instance;
+    protected Tessellator t = Tessellator.getInstance();
     protected Minecraft mc = Minecraft.getMinecraft();
     protected static Random RNG = new Random();
     
@@ -239,16 +239,17 @@ public class RenderModelItem implements IItemRenderer {
     }
 
     @Override
+    @SuppressWarnings("unckecked")
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         switch (type) {
         case EQUIPPED:
         case EQUIPPED_FIRST_PERSON:
-            renderEquipped(item, (RenderBlocks) data[0], (EntityLivingBase) data[1], type);
+            renderEquipped(item, (Render) data[0], (EntityLivingBase) data[1], type);
             break;
         case ENTITY:
-            renderEntityItem((RenderBlocks)data[0], (EntityItem) data[1]);
+            renderEntityItem((Render)data[0], (EntityItem) data[1]);
             break;
         case INVENTORY:
             renderInventory();
@@ -280,7 +281,7 @@ public class RenderModelItem implements IItemRenderer {
         GL11.glEnable(GL11.GL_CULL_FACE);
     }
     
-    public void renderEntityItem(RenderBlocks render, EntityItem ent) {
+    public void renderEntityItem(Render render, EntityItem ent) {
         GL11.glPushMatrix(); {
             RenderUtils.loadTexture(texturePath);
             this.doRotation(entityItemRotation);
@@ -290,11 +291,11 @@ public class RenderModelItem implements IItemRenderer {
         } GL11.glPopMatrix();
     }
     
-    public void renderEquipped(ItemStack item, RenderBlocks render,
+    public void renderEquipped(ItemStack item, Render render,
             EntityLivingBase entity, ItemRenderType type) {
 
-        if (item.stackTagCompound == null)
-            item.stackTagCompound = new NBTTagCompound();
+        if (item.getTagCompound() == null)
+            item.setTagCompound(new NBTTagCompound());
         
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glPushMatrix(); {
@@ -349,25 +350,19 @@ public class RenderModelItem implements IItemRenderer {
     }
     
     protected static void initVec(Vec3 vec) {
-        vec = vec == null ?  Vec3.createVectorHelper(0D, 0D, 0D) : vec;
+        vec = vec == null ?  new Vec3(0D, 0D, 0D) : vec;
     }
     
     protected static void initVec(Vec3 vec, Vec3 another) {
-        initVec(vec, another.xCoord, another.yCoord, another.zCoord);
+        vec=new Vec3(another.xCoord,another.yCoord,another.zCoord);
     }
     
     protected static Vec3 initVec() {
-        return Vec3.createVectorHelper(0D, 0D, 0D);
+        return new Vec3(0D, 0D, 0D);
     }
     
     protected static void initVec(Vec3 vec, double x, double y, double z) {
-        if(vec == null)
-            vec = Vec3.createVectorHelper(x, y, z);
-        else {
-            vec.xCoord = x;
-            vec.yCoord = y;
-            vec.zCoord = z;
-        }
+        vec=new Vec3(x,y,z);
     }
 
 }

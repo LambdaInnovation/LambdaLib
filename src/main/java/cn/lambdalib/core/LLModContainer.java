@@ -11,15 +11,14 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import cpw.mods.fml.common.DummyModContainer;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.LoadController;
-import cpw.mods.fml.common.ModMetadata;
-import cpw.mods.fml.common.discovery.ASMDataTable;
-import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
-import cpw.mods.fml.common.discovery.asm.ModAnnotation.EnumHolder;
-import cpw.mods.fml.common.event.FMLConstructionEvent;
-import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.DummyModContainer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.LoadController;
+import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.asm.ModAnnotation;
+import net.minecraftforge.fml.common.event.FMLConstructionEvent;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +27,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class LLModContainer extends DummyModContainer {
+public class LLModContainer extends DummyModContainer
+{
 
     public static Logger log = LogManager.getLogger("LambdaLib|Core");
     public static final String MODID = "LambdaLib|Core";
@@ -49,7 +49,7 @@ public class LLModContainer extends DummyModContainer {
         super(getModMetadata());
 
         try {
-            ehFieldValue = EnumHolder.class.getDeclaredField("value");
+            ehFieldValue = ModAnnotation.EnumHolder.class.getDeclaredField("value");
             ehFieldValue.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw Throwables.propagate(e);
@@ -73,9 +73,9 @@ public class LLModContainer extends DummyModContainer {
         Set<String> removedClasses = Sets.newHashSet();
         { // Get removed classes
             String startupSide = FMLCommonHandler.instance().getSide().toString();
-            Set<ASMData> sideData = data.getAll("cpw.mods.fml.relauncher.SideOnly");
-            for (ASMData ad : sideData) if (ad.getClassName().equals(ad.getObjectName())) { // If is a class
-                EnumHolder enumHolder = (EnumHolder) ad.getAnnotationInfo().get("value");
+            Set<ASMDataTable.ASMData> sideData = data.getAll("cpw.mods.fml.relauncher.SideOnly");
+            for (ASMDataTable.ASMData ad : sideData) if (ad.getClassName().equals(ad.getObjectName())) { // If is a class
+                ModAnnotation.EnumHolder enumHolder = (ModAnnotation.EnumHolder) ad.getAnnotationInfo().get("value");
                 try {
                     String value = (String) ehFieldValue.get(enumHolder);
                     if (!value.equals(startupSide)) {
@@ -112,8 +112,8 @@ public class LLModContainer extends DummyModContainer {
         RegistrationManager.INSTANCE.checkLoadState();
     }
 
-    private Set<String> mapToClass(Set<ASMData> adset) {
-        return adset.stream().map(ASMData::getClassName).collect(Collectors.toSet());
+    private Set<String> mapToClass(Set<ASMDataTable.ASMData> adset) {
+        return adset.stream().map(ASMDataTable.ASMData::getClassName).collect(Collectors.toSet());
     }
 
     public static boolean isClassRemoved(String className) {

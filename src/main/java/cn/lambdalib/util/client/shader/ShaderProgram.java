@@ -12,15 +12,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.base.Throwables;
 import org.apache.commons.io.IOUtils;
 
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.generic.RegistryUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 

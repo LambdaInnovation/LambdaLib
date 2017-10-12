@@ -14,10 +14,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.minecraft.block.Block;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 import cn.lambdalib.annoreg.core.Registrant;
@@ -31,19 +34,37 @@ import cn.lambdalib.template.command.LICommandBase;
 public class CmdMineStatistics extends LICommandBase {
 
     public CmdMineStatistics() {}
-    
+
+    /**
+     * Get the name of the command
+     */
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "minestat";
     }
+
+
+
 
     @Override
     public String getCommandUsage(ICommandSender var1) {
         return "/minestat or /minestat <size>";
     }
 
+    /**
+     * Called when a CommandSender executes this command
+     *
+     * @param sender
+     * @param args
+     */
     @Override
-    public void processCommand(ICommandSender var1, String[] var2) {
+    public void execute(ICommandSender sender, String[] args) throws CommandException
+    {
+
+    }
+
+    @Override
+    public void processCommand(ICommandSender var1, String[] var2)throws PlayerNotFoundException {
         EntityPlayer player = this.getCommandSenderAsPlayer(var1);
         int cx = ((int)player.posX) >> 4;
         int cz = ((int)player.posZ) >> 4;
@@ -82,7 +103,7 @@ public class CmdMineStatistics extends LICommandBase {
                 for(int j = 0; j < 65; ++j) {
                     for(int k = z; k < z + size; ++k) {
                         Block b = null;
-                        b = world.getBlock(i, j, k);
+                        b = world.getBlock(new BlockPos(i, j, k));
                         if(Item.getItemFromBlock(b) == null) continue;
                         for(int id : OreDictionary.getOreIDs(new ItemStack(b))) {
                             if(filteredDicts.contains(id))

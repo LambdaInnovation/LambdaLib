@@ -6,14 +6,13 @@
 */
 package cn.lambdalib.util.helper;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import cn.lambdalib.annoreg.core.Registrant;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * A simple timer wrapup to handle paused timing situations.
@@ -54,7 +53,7 @@ public enum GameTimer {
     // In case GameTimer isn't queried frequently, use this to prevent huge (and incorrect) time lag.
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
-    public void onClientTick(ClientTickEvent event) {
+    public void onClientTick(TickEvent.ClientTickEvent event) {
         getTimeClient();
     }
     

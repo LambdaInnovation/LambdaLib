@@ -7,10 +7,10 @@
 package cn.lambdalib.util.helper;
 
 import cn.lambdalib.s11n.SerializeType;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * @author WeAthFolD

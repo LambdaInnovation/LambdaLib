@@ -15,15 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 import cn.lambdalib.annoreg.base.RegistrationFieldSimple;
-import cn.lambdalib.annoreg.core.AnnotationData;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegModInformation;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 import cn.lambdalib.core.LLModContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 @RegistryTypeDecl
 public class GuiHandlerRegistration extends RegistrationFieldSimple<RegGuiHandler, GuiHandlerBase> {
@@ -33,7 +32,8 @@ public class GuiHandlerRegistration extends RegistrationFieldSimple<RegGuiHandle
         this.setLoadStage(LoadStage.INIT);
     }
 
-    private static class ModGuiHandler implements IGuiHandler {
+    private static class ModGuiHandler implements IGuiHandler
+    {
 
         private List<IGuiHandler> subHandlers = new ArrayList();
         

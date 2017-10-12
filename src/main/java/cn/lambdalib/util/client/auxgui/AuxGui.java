@@ -8,8 +8,8 @@ package cn.lambdalib.util.client.auxgui;
 
 import net.minecraft.client.gui.ScaledResolution;
 import cn.lambdalib.util.helper.GameTimer;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Auxillary GUI interface class. This is a kind of GUI that doesn't make mouse gain focus. </br>

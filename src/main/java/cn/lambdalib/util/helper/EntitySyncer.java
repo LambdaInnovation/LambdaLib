@@ -22,7 +22,6 @@ import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.DataWatcher.WatchableObject;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChunkCoordinates;
 
 /**
  * A helper to help syncing fields within entity, which gets rid of the ANNOYING 
