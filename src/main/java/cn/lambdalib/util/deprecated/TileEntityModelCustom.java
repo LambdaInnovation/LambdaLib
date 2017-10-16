@@ -7,7 +7,6 @@
 package cn.lambdalib.util.deprecated;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.client.model.IModelCustom;
 
 /**
  * Simple adaptor from IModelCustom to ITileEntityModel.

@@ -12,17 +12,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
 import cn.lambdalib.util.client.RenderUtils;
 import cn.lambdalib.util.helper.GameTimer;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
@@ -70,7 +70,7 @@ public class AuxGuiHandler {
         iterating = false;
     }
     
-    @SubscribeEvent    
+    @SubscribeEvent
     public void drawHudEvent(RenderGameOverlayEvent event) {
         GL11.glDepthFunc(GL11.GL_ALWAYS);
         GL11.glDepthMask(false);
@@ -79,7 +79,7 @@ public class AuxGuiHandler {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         RenderUtils.pushTextureState();
         
-        if(event.type == ElementType.EXPERIENCE) {
+        if(event.getType() == ElementType.EXPERIENCE) {
             Iterator<AuxGui> iter = auxGuiList.iterator();
             startIterating();
             while(iter.hasNext()) {
@@ -87,7 +87,7 @@ public class AuxGuiHandler {
                 if(!gui.isDisposed()) {
                     if(!gui.lastFrameActive)
                         gui.lastActivateTime = GameTimer.getTime();
-                    gui.draw(event.resolution);
+                    gui.draw(event.getResolution());
                     gui.lastFrameActive = true;
                 }
             }
@@ -101,7 +101,7 @@ public class AuxGuiHandler {
     }
     
     @SubscribeEvent
-    public void clientTick(ClientTickEvent event) {
+    public void clientTick(TickEvent.ClientTickEvent event) {
         if(!Minecraft.getMinecraft().isGamePaused()) {
             for(AuxGui gui : toAddList)
                 doAdd(gui);
@@ -128,7 +128,7 @@ public class AuxGuiHandler {
     }
     
     @SubscribeEvent
-    public void disconnected(ClientDisconnectionFromServerEvent event) {
+    public void disconnected(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         startIterating();
         Iterator<AuxGui> iter = auxGuiList.iterator();
         while(iter.hasNext()) {

@@ -11,8 +11,6 @@ import java.util.*;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * A class that has capability to store widgets. Used by CGui and Widget.

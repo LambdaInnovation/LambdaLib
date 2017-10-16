@@ -9,15 +9,15 @@ package cn.lambdalib.annoreg.mc;
 import cn.lambdalib.annoreg.base.RegistrationFieldSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
-import cn.lambdalib.annoreg.core.RegistrationWithPostWork.PostWork;
-import cpw.mods.fml.common.IWorldGenerator;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 /**
  * @author KSkun
  */
 @RegistryTypeDecl
-public class WorldGenRegistration extends RegistrationFieldSimple<RegWorldGen, IWorldGenerator> {
+public class WorldGenRegistration extends RegistrationFieldSimple<RegWorldGen, IWorldGenerator>
+{
 
     public WorldGenRegistration() {
         super(RegWorldGen.class, "WorldGen");
@@ -29,5 +29,6 @@ public class WorldGenRegistration extends RegistrationFieldSimple<RegWorldGen, I
             throws Exception {
         GameRegistry.registerWorldGenerator(value, anno.value());
     }
+
 
 }

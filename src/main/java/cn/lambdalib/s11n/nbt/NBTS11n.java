@@ -260,7 +260,7 @@ public class NBTS11n {
                 }
                 @Override
                 public Byte read(NBTTagByte tag, Class<? extends Byte> type) {
-                    return tag.func_150290_f();
+                    return tag.getByte();
                 }
             };
             addBase(byte.class, ser);
@@ -274,7 +274,7 @@ public class NBTS11n {
                 }
                 @Override
                 public Short read(NBTTagShort tag, Class<? extends Short> type) {
-                    return tag.func_150289_e();
+                    return tag.getShort();
                 }
             };
             addBase(short.class, ser);
@@ -288,7 +288,7 @@ public class NBTS11n {
                 }
                 @Override
                 public Integer read(NBTTagInt tag, Class<? extends Integer> type) {
-                    return tag.func_150287_d();
+                    return tag.getInt();
                 }
             };
             addBase(int.class, ser);
@@ -302,7 +302,7 @@ public class NBTS11n {
                 }
                 @Override
                 public Float read(NBTTagFloat tag, Class<? extends Float> type) {
-                    return tag.func_150288_h();
+                    return tag.getFloat();
                 }
             };
             addBase(float.class, ser);
@@ -316,7 +316,7 @@ public class NBTS11n {
                 }
                 @Override
                 public Double read(NBTTagDouble tag, Class<? extends Double> type) {
-                    return tag.func_150286_g();
+                    return tag.getDouble();
                 }
             };
             addBase(double.class, ser);
@@ -330,7 +330,7 @@ public class NBTS11n {
                 }
                 @Override
                 public Long read(NBTTagLong tag, Class<? extends Long> type) {
-                    return tag.func_150291_c();
+                    return tag.getLong();
                 }
             };
             addBase(long.class, ser);
@@ -344,7 +344,7 @@ public class NBTS11n {
                 }
                 @Override
                 public Boolean read(NBTTagByte tag, Class<? extends Boolean> type) {
-                    return tag.func_150290_f() != 0;
+                    return tag.getByte() != 0;
                 }
             };
             addBase(boolean.class, ser);
@@ -358,7 +358,7 @@ public class NBTS11n {
                 }
                 @Override
                 public byte[] read(NBTTagByteArray tag, Class<? extends byte[]> type) {
-                    return tag.func_150292_c();
+                    return tag.getByteArray();
                 }
             };
             addBase(byte[].class, ser);
@@ -371,7 +371,7 @@ public class NBTS11n {
                 }
                 @Override
                 public int[] read(NBTTagIntArray tag, Class<? extends int[]> type) {
-                    return tag.func_150302_c();
+                    return tag.getIntArray();
                 }
             };
             addBase(int[].class, ser);
@@ -384,7 +384,7 @@ public class NBTS11n {
                 }
                 @Override
                 public String read(NBTTagString tag, Class<? extends String> type) {
-                    return tag.func_150285_a_();
+                    return tag.getString();
                 }
             };
             addBase(String.class, ser);
@@ -492,7 +492,7 @@ public class NBTS11n {
                 }
                 @Override
                 public BitSet read(NBTBase tag, Class<? extends BitSet> type) {
-                    return BitSet.valueOf(((NBTTagByteArray) tag).func_150292_c());
+                    return BitSet.valueOf(((NBTTagByteArray) tag).getByteArray());
                 }
             });
         }
@@ -507,7 +507,7 @@ public class NBTS11n {
         }
         @Override
         public Enum read(NBTTagByte tag, Class<? extends Enum> type) {
-            return type.getEnumConstants()[tag.func_150290_f()];
+            return type.getEnumConstants()[tag.getByte()];
         }
     };
 

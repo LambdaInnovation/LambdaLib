@@ -14,8 +14,8 @@ import cn.lambdalib.util.entityx.EntityAdvanced;
 import cn.lambdalib.util.entityx.handlers.Rigidbody;
 import cn.lambdalib.util.helper.Color;
 import cn.lambdalib.util.helper.GameTimer;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author WeAthFolD

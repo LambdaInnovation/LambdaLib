@@ -14,14 +14,13 @@ import java.util.Map.Entry;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import cn.lambdalib.util.client.ClientUtils;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
 /**
  * The instance of this class handles a set of KeyHandlers, and restore their key bindings
@@ -186,8 +185,8 @@ public class KeyManager {
     }
     
     @SubscribeEvent
-    public void onEvent(ClientTickEvent event) {
-        if(event.phase == Phase.START && activated) {
+    public void onEvent(TickEvent.ClientTickEvent event) {
+        if(event.phase == TickEvent.Phase.START && activated) {
             tick();
         }
     }

@@ -19,7 +19,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 
@@ -31,7 +30,7 @@ public class RenderUtils {
     
     public static ResourceLocation src_glint = new ResourceLocation("textures/misc/enchanted_item_glint.png");
     
-    private static Tessellator t = Tessellator.instance;
+    private static Tessellator t = Tessellator.getInstance();
     
     private static int textureState = -1;
     
@@ -61,7 +60,7 @@ public class RenderUtils {
     }
     
     public static void addVertex(Vec3 vertex, double u, double v) {
-        t.addVertexWithUV(vertex.xCoord, vertex.yCoord, vertex.zCoord, u, v);
+        t.getWorldRenderer().addVertexWithUV(vertex.xCoord, vertex.yCoord, vertex.zCoord, u, v);
     }
     
     public static void addVertexLegacy(Vec3 vertex, double u, double v) {
@@ -70,7 +69,7 @@ public class RenderUtils {
     }
     
     public static void addVertex(Vec3 vertex) {
-        t.addVertex(vertex.xCoord, vertex.yCoord, vertex.zCoord);
+        t.getWorldRenderer().addVertex(vertex.xCoord, vertex.yCoord, vertex.zCoord);
     }
     
     public static void glTranslate(Vec3 v) {
@@ -235,11 +234,11 @@ public class RenderUtils {
         float f9 = GameTimer.getAbsTime() % 3000L / 3000.0F * 8.0F;
         GL11.glTranslatef(f9, 0.0F, 0.0F);
         GL11.glRotatef(-50.0F, 0.0F, 0.0F, 1.0F);
-        t.startDrawingQuads();
-        t.addVertexWithUV(0.0, 0.0, 0.0, 0.0, 0.0);
-        t.addVertexWithUV(0.0, 16.0, 0.0, 0.0, 1.0);
-        t.addVertexWithUV(16.0, 16.0, 0.0, 1.0, 1.0);
-        t.addVertexWithUV(16.0, 0.0, 0.0, 1.0, 0.0);
+        t.getWorldRenderer().startDrawingQuads();
+        t.getWorldRenderer().addVertexWithUV(0.0, 0.0, 0.0, 0.0, 0.0);
+        t.getWorldRenderer().addVertexWithUV(0.0, 16.0, 0.0, 0.0, 1.0);
+        t.getWorldRenderer().addVertexWithUV(16.0, 16.0, 0.0, 1.0, 1.0);
+        t.getWorldRenderer().addVertexWithUV(16.0, 0.0, 0.0, 1.0, 0.0);
         t.draw();
         GL11.glPopMatrix();
         GL11.glPushMatrix();
@@ -247,11 +246,11 @@ public class RenderUtils {
         f9 = GameTimer.getAbsTime() % 4873L / 4873.0F * 8.0F;
         GL11.glTranslatef(-f9, 0.0F, 0.0F);
         GL11.glRotatef(10.0F, 0.0F, 0.0F, 1.0F);
-        t.startDrawingQuads();
-        t.addVertexWithUV(0.0, 0.0, 0.0, 0.0, 0.0);
-        t.addVertexWithUV(0.0, 16.0, 0.0, 0.0, 1.0);
-        t.addVertexWithUV(16.0, 16.0, 0.0, 1.0, 1.0);
-        t.addVertexWithUV(16.0, 0.0, 0.0, 1.0, 0.0);
+        t.getWorldRenderer().startDrawingQuads();
+        t.getWorldRenderer().addVertexWithUV(0.0, 0.0, 0.0, 0.0, 0.0);
+        t.getWorldRenderer().addVertexWithUV(0.0, 16.0, 0.0, 0.0, 1.0);
+        t.getWorldRenderer().addVertexWithUV(16.0, 16.0, 0.0, 1.0, 1.0);
+        t.getWorldRenderer().addVertexWithUV(16.0, 0.0, 0.0, 1.0, 0.0);
         t.draw();
         GL11.glPopMatrix();
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
@@ -279,11 +278,11 @@ public class RenderUtils {
      */
     public static void renderItemInventory(IIcon icon) {
         if(icon != null) {
-            t.startDrawingQuads();
-            t.addVertexWithUV(0.0, 0.0, 0.0, icon.getMinU(), icon.getMinV());
-            t.addVertexWithUV(0.0, 16.0, 0.0, icon.getMinU(), icon.getMaxV());
-            t.addVertexWithUV(16.0, 16.0, 0.0, icon.getMaxU(), icon.getMaxV());
-            t.addVertexWithUV(16.0, 0.0, 0.0, icon.getMaxU(), icon.getMinV());
+            t.getWorldRenderer().startDrawingQuads();
+            t.getWorldRenderer().addVertexWithUV(0.0, 0.0, 0.0, icon.getMinU(), icon.getMinV());
+            t.getWorldRenderer().addVertexWithUV(0.0, 16.0, 0.0, icon.getMinU(), icon.getMaxV());
+            t.getWorldRenderer().addVertexWithUV(16.0, 16.0, 0.0, icon.getMaxU(), icon.getMaxV());
+            t.getWorldRenderer().addVertexWithUV(16.0, 0.0, 0.0, icon.getMaxU(), icon.getMinV());
             t.draw();
         }
     }

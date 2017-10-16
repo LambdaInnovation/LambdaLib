@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.lambdalib.particle.decorators.ParticleDecorator;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
@@ -54,7 +54,7 @@ public class ParticleFactory extends ParticleFactoryBase {
     @Override
     public Particle next(World world) {
         Particle p = this.queryParticle();
-        p.worldObj = world;
+        p.world = world;
         p.fromTemplate(template);
 
         p.setPosition(px, py, pz);
@@ -73,14 +73,14 @@ public class ParticleFactory extends ParticleFactoryBase {
      * Generates a particle at the given world position with the given velocity.
      * Note that this will override the current position and velocity settings.
      */
-    public Particle next(World world, Vec3 position, Vec3 velocity) {
-        px = position.xCoord;
-        py = position.yCoord;
-        pz = position.zCoord;
+    public Particle next(World world, BlockPos position, BlockPos velocity) {
+        px = position.getX();
+        py = position.getY();
+        pz = position.getZ();
 
-        vx = velocity.xCoord;
-        vy = velocity.yCoord;
-        vz = velocity.zCoord;
+        vx = velocity.getX();
+        vy = velocity.getY();
+        vz = velocity.getZ();
 
         return next(world);
     }

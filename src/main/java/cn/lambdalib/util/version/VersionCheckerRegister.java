@@ -6,14 +6,10 @@
 */
 package cn.lambdalib.util.version;
 
-import net.minecraft.tileentity.TileEntity;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.SideOnly;
 import cn.lambdalib.annoreg.base.RegistrationClassSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
-import cn.lambdalib.annoreg.mc.RegTileEntity;
+import net.minecraftforge.fml.common.Mod;
 
 @RegistryTypeDecl
 public class VersionCheckerRegister extends RegistrationClassSimple<VersionUpdateUrl,Object>

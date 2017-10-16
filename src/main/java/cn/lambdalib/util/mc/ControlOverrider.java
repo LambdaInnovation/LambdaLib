@@ -17,15 +17,15 @@ import cn.lambdalib.annoreg.mc.RegInitCallback;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.generic.RegistryUtils;
 import com.google.common.base.Throwables;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.IntHashMap;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Overrides (disables) key in vanilla minecraft.
@@ -227,7 +227,7 @@ public class ControlOverrider {
         instance_;
 
         @SubscribeEvent
-        public void onClientTick(ClientTickEvent cte) {
+        public void onClientTick(TickEvent.ClientTickEvent cte) {
             GuiScreen cgs = Minecraft.getMinecraft().currentScreen;
             if(lastTickGui == null && cgs != null) {
                 releaseLocks();
@@ -239,7 +239,7 @@ public class ControlOverrider {
         }
 
         @SubscribeEvent
-        public void onDisconnect(ClientDisconnectionFromServerEvent evt) {
+        public void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent evt) {
             if (SideHelper.isClient()) {
                 clearInternal();
                 endCompleteOverride();

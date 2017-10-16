@@ -11,8 +11,6 @@ import cn.lambdalib.core.LLModContainer;
 import cn.lambdalib.core.Profiler;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

@@ -14,6 +14,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -28,15 +30,14 @@ public class ItemBlockMulti extends ItemBlock {
     public ItemBlockMulti(Block block) {
         super(block);
     }
+    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float rx,
+                             float ry, float rz) {
+        Block block = world.getBlockState(pos).getBlock();
 
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float rx,
-            float ry, float rz) {
-        Block block = world.getBlock(x, y, z);
-
-        if (block == Blocks.snow_layer && (world.getBlockMetadata(x, y, z) & 7) < 1) {
+        if (block == Blocks.snow_layer && (world.getBlockState(pos).getBlock().getMetaFromState(world.getBlockState(pos)) & 7) < 1) {
             side = 1;
         } else if (block != Blocks.vine && block != Blocks.tallgrass && block != Blocks.deadbush
-                && !block.isReplaceable(world, x, y, z)) {
+                && !block.isReplaceable(world,pos)) {
             if (side == 0)
                 --y;
             if (side == 1)
@@ -53,7 +54,7 @@ public class ItemBlockMulti extends ItemBlock {
 
         if (stack.stackSize == 0)
             return false;
-        if (!player.canPlayerEdit(x, y, z, side, stack))
+        if (!player.canPlayerEdit(pos, side, stack))
             return false;
         if (y == 255 && this.field_150939_a.getMaterial().isSolid())
             return false;

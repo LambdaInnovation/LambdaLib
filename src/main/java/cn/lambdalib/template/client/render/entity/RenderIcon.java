@@ -12,6 +12,8 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -19,8 +21,6 @@ import cn.lambdalib.util.client.RenderUtils;
 import cn.lambdalib.util.deprecated.ViewOptimize;
 import cn.lambdalib.util.deprecated.ViewOptimize.IAssociatePlayer;
 import cn.lambdalib.util.helper.Color;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * A EntityRender that renders an entity as a single icon.

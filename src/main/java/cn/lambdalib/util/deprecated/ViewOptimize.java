@@ -51,9 +51,9 @@ public class ViewOptimize {
     
     public static Vec3 getFixVector(IAssociatePlayer entity) {
         if(isFirstPerson(entity)) {
-            return Vec3.createVectorHelper(fpOffsetX, fpOffsetY, fpOffsetZ);
+            return new Vec3(fpOffsetX, fpOffsetY, fpOffsetZ);
         } else {
-            return Vec3.createVectorHelper(tpOffsetX, tpOffsetY, tpOffsetZ);
+            return new Vec3(tpOffsetX, tpOffsetY, tpOffsetZ);
         }
     }
     

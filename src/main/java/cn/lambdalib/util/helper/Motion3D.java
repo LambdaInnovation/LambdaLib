@@ -9,8 +9,8 @@ package cn.lambdalib.util.helper;
 import java.util.Random;
 
 import com.google.common.base.Objects;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -240,11 +240,11 @@ public class Motion3D {
     }
     
     public Vec3 getPosVec() {
-        return Vec3.createVectorHelper(px, py, pz);
+        return new Vec3(px, py, pz);
     }
     
     public Vec3 getMotionVec() {
-        return Vec3.createVectorHelper(vx, vy, vz);
+        return new Vec3(vx, vy, vz);
     }
     
     @Override

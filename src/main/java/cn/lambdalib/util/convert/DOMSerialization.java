@@ -1,0 +1,158 @@
+/**
+ * Copyright (c) Lambda Innovation, 2013-2016
+ * This file is part of LambdaLib modding library.
+ * https://github.com/LambdaInnovation/LambdaLib
+ * Licensed under MIT, see project root for more information.
+ */
+package cn.lambdalib.util.convert;
+
+import cn.lambdalib.core.LLCommons;
+import cn.lambdalib.s11n.SerializationHelper;
+
+import javax.xml.soap.Node;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+
+/**
+ * DOM serialization used to read and write XML documents.
+ * Rewrite by
+ */
+class DOMSerialization {
+    /*type DOMElement = org.w3c.dom.Element
+
+    private Forwarder = (AnyRef, Node) => Any
+    type Backwarder[T] = (Class[T], Node) => T*/
+    @FunctionalInterface
+    interface Forwarder<F1, T> {
+        T convert(F1 from,Node node);
+    }
+
+    @FunctionalInterface
+    interface FuncRef2Bool<F1, Boolean> {
+        Boolean convert(F1 from);
+    }
+
+    private List<Map.Entry<FuncRef2Bool, Forwarder>> forwarders = new ArrayList<>();
+    private var backwarders = Map[Class[_], Backwarder[_]]()
+    private val serHelper = new SerializationHelper
+
+    def addForward(cond: AnyRef => Boolean, forwarder: Forwarder) = forwarders = (cond, forwarder) :: forwarders
+    def addForwardType(forwarder:Forwarder, classes: Class[_]*) = {
+        addForward(obj => classes.exists(_.isInstance(obj)), forwarder)
+    }
+    def addBackward[T](backwarder: Backwarder[T])(implicit evidence: ClassTag[T]) =
+    backwarders = backwarders updated (evidence.runtimeClass, backwarder)
+
+    /**
+     * ? + Document -> Node
+     */
+    def convertTo(obj: AnyRef, name: String)(implicit doc: Document): Node = {
+        forwarders.find{ case (cond, _) => cond(obj) } match {
+            case Some(f) =>
+                val ret = doc.createElement(name)
+                f._2(obj, ret)
+                ret
+            case _ =>
+                forwardDefault(obj, name)
+        }
+    }
+
+    /**
+     * Node -> ?
+     */
+    def convertFrom[T](klass: Class[T], node: Node) = {
+        backwarders.get(klass) match {
+            case Some(bw) => bw.asInstanceOf[Backwarder[T]](klass, node)
+            case None => backwardDefault(klass, node)
+        }
+    }
+
+    def forwardDefault(obj: AnyRef, name: String)(implicit document: Document): Node = {
+        val ret: DOMElement = document.createElement(name)
+        val fields = serHelper.getExposedFields(obj.getClass).toList
+        for (f <- fields) {
+            Option(f.get(obj)) match {
+                case Some(x) =>
+                    ret.appendChild(convertTo(x, f.getName))
+                case _ =>
+                    val nullNode = document.createElement(f.getName)
+                    nullNode.setAttribute("isNull", "true")
+                    ret.appendChild(nullNode)
+            }
+        }
+        ret
+    }
+
+    def backwardDefault[T, U<:T](klass: Class[U], src: Node):T = {
+        if (klass.isEnum) {
+            val content = src.getTextContent
+            klass.getEnumConstants.find(_.toString == content) match {
+                case Some(e) => e.asInstanceOf[T]
+                case _ => throw new RuntimeException("No enum with literal name " + content)
+            }
+        } else {
+            val ret = klass.newInstance
+            val fields = serHelper.getExposedFields(klass).toList
+            val childs = src.getChildNodes
+                    // Loop through all the fields and fetch corresponding elements from document
+                            (0 until childs.getLength).map(childs.item)
+                    .foreach({ case elem: DOMElement =>
+                fields.find(f => elem.getNodeName == f.getName) match {
+                case Some(field) =>
+                    val attr = elem.getAttribute("isNull")
+                    field.set(ret, if(!attr.isEmpty) null else convertFrom(field.getType, elem))
+                case _ =>
+            }
+      })
+            ret
+        }
+    }
+
+    private def init() {
+        def addText(node: Node, content: String) =
+        node.appendChild(node.getOwnerDocument.createTextNode(content))
+
+        // Primitive types
+        addForwardType((obj, node) => addText(node, obj.toString),
+                classOf[Char], classOf[Character],
+                classOf[Int], classOf[Integer],
+                classOf[Float], classOf[java.lang.Float],
+                classOf[Double], classOf[java.lang.Double],
+                classOf[Boolean], classOf[java.lang.Boolean],
+                classOf[String], classOf[ResourceLocation])
+        addForward(_.getClass.isEnum, (obj, node) => addText(node, obj.toString))
+        addForward(_.isInstanceOf[IFont], (obj, node) => obj match {
+            case fnt: IFont =>
+                addText(node, Fonts.getName(fnt))
+        })
+
+        def bw[T](parseMethod: String => T)(implicit evidence: ClassTag[T]) =
+        addBackward[T]((_, n) => parseMethod(n.getTextContent))
+
+        // Literal value parsings
+        bw(s => s.charAt(0))
+        bw(Integer.parseInt)
+        bw(Integer.valueOf)
+        bw(java.lang.Float.parseFloat)
+        bw(java.lang.Float.valueOf)
+        bw(java.lang.Double.parseDouble)
+        bw(java.lang.Double.valueOf)
+        bw(java.lang.Boolean.parseBoolean)
+        bw(java.lang.Boolean.valueOf)
+        bw(String.valueOf)
+        bw(str => new ResourceLocation(str))
+        bw(str => {
+        if (Fonts.exists(str)) {
+            Fonts.get(str)
+        } else {
+            LLCommons.log.warn("Can't find font with name " + str + " while loading. Plase check your installed mods.")
+            Fonts.getDefault
+        }
+    })
+    }
+
+    init()
+}
+

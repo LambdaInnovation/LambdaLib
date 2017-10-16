@@ -10,10 +10,8 @@ import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.util.client.RenderUtils;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 
 /**
  * A delegator renderer for Sprite and Entities that implements ISpriteEntity.

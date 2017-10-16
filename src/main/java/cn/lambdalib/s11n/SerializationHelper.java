@@ -12,7 +12,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import java.lang.reflect.Field;
@@ -63,7 +63,7 @@ public class SerializationHelper {
                 double.class, Double.class,
                 boolean.class, Boolean.class,
                 String.class,
-                Vec3.class,
+                Vec3d.class,
                 ResourceLocation.class);
     }
 

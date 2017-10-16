@@ -11,8 +11,6 @@ import net.minecraftforge.common.ChestGenHooks;
 import cn.lambdalib.annoreg.base.RegistrationFieldSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
-import cn.lambdalib.annoreg.core.RegistrationWithPostWork.PostWork;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 /**
  * @author KSkun

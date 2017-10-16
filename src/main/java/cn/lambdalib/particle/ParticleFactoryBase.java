@@ -13,12 +13,11 @@ import java.util.List;
 import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
 import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author WeAthFolD
@@ -64,8 +63,8 @@ public abstract class ParticleFactoryBase {
         int ticker;
 
         @SubscribeEvent
-        public void onClientTick(ClientTickEvent event) {
-            if (event.phase == Phase.END && ++ticker == UPDATE_RATE) {
+        public void onClientTick(TickEvent.ClientTickEvent event) {
+            if (event.phase == TickEvent.Phase.END && ++ticker == UPDATE_RATE) {
                 ticker = 0;
 
                 Iterator<Particle> iter = alive.iterator();

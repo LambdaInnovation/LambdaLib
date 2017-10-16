@@ -60,9 +60,9 @@ public class StackUtils {
     }
     
     public static NBTTagCompound loadTag(ItemStack stack) {
-        NBTTagCompound ret = stack.stackTagCompound;
+        NBTTagCompound ret = stack.getTagCompound();
         if(ret == null)
-            ret = stack.stackTagCompound = new NBTTagCompound();
+            stack.setTagCompound(ret = new NBTTagCompound());
         return ret;
     }
     

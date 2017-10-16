@@ -60,7 +60,7 @@ public class Fonts {
         return fonts.containsValue(font);
     }
 
-    private static final IFont DefaultFont = TrueTypeFont.defaultFont();
+    private static final IFont DefaultFont = TrueTypeFont.defaultFont;
 
     private static BiMap<String, IFont> fonts = HashBiMap.create();
 

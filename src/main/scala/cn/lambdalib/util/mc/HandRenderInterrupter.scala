@@ -6,12 +6,12 @@ import cn.lambdalib.annoreg.mc.RegEventHandler.Bus
 import cn.lambdalib.util.datapart.{DataPart, EntityData, RegDataPart}
 import cn.lambdalib.util.generic.RegistryUtils
 import cn.lambdalib.vis.model.CompTransform
-import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.relauncher.{Side, SideOnly}
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.{EntityRenderer, ItemRenderer}
+import net.minecraft.client.renderer.EntityRenderer
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraftforge.client.event.{RenderHandEvent, RenderWorldLastEvent}
+import net.minecraftforge.client.event.RenderHandEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.lwjgl.opengl.GL11
 import org.lwjgl.util.glu.Project
 
@@ -74,12 +74,11 @@ class __HREvents {
       evt.setCanceled(true)
 
       if (mc.gameSettings.thirdPersonView == 0 &&
-        !mc.renderViewEntity.isPlayerSleeping &&
-        !mc.gameSettings.hideGUI &&
-        !mc.playerController.enableEverythingIsScrewedUpMode) {
-        mc.entityRenderer.enableLightmap(evt.partialTicks)
+        ! mc.getRenderViewEntity.asInstanceOf[EntityPlayer].isPlayerSleeping &&
+        !mc.gameSettings.hideGUI) {
+        mc.entityRenderer.enableLightmap()
         data.get.render(evt.partialTicks)
-        mc.entityRenderer.disableLightmap(evt.partialTicks)
+        mc.entityRenderer.disableLightmap()
       }
     }
   }

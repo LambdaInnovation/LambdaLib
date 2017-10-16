@@ -7,9 +7,9 @@
 package cn.lambdalib.annoreg.core;
 
 import cn.lambdalib.core.LLModContainer;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.ModContainer;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ModContainer;
 
 public class RegModInformation {
     

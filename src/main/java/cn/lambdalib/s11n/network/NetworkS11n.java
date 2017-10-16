@@ -13,15 +13,16 @@ import cn.lambdalib.s11n.SerializationHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import cpw.mods.fml.common.network.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import jdk.nashorn.internal.ir.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -120,7 +121,7 @@ public class NetworkS11n {
     public static void register(Class<?> type) {
         if (!serTypes.contains(type)) {
             serTypes.add(type);
-            serTypes.sort((lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
+            serTypes.sort(Comparator.comparing(Class::getName));
             serHelper.regS11nType(type);
         }
 
@@ -611,7 +612,7 @@ public class NetworkS11n {
         addDirect(World.class, new NetS11nAdaptor<World>() {
             @Override
             public void write(ByteBuf buf, World obj) {
-                buf.writeByte(obj.provider.dimensionId);
+                buf.writeByte(obj.provider.getDimension());
             }
             @Override
             public World read(ByteBuf buf) throws ContextException {
@@ -626,17 +627,17 @@ public class NetworkS11n {
         addDirect(TileEntity.class, new NetS11nAdaptor<TileEntity>() {
             @Override
             public void write(ByteBuf buf, TileEntity obj) {
-                serializeWithHint(buf, obj.getWorldObj(), World.class);
+                serializeWithHint(buf, obj.getWorld(), World.class);
 
-                buf.writeInt(obj.xCoord);
-                buf.writeInt(obj.yCoord);
-                buf.writeInt(obj.zCoord);
+                buf.writeInt(obj.getPos().getX());
+                buf.writeInt(obj.getPos().getY());
+                buf.writeInt(obj.getPos().getZ());
             }
             @Override
             public TileEntity read(ByteBuf buf) throws ContextException {
                 World world = deserializeWithHint(buf, World.class);
 
-                TileEntity tileEntity = world.getTileEntity(buf.readInt(), buf.readInt(), buf.readInt());
+                TileEntity tileEntity = world.getTileEntity(new BlockPos(buf.readInt(), buf.readInt(), buf.readInt()));
 
                 if (tileEntity == null) {
                     throw new ContextException("No such TileEntity is present");
@@ -645,16 +646,16 @@ public class NetworkS11n {
                 }
             }
         });
-        addDirect(Vec3.class, new NetS11nAdaptor<Vec3>() {
+        addDirect(BlockPos.class, new NetS11nAdaptor<BlockPos>() {
             @Override
-            public void write(ByteBuf buf, Vec3 obj) {
-                buf.writeDouble(obj.xCoord);
-                buf.writeDouble(obj.yCoord);
-                buf.writeDouble(obj.zCoord);
+            public void write(ByteBuf buf, BlockPos obj) {
+                buf.writeInt(obj.getX());
+                buf.writeInt(obj.getY());
+                buf.writeInt(obj.getZ());
             }
             @Override
-            public Vec3 read(ByteBuf buf) throws ContextException {
-                return Vec3.createVectorHelper(buf.readDouble(), buf.readDouble(), buf.readDouble());
+            public BlockPos read(ByteBuf buf) throws ContextException {
+                return new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
             }
         });
         addDirect(ItemStack.class, new NetS11nAdaptor<ItemStack>() {
@@ -667,7 +668,7 @@ public class NetworkS11n {
             @Override
             public ItemStack read(ByteBuf buf) throws ContextException {
                 NBTTagCompound tag = deserializeWithHint(buf, NBTTagCompound.class);
-                return ItemStack.loadItemStackFromNBT(tag);
+                return new ItemStack(tag);
             }
         });
     }

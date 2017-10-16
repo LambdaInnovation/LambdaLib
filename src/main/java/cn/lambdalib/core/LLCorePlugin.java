@@ -6,6 +6,8 @@
 */
 package cn.lambdalib.core;
 
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,11 +16,9 @@ import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
-import cpw.mods.fml.common.MetadataCollection;
-import cpw.mods.fml.relauncher.IFMLCallHook;
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
-public class LLCorePlugin implements IFMLLoadingPlugin {
+public class LLCorePlugin implements IFMLLoadingPlugin
+{
 
     private static boolean deobfEnabled;
 

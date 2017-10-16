@@ -1,107 +1,103 @@
 buildscript {
-	repositories {
-		mavenCentral()
-		maven {
-			name = "forge"
-			url = "http://files.minecraftforge.net/maven"
-		}
-		maven {
-			name = "sonatype"
-			url = "https://oss.sonatype.org/content/repositories/snapshots/"
-		}
-	}
-	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-	}
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
 }
-
+apply plugin: 'net.minecraftforge.gradle.forge'
+//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 ext.configFile = file "build.properties"
 
 configFile.withReader {
-	def prop = new Properties()
-	prop.load(it)
-	project.ext.config = new ConfigSlurper().parse prop
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
 }
 
-configurations {
-	deployerJars
+version = config.mod_ver
+group= config.mod_group // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = config.mod_name
+
+sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
 }
-
-apply plugin: 'scala'
-apply plugin: 'forge'
-
-
-version				= config.mod_ver
-group				= config.mod_group
-archivesBaseName	= config.mod_name
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 minecraft {
-	version = "${config.mc_ver}-${config.forge_ver}"
-	runDir = "eclipse"
-
-	// Replace stuffs in the source
+    version = "${config.mc_ver}-${config.forge_ver}"
+    runDir = "run"
+    // Replacing stuff in the source
     replace "@VERSION@", config.mod_ver
     replace "@MC_VERSION@", config.mc_ver
-}
-
-repositories {
-	mavenCentral()
-	mavenLocal()
+    
+    // the mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   snapshot are built nightly.
+    // stable_#            stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // simply re-run your setup task after changing the mappings to update your workspace.
+    mappings = "snapshot_20170624"
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
 dependencies {
-	compile files('jars/LambdaLib-PluginLoader.jar') // Core plugin loader
-	deployerJars "org.apache.maven.wagon:wagon-ftp:2.2"
+    // you may put jars on which you depend on in ./libs
+    // or you may define them like so..
+    //compile "some.group:artifact:version:classifier"
+    //compile "some.group:artifact:version"
+      
+    // real examples
+    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
+    //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
+    // except that these dependencies get remapped to your current MCP mappings
+    //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+    //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // for more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
 }
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+apply plugin: 'idea'
 
 sourceSets.main {
-    java.srcDirs = []
-    scala.srcDirs =  ['src/main/java', 'src/main/scala']
+    java.srcDirs = ["src/main/java"]
 }
+  
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.java
-    from sourceSets.main.scala
-    classifier = 'sources'
-}
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
 
-processResources
-{
-	from(sourceSets.main.resources.srcDirs) {
-		include 'mcmod.info'
-		expand 'version':project.version, 'mcversion':project.minecraft.version
-	}
-
-	from(sourceSets.main.resources.srcDirs) {
-		exclude 'mcmod.info'
-	}
-}
-
-compileJava.options.encoding = "UTF-8"
-compileScala.options.encoding = "UTF-8"
-
-jar {
-	manifest {
-		attributes 'FMLCorePluginContainsFMLMod' : 'true'
-		attributes 'FMLCorePlugin' : 'cn.lambdalib.core.LLCorePlugin'
-	}
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+    // copy everything else except the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
 }
 
 task deobfJar(type: Jar, dependsOn: 'jar') {
-	classifier 'dev'
-	from sourceSets.main.output
-	manifest {
-		attributes 'FMLCorePluginContainsFMLMod' : 'true'
-		attributes 'FMLCorePlugin' : 'cn.lambdalib.core.LLCorePlugin'
-	}
+    classifier 'dev'
+    from sourceSets.main.output
 }
-
-artifacts {
-	archives deobfJar
-}
-
-install.dependsOn build
-

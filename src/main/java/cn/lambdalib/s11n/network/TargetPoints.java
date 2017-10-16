@@ -11,7 +11,7 @@ import java.util.Map;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
-import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
+import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 
 /**
  * Helper to convert objects into {@link TargetPoint}.
@@ -81,8 +81,8 @@ public class TargetPoints {
             public TargetPoint convert(TileEntity object, double range) {
                 if (range == -1)
                     range = DEFAULT_RANGE;
-                return new TargetPoint(object.getWorldObj().provider.dimensionId, object.xCoord + 0.5,
-                        object.yCoord + 0.5, object.zCoord + 0.5, range);
+                return new TargetPoint(object.getWorld().provider.getDimensionId(), object.getPos().getX() + 0.5,
+                        object.getPos().getY() + 0.5, object.getPos().getZ() + 0.5, range);
             }
 
         });

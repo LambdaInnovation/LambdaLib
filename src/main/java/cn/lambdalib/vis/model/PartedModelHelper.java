@@ -11,8 +11,6 @@ import java.util.Collection;
 import java.util.List;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.obj.GroupObject;
-import net.minecraftforge.client.model.obj.WavefrontObject;
 
 public class PartedModelHelper {
     

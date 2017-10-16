@@ -11,10 +11,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
@@ -89,7 +89,7 @@ public class SideHelper {
         }
 
         public EntityPlayer getPlayerOnServer(String name) {
-            return MinecraftServer.getServer().getConfigurationManager().func_152612_a(name);
+            return MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(name);
         }
 
         @SuppressWarnings("unchecked")
@@ -107,7 +107,7 @@ public class SideHelper {
         @Override
         public World getWorld(int dimension) {
             World theWorld = Minecraft.getMinecraft().theWorld;
-            if (theWorld != null && theWorld.provider.dimensionId == dimension) {
+            if (theWorld != null && theWorld.provider.getDimensionId() == dimension) {
                 return theWorld;
             } else {
                 return null;

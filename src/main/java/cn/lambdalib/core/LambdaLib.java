@@ -13,15 +13,15 @@ import cn.lambdalib.multiblock.MsgBlockMulti;
 import cn.lambdalib.s11n.network.NetworkEvent;
 import cn.lambdalib.s11n.network.NetworkMessage;
 import cn.lambdalib.util.deprecated.LIFMLGameEventDispatcher;
-import cpw.mods.fml.common.FMLLog;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.event.*;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
 import net.minecraft.command.CommandHandler;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.FMLLog;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.Logger;
 
 @Mod(modid = "LambdaLib", name = "LambdaLib", version = LambdaLib.VERSION, dependencies = "required-after:"
@@ -36,7 +36,7 @@ public class LambdaLib {
      */
     public static final boolean DEBUG = VERSION.startsWith("@");
 
-    public static final Logger log = FMLLog.getLogger();
+    public static final Logger log = FMLLog.log;
 
     private static Configuration config;
 
@@ -50,7 +50,7 @@ public class LambdaLib {
     @EventHandler()
     public void preInit(FMLPreInitializationEvent event) {
         log.info("Starting LambdaLib");
-        log.info("Copyright (c) Lambda Innovation, 2013-2016");
+        log.info("Copyright (c) Lambda Innovation, 2013-2017");
         log.info("http://www.li-dev.cn/");
 
         LIFMLGameEventDispatcher.init();

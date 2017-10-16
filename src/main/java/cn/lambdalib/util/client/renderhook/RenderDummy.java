@@ -14,6 +14,7 @@ import static org.lwjgl.opengl.GL11.glTranslated;
 import cn.lambdalib.util.deprecated.ViewOptimize;
 import cn.lambdalib.util.generic.MathUtils;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
@@ -21,6 +22,11 @@ import net.minecraft.util.ResourceLocation;
  * @author WeAthFolD
  */
 public class RenderDummy extends Render {
+
+    protected RenderDummy(RenderManager renderManager)
+    {
+        super(renderManager);
+    }
 
     @Override
     public void doRender(Entity _entity, double x, double y, double z, float a, float b) {

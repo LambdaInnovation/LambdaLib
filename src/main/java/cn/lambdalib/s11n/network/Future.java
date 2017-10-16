@@ -8,13 +8,12 @@ import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
 import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
 import cn.lambdalib.s11n.network.NetworkS11n.NetworkS11nType;
 import cn.lambdalib.util.mc.SideHelper;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ServerDisconnectionFromClientEvent;
-import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import scala.Function1;
 
 import java.util.HashMap;
@@ -147,12 +146,12 @@ enum FutureManager {
     }
 
     @SubscribeEvent
-    public void __onClientDisconnect(ClientDisconnectionFromServerEvent evt) {
+    public void __onClientDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent evt) {
         disconnect();
     }
 
     @SubscribeEvent
-    public void __onServerDisconnect(ServerDisconnectionFromClientEvent evt) {
+    public void __onServerDisconnect(FMLNetworkEvent.ServerDisconnectionFromClientEvent evt) {
         disconnect();
     }
 
