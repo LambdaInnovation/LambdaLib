@@ -6,153 +6,230 @@
  */
 package cn.lambdalib.util.convert;
 
+import cn.lambdalib.cgui.gui.component.Component;
 import cn.lambdalib.core.LLCommons;
 import cn.lambdalib.s11n.SerializationHelper;
+import cn.lambdalib.util.client.font.Fonts;
+import cn.lambdalib.util.client.font.IFont;
+import com.sun.istack.internal.NotNull;
 
-import javax.xml.soap.Node;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.function.Function;
 
+import net.minecraft.util.ResourceLocation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * DOM serialization used to read and write XML documents.
- * Rewrite by
+ * It also create component and assign it.
+ * Rewrite by Paindar
  */
-class DOMSerialization {
-    /*type DOMElement = org.w3c.dom.Element
+public class DOMSerialization
+{
 
-    private Forwarder = (AnyRef, Node) => Any
-    type Backwarder[T] = (Class[T], Node) => T*/
     @FunctionalInterface
-    interface Forwarder<F1, T> {
-        T convert(F1 from,Node node);
+    interface Backwarder<T>
+    {
+        T convert(Class<T> c, Node node);
     }
 
     @FunctionalInterface
-    interface FuncRef2Bool<F1, Boolean> {
+    interface Forwarder<F1, T>
+    {
+        T convert(F1 from, Node node);
+    }
+
+    @FunctionalInterface
+    interface FuncRef2Bool<F1, Boolean>
+    {
         Boolean convert(F1 from);
     }
 
-    private List<Map.Entry<FuncRef2Bool, Forwarder>> forwarders = new ArrayList<>();
-    private var backwarders = Map[Class[_], Backwarder[_]]()
-    private val serHelper = new SerializationHelper
+    private SerializationHelper serHelper = new SerializationHelper();
+    private Map<FuncRef2Bool, Forwarder> forwarders = new HashMap<>();
+    private Map<Class<?>, Backwarder> backwarders = new HashMap<>();
 
-    def addForward(cond: AnyRef => Boolean, forwarder: Forwarder) = forwarders = (cond, forwarder) :: forwarders
-    def addForwardType(forwarder:Forwarder, classes: Class[_]*) = {
-        addForward(obj => classes.exists(_.isInstance(obj)), forwarder)
-    }
-    def addBackward[T](backwarder: Backwarder[T])(implicit evidence: ClassTag[T]) =
-    backwarders = backwarders updated (evidence.runtimeClass, backwarder)
 
     /**
-     * ? + Document -> Node
+     * ? + Document -> Element
      */
-    def convertTo(obj: AnyRef, name: String)(implicit doc: Document): Node = {
-        forwarders.find{ case (cond, _) => cond(obj) } match {
-            case Some(f) =>
-                val ret = doc.createElement(name)
-                f._2(obj, ret)
-                ret
-            case _ =>
-                forwardDefault(obj, name)
+    public <T> Element convertTo(T obj, String name, Document doc)
+    {
+        Element ret;
+        for (Map.Entry<FuncRef2Bool, Forwarder> entry : forwarders.entrySet())
+        {
+            if ((boolean) entry.getKey().convert(obj))
+            {
+                ret = doc.createElement(name);
+                entry.getValue().convert(obj, ret);
+                return ret;
+            }
         }
+        return forwardDefault(obj, name, doc);
+    }
+
+    private <T> Element forwardDefault(T obj, String name, Document doc)
+    {
+        Element ret = doc.createElement(name);
+        List<Field> fields = serHelper.getExposedFields(obj.getClass());
+        for (Field f : fields)
+        {
+            Object o;
+            try
+            {
+                o = f.get(obj);
+            } catch (IllegalAccessException e)
+            {
+                e.printStackTrace();
+                throw new RuntimeException("Fail to create instance:" + f.getName());
+            }
+            if (o != null)
+            {
+                ret.appendChild(convertTo(o, f.getName(), doc));
+            } else
+            {
+                Element nullNode = doc.createElement(f.getName());
+                nullNode.setAttribute("isNull", "true");
+                ret.appendChild(nullNode);
+            }
+        }
+        return ret;
+    }
+
+
+    /**
+     * Convert from a Node value to any value you want, if it can be converted.
+     *
+     * @param klass
+     * @param node
+     * @param <T>
+     * @return
+     */
+    public <T> T convertFrom(Class<T> klass, Node node)
+    {
+        Backwarder<T> bw = backwarders.get(klass);
+        if (bw != null)
+        {
+            return bw.convert(klass, node);
+        }
+        return backwardDefault(klass, node);
     }
 
     /**
-     * Node -> ?
+     * Called by {@function convertFrom}, where it cannot find any Backwarder to return a value.
+     * It will return a default value, if possible.
+     *
+     * @param klass
+     * @param node
+     * @return
      */
-    def convertFrom[T](klass: Class[T], node: Node) = {
-        backwarders.get(klass) match {
-            case Some(bw) => bw.asInstanceOf[Backwarder[T]](klass, node)
-            case None => backwardDefault(klass, node)
-        }
-    }
-
-    def forwardDefault(obj: AnyRef, name: String)(implicit document: Document): Node = {
-        val ret: DOMElement = document.createElement(name)
-        val fields = serHelper.getExposedFields(obj.getClass).toList
-        for (f <- fields) {
-            Option(f.get(obj)) match {
-                case Some(x) =>
-                    ret.appendChild(convertTo(x, f.getName))
-                case _ =>
-                    val nullNode = document.createElement(f.getName)
-                    nullNode.setAttribute("isNull", "true")
-                    ret.appendChild(nullNode)
+    public <T, U extends T> T backwardDefault(Class<U> klass, Node node)
+    {
+        if (klass.isEnum())
+        {
+            String content = node.getTextContent();
+            for (Object obj : klass.getEnumConstants())
+            {
+                if (obj.toString().equals(content))
+                {
+                    return (T) obj;
+                }
             }
         }
-        ret
-    }
 
-    def backwardDefault[T, U<:T](klass: Class[U], src: Node):T = {
-        if (klass.isEnum) {
-            val content = src.getTextContent
-            klass.getEnumConstants.find(_.toString == content) match {
-                case Some(e) => e.asInstanceOf[T]
-                case _ => throw new RuntimeException("No enum with literal name " + content)
-            }
-        } else {
-            val ret = klass.newInstance
-            val fields = serHelper.getExposedFields(klass).toList
-            val childs = src.getChildNodes
-                    // Loop through all the fields and fetch corresponding elements from document
-                            (0 until childs.getLength).map(childs.item)
-                    .foreach({ case elem: DOMElement =>
-                fields.find(f => elem.getNodeName == f.getName) match {
-                case Some(field) =>
-                    val attr = elem.getAttribute("isNull")
-                    field.set(ret, if(!attr.isEmpty) null else convertFrom(field.getType, elem))
-                case _ =>
-            }
-      })
-            ret
+        Object ret;
+        try
+        {
+            ret = klass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException("Fail to create an instance: " + klass);
         }
+        List<Field> fields = serHelper.getExposedFields(klass);
+        NodeList childs = node.getChildNodes();
+        for (Field f : fields)
+        {
+            for (int i = 0; i < childs.getLength(); i++)
+            {
+                if (childs.item(i) instanceof Element && childs.item(i).getNodeName().equals(f.getName()))
+                {
+                    Element elem = ((Element) childs.item(i));
+                    String attr = elem.getAttribute("isNull");
+                    try
+                    {
+                        f.set(ret, (attr.isEmpty()) ? null : convertFrom(f.getType(), elem));
+                    } catch (IllegalAccessException e)
+                    {
+                        e.printStackTrace();
+                        throw new RuntimeException("Fail to set attr:" + attr + " to " + elem);
+                    }
+                }
+            }
+
+        }
+        return (T) ret;
     }
 
-    private def init() {
-        def addText(node: Node, content: String) =
-        node.appendChild(node.getOwnerDocument.createTextNode(content))
+    private <T> void bw(Function<String, T> parseMethod, Class<T> evidence)
+    {
+        backwarders.put(evidence.getClass(), (c, n) -> parseMethod.apply(n.getTextContent()));
+    }
+
+    private Node addText(Node node, String content) {
+        return node.appendChild(node.getOwnerDocument().createTextNode(content));
+    }
+
+    private void addForward(FuncRef2Bool cond, Forwarder forwarder){
+        forwarders.put(cond,forwarder);
+    }
+    private void addForwardType(Forwarder forwarder, Class...classes ){
+        addForward(obj ->{
+            for(Class klass:classes){
+                if (klass.equals(obj))
+                    return true;
+            }
+            return false;
+        }, forwarder);
+    }
+    private void init()
+    {
 
         // Primitive types
-        addForwardType((obj, node) => addText(node, obj.toString),
-                classOf[Char], classOf[Character],
-                classOf[Int], classOf[Integer],
-                classOf[Float], classOf[java.lang.Float],
-                classOf[Double], classOf[java.lang.Double],
-                classOf[Boolean], classOf[java.lang.Boolean],
-                classOf[String], classOf[ResourceLocation])
-        addForward(_.getClass.isEnum, (obj, node) => addText(node, obj.toString))
-        addForward(_.isInstanceOf[IFont], (obj, node) => obj match {
-            case fnt: IFont =>
-                addText(node, Fonts.getName(fnt))
-        })
+        addForwardType((obj, node) -> addText(node, obj.toString()),
+                char.class, Character.class,int.class,Integer.class,float.class,Float.class,
+                double.class,Double.class,boolean.class,Boolean.class,String.class,ResourceLocation.class);
+        addForward(c->c.getClass().isEnum(), (obj, node) -> addText(node, obj.toString()));
+        addForward(ifn->ifn instanceof IFont, (obj, node) -> addText(node, Fonts.getName((IFont) obj)));
 
-        def bw[T](parseMethod: String => T)(implicit evidence: ClassTag[T]) =
-        addBackward[T]((_, n) => parseMethod(n.getTextContent))
-
-        // Literal value parsings
-        bw(s => s.charAt(0))
-        bw(Integer.parseInt)
-        bw(Integer.valueOf)
-        bw(java.lang.Float.parseFloat)
-        bw(java.lang.Float.valueOf)
-        bw(java.lang.Double.parseDouble)
-        bw(java.lang.Double.valueOf)
-        bw(java.lang.Boolean.parseBoolean)
-        bw(java.lang.Boolean.valueOf)
-        bw(String.valueOf)
-        bw(str => new ResourceLocation(str))
-        bw(str => {
-        if (Fonts.exists(str)) {
-            Fonts.get(str)
-        } else {
-            LLCommons.log.warn("Can't find font with name " + str + " while loading. Plase check your installed mods.")
-            Fonts.getDefault
-        }
-    })
+        bw(s -> s.charAt(0), Character.class);
+        bw(Integer::parseInt, int.class);
+        bw(Integer::valueOf, Integer.class);
+        bw(Float::parseFloat, float.class);
+        bw(Float::valueOf, Float.class);
+        bw(Double::parseDouble, double.class);
+        bw(Double::valueOf, Double.class);
+        bw(Boolean::parseBoolean, boolean.class);
+        bw(Boolean::valueOf, Boolean.class);
+        bw(String::valueOf, String.class);
+        bw(ResourceLocation::new, ResourceLocation.class);
+        bw(str -> {
+            if (Fonts.exists(str))
+            {
+                return Fonts.get(str);
+            } else
+            {
+                LLCommons.log.warn("Can't find font with name " + str + " while loading. Plase check your installed mods.");
+                return Fonts.getDefault();
+            }
+        },IFont.class);
     }
 
-    init()
+    {
+        init();
+    }
 }
-
