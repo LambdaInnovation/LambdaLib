@@ -6,55 +6,49 @@
 */
 package cn.lambdalib.annoreg.mc;
 
-import net.minecraft.util.WeightedRandomChestContent;
-import net.minecraftforge.common.ChestGenHooks;
+import cn.lambdalib.util.mc.LILootEntry;
+import cn.lambdalib.util.mc.LILootManager;
+import net.minecraft.item.Item;
 import cn.lambdalib.annoreg.base.RegistrationFieldSimple;
 import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 
 /**
- * @author KSkun
+ * @author KSkun, Paindar
  */
 @RegistryTypeDecl
-public class ChestContentRegistration extends RegistrationFieldSimple<RegChestContent, WeightedRandomChestContent> {
-    
+public class ChestContentRegistration extends RegistrationFieldSimple<RegChestContent, Item> {
+
     public ChestContentRegistration() {
         super(RegChestContent.class, "ChestContent");
         this.setLoadStage(LoadStage.INIT);
     }
 
     @Override
-    protected void register(WeightedRandomChestContent value, RegChestContent anno, String field) 
+    protected void register(Item value, RegChestContent anno, String field)
             throws Exception {
+        LILootEntry entry=new LILootEntry(value,anno.size(),anno.prob(),String.format("LI%s_%d_%d",value.getUnlocalizedName(),anno.prob(),anno.size()));
         for(int i : anno.value()) {
-            ChestGenHooks.addItem(type(i), value);
+            LILootManager.getInstance().add(type(i),entry);
         }
     }
-    
+
+    private final String[] types= new String[]{"spawn_bonus_chest" ,
+            "end_city_treasure" ,
+            "imple_dungeon" ,
+            "village_blacksmith" ,
+            "abandoned_mineshaft" ,
+            "nether_bridge" ,
+            "stronghold_library" ,
+            "stronghold_crossing" ,
+            "stronghold_corridor" ,
+            "desert_pyramid" ,
+            "jungle_temple" ,
+            "jungle_temple_dispenser" ,
+            "igloo_chest" ,
+            "woodland_mansion"};
     private String type(int type) {
-        switch(type) {
-        case 0:
-            return "dungeonChest";
-        case 1:
-            return "villageBlacksmith";
-        case 2:
-            return "pyramidDesertyChest";
-        case 3:
-            return "pyramidJungleChest";
-        case 4:
-            return "mineshaftCorridor";
-        case 5:
-            return "pyramidJungleDispenser";
-        case 6:
-            return "strongholdCorridor";
-        case 7:
-            return "strongholdLibrary";
-        case 8:
-            return "strongholdCrossing";
-        case 9:
-            return "bonusChest";
-        }
-        return null;
+        return type>=types.length||type<0?"unknown":types[type];
     }
 
 }
