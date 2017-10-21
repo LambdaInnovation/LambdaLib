@@ -6,16 +6,17 @@
 */
 package cn.lambdalib.vis.animation.presets;
 
+import cn.lambdalib.util.generic.VecUtils;
 import cn.lambdalib.vis.animation.Animation;
 import cn.lambdalib.vis.curve.IFittedCurve;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * @author WeAthFolD
  */
 public class Vec3Anim extends Animation {
     
-    public Vec3 target;
+    public Vec3d target;
     
     public IFittedCurve
         curveX,
@@ -24,18 +25,20 @@ public class Vec3Anim extends Animation {
     
     public Vec3Anim() {}
     
-    public Vec3Anim(Vec3 _target) {
+    public Vec3Anim(Vec3d _target) {
         target = _target;
     }
 
     @Override
     public void perform(double timePoint) {
+        double x=target.x,y=target.y,z=target.z;
         if(curveX != null)
-            target.xCoord = curveX.valueAt(timePoint);
+            x = curveX.valueAt(timePoint);
         if(curveY != null)
-            target.yCoord = curveY.valueAt(timePoint);
+            y = curveY.valueAt(timePoint);
         if(curveZ != null)
-            target.zCoord = curveZ.valueAt(timePoint);
+            z = curveZ.valueAt(timePoint);
+        target = VecUtils.vec(x,y,z);
     }
 
 }

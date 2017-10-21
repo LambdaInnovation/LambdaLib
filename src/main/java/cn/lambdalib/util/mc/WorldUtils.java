@@ -12,7 +12,10 @@ import java.util.Objects;
 
 import com.google.common.base.Predicate;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -20,13 +23,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-
-import javax.annotation.Nullable;
 
 /**
  * Utils about block/entity lookup and interaction.
@@ -56,31 +54,31 @@ public class WorldUtils {
 
     @SideOnly(Side.CLIENT)
     private static boolean worldValidC(World world) {
-        return Minecraft.getMinecraft().theWorld == world;
+        return Minecraft.getMinecraft().world == world;
     }
 
-    public static AxisAlignedBB getBoundingBox(Vec3 vec1, Vec3 vec2) {
+    public static AxisAlignedBB getBoundingBox(Vec3d vec1, Vec3d vec2) {
         double minX = 0.0, minY = 0.0, minZ = 0.0, maxX = 0.0, maxY = 0.0, maxZ = 0.0;
-        if(vec1.xCoord < vec2.xCoord) {
-            minX = vec1.xCoord;
-            maxX = vec2.xCoord;
+        if(vec1.x < vec2.x) {
+            minX = vec1.x;
+            maxX = vec2.x;
         } else {
-            minX = vec2.xCoord;
-            maxX = vec1.xCoord;
+            minX = vec2.x;
+            maxX = vec1.x;
         }
-        if(vec1.yCoord < vec2.yCoord) {
-            minY = vec1.yCoord;
-            maxY = vec2.yCoord;
+        if(vec1.y < vec2.y) {
+            minY = vec1.y;
+            maxY = vec2.y;
         } else {
-            minY = vec2.yCoord;
-            maxY = vec1.yCoord;
+            minY = vec2.y;
+            maxY = vec1.y;
         }
-        if(vec1.zCoord < vec2.zCoord) {
-            minZ = vec1.zCoord;
-            maxZ = vec2.zCoord;
+        if(vec1.z < vec2.z) {
+            minZ = vec1.z;
+            maxZ = vec2.z;
         } else {
-            minZ = vec2.zCoord;
-            maxZ = vec1.zCoord;
+            minZ = vec2.z;
+            maxZ = vec1.z;
         }
         return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
     }
@@ -88,27 +86,27 @@ public class WorldUtils {
     /**
      * Return a minimum AABB that can hold the points given.
      */
-    public static AxisAlignedBB minimumBounds(Vec3 ...points) {
+    public static AxisAlignedBB minimumBounds(Vec3d ...points) {
         if(points.length == 0) {
             throw new RuntimeException("Invalid call: too few vectors");
         }
 
-        double minX=points[0].xCoord,maxX=points[0].xCoord,minY=points[0].yCoord,maxY=points[0].yCoord,minZ=points[0].zCoord,maxZ=points[0].zCoord;
+        double minX=points[0].x,maxX=points[0].x,minY=points[0].y,maxY=points[0].y,minZ=points[0].z,maxZ=points[0].z;
         for(int i = 1; i < points.length; ++i) {
-            if(minX > points[i].xCoord)
-                minX = points[i].xCoord;
-            if(maxX < points[i].xCoord)
-                maxX = points[i].xCoord;
+            if(minX > points[i].x)
+                minX = points[i].x;
+            if(maxX < points[i].x)
+                maxX = points[i].x;
             
-            if(minY > points[i].yCoord)
-                minY = points[i].yCoord;
-            if(maxY < points[i].yCoord)
-                maxY = points[i].yCoord;
+            if(minY > points[i].y)
+                minY = points[i].y;
+            if(maxY < points[i].y)
+                maxY = points[i].y;
             
-            if(minZ > points[i].zCoord)
-                minZ = points[i].zCoord;
-            if(maxZ < points[i].zCoord)
-                maxZ = points[i].zCoord;
+            if(minZ > points[i].z)
+                minZ = points[i].z;
+            if(maxZ < points[i].z)
+                maxZ = points[i].z;
         }
         
         return new AxisAlignedBB(minX, minY, minZ,maxX,maxY,maxZ);
@@ -139,12 +137,12 @@ public class WorldUtils {
             return dx * dx + dy * dy + dz * dz <= rangeSq;
         };
         
-        int minX = MathHelper.floor_double(x - range),
-            minY = MathHelper.floor_double(y - range),
-            minZ = MathHelper.floor_double(z - range),
-            maxX = MathHelper.ceiling_double_int(x + range),
-            maxY = MathHelper.ceiling_double_int(y + range),
-            maxZ = MathHelper.ceiling_double_int(z + range);
+        int minX = MathHelper.floor(x - range),
+            minY = MathHelper.floor(y - range),
+            minZ = MathHelper.floor(z - range),
+            maxX = MathHelper.ceil(x + range),
+            maxY = MathHelper.ceil(y + range),
+            maxZ = MathHelper.ceil(z + range);
         
         return getBlocksWithin(world, minX, minY, minZ, maxX, maxY, maxZ, max, fs);
     }
@@ -184,7 +182,7 @@ public class WorldUtils {
     }
     
     public static List<Entity> getEntities(Entity ent, double range, Predicate predicate) {
-        return getEntities(ent.worldObj, ent.posX, ent.posY, ent.posZ, range, predicate);
+        return getEntities(ent.world, ent.posX, ent.posY, ent.posZ, range, predicate);
     }
     
     public static List<Entity> getEntities(World world, double x, double y, double z, double range,
@@ -201,7 +199,7 @@ public class WorldUtils {
 
     @SuppressWarnings("unchecked")
     public static List<Entity> getEntities(World world, AxisAlignedBB box, Predicate predicate) {
-        return world.func_175674_a(null, box, predicate);
+        return world.getEntitiesWithinAABB(null, box, predicate);
     }
     
 }

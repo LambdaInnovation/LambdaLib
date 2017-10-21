@@ -8,14 +8,17 @@ package cn.lambdalib.util.deprecated;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.Vec3;
 
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 /**
  * This class essentially transforms the origin to the player's hand in thirdPerson or firstPerson.
  * @author WeAthFolD
+ * Paindar:Why deprecated it?
  */
+
+
 @Deprecated
 public class ViewOptimize {
     
@@ -49,17 +52,17 @@ public class ViewOptimize {
         }
     }
     
-    public static Vec3 getFixVector(IAssociatePlayer entity) {
+    public static Vec3d getFixVector(IAssociatePlayer entity) {
         if(isFirstPerson(entity)) {
-            return new Vec3(fpOffsetX, fpOffsetY, fpOffsetZ);
+            return new Vec3d(fpOffsetX, fpOffsetY, fpOffsetZ);
         } else {
-            return new Vec3(tpOffsetX, tpOffsetY, tpOffsetZ);
+            return new Vec3d(tpOffsetX, tpOffsetY, tpOffsetZ);
         }
     }
     
     public static boolean isFirstPerson(IAssociatePlayer entity) {
         Minecraft mc = Minecraft.getMinecraft();
-        EntityPlayer clientPlayer = Minecraft.getMinecraft().thePlayer;
+        EntityPlayer clientPlayer = Minecraft.getMinecraft().player;
         return mc.gameSettings.thirdPersonView == 0 && clientPlayer == entity.getPlayer();
     }
     

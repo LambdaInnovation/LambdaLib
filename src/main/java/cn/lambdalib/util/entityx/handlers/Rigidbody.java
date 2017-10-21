@@ -16,6 +16,7 @@ import cn.lambdalib.util.generic.VecUtils;
 import cn.lambdalib.util.mc.BlockSelectors;
 import cn.lambdalib.util.mc.IBlockSelector;
 import cn.lambdalib.util.mc.Raytrace;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.function.Predicate;
 
@@ -59,7 +60,7 @@ public class Rigidbody extends MotionHandler {
                 VecUtils.vec(target.posX + hw, target.posY + hh, target.posZ + hw),
                 VecUtils.vec(target.posX + hw, target.posY + hh, target.posZ - hw),
             };
-            Vec3 motion = VecUtils.vec(target.motionX, target.motionY, target.motionZ);
+            Vec3d motion = VecUtils.vec(target.motionX, target.motionY, target.motionZ);
             for(Vec3 vec : points) {
                 Vec3 next = VecUtils.add(vec, motion);
                 if((mop = Raytrace.perform(target.worldObj, vec, next, entitySel, blockFil)) != null)

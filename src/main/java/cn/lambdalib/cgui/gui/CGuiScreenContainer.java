@@ -13,6 +13,8 @@ import net.minecraft.inventory.Container;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
+
 /**
  * A simple wrapper for fast {@link CGui} deploy as GuiContainer.
  * @author WeAthFolD
@@ -56,7 +58,8 @@ public class CGuiScreenContainer extends GuiContainer {
     }
 
     @Override
-    protected void mouseClicked(int par1, int par2, int par3) {
+    protected void mouseClicked(int par1, int par2, int par3) throws IOException
+    {
         if(isSlotActive()) super.mouseClicked(par1, par2, par3);
         gui.mouseClicked(par1, par2, par3);
     }
@@ -73,14 +76,15 @@ public class CGuiScreenContainer extends GuiContainer {
     }
 
     @Override
-    protected void mouseMovedOrUp(int a, int b, int c) {
+    protected void mouseReleased(int a, int b, int c) {
         if(isSlotActive()) {
-            super.mouseMovedOrUp(a, b, c);
+            super.mouseReleased(a, b, c);
         }
     }
 
     @Override
-    public void keyTyped(char ch, int key) {
+    public void keyTyped(char ch, int key) throws IOException
+    {
         gui.keyTyped(ch, key);
         if(containerAcceptsKey(key) || key == Keyboard.KEY_ESCAPE)
             super.keyTyped(ch, key);

@@ -18,14 +18,14 @@ import java.util.*;
 
 public abstract class RegistryType {
     
-    private Map<RegModInformation, List<AnnotationData>> data = new HashMap();
-    private List<AnnotationData> unknownData = new LinkedList();
+    private Map<RegModInformation, List<AnnotationData>> data = new HashMap<>();
+    private List<AnnotationData> unknownData = new LinkedList<>();
     
     public final Class<? extends Annotation> annoClass;
     public final String name;
     
-    private Set<RegModInformation> loadedMods = new HashSet();
-    private Set<String> dependencies = new HashSet();
+    private Set<RegModInformation> loadedMods = new HashSet<>();
+    private Set<String> dependencies = new HashSet<>();
     
     public RegistryHelper helper = new RegistryHelper(this);
     
@@ -49,7 +49,7 @@ public abstract class RegistryType {
     private void newData(AnnotationData anno) {
         RegModInformation mod = RegistrationManager.INSTANCE.findMod(anno);
         if (mod != null) {
-            if (!data.containsKey(mod)) data.put(mod, new LinkedList());
+            if (!data.containsKey(mod)) data.put(mod, new LinkedList<>());
             data.get(mod).add(anno);
         } else {
             unknownData.add(anno);

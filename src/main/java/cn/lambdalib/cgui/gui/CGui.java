@@ -11,6 +11,7 @@ import java.util.Iterator;
 import cn.lambdalib.util.client.HudUtils;
 import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
+import cn.lambdalib.util.client.font.TrueTypeFont;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.cgui.gui.component.Transform;
@@ -29,7 +30,6 @@ import cn.lambdalib.cgui.gui.event.RefreshEvent;
 import cn.lambdalib.cgui.gui.event.RightClickEvent;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.helper.GameTimer;
-import sun.font.TrueTypeFont;
 
 /**
  * @author WeathFolD
@@ -116,7 +116,7 @@ public class CGui extends WidgetContainer {
                 HudUtils.drawRectOutline(hovering.x, hovering.y,
                         hovering.transform.width * hovering.scale,
                         hovering.transform.height * hovering.scale, 3);
-                IFont font = TrueTypeFont.defaultFont();
+                IFont font = TrueTypeFont.defaultFont;
                 font.draw(hovering.getFullName(), hovering.x, hovering.y - 10, new FontOption(10));
             }
 

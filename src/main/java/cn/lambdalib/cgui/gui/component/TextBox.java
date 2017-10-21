@@ -21,6 +21,7 @@ import cn.lambdalib.util.client.font.IFont;
 import cn.lambdalib.util.client.font.IFont.FontOption;
 import cn.lambdalib.util.client.font.TrueTypeFont;
 import cn.lambdalib.util.generic.MathUtils;
+import net.minecraft.util.text.translation.LanguageMap;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -34,8 +35,7 @@ import cn.lambdalib.cgui.gui.event.LeftClickEvent;
 import cn.lambdalib.util.helper.Color;
 import cn.lambdalib.util.helper.GameTimer;
 import net.minecraft.util.ChatAllowedCharacters;
-import net.minecraft.util.StatCollector;
-
+import net.minecraft.util.text.translation.I18n;
 import javax.vecmath.Vector2d;
 
 /**
@@ -271,7 +271,7 @@ public class TextBox extends Component {
     private String processedContent() {
         String ret = content;
         if (shouldLocalize()) {
-            ret = StatCollector.translateToLocal(ret);
+            ret = I18n.translateToLocal(ret);
         }
         if (doesEcho) {
             ret = StringUtils.repeat(echoChar, ret.length());

@@ -21,6 +21,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.template.client.render.block.RenderEmptyBlock;
@@ -87,7 +89,7 @@ public abstract class BlockMulti extends BlockContainer {
     public AxisAlignedBB getRenderBB(int x, int y, int z, EnumFacing dir) {
         // Lazy init
         if (renderBB[dir.ordinal()] == null) {
-            Vec3[] vecs = new Vec3[subList.size() * 2];
+            Vec3d[] vecs = new Vec3d[subList.size() * 2];
             for (int i = 0; i < subList.size(); ++i) {
                 SubBlockPos rot = rotate(subList.get(i), dir);
                 vecs[i * 2] = VecUtils.vec(rot.dx, rot.dy, rot.dz);

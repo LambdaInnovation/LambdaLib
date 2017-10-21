@@ -80,7 +80,7 @@ public class RenderCrossedProjectile extends Render {
         Tessellator t = Tessellator.instance;
 
         GL11.glPushMatrix(); {
-            Vec3 v1 = newV3(0, HEIGHT, 0), 
+            Vec3d v1 = newV3(0, HEIGHT, 0),
                     v2 = newV3(0, -HEIGHT, 0), 
                     v3 = newV3(LENGTH, -HEIGHT, 0),
                     v4 = newV3(LENGTH, HEIGHT, 0),
@@ -141,7 +141,7 @@ public class RenderCrossedProjectile extends Render {
         } GL11.glPopMatrix();
     }
 
-    public static Vec3 newV3(double x, double y, double z) {
+    public static Vec3d newV3(double x, double y, double z) {
         return Vec3.createVectorHelper(x, y, z);
     }
 

@@ -29,7 +29,7 @@ public class RecipeRegistry {
     /**
      * This should only be visited for debug purpose.
      */
-    public final Map<String, Object> nameMapping = new HashMap();
+    public final Map<String, Object> nameMapping = new HashMap<>();
 
     public RecipeRegistry() {
         registerRecipeType("shaped", ShapedOreRegistry.INSTANCE);
@@ -60,10 +60,13 @@ public class RecipeRegistry {
         if (!OreDictionary.getOres(key).isEmpty())
             return key;
 
-        if (Item.itemRegistry.containsKey(key))
-            return Item.itemRegistry.getObject(key);
-        if (Block.blockRegistry.containsKey(key))
-            return Block.blockRegistry.getObject(key);
+        ResourceLocation res=new ResourceLocation(key);
+        Item item=Item.REGISTRY.getObject(res);
+        if (item !=null)
+            return item;
+        Block block= Block.getBlockFromName(key);
+        if(block!=null)
+            return block;
 
         throw new RuntimeException("Registry object " + key + " doesn't exist");
     }
@@ -97,7 +100,7 @@ public class RecipeRegistry {
             return new ItemStack((Block) o, element.amount, element.data);
         } else {
             ItemStack outputstack = OreDictionary.getOres(element.name).get(0).copy();
-            outputstack.stackSize = element.amount;
+            outputstack.setCount(element.amount);
             return outputstack;
         }
     }
@@ -196,13 +199,13 @@ public class RecipeRegistry {
         }
     }
 
-    private HashMap<String, IRecipeRegistry> map = new HashMap<String, IRecipeRegistry>();
+    private HashMap<String, IRecipeRegistry> map = new HashMap<>();
 
     /**
      * Preserved for debug usage.
      */
     public static String reprStack(ItemStack stack) {
-        return stack.getItem().getUnlocalizedName() + "*" + stack.stackSize + "#" + stack.getItemDamage();
+        return stack.getItem().getUnlocalizedName() + "*" + stack.getCount() + "#" + stack.getItemDamage();
     }
 
 }

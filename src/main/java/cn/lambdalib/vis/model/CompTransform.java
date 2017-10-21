@@ -7,22 +7,21 @@
 package cn.lambdalib.vis.model;
 
 import cn.lambdalib.s11n.SerializeType;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import cn.lambdalib.util.client.RenderUtils;
 import cn.lambdalib.util.generic.VecUtils;
-import net.minecraft.util.Vec3;
-
 @SerializeType
 public class CompTransform {
 
     public static final CompTransform identity = new CompTransform();
 
-    public Vec3 transform = new Vec3(0, 0, 0);
+    public Vec3d transform = new Vec3d(0, 0, 0);
     
-    public Vec3 pivotPt = new Vec3(0, 0, 0);
+    public Vec3d pivotPt = new Vec3d(0, 0, 0);
     
-    public Vec3 rotation = new Vec3(0, 0, 0);
+    public Vec3d rotation = new Vec3d(0, 0, 0);
     
     public double scale = 1.0;
     
@@ -46,16 +45,16 @@ public class CompTransform {
         return this;
     }
     
-    private void svec(Vec3 vec3, double x, double y, double z) {
-        vec3=new Vec3(x,y,z);
+    private void svec(Vec3d vec3, double x, double y, double z) {
+        vec3=new Vec3d(x,y,z);
     }
     
     public void doTransform() {
         RenderUtils.glTranslate(VecUtils.add(transform, pivotPt));
 
-        GL11.glRotated(rotation.xCoord, 1, 0, 0);
-        GL11.glRotated(rotation.yCoord, 0, 1, 0);
-        GL11.glRotated(rotation.zCoord, 0, 0, 1);
+        GL11.glRotated(rotation.x, 1, 0, 0);
+        GL11.glRotated(rotation.t, 0, 1, 0);
+        GL11.glRotated(rotation.z, 0, 0, 1);
         
         GL11.glScaled(scale, scale, scale);
         

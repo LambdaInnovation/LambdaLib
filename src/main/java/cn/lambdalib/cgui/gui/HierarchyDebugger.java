@@ -32,7 +32,7 @@ public class HierarchyDebugger extends Widget {
 
     private static final FontOption option = new IFont.FontOption(10);
     private double drawHierarchy(double x, double y, Widget w, String name, double fsize) {
-        IFont font = TrueTypeFont.defaultFont();
+        IFont font = TrueTypeFont.defaultFont;
 
         StringBuilder sb = new StringBuilder();
         sb.append("·").append(name).append(" [");

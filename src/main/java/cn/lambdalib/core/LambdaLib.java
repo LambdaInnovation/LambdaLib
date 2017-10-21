@@ -12,6 +12,7 @@ import cn.lambdalib.core.command.CmdMineStatistics;
 import cn.lambdalib.multiblock.MsgBlockMulti;
 import cn.lambdalib.s11n.network.NetworkEvent;
 import cn.lambdalib.s11n.network.NetworkMessage;
+import cn.lambdalib.util.datapart.CapDataPartHandler;
 import cn.lambdalib.util.deprecated.LIFMLGameEventDispatcher;
 import net.minecraft.command.CommandHandler;
 import net.minecraftforge.common.config.Configuration;
@@ -26,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 
 @Mod(modid = "LambdaLib", name = "LambdaLib", version = LambdaLib.VERSION, dependencies = "required-after:"
         + LLModContainer.MODID)
+//TODO add updateJSON, @Link http://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
 @RegistrationMod(pkg = "cn.lambdalib.", res = "lambdalib", prefix = "ll_")
 public class LambdaLib {
 
@@ -52,7 +54,6 @@ public class LambdaLib {
         log.info("Starting LambdaLib");
         log.info("Copyright (c) Lambda Innovation, 2013-2017");
         log.info("http://www.li-dev.cn/");
-
         LIFMLGameEventDispatcher.init();
 
         config = new Configuration(event.getSuggestedConfigurationFile());
@@ -67,6 +68,7 @@ public class LambdaLib {
         //
 
         RegistrationManager.INSTANCE.registerAll(this, "PreInit");
+        CapDataPartHandler.register();
     }
 
     @EventHandler()

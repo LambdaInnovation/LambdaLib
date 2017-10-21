@@ -37,7 +37,7 @@ public class TrueTypeFont implements IFont {
             this.v=v;
         }
     }
-    static TrueTypeFont defaultFont = withFallback(Font.PLAIN, 32,
+    public static TrueTypeFont defaultFont = withFallback(Font.PLAIN, 32,
             "Microsoft YaHei", "Adobe Heiti Std R", "STHeiti",
             "SimHei", "微软雅黑", "黑体",
             "Consolas", "Monospace", "Arial");

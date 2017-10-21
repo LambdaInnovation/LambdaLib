@@ -63,12 +63,12 @@ public class RenderModelItem implements IItemRenderer {
     /**
      * Standard Rotation.
      */
-    public Vec3 stdRotation = initVec();
+    public Vec3d stdRotation = initVec();
     
     /**
      * Standard Offset.
      */
-    public Vec3 stdOffset = initVec();
+    public Vec3d stdOffset = initVec();
     
     /**
      * Standard Scale.
@@ -84,14 +84,14 @@ public class RenderModelItem implements IItemRenderer {
     /**
      * Equip Offset
      */
-    public Vec3 equipOffset = initVec();
+    public Vec3d equipOffset = initVec();
     
-    public Vec3 thirdPersonOffset = initVec();
+    public Vec3d thirdPersonOffset = initVec();
     
     /**
      * Equip Rotation
      */
-    public Vec3 equipRotation = initVec();
+    public Vec3d equipRotation = initVec();
     
     /**
      * Inventory Scale
@@ -106,14 +106,14 @@ public class RenderModelItem implements IItemRenderer {
     /**
      * Inventory Rotation
      */
-    public Vec3 invRotation = initVec();
+    public Vec3d invRotation = initVec();
     
     /**
      * Entity Item Rotation.
      */
-    public Vec3 entityItemRotation = initVec();
+    public Vec3d entityItemRotation = initVec();
     
-    public Vec3 entityItemOffset = initVec();
+    public Vec3d entityItemOffset = initVec();
     
     /**
      * Handle render Inventory or not
@@ -324,9 +324,9 @@ public class RenderModelItem implements IItemRenderer {
         GL11.glDisable(GL11.GL_CULL_FACE);
         this.doTransformation(stdOffset);
         GL11.glScalef(-1F , -1F , 1F );
-        GL11.glRotated(stdRotation.yCoord + 180, 0.0F, 1.0F, 0.0F);
-        GL11.glRotated(stdRotation.zCoord, 0.0F, 0.0F, 1.0F);
-        GL11.glRotated(stdRotation.xCoord, 1.0F, 0.0F, 0.0F);
+        GL11.glRotated(stdRotation.y + 180, 0.0F, 1.0F, 0.0F);
+        GL11.glRotated(stdRotation.z, 0.0F, 0.0F, 1.0F);
+        GL11.glRotated(stdRotation.x, 1.0F, 0.0F, 0.0F);
         
         model.render(null, 0.0625F, i);
         GL11.glEnable(GL11.GL_CULL_FACE);
@@ -336,33 +336,33 @@ public class RenderModelItem implements IItemRenderer {
         return 0.1F;
     }
     
-    protected void doTransformation(Vec3 vec3) {
-        if(vec3 != null)
-            GL11.glTranslated(vec3.xCoord, vec3.yCoord, vec3.zCoord);
+    protected void doTransformation(Vec3d vec3) {
+        if(Vec3d != null)
+            GL11.glTranslated(vec3.x, vec3.y, vec3.z);
     }
     
-    protected void doRotation(Vec3 vec3) {
-        if(vec3 != null) {
-            GL11.glRotated(vec3.yCoord, 0.0F, 1.0F, 0.0F);
-            GL11.glRotated(vec3.zCoord, 0.0F, 0.0F, 1.0F);
-            GL11.glRotated(vec3.xCoord, 1.0F, 0.0F, 0.0F);
+    protected void doRotation(Vec3d vec3) {
+        if(Vec3d != null) {
+            GL11.glRotated(vec3.y, 0.0F, 1.0F, 0.0F);
+            GL11.glRotated(vec3.z, 0.0F, 0.0F, 1.0F);
+            GL11.glRotated(vec3.x, 1.0F, 0.0F, 0.0F);
         }
     }
     
-    protected static void initVec(Vec3 vec) {
+    protected static void initVec(Vec3d vec) {
         vec = vec == null ?  new Vec3(0D, 0D, 0D) : vec;
     }
     
-    protected static void initVec(Vec3 vec, Vec3 another) {
-        vec=new Vec3(another.xCoord,another.yCoord,another.zCoord);
+    protected static void initVec(Vec3d vec, Vec3d another) {
+        vec=new Vec3d(another.x,another.y,another.z);
     }
     
-    protected static Vec3 initVec() {
-        return new Vec3(0D, 0D, 0D);
+    protected static Vec3d initVec() {
+        return new Vec3d(0D, 0D, 0D);
     }
     
-    protected static void initVec(Vec3 vec, double x, double y, double z) {
-        vec=new Vec3(x,y,z);
+    protected static void initVec(Vec3d vec, double x, double y, double z) {
+        vec=new Vec3d(x,y,z);
     }
 
 }

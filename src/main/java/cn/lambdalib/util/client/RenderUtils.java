@@ -10,6 +10,7 @@ import static cn.lambdalib.util.generic.VecUtils.vec;
 
 import java.lang.reflect.Field;
 
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
@@ -20,7 +21,6 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 
 /**
  * @author WeAthFolD
@@ -59,29 +59,29 @@ public class RenderUtils {
         textureState = -1;
     }
     
-    public static void addVertex(Vec3 vertex, double u, double v) {
-        t.getWorldRenderer().addVertexWithUV(vertex.xCoord, vertex.yCoord, vertex.zCoord, u, v);
+    public static void addVertex(Vec3d vertex, double u, double v) {
+        t.getWorldRenderer().addVertexWithUV(vertex.x, vertex.y, vertex.z, u, v);
     }
     
-    public static void addVertexLegacy(Vec3 vertex, double u, double v) {
+    public static void addVertexLegacy(Vec3d vertex, double u, double v) {
         GL11.glTexCoord2d(u, v);
-        GL11.glVertex3d(vertex.xCoord, vertex.yCoord, vertex.zCoord);
+        GL11.glVertex3d(vertex.x, vertex.y, vertex.z);
     }
     
-    public static void addVertex(Vec3 vertex) {
-        t.getWorldRenderer().addVertex(vertex.xCoord, vertex.yCoord, vertex.zCoord);
+    public static void addVertex(Vec3d vertex) {
+        t.getBuffer().addVertex(vertex.x, vertex.y, vertex.z);
     }
     
-    public static void glTranslate(Vec3 v) {
-        GL11.glTranslated(v.xCoord, v.yCoord, v.zCoord);
+    public static void glTranslate(Vec3d v) {
+        GL11.glTranslated(v.x, v.y, v.z);
     }
     
-    public static void glScale(Vec3 v) {
-        GL11.glScaled(v.xCoord, v.yCoord, v.zCoord);
+    public static void glScale(Vec3d v) {
+        GL11.glScaled(v.x, v.y, v.z);
     }
     
-    public static void glRotate(double angle, Vec3 axis) {
-        GL11.glRotated(angle, axis.xCoord, axis.yCoord, axis.zCoord);
+    public static void glRotate(double angle, Vec3d axis) {
+        GL11.glRotated(angle, axis.x, axis.y, axis.z);
     }
     
     public static void loadTexture(ResourceLocation src) {
@@ -93,8 +93,8 @@ public class RenderUtils {
         IIcon icon = stackToRender.getIconIndex();
         
         Minecraft mc = Minecraft.getMinecraft();
-        mc.renderEngine.bindTexture(mc.renderEngine.getResourceLocation(stackToRender.getItemSpriteNumber()));
-        ResourceLocation tex = mc.renderEngine.getResourceLocation(stackToRender.getItemSpriteNumber());
+        mc.renderEngine.bindTexture(mc.renderEngine.getTexture(stackToRender.getItemSpriteNumber()) );
+        ResourceLocation tex = mc.renderEngine.getTexture(stackToRender.getItemSpriteNumber());
         
         drawEquippedItem(width, tex, tex, icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV(), false);
     }
@@ -113,7 +113,7 @@ public class RenderUtils {
     
     private static void drawEquippedItem(double w, ResourceLocation front, ResourceLocation back, 
             double u1, double v1, double u2, double v2, boolean faceOnly) {
-        Vec3 a1 = vec(0, 0, w), 
+        Vec3d a1 = vec(0, 0, w), 
             a2 = vec(1, 0, w), 
             a3 = vec(1, 1, w), 
             a4 = vec(0, 1, w), 

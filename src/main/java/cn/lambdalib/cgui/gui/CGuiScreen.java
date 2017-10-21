@@ -10,6 +10,8 @@ import net.minecraft.client.gui.GuiScreen;
 
 import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
+
 /**
  * A simple wrapper for fast {@link CGui} deploy as GuiScreen.
  * @author WeAthFolD
@@ -64,9 +66,10 @@ public class CGuiScreen extends GuiScreen {
     }
     
     @Override
-    protected void keyTyped(char par1, int par2) {
-        super.keyTyped(par1, par2);
-        gui.keyTyped(par1, par2);
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
+    {
+        super.keyTyped(typedChar, keyCode);
+        gui.keyTyped(typedChar, keyCode);
     }
     
     public CGui getGui() {

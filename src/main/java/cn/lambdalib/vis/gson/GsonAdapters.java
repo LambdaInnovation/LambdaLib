@@ -17,7 +17,7 @@ import cn.lambdalib.util.generic.VecUtils;
 import cn.lambdalib.vis.model.CompTransform;
 import cn.lambdalib.vis.model.renderer.ItemModelRenderer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * Gson adapters used in info serialization/deserialization.
@@ -25,22 +25,22 @@ import net.minecraft.util.Vec3;
  */
 public class GsonAdapters {
 
-    public static TypeAdapter<Vec3> vec3Adapter =
-        new TypeAdapter<Vec3>() {
+    public static TypeAdapter<Vec3d> vec3Adapter =
+        new TypeAdapter<Vec3d>() {
 
             @Override
-            public void write(JsonWriter out, Vec3 value) throws IOException {
+            public void write(JsonWriter out, Vec3d value) throws IOException {
                 out.beginArray();
-                out.value(value.xCoord);
-                out.value(value.yCoord);
-                out.value(value.zCoord);
+                out.value(value.x);
+                out.value(value.y);
+                out.value(value.z);
                 out.endArray();
             }
 
             @Override
-            public Vec3 read(JsonReader in) throws IOException {
+            public Vec3d read(JsonReader in) throws IOException {
                 in.beginArray();
-                Vec3 ret = VecUtils.vec(
+                Vec3d ret = VecUtils.vec(
                         in.nextDouble(),
                         in.nextDouble(),
                         in.nextDouble());
