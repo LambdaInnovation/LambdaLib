@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 
 /**
  * Registers the class as a listener into either FML or Forge bus.
+ * FML event bus have been merged into Forge bus, but FML buss still leave for backward compatible.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

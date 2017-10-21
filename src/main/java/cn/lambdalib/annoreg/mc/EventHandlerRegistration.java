@@ -27,15 +27,7 @@ public class EventHandlerRegistration extends RegistrationInstance<RegEventHandl
     @Override
     protected void register(Object obj, RegEventHandler anno) throws Exception {
         for (RegEventHandler.Bus bus : anno.value()) {
-            switch (bus) {
-            case FML:
-                FMLCommonHandler.instance().bus().register(obj);
-                break;
-            case Forge:
                 MinecraftForge.EVENT_BUS.register(obj);
-                break;
-            default:
-            }
         }
     }
     
