@@ -11,12 +11,20 @@ import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistryTypeDecl;
 import cn.lambdalib.util.mc.SideHelper;
 import net.minecraft.item.Item;
-import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 
+
+/**
+ * Register all item marked by {@anno RegItem}.
+ * @author acaly
+ *
+ * But now MC have {@event registerBlocks}, so will we keep it continually?
+ * @author Paindar
+ */
 @RegistryTypeDecl
 public class ItemRegistration extends RegistrationFieldSimple<RegItem, Item> {
 
@@ -24,19 +32,12 @@ public class ItemRegistration extends RegistrationFieldSimple<RegItem, Item> {
         super(RegItem.class, "Item");
         this.setLoadStage(LoadStage.PRE_INIT);
         
-        this.addWork(RegItem.OreDict.class, new PostWork<RegItem.OreDict, Item>() {
-            @Override
-            public void invoke(RegItem.OreDict anno, Item obj) throws Exception {
-                OreDictionary.registerOre(anno.value(), obj);
-            }
-        });
+        this.addWork(RegItem.OreDict.class, (PostWork<RegItem.OreDict, Item>) (anno, obj) -> OreDictionary.registerOre(anno.value(), obj));
         
-        this.addWork(RegItem.UTName.class, new PostWork<RegItem.UTName, Item>() {
-            @Override
-            public void invoke(RegItem.UTName anno, Item obj) throws Exception {
-                obj.setUnlocalizedName(getCurrentMod().getPrefix() + anno.value());
-                obj.setTextureName(getCurrentMod().getRes(anno.value()));
-            }
+        this.addWork(RegItem.UTName.class, (PostWork<RegItem.UTName, Item>) (anno, obj) -> {
+            obj.setUnlocalizedName(getCurrentMod().getPrefix() + anno.value());
+            //TODO add Texture path
+            //obj.setTextureName(getCurrentMod().getRes(anno.value()));
         });
 
         if (SideHelper.isClient()) {
@@ -44,8 +45,8 @@ public class ItemRegistration extends RegistrationFieldSimple<RegItem, Item> {
                 @Override
                 @SideOnly(Side.CLIENT)
                 public void invoke(RegItem.HasRender anno, Item obj) throws Exception {
-                    MinecraftForgeClient.registerItemRenderer(obj,
-                            (IItemRenderer) helper.getFieldFromObject(obj, RegItem.Render.class));
+                    //TODO add ItemRenderer.
+                    //MinecraftForgeClient.registerItemRenderer(obj, (IItemRenderer) helper.getFieldFromObject(obj, RegItem.Render.class));
                 }
             });
         }
@@ -53,6 +54,7 @@ public class ItemRegistration extends RegistrationFieldSimple<RegItem, Item> {
 
     @Override
     protected void register(Item value, RegItem anno, String field) throws Exception {
-        GameRegistry.registerItem(value, getSuggestedName());
+        value.setUnlocalizedName(getSuggestedName());
+        GameRegistry.findRegistry(Item.class).register(value);
     }
 }
