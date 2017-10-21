@@ -4,6 +4,7 @@ import cn.lambdalib.annoreg.core.Registrant;
 import cn.lambdalib.annoreg.mc.RegEventHandler;
 import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
 import cn.lambdalib.core.LLCommons;
+import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.network.NetS11nAdapterRegistry.RegNetS11nAdapter;
 import cn.lambdalib.s11n.network.NetworkS11n;
 import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
@@ -11,6 +12,9 @@ import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
 import cn.lambdalib.util.mc.SideHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.nbt.NBTBase;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
@@ -19,7 +23,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -31,7 +34,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Registrant
-public final class EntityData<Ent extends EntityLivingBase> implements IExtendedEntityProperties {
+public final class EntityData<Ent extends EntityLivingBase> implements IDataPart {
 
     private static final String ID = "LL_EntityData";
 
@@ -39,6 +42,14 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
     private static final List<RegData> bothSideList = new ArrayList<>();
     private static boolean init = false;
 
+
+    /**
+     * Register all the DataPart into List. Use @RegDataPart or register your DataPart in @event FMLInitializationEvent manually.
+     * @param type
+     * @param sides
+     * @param pred
+     * @param lazy
+     */
     @SuppressWarnings("unchecked")
     public static <T extends EntityLivingBase> void
     register(Class<? extends DataPart<T>> type,
@@ -57,6 +68,16 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
         }
     }
 
+    private static  Capability<IDataPart> getCapability(){
+        return CapDataPartHandler.DATA_PART_CAPABILITY;
+    }
+
+    /**
+     * Get entity's EntityData. By get it you can get other data by getPart().
+     * @param entity can't be null.
+     * @param <T>
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static <T extends EntityLivingBase> EntityData<T> get(T entity) {
         Objects.requireNonNull(entity);
@@ -66,29 +87,16 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
             init();
         }
 
-        EntityData<T> ret = (EntityData<T>) entity.getExtendedProperties(ID);
-        if (ret == null) {
-            ret = new EntityData<>();
-            ret.entity = entity;
-            entity.registerExtendedProperties(ID, ret);
-
-            // Construct all non-lazy parts
-            _allApplicable(entity).filter(data -> !data.lazy).forEach(ret::_constructPart);
+        IDataPart ret =  entity.getCapability(getCapability(),null);
+        if (ret == null || !(ret instanceof EntityData)) {
+            throw new RuntimeException("Failed to get EntityData of "+entity);
         }
 
-        return ret;
-    }
-
-    /**
-     * @return The EntityData of given entity, or {@link null} if not created.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends EntityLivingBase> EntityData<T> getNonCreate(T entity) {
-        return (EntityData<T>) entity.getExtendedProperties(ID);
+        return (EntityData)ret;
     }
 
     private static void init() {
-        bothSideList.sort((lhs, rhs) -> lhs.type.getName().compareTo(rhs.type.getName()));
+        bothSideList.sort(Comparator.comparing(lhs -> lhs.type.getName()));
         Preconditions.checkState(bothSideList.size() < Byte.MAX_VALUE);
         IntStream.range(0, bothSideList.size()).forEach(i -> bothSideList.get(i).networkID = (byte) i);
 
@@ -125,20 +133,20 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
     @SuppressWarnings("unchecked")
     public <T extends EntityLivingBase>
     DataPart<T> getPartNonCreate(Class<? extends DataPart<T>> type) {
-        if (constructed.containsKey(type)) {
-            return constructed.get(type);
-        } else {
-            return null;
-        }
+        return constructed.getOrDefault(type, null);
     }
 
     public Ent getEntity() {
         return entity;
     }
 
+
+
+    //NBT path: tag_->TAG("ForgeData"->TAG(ID))
     @Override
-    public void saveNBTData(NBTTagCompound tag_) {
-        NBTTagCompound tag = tag_.getCompoundTag("ForgeData");
+    public void writeNBT(NBTTagCompound tag_) {
+        NBTTagCompound tag=new NBTTagCompound();
+
         constructed.values().forEach(part -> {
             if (part.needNBTStorage) {
                 NBTTagCompound partTag = new NBTTagCompound();
@@ -146,18 +154,23 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
                 tag.setTag(_partNBTID(part), partTag);
             }
         });
+        if(tag.getCompoundTag("ForgeData").hasKey(ID))
+            LambdaLib.log.warn("Find existed log:"+ID+" when storage NBTTag in EntityData:155.");
+        tag.getCompoundTag("ForgeData").setTag(ID,tag);
     }
 
     @Override
-    public void loadNBTData(NBTTagCompound tag) {
-        // We don't do it this way. Loads manually from entity tag.
+    public void readNBT(NBTTagCompound tag_) {
+        NBTTagCompound tag=tag_.getCompoundTag("ForgeData").getCompoundTag(ID);
+
+        constructed.values().forEach(part -> {
+            if (part.needNBTStorage) {
+                NBTTagCompound partTag = tag.getCompoundTag(_partNBTID(part));
+                part.fromNBT(partTag);
+            }
+        });
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void init(Entity entity, World world) {
-        this.entity = (Ent) entity;
-    }
 
     private String _partNBTID(DataPart part) {
         return part.getClass().getCanonicalName();
@@ -168,16 +181,16 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
         Preconditions.checkState(data.sides.contains(runtimeSide));
         try {
             DataPart instance = data.type.newInstance();
-            instance.entityData = (EntityData) this;
+            instance.entityData = this;
             constructed.put(data.type, instance);
 
             instance.wake();
 
             if (!SideHelper.isClient() && instance.needNBTStorage) {
-                NBTTagCompound forgeTag = getEntity().getEntityData();
+                NBTTagCompound tag = getEntity().getEntityData().getCompoundTag(ID);
                 String id = _partNBTID(instance);
-                if (forgeTag.hasKey(id)) {
-                    instance.fromNBT(forgeTag.getCompoundTag(id));
+                if (tag.hasKey(id)) {
+                    instance.fromNBT(tag.getCompoundTag(id));
                 }
             }
         } catch (IllegalAccessException |
@@ -218,7 +231,7 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
 
         @SubscribeEvent
         public void onLivingUpdate(LivingUpdateEvent evt) {
-            EntityData<EntityLivingBase> data = EntityData.getNonCreate(evt.entityLiving);
+            EntityData<EntityLivingBase> data = EntityData.get(evt.getEntityLiving());
             if (data != null) {
                 data.tick();
             }
@@ -226,24 +239,19 @@ public final class EntityData<Ent extends EntityLivingBase> implements IExtended
 
         @SubscribeEvent
         public void onLivingDeath(LivingDeathEvent evt) {
-            if (evt.entityLiving instanceof EntityPlayer) {
-                EntityData<EntityPlayer> playerData = EntityData.get((EntityPlayer) evt.entityLiving);
-                Iterator<DataPart> iter = playerData.constructed.values().iterator();
-                while (iter.hasNext()) {
-                    DataPart dp = iter.next();
-                    if (dp.clearOnDeath) {
-                        iter.remove();
-                    }
-                }
+            if (evt.getEntityLiving() instanceof EntityPlayer) {
+                EntityData<EntityPlayer> playerData = EntityData.get((EntityPlayer) evt.getEntityLiving());
+                playerData.constructed.values().removeIf(dp -> dp.clearOnDeath);
             }
         }
 
         @SubscribeEvent
         public void onPlayerClone(PlayerEvent.Clone evt) {
-            EntityData<EntityPlayer> data = EntityData.getNonCreate(evt.original);
+            EntityData<EntityPlayer> data = EntityData.get(evt.getOriginal());
             if (data != null) {
-                data.entity = evt.entityPlayer;
-                evt.entityPlayer.registerExtendedProperties(ID, data);
+                data.entity = evt.getEntityPlayer();
+                NBTBase nbt = CapDataPartHandler.storage.writeNBT(getCapability(), evt.getOriginal().getCapability(getCapability(), null), null);
+                CapDataPartHandler.storage.readNBT(getCapability(), evt.getEntityPlayer().getCapability(getCapability(), null), null, nbt);
             }
         }
     }

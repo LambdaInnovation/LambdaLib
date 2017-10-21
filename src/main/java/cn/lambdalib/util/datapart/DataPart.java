@@ -93,7 +93,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
         if (!(ent instanceof EntityPlayer)) {
             log.warn("Trying to call sync() in client for non-EntityPlayers in" + this +
                     ". This usually doesn't make sense.");
-        } else if (!(ent.equals(Minecraft.getMinecraft().thePlayer))) {
+        } else if (!(ent.equals(Minecraft.getMinecraft().player))) {
             log.warn("Trying to sync non-local player data to server D  ataPart in " + this +
                     ". This usually doesn't make sense.");
         }
@@ -141,7 +141,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
      * @return Whether we are in client.
      */
     protected boolean isClient() {
-        return getEntity().worldObj.isRemote;
+        return getEntity().world.isRemote;
     }
 
     protected Side getSide() {
@@ -189,7 +189,7 @@ public abstract class DataPart<T extends EntityLivingBase> {
             if (!(ent instanceof EntityPlayer)) {
                 log.warn("Trying to send message in client for non-EntityPlayers in" + this +
                         ". This usually doesn't make sense.");
-            } else if (!(ent.equals(Minecraft.getMinecraft().thePlayer))) {
+            } else if (!(ent.equals(Minecraft.getMinecraft().player))) {
                 log.warn("Trying to send message from non-local player data to server DataPart in " + this +
                         ". This usually doesn't make sense.");
             }

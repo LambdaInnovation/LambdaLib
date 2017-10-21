@@ -25,7 +25,7 @@ public class DataPartRegistration extends RegistryType {
         EntityData.register(
                 (Class<? extends DataPart<EntityLivingBase>>) data.getTheClass(),
                 EnumSet.copyOf(Arrays.asList(anno.side())),
-                type -> regType.isAssignableFrom(type),
+                regType::isAssignableFrom,
                 anno.lazy());
 
         return true;
