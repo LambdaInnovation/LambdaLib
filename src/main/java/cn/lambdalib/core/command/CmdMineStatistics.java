@@ -13,19 +13,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import cn.lambdalib.annoreg.core.LoadStage;
+import cn.lambdalib.annoreg.mc.RegCallback;
 import net.minecraft.block.Block;
 import net.minecraft.command.CommandException;
+import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemAir;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.oredict.OreDictionary;
 import cn.lambdalib.template.command.LICommandBase;
+
+import static cn.lambdalib.core.LambdaLib.DEBUG;
 
 /**
  * @author WeathFolD
@@ -33,6 +38,13 @@ import cn.lambdalib.template.command.LICommandBase;
  */
 public class CmdMineStatistics extends LICommandBase {
 
+    @RegCallback(stage= LoadStage.START_SERVER)
+    public static void init(FMLServerStartingEvent event){
+        CommandHandler cm = (CommandHandler) event.getServer().getCommandManager();
+        if (DEBUG) {
+            cm.registerCommand(new CmdMineStatistics());
+        }
+    }
     public CmdMineStatistics() {}
 
     /**

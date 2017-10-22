@@ -7,6 +7,7 @@
 package cn.lambdalib.core;
 
 import cn.lambdalib.annoreg.core.RegistrationManager;
+import cn.lambdalib.annoreg.mc.RegisterCallbackManager;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
@@ -92,6 +93,7 @@ public class LLModContainer extends DummyModContainer
         Set<String> registrants = mapToClass(data.getAll("cn.lambdalib.annoreg.core.Registrant"));
         registrants.removeAll(removedClasses);
         RegistrationManager.INSTANCE.annotationList(registrants);
+        RegisterCallbackManager.INSTANCE.init(registrants);
 
         Set<String> registryTypes = mapToClass(data.getAll("cn.lambdalib.annoreg.core.RegistryTypeDecl"));
         registryTypes.removeAll(removedClasses);

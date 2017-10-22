@@ -6,8 +6,10 @@
 */
 package cn.lambdalib.core;
 
+import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.RegistrationManager;
 import cn.lambdalib.annoreg.core.RegistrationMod;
+import cn.lambdalib.annoreg.mc.RegisterCallbackManager;
 import cn.lambdalib.core.command.CmdMineStatistics;
 import cn.lambdalib.multiblock.MsgBlockMulti;
 import cn.lambdalib.s11n.network.NetworkEvent;
@@ -68,17 +70,20 @@ public class LambdaLib {
         //
 
         RegistrationManager.INSTANCE.registerAll(this, "PreInit");
+        RegisterCallbackManager.INSTANCE.registerAll(LoadStage.PRE_INIT,event);
         CapDataPartHandler.register();
     }
 
     @EventHandler()
     public void init(FMLInitializationEvent event) {
         RegistrationManager.INSTANCE.registerAll(this, "Init");
+        RegisterCallbackManager.INSTANCE.registerAll(LoadStage.INIT,event);
     }
 
     @EventHandler()
     public void postInit(FMLPostInitializationEvent event) {
         RegistrationManager.INSTANCE.registerAll(this, "PostInit");
+        RegisterCallbackManager.INSTANCE.registerAll(LoadStage.POST_INIT,event);
     }
 
     @EventHandler
@@ -88,11 +93,9 @@ public class LambdaLib {
 
     @EventHandler()
     public void serverStarting(FMLServerStartingEvent event) {
-        CommandHandler cm = (CommandHandler) event.getServer().getCommandManager();
-        if (DEBUG) {
-            cm.registerCommand(new CmdMineStatistics());
-        }
+
         RegistrationManager.INSTANCE.registerAll(this, "StartServer");
+        RegisterCallbackManager.INSTANCE.registerAll(LoadStage.START_SERVER,event);
     }
 
 }
