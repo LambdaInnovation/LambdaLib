@@ -1,16 +1,28 @@
 package cn.lambdalib.util.datapart;
 
+import cn.lambdalib.annoreg.core.LoadStage;
+import cn.lambdalib.annoreg.core.Registrant;
+import cn.lambdalib.annoreg.mc.RegCallback;
+import cn.lambdalib.core.LambdaLib;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * Created by Paindar on 17/10/19.
  */
+@Registrant
 public class CapDataPartHandler
 {
     @CapabilityInject(IDataPart.class)
@@ -28,14 +40,25 @@ public class CapDataPartHandler
         @Override
         public void readNBT(Capability<IDataPart> capability, IDataPart instance, EnumFacing side, NBTBase base)
         {
-            if (instance instanceof EntityData)
+            if (! (instance instanceof EntityData))
                 throw new RuntimeException("IDataPart instance does not implement EntityData");
             instance.readNBT((NBTTagCompound) base);
         }
     };
 
-    public static void register(){
-        CapabilityManager.INSTANCE.register(IDataPart.class, storage,
-                EntityData::new);
+    @SubscribeEvent
+    public void onAttachCapabilitiesEntity(AttachCapabilitiesEvent event)
+    {
+        if (event.getObject() instanceof EntityLivingBase)
+        {
+            ICapabilitySerializable<NBTTagCompound> provider = new CapDataPartDispatcher();
+            event.addCapability(new ResourceLocation("lambda_lib"),provider);
+        }
+    }
+
+    @RegCallback(stage= LoadStage.PRE_INIT)
+    public static void register(FMLPreInitializationEvent event){
+        MinecraftForge.EVENT_BUS.register(new CapDataPartHandler());
+        CapabilityManager.INSTANCE.register(IDataPart.class, storage, EntityData::new);
     }
 }

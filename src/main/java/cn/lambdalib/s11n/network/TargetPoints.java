@@ -81,7 +81,7 @@ public class TargetPoints {
             public TargetPoint convert(TileEntity object, double range) {
                 if (range == -1)
                     range = DEFAULT_RANGE;
-                return new TargetPoint(object.getWorld().provider.getDimensionId(), object.getPos().getX() + 0.5,
+                return new TargetPoint(object.getWorld().provider.getDimension(), object.getPos().getX() + 0.5,
                         object.getPos().getY() + 0.5, object.getPos().getZ() + 0.5, range);
             }
 

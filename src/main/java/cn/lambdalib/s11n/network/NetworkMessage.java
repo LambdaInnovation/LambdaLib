@@ -7,7 +7,6 @@
 package cn.lambdalib.s11n.network;
 
 import cn.lambdalib.annoreg.core.Registrant;
-import cn.lambdalib.annoreg.mc.RegMessageHandler;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.network.NetworkS11n.ContextException;
 import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;

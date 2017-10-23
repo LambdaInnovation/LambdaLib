@@ -1,8 +1,8 @@
 package cn.lambdalib.util.datapart;
 
+import cn.lambdalib.annoreg.core.LoadStage;
 import cn.lambdalib.annoreg.core.Registrant;
-import cn.lambdalib.annoreg.mc.RegEventHandler;
-import cn.lambdalib.annoreg.mc.RegEventHandler.Bus;
+import cn.lambdalib.annoreg.mc.RegCallback;
 import cn.lambdalib.core.LLCommons;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.s11n.network.NetS11nAdapterRegistry.RegNetS11nAdapter;
@@ -12,9 +12,10 @@ import cn.lambdalib.s11n.network.NetworkS11n.NetS11nAdaptor;
 import cn.lambdalib.util.mc.SideHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTBase;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
@@ -22,7 +23,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -89,7 +89,10 @@ public final class EntityData<Ent extends EntityLivingBase> implements IDataPart
 
         IDataPart ret =  entity.getCapability(getCapability(),null);
         if (ret == null || !(ret instanceof EntityData)) {
-            throw new RuntimeException("Failed to get EntityData of "+entity);
+            throw new RuntimeException("Failed to get EntityData of "+entity+" ret="+ret);
+        }
+        if(((EntityData)ret).getEntity()==null){
+            ((EntityData)ret).initEntity(entity);
         }
 
         return (EntityData)ret;
@@ -107,6 +110,10 @@ public final class EntityData<Ent extends EntityLivingBase> implements IDataPart
     private Map<Class, DataPart> constructed = new HashMap<>();
 
     private Ent entity;
+
+    public void initEntity(Ent entity){
+        this.entity=entity;
+    }
 
     /**
      * @return The datapart of exact type, never null
@@ -226,8 +233,12 @@ public final class EntityData<Ent extends EntityLivingBase> implements IDataPart
 
     @Registrant
     public enum EventListener {
-        @RegEventHandler(Bus.Forge)
         instance;
+
+        @RegCallback(stage= LoadStage.PRE_INIT)
+        public static void preInit(FMLPreInitializationEvent event){
+            MinecraftForge.EVENT_BUS.register(instance);
+        }
 
         @SubscribeEvent
         public void onLivingUpdate(LivingUpdateEvent evt) {
