@@ -7,6 +7,7 @@
 package cn.lambdalib.crafting;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -149,7 +150,7 @@ public class RecipeRegistry {
 
     public void addRecipeFromResourceLocation(ResourceLocation src) {
         try {
-            addRecipeFromString(IOUtils.toString(RegistryUtils.getResourceStream(src)));
+            addRecipeFromString(IOUtils.toString(RegistryUtils.getResourceStream(src), Charset.defaultCharset()));
         } catch (Throwable e) {
             LambdaLib.log.error("Failed to load recipes from file: " + src, e);
             e.printStackTrace();

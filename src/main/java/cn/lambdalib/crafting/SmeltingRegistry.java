@@ -42,7 +42,7 @@ public class SmeltingRegistry implements IRecipeRegistry {
                 GameRegistry.addSmelting((Item) in, output, experience);
 
             debug("[Smelting] " +
-                    in + " => " + RecipeRegistry.reprStack(output));
+                    in + " => " + RecipeRegistry.reprStack(output));//TODO need testing
         }
     }
 

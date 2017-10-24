@@ -8,8 +8,8 @@ package cn.lambdalib.crafting;
 
 import com.google.common.base.Joiner;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.oredict.ShapedOreRecipe;
 
 /**
  * @author EAirPeter
@@ -33,17 +33,16 @@ public class ShapedOreRegistry implements IRecipeRegistry {
             for (int x = 0; x < width; ++x, ++index)
                 if (input[index] != null) {
                     spec += (char) (index + 'A');
-                    recipe[_i++] = Character.valueOf((char) (index + 'A'));
+                    recipe[_i++] = (char) (index + 'A');
                     recipe[_i++] = input[index];
                 } else
                     spec += ' ';
             recipe[y] = spec;
         }
-
-        debug("[ShapedOre] " +
-                RecipeRegistry.reprStack(output) + "[" + mirrored + "]" +
-                Joiner.on(',').join(recipe));
-        GameRegistry.addRecipe(new ShapedOreRecipe(output, mirrored, recipe));
+        String name=RecipeRegistry.reprStack(output) + "[" + mirrored + "]" +
+                Joiner.on(',').join(recipe);
+        debug("[ShapedOre] " +name+"\n");
+        GameRegistry.addShapedRecipe(new ResourceLocation("lambda_lib:"+name), new ResourceLocation("lambda_lib"),output, recipe);
     }
 
     private ShapedOreRegistry() {
