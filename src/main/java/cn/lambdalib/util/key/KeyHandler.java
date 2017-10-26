@@ -32,7 +32,7 @@ public abstract class KeyHandler {
     
     @SideOnly(Side.CLIENT)
     protected EntityPlayer getPlayer() {
-        return getMC().thePlayer;
+        return getMC().player;
     }
     
 }
