@@ -42,7 +42,7 @@ public class ShapedOreRegistry implements IRecipeRegistry {
         String name=RecipeRegistry.reprStack(output) + "[" + mirrored + "]" +
                 Joiner.on(',').join(recipe);
         debug("[ShapedOre] " +name+"\n");
-        GameRegistry.addShapedRecipe(new ResourceLocation("lambda_lib:"+name), new ResourceLocation("lambda_lib"),output, recipe);
+        GameRegistry.addShapedRecipe(new ResourceLocation("lambdalib:"+name), new ResourceLocation("lambda_lib"),output, recipe);
     }
 
     private ShapedOreRegistry() {
