@@ -10,6 +10,8 @@ import static cn.lambdalib.util.generic.VecUtils.vec;
 
 import java.lang.reflect.Field;
 
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
@@ -17,7 +19,6 @@ import org.lwjgl.util.glu.GLU;
 import cn.lambdalib.core.LambdaLib;
 import cn.lambdalib.util.helper.GameTimer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -60,7 +61,7 @@ public class RenderUtils {
     }
     
     public static void addVertex(Vec3d vertex, double u, double v) {
-        t.getWorldRenderer().addVertexWithUV(vertex.x, vertex.y, vertex.z, u, v);
+        Tessellator.getInstance().getBuffer().pos(vertex.x, vertex.y, vertex.z).tex(u, v).endVertex();
     }
     
     public static void addVertexLegacy(Vec3d vertex, double u, double v) {
@@ -69,7 +70,7 @@ public class RenderUtils {
     }
     
     public static void addVertex(Vec3d vertex) {
-        t.getBuffer().addVertex(vertex.x, vertex.y, vertex.z);
+        Tessellator.getInstance().getBuffer().pos(vertex.x, vertex.y, vertex.z).endVertex();
     }
     
     public static void glTranslate(Vec3d v) {
@@ -88,15 +89,17 @@ public class RenderUtils {
         Minecraft.getMinecraft().renderEngine.bindTexture(src);
     }
     
-    
+    //        Minecraft.getMinecraft().getRenderItem().renderItemAndEffectIntoGUI(@Nullable EntityLivingBase p_184391_1_, final ItemStack p_184391_2_, int p_184391_3_, int p_184391_4_)
+    //IBakedModel model
     public static void drawEquippedItem(ItemStack stackToRender, double width) {
-        IIcon icon = stackToRender.getIconIndex();
+        TextureAtlasSprite model=Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stackToRender, null, null).getParticleTexture();
+        String icon=model.getIconName();
         
         Minecraft mc = Minecraft.getMinecraft();
-        mc.renderEngine.bindTexture(mc.renderEngine.getTexture(stackToRender.getItemSpriteNumber()) );
-        ResourceLocation tex = mc.renderEngine.getTexture(stackToRender.getItemSpriteNumber());
+        mc.renderEngine.bindTexture(new ResourceLocation(icon));
+        ResourceLocation tex = new ResourceLocation("minecraft:textures/atlas/items.png");
         
-        drawEquippedItem(width, tex, tex, icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV(), false);
+        drawEquippedItem(width, tex, tex, model.getMinU(), model.getMinV(), model.getMaxU(), model.getMaxV(), false);
     }
     
     public static void drawEquippedItem(double width, ResourceLocation texture) {
@@ -127,8 +130,8 @@ public class RenderUtils {
         GL11.glPushMatrix();
         
         RenderUtils.loadTexture(back);
-        t.startDrawingQuads();
-        t.setNormal(0.0F, 0.0F, 1.0F);
+        t.getBuffer().begin(7, DefaultVertexFormats.POSITION_TEX);
+        t.getBuffer().normal(0.0F, 0.0F, 1.0F);
         addVertex(a1, u2, v2);
         addVertex(a2, u1, v2);
         addVertex(a3, u1, v1);
@@ -136,8 +139,8 @@ public class RenderUtils {
         t.draw();
 
         RenderUtils.loadTexture(front);
-        t.startDrawingQuads();
-        t.setNormal(0.0F, 0.0F, -1.0F);
+        t.getBuffer().begin(7, DefaultVertexFormats.POSITION_TEX);
+        t.getBuffer().normal(0.0F, 0.0F, -1.0F);
         addVertex(a8, u2, v1);
         addVertex(a7, u1, v1);
         addVertex(a6, u1, v2);
@@ -158,28 +161,31 @@ public class RenderUtils {
         float tz = 1.0f / tileSize;
 
         if(!faceOnly) {
-            t.startDrawingQuads();
-            t.setNormal(-1.0F, 0.0F, 0.0F);
+            t.getBuffer().begin(7, DefaultVertexFormats.POSITION_TEX);
+            t.getBuffer().normal(-1.0F, 0.0F, 0.0F);
             for (var7 = 0; var7 < tileSize; ++var7) {
                 var8 = (float) var7 / tileSize;
                 var9 = u2 - (u2 - u1) * var8 - tx;
                 var10 = 1.0F * var8;
-                t.addVertexWithUV(var10, 0.0D, -w, var9, v2);
-                t.addVertexWithUV(var10, 0.0D, w, var9, v2);
-                t.addVertexWithUV(var10, 1.0D, w, var9, v1);
-                t.addVertexWithUV(var10, 1.0D, -w, var9, v1);
+                Tessellator.getInstance().getBuffer().pos(var10, 0.0D, -w).tex(var9, v2).endVertex();
+                Tessellator.getInstance().getBuffer().pos(var10, 0.0D, w).tex(var9, v2).endVertex();
+                Tessellator.getInstance().getBuffer().pos(var10, 1.0D, w).tex(var9, v1).endVertex();
+                Tessellator.getInstance().getBuffer().pos(var10, 1.0D, -w).tex(var9, v1).endVertex();
     
-                t.addVertexWithUV(var10, 1.0D, w, var9, v1);
-                t.addVertexWithUV(var10, 0.0D, w, var9, v2);
-                t.addVertexWithUV(var10, 0.0D, -w, var9, v2);
-                t.addVertexWithUV(var10, 1.0D, -w, var9, v1);
+                Tessellator.getInstance().getBuffer().pos(var10, 1.0D, w).tex(var9, v1).endVertex();
+                Tessellator.getInstance().getBuffer().pos(var10, 0.0D, w).tex(var9, v2).endVertex();
+                Tessellator.getInstance().getBuffer().pos(var10, 0.0D, -w).tex(var9, v2).endVertex();
+                Tessellator.getInstance().getBuffer().pos(var10, 1.0D, -w).tex(var9, v1).endVertex();
             }
             t.draw();
         }
 
         GL11.glPopMatrix();
     }
-    
+
+    private static void addVertexWithUV(double x,double y,double z,double u,double v){
+        Tessellator.getInstance().getBuffer().pos(u, y, z).tex(u, v).endVertex();
+    }
     public static void renderOverlayEquip(ResourceLocation src) {
         //Setup
         GL11.glDepthFunc(GL11.GL_EQUAL);
@@ -196,7 +202,7 @@ public class RenderUtils {
         float f9 = GameTimer.getAbsTime() % 3000L / 3000.0F * 8.0F;
         GL11.glTranslatef(f9, 0.0F, 0.0F); //xOffset loops between 0.0 and 8.0
         GL11.glRotatef(-50.0F, 0.0F, 0.0F, 1.0F);
-        ItemRenderer.renderItemIn2D(t, 0.0F, 0.0F, 1.0F, 1.0F, 256, 256, 0.0625F);
+        //TODO ItemRenderer.rende(t, 0.0F, 0.0F, 1.0F, 1.0F, 256, 256, 0.0625F);
         GL11.glPopMatrix();
         
         //Second pass
@@ -205,7 +211,7 @@ public class RenderUtils {
         f9 = GameTimer.getAbsTime() % 4873L / 4873.0F * 8.0F; //Loop between 0 and 8, longer loop
         GL11.glTranslatef(-f9, 0.0F, 0.0F); //Still xOffset
         GL11.glRotatef(10.0F, 0.0F, 0.0F, 1.0F); //However, different rotation!
-        ItemRenderer.renderItemIn2D(t, 0.0F, 0.0F, 1.0F, 1.0F, 256, 256, 0.0625F);
+        //TODO ItemRenderer.(t, 0.0F, 0.0F, 1.0F, 1.0F, 256, 256, 0.0625F);
         GL11.glPopMatrix();
         //Pop texture mat
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
@@ -234,11 +240,11 @@ public class RenderUtils {
         float f9 = GameTimer.getAbsTime() % 3000L / 3000.0F * 8.0F;
         GL11.glTranslatef(f9, 0.0F, 0.0F);
         GL11.glRotatef(-50.0F, 0.0F, 0.0F, 1.0F);
-        t.getWorldRenderer().startDrawingQuads();
-        t.getWorldRenderer().addVertexWithUV(0.0, 0.0, 0.0, 0.0, 0.0);
-        t.getWorldRenderer().addVertexWithUV(0.0, 16.0, 0.0, 0.0, 1.0);
-        t.getWorldRenderer().addVertexWithUV(16.0, 16.0, 0.0, 1.0, 1.0);
-        t.getWorldRenderer().addVertexWithUV(16.0, 0.0, 0.0, 1.0, 0.0);
+        t.getBuffer().begin(7, DefaultVertexFormats.POSITION_TEX);
+        t.getBuffer().pos(0.0, 0.0, 0.0).tex(0.0, 0.0).endVertex();
+        t.getBuffer().pos(0.0, 16.0, 0.0).tex(0.0, 1.0).endVertex();
+        t.getBuffer().pos(16.0, 16.0, 0.0).tex(1.0, 1.0).endVertex();
+        t.getBuffer().pos(16.0, 0.0, 0.0).tex(1.0, 0.0).endVertex();
         t.draw();
         GL11.glPopMatrix();
         GL11.glPushMatrix();
@@ -246,11 +252,11 @@ public class RenderUtils {
         f9 = GameTimer.getAbsTime() % 4873L / 4873.0F * 8.0F;
         GL11.glTranslatef(-f9, 0.0F, 0.0F);
         GL11.glRotatef(10.0F, 0.0F, 0.0F, 1.0F);
-        t.getWorldRenderer().startDrawingQuads();
-        t.getWorldRenderer().addVertexWithUV(0.0, 0.0, 0.0, 0.0, 0.0);
-        t.getWorldRenderer().addVertexWithUV(0.0, 16.0, 0.0, 0.0, 1.0);
-        t.getWorldRenderer().addVertexWithUV(16.0, 16.0, 0.0, 1.0, 1.0);
-        t.getWorldRenderer().addVertexWithUV(16.0, 0.0, 0.0, 1.0, 0.0);
+        t.getBuffer().begin(7, DefaultVertexFormats.POSITION_TEX);
+        t.getBuffer().pos(0.0, 0.0, 0.0).tex(0.0, 0.0).endVertex();
+        t.getBuffer().pos(0.0, 16.0, 0.0).tex(0.0, 1.0).endVertex();
+        t.getBuffer().pos(16.0, 16.0, 0.0).tex(1.0, 1.0).endVertex();
+        t.getBuffer().pos(16.0, 0.0, 0.0).tex(1.0, 0.0).endVertex();
         t.draw();
         GL11.glPopMatrix();
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
@@ -269,20 +275,20 @@ public class RenderUtils {
      * @param item
      */
     public static void renderItemInventory(ItemStack item) {
-        IIcon icon = item.getIconIndex();
+        TextureAtlasSprite icon = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(item, null, null).getParticleTexture();
         renderItemInventory(icon);
     }
     
     /**
      * 直接在物品栏渲染物品icon。确认你已经绑定好贴图。
      */
-    public static void renderItemInventory(IIcon icon) {
+    public static void renderItemInventory(TextureAtlasSprite icon) {
         if(icon != null) {
-            t.getWorldRenderer().startDrawingQuads();
-            t.getWorldRenderer().addVertexWithUV(0.0, 0.0, 0.0, icon.getMinU(), icon.getMinV());
-            t.getWorldRenderer().addVertexWithUV(0.0, 16.0, 0.0, icon.getMinU(), icon.getMaxV());
-            t.getWorldRenderer().addVertexWithUV(16.0, 16.0, 0.0, icon.getMaxU(), icon.getMaxV());
-            t.getWorldRenderer().addVertexWithUV(16.0, 0.0, 0.0, icon.getMaxU(), icon.getMinV());
+            t.getBuffer().begin(7, DefaultVertexFormats.POSITION_TEX);
+            t.getBuffer().pos(0.0, 0.0, 0.0).tex(icon.getMinU(), icon.getMinV()).endVertex();
+            t.getBuffer().pos(0.0, 16.0, 0.0).tex(icon.getMinU(), icon.getMaxV()).endVertex();
+            t.getBuffer().pos(16.0, 16.0, 0.0).tex(icon.getMaxU(), icon.getMaxV()).endVertex();
+            t.getBuffer().pos(16.0, 0.0, 0.0).tex(icon.getMaxU(), icon.getMinV()).endVertex();
             t.draw();
         }
     }

@@ -7,12 +7,14 @@
 package cn.lambdalib.util.client;
 
 import cn.lambdalib.util.client.auxgui.AuxGuiHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Client-Side judgement helper and other stuffs.
@@ -26,17 +28,17 @@ public class ClientUtils {
      * @return
      */
     public static boolean isPlayerInGame() {
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        EntityPlayer player = Minecraft.getMinecraft().player;
         return player != null && Minecraft.getMinecraft().currentScreen == null && !AuxGuiHandler.hasForegroundGui();
     }
 
     public static boolean isInWorld() {
-        return Minecraft.getMinecraft().thePlayer != null;
+        return Minecraft.getMinecraft().player != null;
     }
     
     public static boolean isPlayerPlaying() {
         Minecraft mc = Minecraft.getMinecraft();
-        return mc.thePlayer != null && !mc.isGamePaused();
+        return mc.player != null && !mc.isGamePaused();
     }
     
     /**
@@ -44,9 +46,15 @@ public class ClientUtils {
      * @param src
      * @param pitch
      */
-    public static void playSound(ResourceLocation src, float pitch) {
+    public static void playSound(ResourceLocation src, SoundCategory cat, float pitch) {
         Minecraft.getMinecraft().getSoundHandler().playSound(
-            PositionedSoundRecord.func_147674_a(src, pitch));
+            new PositionedSoundRecord(src, cat, 0.25F,pitch, false, 0, ISound.AttenuationType.NONE, 0.0F, 0.0F, 0.0F));
     }
+    /*
+        public static PositionedSoundRecord func_147674_a(ResourceLocation p_147674_0_, float p_147674_1_)
+    {
+        return new PositionedSoundRecord(p_147674_0_, 0.25F, p_147674_1_, false, 0, ISound.AttenuationType.NONE, 0.0F, 0.0F, 0.0F);
+    }
+     */
 
 }
